@@ -1,0 +1,41 @@
+/* Table landscape. Native lock when the WebView allows it; otherwise CSS rotate. */
+
+html.table-landscape,
+html.table-landscape body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+@media (orientation: portrait) {
+  html.css-landscape .lobby-shell.table-active {
+    position: fixed !important;
+    z-index: 80 !important;
+    top: 0 !important;
+    left: 100dvw !important;
+    width: 100dvh !important;
+    height: 100dvw !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    transform: rotate(90deg) !important;
+    transform-origin: top left !important;
+    overflow: hidden !important;
+    inset: auto !important;
+  }
+
+  html.css-landscape .lobby-shell.table-active #tableView,
+  html.css-landscape .lobby-shell.table-active #texasTableView,
+  html.css-landscape .lobby-shell.table-active #multiGameView {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+  }
+}
+
+html.table-landscape .topbar,
+html.table-landscape .lobby-stage,
+html.table-landscape .home-tabbar,
+html.table-landscape .p0-tabbar {
+  display: none !important;
+}

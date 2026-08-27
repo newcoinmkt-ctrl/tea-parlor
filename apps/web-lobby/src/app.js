@@ -40,6 +40,7 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
 import { initHandFit, fitAllHands } from './net/hand-layout.js';
+import { initTableOrientation } from './net/table-orient.js';
 import {
   loadPlayMode,
   savePlayMode,
@@ -409,8 +410,13 @@ let wardrobeSavedSnapshot = null;
 let wardrobePreviewAvatar = null;
 /** 设备自适应：给 html 打 data-device / data-orient，供 CSS 与逻辑使用 */
 function applyDeviceAdapt() {
-  const w = window.innerWidth || document.documentElement.clientWidth || 360;
-  const h = window.innerHeight || document.documentElement.clientHeight || 640;
+  let w = window.innerWidth || document.documentElement.clientWidth || 360;
+  let h = window.innerHeight || document.documentElement.clientHeight || 640;
+  if (document.documentElement.classList.contains('css-landscape') && h > w) {
+    const swapped = w;
+    w = h;
+    h = swapped;
+  }
   const coarse = window.matchMedia?.('(pointer: coarse)')?.matches;
   let device = 'desktop';
   if (w <= 480) device = 'phone';
@@ -622,6 +628,7 @@ async function boot() {
     renderDdzRooms(ddzVariant);
     initTelegramMiniApp();
     try { initHandFit(); } catch (e) { console.warn('[hand-fit]', e); }
+    try { initTableOrientation(); } catch (e) { console.warn('[table-orient]', e); }
     try { initTexas(); } catch (e) { console.warn('[TeaParlor] initTexas', e); }
     renderAccount();
     renderProfileUi();

@@ -115,6 +115,7 @@ export function initHandFit() {
   requestAnimationFrame(run);
   window.addEventListener("resize", run);
   window.addEventListener("orientationchange", run);
+  window.addEventListener("table-orient", run);
   if (window.visualViewport) window.visualViewport.addEventListener("resize", run);
 
   const obs = new MutationObserver(() => {
