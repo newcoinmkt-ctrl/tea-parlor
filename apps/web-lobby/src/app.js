@@ -39,6 +39,7 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
+import { initHandFit, fitAllHands } from './net/hand-layout.js';
 import {
   loadPlayMode,
   savePlayMode,
@@ -620,6 +621,7 @@ async function boot() {
     bindP0Lobby();
     renderDdzRooms(ddzVariant);
     initTelegramMiniApp();
+    try { initHandFit(); } catch (e) { console.warn('[hand-fit]', e); }
     try { initTexas(); } catch (e) { console.warn('[TeaParlor] initTexas', e); }
     renderAccount();
     renderProfileUi();
@@ -5732,6 +5734,7 @@ function renderHand() {
     btn.setAttribute('aria-pressed', selected.has(card.id) ? 'true' : 'false');
     nodes.handArea.appendChild(btn);
   });
+  try { fitAllHands(); } catch (_) {}
 }
 
 function statusLine() {

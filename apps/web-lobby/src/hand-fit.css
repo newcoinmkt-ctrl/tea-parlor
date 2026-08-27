@@ -1,0 +1,103 @@
+/* Hand fit overlay. Loaded after styles.css. Do not rewrite styles.css. */
+
+.table-active .self-slot,
+.table-active .self-slot .hand-wrap,
+.table-active .self-slot .hand-area,
+.lobby-shell.table-active #tableView.harbor-table .self-slot .hand-wrap,
+.lobby-shell.table-active #tableView.harbor-table .self-slot .hand-area,
+.multi-game-view .mg-hand-dock,
+.multi-game-view #mgHand,
+.texas-active .tx-hole-hero,
+.texas-active #texasHole0 {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+.lobby-shell.table-active #tableView.harbor-table .self-slot .hand-area,
+.table-active:not(.texas-active):not(.multi-active) .self-slot .hand-area {
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-content: center !important;
+  padding: 16px 8px 8px !important;
+}
+
+.hand-area.hand-fitted,
+#mgHand.hand-fitted,
+.bj-hand-wrap.hand-fitted {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: flex-end !important;
+  gap: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.table-active .self-slot .playing-card,
+.mg-hand-card,
+.mg-hand-tile,
+.mj-tile.mg-hand-tile,
+.gd-card,
+.tx-hole-hero .tx-card {
+  touch-action: manipulation;
+}
+
+.playing-card.selected,
+.mg-hand-card.selected,
+.mg-hand-tile.selected,
+.gd-card.is-on {
+  transform: translateY(-12px);
+}
+
+.multi-game-view .mg-hand-dock,
+.multi-game-view.mj-4p .mg-hand-dock,
+.multi-game-view.mj-2p .mg-hand-dock {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.gd-yard .mg-hand-dock {
+  left: 8px !important;
+  right: 8px !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+@media (max-width: 820px) {
+  .gd-yard .mg-hand-dock {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 56px !important;
+  }
+}
+
+.tx-hole-hero,
+.texas-active .tx-seat-0 .tx-hole-hero {
+  overflow: visible !important;
+  justify-content: center !important;
+}
+
+.qq-action-row,
+.mg-actions,
+.tx-actions,
+#bidControls,
+#doubleControls,
+#playControls {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  justify-content: center !important;
+}
+
+.qq-action-row .qq-btn,
+.mg-actions .qq-btn,
+.tx-actions .qq-btn,
+.gd-act,
+[data-bid],
+[data-double] {
+  min-height: 44px !important;
+  min-width: 68px !important;
+}
