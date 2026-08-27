@@ -1,4 +1,4 @@
-/* Table landscape. Native lock when the WebView allows it; otherwise CSS rotate. */
+/* Landscape table: grid regions, no overlapping UI. */
 
 html.table-landscape,
 html.table-landscape body {
@@ -22,15 +22,6 @@ html.table-landscape body {
     overflow: hidden !important;
     inset: auto !important;
   }
-
-  html.css-landscape .lobby-shell.table-active #tableView,
-  html.css-landscape .lobby-shell.table-active #texasTableView,
-  html.css-landscape .lobby-shell.table-active #multiGameView {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-  }
 }
 
 html.table-landscape .topbar,
@@ -38,4 +29,355 @@ html.table-landscape .lobby-stage,
 html.table-landscape .home-tabbar,
 html.table-landscape .p0-tabbar {
   display: none !important;
+}
+
+html.table-landscape .lobby-shell.table-active {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  max-height: 100dvh !important;
+}
+
+html.css-landscape .lobby-shell.table-active {
+  max-height: 100dvw !important;
+}
+
+html.table-landscape #tableView,
+html.table-landscape #texasTableView,
+html.table-landscape #multiGameView {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* ── Dou Dizhu ── */
+html.table-landscape #tableView.harbor-table,
+html.table-landscape #tableView.qq-table-view {
+  display: grid !important;
+  grid-template-rows: 44px 22px minmax(0, 1fr) 72px !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+  padding: 4px 8px 6px !important;
+  box-sizing: border-box !important;
+}
+
+html.table-landscape #tableView .qq-hud {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  padding: 0 4px !important;
+  overflow: hidden !important;
+  z-index: 5 !important;
+}
+
+html.table-landscape #tableView .qq-deck-meter {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-height: 36px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+}
+
+html.table-landscape #tableView .qq-room-line {
+  position: relative !important;
+  inset: auto !important;
+  height: 22px !important;
+  line-height: 22px !important;
+  padding: 0 6px !important;
+  font-size: 12px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+html.table-landscape #tableView .ddz-table,
+html.table-landscape #tableView .qq-felt {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-columns: 120px minmax(0, 1fr) 120px !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  grid-template-areas:
+    "left felt right"
+    "hand hand hand" !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: hidden !important;
+  padding: 4px 6px !important;
+}
+
+html.table-landscape #tableView .side-slot.left-slot {
+  grid-area: left !important;
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+  z-index: 2 !important;
+  transform: none !important;
+}
+
+html.table-landscape #tableView .side-slot.right-slot {
+  grid-area: right !important;
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+  z-index: 2 !important;
+  transform: none !important;
+}
+
+html.table-landscape #tableView .center-pot,
+html.table-landscape #tableView .qq-center {
+  grid-area: felt !important;
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  z-index: 3 !important;
+}
+
+html.table-landscape #tableView .self-slot {
+  grid-area: hand !important;
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+  z-index: 4 !important;
+  transform: none !important;
+}
+
+html.table-landscape #tableView .qq-bottom-bar {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 10px !important;
+  overflow: hidden !important;
+  z-index: 5 !important;
+  transform: none !important;
+}
+
+html.table-landscape #tableView .char-figure-wrap,
+html.table-landscape #tableView .full-body-char img.char-figure {
+  max-height: 88px !important;
+  width: auto !important;
+  max-width: 72px !important;
+}
+
+html.table-landscape #tableView .qq-self-char .char-figure-wrap,
+html.table-landscape #tableView .qq-self-char img.char-figure {
+  max-height: 64px !important;
+  max-width: 48px !important;
+}
+
+html.table-landscape #tableView .qq-center-actions,
+html.table-landscape #tableView .action-panel,
+html.table-landscape #tableView .qq-action-row {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+html.table-landscape .qq-btn,
+html.table-landscape [data-bid],
+html.table-landscape [data-double],
+html.table-landscape .gd-act,
+html.table-landscape .mg-actions .qq-btn,
+html.table-landscape .tx-actions .qq-btn {
+  min-height: 34px !important;
+  max-height: 36px !important;
+  min-width: 56px !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+}
+
+html.table-landscape #tableView .hand-wrap,
+html.table-landscape #tableView .hand-area {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 70px !important;
+  overflow: visible !important;
+}
+
+html.table-landscape #tableView .qq-logo-mark,
+html.table-landscape #tableView .table-skin-ad,
+html.table-landscape #tableView .card-face-ad,
+html.table-landscape #tableView .table-center-ad,
+html.table-landscape #tableView .table-rail-ad {
+  display: none !important;
+}
+
+html.table-landscape #tableView .play-zone {
+  position: relative !important;
+  min-height: 28px !important;
+  overflow: visible !important;
+}
+
+/* ── Texas ── */
+html.table-landscape #texasTableView {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  padding: 6px 10px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+html.table-landscape .texas-active .tx-seat {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+html.table-landscape .texas-active .tx-table,
+html.table-landscape .texas-active .tx-felt {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1.6fr 1fr !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+html.table-landscape .texas-active .tx-hole-hero,
+html.table-landscape .texas-active .tx-hole {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+html.table-landscape .texas-active .tx-actions,
+html.table-landscape .texas-active #texasActions {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 6px !important;
+}
+
+html.table-landscape .texas-active .char-figure-wrap,
+html.table-landscape .texas-active img.char-figure {
+  max-height: 84px !important;
+  max-width: 64px !important;
+}
+
+/* ── Multi (mahjong / zjh / guandan / blackjack) ── */
+html.table-landscape #multiGameView {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+  padding: 4px 8px 6px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+html.table-landscape .multi-active .mg-table {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 120px minmax(0, 1fr) 120px !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  gap: 6px !important;
+}
+
+html.table-landscape .multi-active .mg-seat,
+html.table-landscape .multi-active [data-mg-seat] {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+html.table-landscape .multi-active .mg-hand-dock,
+html.table-landscape .multi-active #mgHand {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+html.table-landscape .multi-active .mg-footer,
+html.table-landscape .multi-active .mg-actions,
+html.table-landscape .multi-active #mgActions {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+}
+
+html.table-landscape .multi-active .char-figure-wrap,
+html.table-landscape .multi-active img.char-figure {
+  max-height: 80px !important;
+  max-width: 60px !important;
+}
+
+html.table-landscape .gd-yard .mg-hand-dock {
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: relative !important;
 }
