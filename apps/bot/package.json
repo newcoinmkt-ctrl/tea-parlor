@@ -1,0 +1,22 @@
+{
+  "name": "@tea-parlor/bot",
+  "version": "0.1.0",
+  "description": "Telegram Bot entrypoint for the Tea Parlor H5 Mini App lobby.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/telegram.js",
+    "test": "node --test tests/*.test.js",
+    "demo": "node scripts/demo-bot.js"
+  },
+  "dependencies": {
+    "@tea-parlor/wallet-service": "file:../wallet-service",
+    "telegraf": "^4.16.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

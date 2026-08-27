@@ -1,0 +1,21 @@
+{
+  "name": "@tea-parlor/ops-service",
+  "version": "0.1.0",
+  "description": "Internal operations API for Tea Parlor test operations and audit workflows.",
+  "type": "module",
+  "main": "src/server.js",
+  "exports": {
+    ".": "./src/server.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@tea-parlor/wallet-service": "file:../wallet-service",
+    "@tea-parlor/character-catalog": "file:../../packages/character-catalog"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@tea-parlor/colyseus-game-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Colyseus multiplayer game server for Tea Parlor (authoritative rooms)",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@colyseus/ws-transport": "^0.15.3",
+    "colyseus": "^0.15.26",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

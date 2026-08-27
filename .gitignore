@@ -1,0 +1,27 @@
+# deps / build
+node_modules/
+**/dist/
+*.log
+.DS_Store
+
+# generated visual / playwright dumps
+apps/web-lobby/output/
+apps/**/output/
+
+# character iteration leftovers
+**/_bak_*/
+**/*.bg-bak.png
+**/*.broken-bak.png
+
+# pinus runtime
+apps/pinus-tea-parlor/game-server/logs/
+apps/pinus-tea-parlor/game-server/dist/logs/
+apps/pinus-tea-parlor/game-server/node_modules/
+
+# ops local store
+apps/ops-service/data/
+
+# env
+.env
+.env.*
+!.env.example

@@ -1,0 +1,26 @@
+{
+  "name": "@tea-parlor/texas-engine",
+  "version": "0.1.0",
+  "description": "德州扑克 7 选 5 牌型识别与比较 · 位运算优化",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./card": "./src/card.js",
+    "./evaluate": "./src/evaluate.js",
+    "./pots": "./src/pots.js",
+    "./betting": "./src/betting.js",
+    "./state-machine": "./src/state-machine/index.js",
+    "./ai-decision": "./src/ai-decision.js",
+    "./fair-shuffle": "./src/fair-shuffle.js",
+    "./hand-history": "./src/hand-history.js",
+    "./collusion": "./src/collusion.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "audit:local": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

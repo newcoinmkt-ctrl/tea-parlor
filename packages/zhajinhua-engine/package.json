@@ -1,0 +1,26 @@
+{
+  "name": "@tea-parlor/zhajinhua-engine",
+  "version": "0.1.0",
+  "description": "炸金花（三张牌）牌型识别与比较 · 含 235 特殊规则",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./card": "./src/card.js",
+    "./hand-types": "./src/hand-types.js",
+    "./engine": "./src/engine.js",
+    "./constants": "./src/constants.js",
+    "./pots": "./src/pots.js",
+    "./ai-decision": "./src/ai-decision.js",
+    "./fair-shuffle": "./src/fair-shuffle.js",
+    "./win-probability": "./src/win-probability.js",
+    "./anti-cheat": "./src/anti-cheat.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "audit:local": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

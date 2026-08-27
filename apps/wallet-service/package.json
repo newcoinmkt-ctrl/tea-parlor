@@ -1,0 +1,16 @@
+{
+  "name": "@tea-parlor/wallet-service",
+  "version": "0.1.0",
+  "description": "Internal shadow-points wallet and ledger service for Tea Parlor.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

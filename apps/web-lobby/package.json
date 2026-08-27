@@ -1,0 +1,21 @@
+{
+  "name": "@tea-parlor/web-lobby",
+  "version": "0.1.0",
+  "description": "H5 Mini App lobby MVP for Tea Parlor.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "check:visual": "node tests/visual-check.mjs",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@tea-parlor/common": "file:../../packages/common"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

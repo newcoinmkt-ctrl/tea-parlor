@@ -1,0 +1,152 @@
+:root {
+  color-scheme: dark;
+
+  --theme-primary: #0b5f47;
+  --theme-secondary: #12352c;
+  --theme-accent: #d9b66f;
+  --theme-background: #071512;
+  --theme-panel-background: rgba(11, 28, 23, 0.86);
+  --theme-table-background: #0b573f;
+  --theme-table-edge: #14231e;
+  --theme-text-primary: #f4efe3;
+  --theme-text-secondary: #c9d7cf;
+  --theme-text-muted: #81968c;
+  --theme-border: rgba(217, 182, 111, 0.24);
+  --theme-divider: rgba(244, 239, 227, 0.1);
+  --theme-button-primary: #d6b066;
+  --theme-button-secondary: #193d34;
+  --theme-button-disabled: rgba(128, 148, 139, 0.38);
+  --theme-success: #52c889;
+  --theme-warning: #d9a84f;
+  --theme-danger: #d75f55;
+  --theme-gold: #d9b66f;
+  --theme-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
+  --theme-glow: 0 0 0 1px rgba(217, 182, 111, 0.24), 0 0 24px rgba(74, 171, 126, 0.18);
+
+  --font-family-base: Inter, "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 22px;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --shadow-sm: 0 6px 14px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 14px 34px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.38);
+
+  --gradient-page: linear-gradient(180deg, #0a1714 0%, #092119 45%, #04100d 100%);
+  --gradient-panel: linear-gradient(180deg, rgba(18, 48, 39, 0.92), rgba(7, 22, 18, 0.9));
+  --gradient-primary-button: linear-gradient(180deg, #ead094 0%, #d6b066 58%, #9d7436 100%);
+  --gradient-secondary-button: linear-gradient(180deg, #235746 0%, #12352c 100%);
+  --gradient-danger-button: linear-gradient(180deg, #e37a6f 0%, #bd3f37 100%);
+
+  --opacity-panel: 0.86;
+  --opacity-muted: 0.68;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 260ms;
+
+  --skin-lobby-background: none;
+  --skin-game-background: none;
+  --skin-poker-table: none;
+  --skin-table-edge: none;
+  --skin-chair: none;
+  --skin-player-frame: none;
+  --skin-dealer-button: none;
+  --skin-poker-card-back: none;
+  --skin-poker-card-front: none;
+  --skin-chip: none;
+  --skin-gold-coin: none;
+  --skin-room-card: none;
+  --skin-primary-button: none;
+  --skin-secondary-button: none;
+  --skin-dialog-background: none;
+  --skin-navbar: none;
+  --skin-icon-set: none;
+  --skin-loading: none;
+  --skin-victory-effect: none;
+}
+
+[data-theme="dark-gold"] {
+  --theme-primary: #2d2518;
+  --theme-secondary: #17130d;
+  --theme-accent: #e3bd68;
+  --theme-background: #080705;
+  --theme-panel-background: rgba(25, 21, 14, 0.9);
+  --theme-table-background: #232016;
+  --theme-table-edge: #0f0c08;
+  --theme-text-primary: #f8efd8;
+  --theme-text-secondary: #d8c9a9;
+  --theme-text-muted: #94876f;
+  --gradient-page: linear-gradient(180deg, #15120c 0%, #0c0906 100%);
+}
+
+[data-theme="chinese-red"] {
+  --theme-primary: #7e1f25;
+  --theme-secondary: #2a1013;
+  --theme-accent: #e4bd75;
+  --theme-background: #12090a;
+  --theme-panel-background: rgba(43, 14, 18, 0.9);
+  --theme-table-background: #184f3b;
+  --theme-table-edge: #2b1113;
+  --theme-text-primary: #fff2df;
+  --theme-text-secondary: #e6cab4;
+  --theme-text-muted: #a98b82;
+  --gradient-page: linear-gradient(180deg, #210b0e 0%, #100708 100%);
+}
+
+[data-theme="ink-blue"] {
+  --theme-primary: #1d3a63;
+  --theme-secondary: #0c1624;
+  --theme-accent: #8eb6e8;
+  --theme-background: #070b12;
+  --theme-panel-background: rgba(12, 20, 34, 0.92);
+  --theme-table-background: #16324f;
+  --theme-table-edge: #0a121c;
+  --theme-text-primary: #e8f0fb;
+  --theme-text-secondary: #b7c7dc;
+  --theme-text-muted: #7d8ca0;
+  --gradient-page: linear-gradient(180deg, #101826 0%, #070b12 100%);
+}
+
+[data-theme="sunset-amber"] {
+  --theme-primary: #8a3d14;
+  --theme-secondary: #2a160b;
+  --theme-accent: #f0b05a;
+  --theme-background: #120905;
+  --theme-panel-background: rgba(38, 20, 10, 0.92);
+  --theme-table-background: #4a2a12;
+  --theme-table-edge: #1a0d07;
+  --theme-text-primary: #fff1df;
+  --theme-text-secondary: #e6c8a4;
+  --theme-text-muted: #a88868;
+  --gradient-page: linear-gradient(180deg, #2a1408 0%, #120905 100%);
+}
+
+[data-theme="cyber-neon"] {
+  --theme-primary: #00a986;
+  --theme-secondary: #071b26;
+  --theme-accent: #68d8ff;
+  --theme-background: #03080d;
+  --theme-panel-background: rgba(5, 19, 28, 0.9);
+  --theme-table-background: #083b4b;
+  --theme-table-edge: #041017;
+  --theme-text-primary: #eefcff;
+  --theme-text-secondary: #a8dcea;
+  --theme-text-muted: #6a94a0;
+  --gradient-page: linear-gradient(180deg, #041019 0%, #02070b 100%);
+}

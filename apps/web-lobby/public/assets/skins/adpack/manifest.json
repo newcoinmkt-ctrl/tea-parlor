@@ -1,0 +1,29 @@
+{
+  "name": "Jade Leaf ad pack",
+  "sponsor": "Jade Leaf (fictional emblem, no lettering)",
+  "materials": ["emerald felt", "antique gold", "dark walnut"],
+  "intensities": ["pure", "light", "full"],
+  "assets": {
+    "emblem": "emblem.jpg",
+    "character": {
+      "pure": "character-pure.jpg",
+      "light": "character-light.jpg",
+      "full": "character-full.jpg"
+    },
+    "table": {
+      "pure": "table-pure.jpg",
+      "light": "table-light.jpg",
+      "full": "table-full.jpg"
+    },
+    "card": {
+      "pure": "card-pure.jpg",
+      "light": "card-light.jpg",
+      "full": "card-full.jpg"
+    }
+  },
+  "rules": {
+    "pure": "No sponsor marks. Jewelry and ornament only.",
+    "light": "Single small emblem on lapel, rail ends, or card-knot center. Play felt clear.",
+    "full": "Prominent chest medallion, repeating rail crests plus modest center crest, large card medallion plus corner lockup. Play felt remains open."
+  }
+}

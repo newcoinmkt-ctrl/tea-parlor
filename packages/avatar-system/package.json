@@ -1,0 +1,16 @@
+{
+  "name": "@tea-parlor/avatar-system",
+  "version": "0.1.0",
+  "description": "Shared avatar wardrobe catalog, inventory, equipment validation, and renderer helpers.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

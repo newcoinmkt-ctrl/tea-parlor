@@ -1,0 +1,576 @@
+html,
+body {
+  font-family: var(--font-family-base);
+  color: var(--theme-text-primary);
+  background: var(--gradient-page);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    var(--skin-lobby-background),
+    radial-gradient(ellipse 72% 36% at 50% 0%, rgba(217, 182, 111, 0.1), transparent 60%),
+    radial-gradient(ellipse 46% 38% at 18% 28%, rgba(22, 112, 78, 0.2), transparent 64%);
+  opacity: 0.92;
+  z-index: -1;
+}
+
+.lobby-shell {
+  background: transparent !important;
+}
+
+.topbar {
+  gap: var(--space-4);
+  border: 1px solid var(--theme-border) !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--skin-navbar), rgba(7, 19, 16, 0.72) !important;
+  box-shadow: var(--shadow-md) !important;
+  backdrop-filter: blur(18px);
+}
+
+.profile,
+.wallet-chip,
+.quick-dock-btn,
+.theme-switcher {
+  border-color: var(--theme-border) !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.avatar,
+.coin-mark,
+.candidate-mark,
+.usdt-mark {
+  background: var(--skin-gold-coin), radial-gradient(circle at 35% 28%, #f5dfaa 0 17%, var(--theme-gold) 18% 60%, #805b2e 61% 100%) !important;
+  color: #172019 !important;
+}
+
+.profile-copy strong,
+.wallet-meta b,
+.view-head h1,
+.main-room-panel h1,
+.tile-copy strong,
+.room-name-center {
+  color: var(--theme-text-primary) !important;
+  letter-spacing: 0;
+}
+
+.profile-copy span,
+.wallet-meta span,
+.main-room-panel span,
+.tile-copy small,
+.room-meta,
+.claim-band span {
+  color: var(--theme-text-secondary) !important;
+}
+
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+}
+
+.theme-switcher label {
+  color: var(--theme-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.theme-switcher select {
+  min-width: 128px;
+  border: 0;
+  color: var(--theme-text-primary);
+  background: transparent;
+  font: 800 var(--font-size-sm) var(--font-family-base);
+  outline: none;
+}
+
+.theme-switcher select option {
+  color: #0f1d18;
+  background: #f5efe2;
+}
+
+.lobby-stage {
+  gap: var(--space-4);
+}
+
+.mode-rail,
+.main-room-panel,
+.claim-band,
+.game-lane,
+.room-band,
+.profile-page,
+.recharge-page,
+.records-page,
+.rules-toast {
+  border: 1px solid var(--theme-border) !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--gradient-panel) !important;
+  box-shadow: var(--theme-shadow) !important;
+}
+
+.mode-item {
+  min-height: 42px;
+  border-radius: var(--radius-md) !important;
+  color: var(--theme-text-secondary) !important;
+  background: transparent !important;
+  transition: transform var(--duration-fast) ease, background var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.mode-item.active,
+.mode-item:hover,
+.main-room-card:hover,
+.game-tile:hover,
+.room-card:hover {
+  transform: translateY(-1px);
+  color: var(--theme-text-primary) !important;
+  background: rgba(217, 182, 111, 0.08) !important;
+  box-shadow: var(--theme-glow) !important;
+}
+
+.main-room-panel {
+  min-height: 230px;
+  background:
+    var(--skin-lobby-background),
+    radial-gradient(ellipse 70% 88% at 82% 36%, rgba(58, 123, 91, 0.28), transparent 68%),
+    var(--gradient-panel) !important;
+}
+
+.main-room-card,
+.game-tile,
+.room-card,
+.card-panel,
+.crypto-section {
+  border: 1px solid var(--theme-border) !important;
+  border-radius: var(--radius-md) !important;
+  background:
+    var(--skin-room-card),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.primary-main-room,
+.primary-room {
+  border-color: rgba(217, 182, 111, 0.5) !important;
+  background:
+    radial-gradient(ellipse 120% 120% at 20% 0%, rgba(217, 182, 111, 0.14), transparent 45%),
+    linear-gradient(145deg, rgba(13, 95, 70, 0.78), rgba(9, 42, 34, 0.9)) !important;
+}
+
+.gold-button,
+.qq-btn-gold,
+.room-action,
+.crypto-supply-btn,
+.rc-full-btn {
+  border: 1px solid rgba(245, 223, 170, 0.42) !important;
+  border-radius: var(--radius-pill) !important;
+  color: #142119 !important;
+  background: var(--skin-primary-button), var(--gradient-primary-button) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+  transition: transform var(--duration-fast) ease, filter var(--duration-fast) ease;
+}
+
+.muted-button,
+.qq-btn-blue,
+.view-back-button,
+.icon-text-button,
+.qq-tool-btn,
+.room-action.secondary {
+  border: 1px solid var(--theme-border) !important;
+  border-radius: var(--radius-pill) !important;
+  color: var(--theme-text-primary) !important;
+  background: var(--skin-secondary-button), var(--gradient-secondary-button) !important;
+}
+
+.gold-button:disabled,
+.qq-btn:disabled,
+button:disabled {
+  opacity: 0.48 !important;
+  filter: grayscale(0.45);
+}
+
+button:not(:disabled):active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.table-view {
+  background:
+    var(--skin-game-background),
+    radial-gradient(ellipse 84% 64% at 50% 40%, rgba(18, 100, 73, 0.18), transparent 70%),
+    var(--gradient-page) !important;
+}
+
+.qq-hud,
+.table-top,
+.qq-room-line {
+  border: 1px solid var(--theme-border) !important;
+  border-radius: var(--radius-lg) !important;
+  background: rgba(5, 18, 15, 0.74) !important;
+  box-shadow: var(--shadow-sm) !important;
+  backdrop-filter: blur(14px);
+}
+
+.ddz-table,
+.texas-table,
+.multi-game-table {
+  border: 14px solid transparent !important;
+  border-radius: 42px !important;
+  background:
+    var(--skin-poker-table),
+    radial-gradient(ellipse 70% 52% at 50% 42%, rgba(37, 127, 83, 0.9), rgba(9, 71, 52, 0.98) 54%, rgba(5, 37, 30, 0.98) 100%) padding-box,
+    var(--skin-table-edge),
+    linear-gradient(145deg, #17231e, #050c0a) border-box !important;
+  box-shadow:
+    inset 0 0 42px rgba(0, 0, 0, 0.32),
+    0 24px 70px rgba(0, 0, 0, 0.42) !important;
+}
+
+.ddz-table::after,
+.texas-table::after {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border-radius: 32px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(42deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 7px),
+    radial-gradient(ellipse 60% 40% at 50% 45%, rgba(255, 255, 255, 0.045), transparent 70%);
+  mix-blend-mode: screen;
+}
+
+.qq-logo-mark,
+.table-center-ad,
+.tx-table-center-ad {
+  opacity: 0.18 !important;
+}
+
+.qq-player-meta,
+.qq-self-info,
+.tx-seat-info,
+.player-seat,
+.tx-seat,
+.mg-seat-info {
+  border-color: var(--theme-border) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--skin-player-frame), rgba(4, 19, 15, 0.72) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.character-panel.is-turn,
+.qq-player-meta.is-turn-meta,
+.qq-self-info.is-turn-meta,
+.tx-seat.is-current,
+.tx-seat.current,
+.mg-seat.is-current {
+  outline: 2px solid rgba(217, 182, 111, 0.78) !important;
+  box-shadow: 0 0 0 4px rgba(217, 182, 111, 0.12), 0 0 28px rgba(82, 200, 137, 0.22) !important;
+  animation: player-turn-soft var(--duration-slow) ease-out;
+}
+
+.qq-timer,
+.action-timer,
+.tx-tag.is-current {
+  color: var(--theme-text-primary) !important;
+  background: rgba(217, 182, 111, 0.16) !important;
+  border-color: rgba(217, 182, 111, 0.48) !important;
+  box-shadow: 0 0 18px rgba(217, 182, 111, 0.18) !important;
+}
+
+.playing-card,
+.table-card,
+.mini-card,
+.tx-card,
+.show-card-face {
+  border-radius: var(--radius-sm) !important;
+  background: var(--skin-poker-card-front), linear-gradient(180deg, #fffdf5 0%, #ece8da 100%) !important;
+  color: #172019 !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.playing-card.selected {
+  transform: translateY(-18px) !important;
+  outline: 2px solid var(--theme-gold) !important;
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.32), 0 0 18px rgba(217, 182, 111, 0.2) !important;
+}
+
+.face-down,
+.tx-card.back {
+  background:
+    var(--skin-poker-card-back),
+    repeating-linear-gradient(-38deg, #103a2d 0 5px, #174d3b 5px 10px) !important;
+}
+
+.qq-center-actions,
+.action-panel,
+.tx-actions,
+.mg-actions {
+  border-color: var(--theme-border) !important;
+  border-radius: var(--radius-lg) !important;
+  background: linear-gradient(180deg, rgba(3, 14, 11, 0.7), rgba(3, 14, 11, 0.42)) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.tx-actions {
+  gap: var(--space-2);
+}
+
+.tx-actions button,
+.action-bar-button {
+  min-width: 92px;
+  min-height: 42px;
+  border-radius: var(--radius-pill) !important;
+  border: 1px solid var(--theme-border) !important;
+  color: var(--theme-text-primary) !important;
+  background: var(--gradient-secondary-button) !important;
+}
+
+.tx-actions button:last-of-type,
+.tx-actions button.danger,
+.action-danger {
+  color: #fff8f0 !important;
+  background: var(--gradient-danger-button) !important;
+  border-color: rgba(255, 180, 160, 0.52) !important;
+}
+
+.bet-slider-panel {
+  display: grid;
+  gap: var(--space-2);
+  min-width: min(520px, 94vw);
+  padding: var(--space-3);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg);
+  background: rgba(4, 19, 15, 0.82);
+}
+
+.bet-slider-panel input[type="range"] {
+  accent-color: var(--theme-gold);
+}
+
+.bet-quick-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.tx-result-panel,
+.game-dialog,
+.modal,
+.rules-panel {
+  border: 1px solid var(--theme-border) !important;
+  border-radius: var(--radius-lg) !important;
+  background: var(--skin-dialog-background), var(--gradient-panel) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+@keyframes player-turn-soft {
+  from { filter: brightness(1.16); }
+  to { filter: brightness(1); }
+}
+
+@keyframes deal-in-soft {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.playing-card,
+.table-card,
+.mini-card,
+.tx-card {
+  animation: deal-in-soft var(--duration-base) ease-out both;
+}
+
+@media (max-width: 900px), (orientation: landscape) and (max-height: 760px) {
+  .topbar {
+    grid-template-columns: minmax(150px, 1fr) auto;
+    align-items: stretch;
+  }
+
+  .wallet-strip {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .quick-dock {
+    justify-content: flex-end;
+  }
+
+  .theme-switcher {
+    min-height: 38px;
+  }
+
+  .theme-switcher label {
+    display: none;
+  }
+
+  .lobby-stage {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mode-rail {
+    display: flex !important;
+    overflow-x: auto;
+    padding: var(--space-2) !important;
+  }
+
+  .mode-item {
+    flex: 0 0 auto;
+    min-width: 82px;
+  }
+
+  .main-room-grid,
+  .room-grid,
+  .real-show-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .ddz-table,
+  .texas-table,
+  .multi-game-table {
+    min-height: calc(100vh - 118px) !important;
+    border-width: 8px !important;
+    border-radius: 28px !important;
+  }
+
+  .qq-hud {
+    gap: var(--space-2);
+  }
+
+  .qq-deck-meter {
+    max-width: 48vw;
+    overflow-x: auto;
+  }
+
+  .qq-center-actions,
+  .tx-actions {
+    position: sticky;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 140;
+  }
+
+  .playing-card {
+    min-width: clamp(34px, 7vw, 48px) !important;
+    height: clamp(50px, 11vw, 68px) !important;
+  }
+
+  .hand-area {
+    max-width: 96vw;
+    overflow-x: auto;
+    padding-bottom: var(--space-3);
+  }
+}
+
+@media (max-width: 560px) {
+  .main-room-grid,
+  .room-grid,
+  .real-show-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .quick-dock-btn .qd-label {
+    display: none;
+  }
+
+  .theme-switcher select {
+    min-width: 104px;
+    font-size: var(--font-size-xs);
+  }
+
+  .bet-quick-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mode-rail{display:none!important}
+.lobby-stage{grid-template-columns:1fr!important}
+
+/* tea-parlor optimize: real hands follow wardrobe card-back */
+.playing-card.face-down,
+.playing-card[data-face="back"] {
+  background-image: var(--skin-poker-card-back, none);
+  background-size: cover;
+  background-position: center;
+}
+html[data-card-back="cardback_classic_green"] .playing-card.face-down,
+html[data-card-back="cardback_classic_green"] .mini-card.face-down {
+  background-image: var(--skin-poker-card-back, linear-gradient(145deg, #0b573f, #147a58));
+}
+html[data-card-back="cardback_season_gold"] .playing-card.face-down,
+html[data-card-back="cardback_season_gold"] .mini-card.face-down {
+  background-image: var(--skin-poker-card-back, linear-gradient(145deg, #3b2a12, #c9a227));
+}
+html[data-card-back="cardback_chain_badge"] .playing-card.face-down,
+html[data-card-back="cardback_chain_badge"] .mini-card.face-down {
+  background-image: var(--skin-poker-card-back, linear-gradient(145deg, #1a2744, #4ea4e8));
+}
+
+/* default felt over harbor if skin table is set */
+.qq-table-view.harbor-table[data-use-felt="1"] .table-felt,
+html[data-table-skin-item] .qq-table-view.harbor-table {
+  background:
+    var(--skin-poker-table, none),
+    radial-gradient(ellipse at center, #147a58 0%, #0b573f 62%, #083d2c 100%) !important;
+  background-size: cover !important;
+}
+
+@media (max-width: 430px) {
+  .p0-legacy-hidden, .p0-legacy[hidden] { display: none !important; }
+  .hero-gold, .p0-points { display: none !important; }
+}
+
+/* show costume / table-center / rails / card-back ads (override styles.css kill-switch) */
+.costume-chip.brand-btc,
+.costume-chip.brand-surface-costume,
+.costume-chip.brand-slot,
+[data-ad-slot*="costume"],
+[data-ad-slot^="texas-costume"],
+[data-ad-slot^="multi-costume"],
+[data-ad-slot^="doudizhu-costume"],
+[data-ad-slot$="-table-center"],
+[data-ad-slot*="table-rail"],
+[data-ad-slot$="-card-back"],
+.table-center-ad,
+.tx-table-center-ad,
+.mg-table-center-ad {
+  display: flex !important;
+  visibility: visible !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: initial !important;
+  padding: 0.2em 0.45em !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+  border: 0 !important;
+  max-width: 42%;
+  font-size: 11px;
+  opacity: 0.88;
+}
+.chip-currency-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 13px;
+}
+.chip-currency-picker select {
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+.tile-state.local {
+  background: #3d5a4c;
+  color: #d7efe3;
+}

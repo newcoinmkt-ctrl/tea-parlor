@@ -1,0 +1,25 @@
+{
+  "name": "tea-parlor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "apps/game-servers/*",
+    "apps/pinus-tea-parlor/game-server",
+    "apps/colyseus-tea-parlor",
+    "packages/*"
+  ],
+  "scripts": {
+    "audit:local": "npm run audit:local --workspaces --if-present",
+    "demo": "npm run demo -w @tea-parlor/doudizhu-engine",
+    "pinus:start": "npm run start -w @tea-parlor/pinus-game-server",
+    "colyseus:start": "npm run start -w @tea-parlor/colyseus-game-server",
+    "net:start": "npm run colyseus:start",
+    "ops:start": "npm start -w @tea-parlor/ops-service",
+    "test": "npm test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@tea-parlor/character-catalog",
+  "version": "0.1.0",
+  "description": "Shared Tea Parlor character roster used by H5 lobby and ops.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

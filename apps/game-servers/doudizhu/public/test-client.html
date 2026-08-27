@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>斗地主三人实时房测试桌</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #0b3f32;
+        color: #f7f0d5;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background:
+          radial-gradient(circle at 50% 42%, #1d7b55 0 34%, #0e513f 35% 57%, #5b351f 58% 65%, #25160f 66% 100%);
+      }
+      main {
+        width: min(960px, 100%);
+        display: grid;
+        gap: 12px;
+      }
+      .topbar, .panel, .actions {
+        border: 1px solid rgba(255, 231, 158, .28);
+        background: rgba(12, 30, 24, .72);
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.28);
+      }
+      .topbar {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        padding: 10px;
+        font-size: 13px;
+      }
+      .label { color: #d8c589; font-size: 12px; }
+      .value { font-weight: 800; overflow-wrap: anywhere; }
+      .table {
+        min-height: 360px;
+        position: relative;
+        border-radius: 8px;
+        border: 2px solid rgba(253, 202, 101, .5);
+        background: radial-gradient(circle, rgba(36,132,83,.94), rgba(10,80,62,.96));
+        overflow: hidden;
+      }
+      .table-ad {
+        position: absolute;
+        z-index: 1;
+        display: grid;
+        gap: 1px;
+        max-width: 164px;
+        padding: 6px 8px;
+        border: 1px solid rgba(255, 226, 143, .5);
+        border-radius: 7px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(255,216,107,.9), rgba(122,73,28,.72));
+        color: #241407;
+        box-shadow: 0 8px 18px rgba(0,0,0,.22);
+        pointer-events: none;
+      }
+      .table-ad strong {
+        font-size: 12px;
+        line-height: 1.1;
+      }
+      .table-ad span {
+        font-size: 10px;
+        line-height: 1.15;
+      }
+      .table-ad-center {
+        left: 50%;
+        top: 56%;
+        transform: translate(-50%, -50%);
+        min-width: 138px;
+        opacity: .9;
+      }
+      .table-ad-left {
+        left: 12px;
+        top: 138px;
+        writing-mode: vertical-rl;
+        min-height: 116px;
+      }
+      .table-ad-right {
+        right: 12px;
+        top: 138px;
+        writing-mode: vertical-rl;
+        min-height: 116px;
+      }
+      .seat {
+        position: absolute;
+        z-index: 2;
+        width: 29%;
+        min-height: 88px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 232, 165, .32);
+        background: rgba(5, 28, 24, .64);
+      }
+      #seat0 { left: 50%; top: 16px; transform: translateX(-50%); }
+      #seat1 { left: 18px; bottom: 72px; }
+      #seat2 { right: 18px; bottom: 72px; }
+      .seat.current { outline: 3px solid #ffd15f; }
+      .landlord { color: #ffd15f; font-weight: 900; }
+      .costume-ad {
+        display: grid;
+        gap: 1px;
+        width: fit-content;
+        max-width: 100%;
+        margin-top: 5px;
+        padding: 3px 6px;
+        border: 1px solid rgba(255, 228, 149, .42);
+        border-radius: 6px;
+        color: #2c1908;
+        background: linear-gradient(135deg, #ffe08b, #bf792b);
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+      .costume-ad span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .center {
+        position: absolute;
+        z-index: 2;
+        inset: 122px 20%;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: #ffeec2;
+      }
+      .hand {
+        position: absolute;
+        z-index: 3;
+        left: 18px;
+        right: 18px;
+        bottom: 12px;
+        min-height: 48px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: flex-end;
+      }
+      .card {
+        min-width: 38px;
+        height: 48px;
+        border-radius: 6px;
+        display: grid;
+        place-items: center;
+        background: #fff8df;
+        color: #1a1a1a;
+        font-weight: 900;
+        border: 1px solid #b48d45;
+        cursor: pointer;
+        user-select: none;
+      }
+      .card.selected {
+        transform: translateY(-10px);
+        outline: 3px solid #ffd45c;
+      }
+      .red { color: #be2f2f; }
+      button:disabled { opacity: .45; cursor: not-allowed; }
+      .actions {
+        padding: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      button {
+        min-height: 40px;
+        border: 0;
+        border-radius: 8px;
+        padding: 0 14px;
+        background: linear-gradient(#ffd66b, #b9701b);
+        color: #2d1708;
+        font-weight: 900;
+        cursor: pointer;
+      }
+      button.secondary { background: linear-gradient(#d8ece8, #8fafaa); color: #06261f; }
+      .panel {
+        padding: 10px;
+        display: grid;
+        gap: 6px;
+        font-size: 13px;
+      }
+      @media (max-width: 640px) {
+        body { padding: 8px; align-items: start; }
+        .topbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .table { min-height: 420px; }
+        .seat { width: 44%; min-height: 78px; font-size: 13px; }
+        #seat0 { width: 58%; }
+        .center { inset: 112px 10px 170px; }
+        .table-ad-left,
+        .table-ad-right {
+          top: auto;
+          bottom: 176px;
+          max-width: 120px;
+          min-height: 82px;
+        }
+        .table-ad-center {
+          top: 55%;
+          min-width: 126px;
+        }
+        .actions button { flex: 1 1 30%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="topbar">
+        <div><div class="label">房间</div><div id="room" class="value">-</div></div>
+        <div><div class="label">阶段</div><div id="phase" class="value">connecting</div></div>
+        <div><div class="label">座位</div><div id="seat" class="value">-</div></div>
+        <div><div class="label">影子积分</div><div id="wallet" class="value">-</div></div>
+      </section>
+      <section class="table" aria-label="斗地主牌桌">
+        <div id="tableAdCenter" class="table-ad table-ad-center" data-ad-slot="doudizhu-table-center"></div>
+        <div id="tableAdLeft" class="table-ad table-ad-left" data-ad-slot="doudizhu-table-rail-left"></div>
+        <div id="tableAdRight" class="table-ad table-ad-right" data-ad-slot="doudizhu-table-rail-right"></div>
+        <div id="seat0" class="seat"></div>
+        <div id="seat1" class="seat"></div>
+        <div id="seat2" class="seat"></div>
+        <div class="center">
+          <div>
+            <div id="status">等待玩家入座</div>
+            <div id="lastPlay"></div>
+            <div id="settlement"></div>
+          </div>
+        </div>
+        <div id="hand" class="hand"></div>
+      </section>
+      <section class="actions">
+        <button data-action="bid0" class="secondary">不叫</button>
+        <button data-action="bid1">1 分</button>
+        <button data-action="bid2">2 分</button>
+        <button data-action="bid3">3 分</button>
+        <button data-action="playSelected">出选中牌</button>
+        <button data-action="playFirst">出最小牌</button>
+        <button data-action="pass" class="secondary">不出</button>
+        <button data-action="hint" class="secondary">提示/清选</button>
+        <button data-action="disconnect" class="secondary">断开</button>
+        <button data-action="reconnect">重连</button>
+      </section>
+      <section class="panel">
+        <div>流水数：<span id="ledger">0</span></div>
+        <div>事件：<span id="event">-</span></div>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const roomId = params.get('roomId') || 'room-1';
+      const userId = params.get('userId') || 'p1';
+      const name = params.get('name') || userId;
+      let ws;
+      let lastState;
+      let selectedIds = new Set();
+      let adPlacements = defaultAdPlacements();
+
+      const rankLabel = {
+        3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9',
+        10: '10', 11: 'J', 12: 'Q', 13: 'K', 14: 'A', 15: '2',
+        16: '小王', 17: '大王'
+      };
+
+      function wsUrl() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // 默认 fillBots=1：单页即可人机对战；三人联机测可加 ?fillBots=0
+        const fillBots = params.get('fillBots') === '0' ? '0' : '1';
+        return `${protocol}//${location.host}/ws?roomId=${encodeURIComponent(roomId)}&userId=${encodeURIComponent(userId)}&name=${encodeURIComponent(name)}&fillBots=${fillBots}`;
+      }
+
+      function connect() {
+        if (ws && ws.readyState < 2) return;
+        ws = new WebSocket(wsUrl());
+        ws.onopen = () => setText('event', 'connected');
+        ws.onclose = () => setText('event', 'disconnected');
+        ws.onmessage = (event) => {
+          const message = JSON.parse(event.data);
+          window.__lastMessage = message;
+          if (message.type === 'state') {
+            lastState = message.state;
+            window.__lastState = lastState;
+            // drop selections that left the hand
+            const handIds = new Set((lastState.hand || []).map((card) => card.id));
+            selectedIds = new Set([...selectedIds].filter((id) => handIds.has(id)));
+            render(lastState);
+          } else if (message.type === 'action_result' && message.ok === false) {
+            setText('event', message.reason || 'action_failed');
+          } else if (message.type === 'settlement') {
+            setText('event', 'settlement');
+            if (lastState) {
+              lastState = { ...lastState, settlementIntent: message.settlementIntent, settlementResult: message.walletResult };
+              window.__lastState = lastState;
+              render(lastState);
+            }
+          } else if (message.type === 'auto_action') {
+            setText('event', `auto ${message.event.seatIndex}`);
+          } else {
+            setText('event', message.reason || message.type);
+          }
+        };
+      }
+
+      async function loadAdPlacements() {
+        try {
+          const response = await fetch(params.get('adsUrl') || '/ad-slots', { cache: 'no-store' });
+          const payload = await response.json();
+          if (payload.ok && Array.isArray(payload.placements)) {
+            adPlacements = mergeAds(defaultAdPlacements(), payload.placements);
+          }
+        } catch {
+          adPlacements = defaultAdPlacements();
+        }
+        renderAds();
+        if (!lastState) {
+          render({
+            roomId,
+            phase: 'preview',
+            viewerSeat: '-',
+            wallet: null,
+            ledgerCount: 0,
+            currentSeat: -1,
+            baseScore: 1,
+            multiplier: 1,
+            players: [],
+            handCounts: [0, 0, 0],
+            hand: [],
+            landlordIndex: -1,
+            lastPlay: null,
+            settlementIntent: null,
+          });
+        }
+      }
+
+      function send(action) {
+        ws.send(JSON.stringify({ type: 'action', action }));
+      }
+
+      function render(state) {
+        setText('room', state.roomId);
+        setText('phase', state.phase);
+        setText('seat', state.viewerSeat);
+        setText('wallet', state.wallet ? `${state.wallet.available}/${state.wallet.locked}` : '-');
+        setText('ledger', state.ledgerCount);
+        setText('status', `当前座位 ${state.currentSeat} · 底分 ${state.baseScore} · 倍数 ${state.multiplier}`);
+        for (let index = 0; index < 3; index++) {
+          const player = state.players[index];
+          const el = document.getElementById(`seat${index}`);
+          el.classList.toggle('current', state.currentSeat === index);
+          const costume = findAd(`doudizhu-costume-seat-${index}`);
+          el.innerHTML = player
+            ? `<div>${player.name} ${player.connected ? '在线' : '离线'}</div><div>${state.handCounts[index] || 0} 张</div><div class="${state.landlordIndex === index ? 'landlord' : ''}">${state.landlordIndex === index ? '地主' : '农民'}</div>${renderCostumeAd(costume)}`
+            : `<div>等待入座</div>${renderCostumeAd(costume)}`;
+        }
+        const hand = document.getElementById('hand');
+        hand.innerHTML = '';
+        const myTurn = state.phase === 'play' && state.currentSeat === state.viewerSeat;
+        for (const card of state.hand || []) {
+          const cardEl = document.createElement('button');
+          cardEl.type = 'button';
+          cardEl.className = `card ${card.isRed ? 'red' : ''} ${selectedIds.has(card.id) ? 'selected' : ''}`;
+          cardEl.textContent = rankLabel[card.rank] || card.rank;
+          cardEl.disabled = state.phase !== 'play' || state.currentSeat !== state.viewerSeat;
+          cardEl.onclick = () => {
+            if (!myTurn) return;
+            if (selectedIds.has(card.id)) selectedIds.delete(card.id);
+            else selectedIds.add(card.id);
+            render(lastState || state);
+          };
+          hand.appendChild(cardEl);
+        }
+        setText('lastPlay', state.lastPlay
+          ? `上一手：座位 ${state.lastPlay.player} 出 ${state.lastPlay.cards.map((card) => rankLabel[card.rank] || card.rank).join(' ')}`
+          : '自由出牌 · 点选手牌后点「出选中牌」');
+        setText('settlement', state.settlementIntent ? `结算：${state.settlementIntent.scores.join(' / ')}` : '');
+
+        const isBid = state.phase === 'bid' && state.currentSeat === state.viewerSeat;
+        const isPlay = state.phase === 'play' && state.currentSeat === state.viewerSeat;
+        document.querySelectorAll('[data-action^="bid"]').forEach((btn) => {
+          btn.disabled = !isBid;
+        });
+        document.querySelector('[data-action="playSelected"]').disabled = !isPlay;
+        document.querySelector('[data-action="playFirst"]').disabled = !isPlay;
+        document.querySelector('[data-action="pass"]').disabled = !(isPlay && state.canPass);
+        document.querySelector('[data-action="hint"]').disabled = !isPlay;
+      }
+
+      function renderAds() {
+        renderAdBox('tableAdCenter', findAd('doudizhu-table-center'));
+        renderAdBox('tableAdLeft', findAd('doudizhu-table-rail-left'));
+        renderAdBox('tableAdRight', findAd('doudizhu-table-rail-right'));
+        if (lastState) render(lastState);
+      }
+
+      function renderAdBox(id, ad) {
+        const el = document.getElementById(id);
+        if (!ad || ad.enabled === false) {
+          el.hidden = true;
+          return;
+        }
+        el.hidden = false;
+        el.innerHTML = `<strong>${escapeHtml(ad.advertiserName)}</strong><span>${escapeHtml(ad.copy)}</span>`;
+      }
+
+      function renderCostumeAd(ad) {
+        if (!ad || ad.enabled === false) return '';
+        return `<div class="costume-ad" data-ad-slot="${escapeHtml(ad.slotId)}"><span>${escapeHtml(ad.advertiserName)}</span><span>${escapeHtml(ad.campaignTitle)}</span></div>`;
+      }
+
+      function findAd(slotId) {
+        return adPlacements.find((placement) => placement.slotId === slotId);
+      }
+
+      function mergeAds(fallback, remote) {
+        const map = new Map(fallback.map((placement) => [placement.slotId, placement]));
+        for (const placement of remote) map.set(placement.slotId, { ...map.get(placement.slotId), ...placement });
+        return [...map.values()];
+      }
+
+      function defaultAdPlacements() {
+        return [
+          { slotId: 'doudizhu-table-center', advertiserName: 'TeaSwap', campaignTitle: '桌面冠名', copy: '链游积分季', enabled: true },
+          { slotId: 'doudizhu-table-rail-left', advertiserName: 'BitBridge', campaignTitle: '牌桌边栏', copy: '平台活动入口', enabled: true },
+          { slotId: 'doudizhu-table-rail-right', advertiserName: 'MintPad', campaignTitle: '牌桌边栏', copy: '项目日历', enabled: true },
+          { slotId: 'doudizhu-costume-seat-0', advertiserName: 'ChainQuest', campaignTitle: '地主披风', copy: '赛季任务', enabled: true },
+          { slotId: 'doudizhu-costume-seat-1', advertiserName: 'CEXOne', campaignTitle: '农民背心', copy: '积分榜', enabled: true },
+          { slotId: 'doudizhu-costume-seat-2', advertiserName: 'BlockHarbor', campaignTitle: '农民肩章', copy: '平台活动', enabled: true },
+        ];
+      }
+
+      function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, (char) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[char]);
+      }
+
+      function setText(id, value) {
+        document.getElementById(id).textContent = value;
+      }
+
+      document.querySelector('[data-action="bid0"]').onclick = () => send({ type: 'bid', score: 0 });
+      document.querySelector('[data-action="bid1"]').onclick = () => send({ type: 'bid', score: 1 });
+      document.querySelector('[data-action="bid2"]').onclick = () => send({ type: 'bid', score: 2 });
+      document.querySelector('[data-action="bid3"]').onclick = () => send({ type: 'bid', score: 3 });
+      document.querySelector('[data-action="playSelected"]').onclick = () => {
+        if (!selectedIds.size) {
+          setText('event', '请先点选手牌');
+          return;
+        }
+        send({ type: 'play', cardIds: [...selectedIds] });
+        selectedIds = new Set();
+      };
+      document.querySelector('[data-action="playFirst"]').onclick = () => send({ type: 'play_first' });
+      document.querySelector('[data-action="pass"]').onclick = () => send({ type: 'pass' });
+      document.querySelector('[data-action="hint"]').onclick = () => {
+        selectedIds = new Set();
+        if (lastState) render(lastState);
+        setText('event', '已清空选择（可用出最小牌）');
+      };
+      document.querySelector('[data-action="disconnect"]').onclick = () => ws && ws.close();
+      document.querySelector('[data-action="reconnect"]').onclick = connect;
+      window.__sendAction = send;
+      window.__disconnect = () => ws && ws.close();
+      window.__connect = connect;
+      window.__setAdPlacements = (placements) => {
+        adPlacements = mergeAds(defaultAdPlacements(), placements || []);
+        renderAds();
+      };
+      loadAdPlacements();
+      connect();
+    </script>
+  </body>
+</html>

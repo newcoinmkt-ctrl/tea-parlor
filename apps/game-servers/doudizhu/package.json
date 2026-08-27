@@ -1,0 +1,28 @@
+{
+  "name": "@tea-parlor/doudizhu-game-server",
+  "version": "0.1.0",
+  "description": "Three-player realtime Doudizhu room MVP over WebSocket.",
+  "type": "module",
+  "main": "src/server.js",
+  "exports": {
+    ".": "./src/server.js"
+  },
+  "scripts": {
+    "dev": "node src/server.js",
+    "test": "node --test tests/*.test.js",
+    "test:playwright": "node tests/playwright-three-clients.mjs"
+  },
+  "dependencies": {
+    "@tea-parlor/avatar-system": "file:../../../packages/avatar-system",
+    "@tea-parlor/doudizhu-engine": "file:../../../packages/doudizhu-engine",
+    "@tea-parlor/game-adapter": "file:../../../packages/game-adapter",
+    "@tea-parlor/wallet-service": "file:../../wallet-service",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

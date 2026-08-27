@@ -1,0 +1,53 @@
+{
+  "purpose": "Evaluate existing GitHub game repositories before adapting them into Tea Parlor.",
+  "allowedLicenses": ["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC"],
+  "quarantineLicenses": ["GPL", "AGPL", "LGPL", "NOASSERTION", "UNKNOWN", "UNLICENSED"],
+  "preferredTargets": {
+    "doudizhu": [
+      "pure rules engine",
+      "hand parser",
+      "AI hints",
+      "test vectors"
+    ],
+    "texasHoldem": [
+      "hand evaluator",
+      "side pot logic",
+      "round state machine",
+      "test vectors"
+    ],
+    "mahjong": [
+      "winning hand evaluator",
+      "tile model",
+      "regional rule plugin examples",
+      "test vectors"
+    ],
+    "h5Lobby": [
+      "responsive card table layout",
+      "lobby information architecture",
+      "non-branded component patterns"
+    ]
+  },
+  "forbiddenImports": [
+    "third-party brand assets",
+    "QQ/JJ copyrighted images, sounds, logos, or copied UI files",
+    "real-money casino wallet flows",
+    "withdrawal or deposit logic",
+    "obfuscated code",
+    "remote executable script loaders",
+    "private keys, tokens, or .env files"
+  ],
+  "requiredReviewBeforeMerge": [
+    "candidate recorded in docs/05-GitHub候选游戏/候选仓库评估表.md",
+    "license recorded",
+    "security risk checked",
+    "IP/asset risk checked",
+    "adapted behind Game Adapter contract",
+    "tests added",
+    "local audit passed"
+  ],
+  "localValidation": [
+    "cd /Users/newcoin/Desktop/棋牌室/tg",
+    "npm run audit:local",
+    "npm run demo"
+  ]
+}

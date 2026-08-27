@@ -1,0 +1,16 @@
+{
+  "name": "@tea-parlor/game-adapter",
+  "version": "0.1.0",
+  "description": "Shared game adapter contracts and placeholder adapters for Tea Parlor games.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

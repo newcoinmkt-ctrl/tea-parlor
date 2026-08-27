@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#1a5aab" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>Tea Parlor H5 大厅</title>
+    <link rel="stylesheet" href="./src/styles.css?v=home-restore1" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=theme-interactive" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=theme-interactive" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <main class="lobby-shell p0-tg" aria-label="Tea Parlor H5 大厅">
+      <header class="topbar topbar-home-layout">
+        <div class="topbar-left">
+          <div class="profile">
+            <div class="avatar" id="topAvatar" aria-hidden="true">茶</div>
+            <div class="profile-copy">
+              <strong id="playerName">茶馆</strong>
+              <span id="playerMeta">ID 830126 · Lv.12</span>
+            </div>
+          </div>
+        </div>
+        <nav class="quick-dock topbar-center" aria-label="快捷入口">
+          <button type="button" class="quick-dock-btn" data-lobby-action="home" aria-label="大厅">
+            <span class="qd-icon" aria-hidden="true">🏠</span>
+            <span class="qd-label">大厅</span>
+          </button>
+          <button type="button" class="quick-dock-btn" data-lobby-action="records" aria-label="战绩">
+            <span class="qd-icon" aria-hidden="true">🏆</span>
+            <span class="qd-label">战绩</span>
+          </button>
+          <button type="button" class="quick-dock-btn" data-lobby-action="recharge" aria-label="补给">
+            <span class="qd-icon" aria-hidden="true">🎁</span>
+            <span class="qd-label">补给</span>
+          </button>
+          <button type="button" class="quick-dock-btn" data-lobby-action="rules" aria-label="玩法说明">
+            <span class="qd-icon" aria-hidden="true">📖</span>
+            <span class="qd-label">说明</span>
+          </button>
+          <button type="button" class="quick-dock-btn" data-lobby-action="profile" aria-label="个人中心">
+            <span class="qd-icon" aria-hidden="true">👤</span>
+            <span class="qd-label">个人</span>
+          </button>
+        </nav>
+        <div class="topbar-right">
+          <div class="wallet-strip wallet-strip-ingot-only" aria-label="资产">
+            <button type="button" class="wallet-chip chip-ingot chip-gold-coin" data-lobby-action="recharge" data-recharge-focus="ingot" title="金币" aria-label="金币余额">
+              <span class="wallet-icon gold-coin-icon" aria-hidden="true"></span>
+              <span class="wallet-meta">
+                <b id="ingotBalance">128,600</b>
+              </span>
+            </button>
+            <!-- 顶栏仅金币；赛季积分 见链游测试区与补给中心 -->
+          </div>
+          <div class="theme-switcher" data-theme-switcher aria-hidden="true"></div>
+        </div>
+        <!-- 供 JS 更新余额（不展示） -->
+        <span id="cryptoBalance" hidden aria-hidden="true">100.00</span>
+        <span id="usdtBalance" hidden aria-hidden="true">0.00</span>
+      </header>
+
+      <div class="lobby-stage lobby-stage-norail">
+        <!-- 侧栏已移除；玩法从主卡片 / 顶栏进入。保留隐藏节点供脚本兼容 -->
+        <aside class="mode-rail" aria-hidden="true" hidden>
+          <button class="mode-item hot active" type="button" data-lobby-action="home">大厅</button>
+          <button class="mode-item" type="button" data-side-game="doudizhu">斗地主</button>
+          <button class="mode-item" type="button" data-side-game="texas">德州扑克</button>
+          <button class="mode-item" type="button" data-side-game="zhajinhua">炸金花</button>
+          <button class="mode-item" type="button" data-side-game="mahjong">麻将</button>
+          <button class="mode-item" type="button" data-side-game="guandan">掼蛋</button>
+          <button class="mode-item" type="button" data-side-game="blackjack">二十一点</button>
+          <button class="mode-item gold-rail" type="button" data-side-game="real">链游测试区</button>
+          <button class="mode-item gold-rail" type="button" data-lobby-action="open-games">更多游戏</button>
+          <button class="mode-item" type="button" data-lobby-action="records">战绩</button>
+          <button class="mode-item" type="button" data-lobby-action="rules">玩法说明</button>
+        </aside>
+
+        <div class="stage-content">
+          <section class="home-app" data-lobby-view="home" aria-label="茶馆主房间">
+            <p class="home-kicker">茶馆主房间</p>
+            <strong id="homePlayerName" hidden>茶馆</strong>
+
+            <div class="p0-home-chrome">
+              <div class="p0-home-user">
+                <button type="button" class="p0-ava" data-lobby-action="profile" aria-label="个人中心"></button>
+                <div class="p0-who"><small>Telegram</small><b id="p0PlayerName">茶馆</b></div>
+                <button type="button" class="p0-points" data-lobby-action="recharge" data-recharge-focus="ingot" aria-label="影子积分，点按领取每日补给">
+                  <i></i><span><small>影子积分</small><b id="p0IngotBalance">128,600</b></span>
+                </button>
+              </div>
+              <div class="p0-home-stage">
+                <p class="p0-kicker">Tea Parlor</p>
+                <div class="p0-cta-card">
+                  <h1>经典三人 · 叫分</h1>
+                  <p>匹配真人，超时由 AI 补位</p>
+                  <button class="p0-primary" type="button" data-lobby-action="quick-doudizhu">斗地主 · 快速开始</button>
+                  <button class="p0-secondary" type="button" data-lobby-action="open-zhajinhua">炸金花</button>
+                  <p class="p0-hint">约 <em>8 秒</em>开局 · 一局三五分钟</p>
+                  <button class="p0-more" type="button" data-lobby-action="open-games">更多玩法</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="p0-legacy" hidden>
+            <header class="home-hero">
+              <img class="home-hero-art" src="./public/assets/home/hero.jpg" alt="" />
+              <div class="home-hero-fade" aria-hidden="true"></div>
+              <div class="home-hero-user">
+                <button type="button" class="home-hero-avatar" data-lobby-action="profile" aria-label="个人中心">
+                  <span id="homeHeroAvatar" class="home-hero-avatar-frame"></span>
+                </button>
+                <div class="home-hero-wallets" aria-label="测试资产展示">
+                  <button type="button" class="home-hero-gold" data-lobby-action="recharge" data-recharge-focus="ingot" aria-label="影子积分">
+                    <span class="gold-coin-icon" aria-hidden="true"></span>
+                    <span><small>影子积分</small><b id="homeIngotBalance">128,600</b></span>
+                  </button>
+                  <button type="button" class="home-hero-gold is-season" data-lobby-action="recharge" data-recharge-focus="usdt" aria-label="赛季积分">
+                    <span class="asset-season-gem" aria-hidden="true">◆</span>
+                    <span><small>赛季积分</small><b id="homeSeasonBalance">100.00</b></span>
+                  </button>
+                </div>
+              </div>
+            </header>
+
+            <section class="home-icon-grid" aria-label="游戏入口">
+              <button class="home-icon-btn" type="button" data-side-game="doudizhu">
+                <img src="./public/assets/home/icon-ddz.png?v=island3" alt="" />
+                <strong>斗地主</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-side-game="mahjong">
+                <img src="./public/assets/home/icon-mahjong.png" alt="" />
+                <strong>麻将</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-side-game="texas">
+                <img src="./public/assets/home/icon-texas.png" alt="" />
+                <strong>德州</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-side-game="guandan">
+                <img src="./public/assets/home/icon-guandan.png" alt="" />
+                <strong>掼蛋</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-side-game="zhajinhua">
+                <img src="./public/assets/home/icon-zjh.png" alt="" />
+                <strong>炸金花</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-side-game="blackjack">
+                <img src="./public/assets/home/icon-blackjack.png" alt="" />
+                <strong>二十一点</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-lobby-action="chain">
+                <img src="./public/assets/home/icon-real.png" alt="" />
+                <strong>链游中心</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-lobby-action="open-games">
+                <img src="./public/assets/home/icon-gift.png" alt="" />
+                <strong>更多游戏</strong>
+              </button>
+            </section>
+
+            <section class="home-pack-grid" aria-label="合集入口">
+              <button class="home-pack" type="button" data-lobby-action="open-games">
+                <span class="home-pack-art" aria-hidden="true">
+                  <img src="./public/assets/home/icon-ddz.png?v=island3" alt="" />
+                  <img src="./public/assets/home/icon-mahjong.png" alt="" />
+                  <img src="./public/assets/home/icon-zjh.png" alt="" />
+                  <img src="./public/assets/home/icon-guandan.png" alt="" />
+                </span>
+                <strong>牌类合集</strong>
+              </button>
+              <button class="home-pack" type="button" data-lobby-action="recharge">
+                <span class="home-pack-art" aria-hidden="true">
+                  <img src="./public/assets/home/icon-gift.png" alt="" />
+                  <img src="./public/assets/home/icon-real.png" alt="" />
+                  <img src="./public/assets/home/icon-ddz.png?v=island3" alt="" />
+                  <img src="./public/assets/home/icon-texas.png" alt="" />
+                </span>
+                <strong>补给中心</strong>
+              </button>
+              <button class="home-pack" type="button" data-lobby-action="records">
+                <span class="home-pack-art" aria-hidden="true">
+                  <img src="./public/assets/home/icon-texas.png" alt="" />
+                  <img src="./public/assets/home/icon-blackjack.png" alt="" />
+                  <img src="./public/assets/home/icon-mahjong.png" alt="" />
+                  <img src="./public/assets/home/icon-gift.png" alt="" />
+                </span>
+                <strong>战绩中心</strong>
+              </button>
+              <button class="home-pack" type="button" data-lobby-action="chain">
+                <span class="home-pack-art" aria-hidden="true">
+                  <img src="./public/assets/home/icon-real.png" alt="" />
+                  <img src="./public/assets/home/icon-ddz.png?v=island3" alt="" />
+                  <img src="./public/assets/home/icon-guandan.png" alt="" />
+                  <img src="./public/assets/home/icon-zjh.png" alt="" />
+                </span>
+                <strong>链游合集</strong>
+              </button>
+            </section>
+
+            <section class="claim-band home-claim" aria-label="每日金币">
+              <div>
+                <p>每日补给</p>
+                <strong>金币输光后可领 · 每天 4 次 · 每次 4,000</strong>
+                <span id="claimStatus">金币未输光，暂不可领取</span>
+              </div>
+              <button id="claimIngotButton" class="gold-button" type="button" disabled>输光后可领</button>
+            </section>
+            <section class="status-band home-status" aria-label="今日状态">
+              <div class="status-item">
+                <span>今日战绩</span>
+                <strong id="homeRecordSummary">0 胜 0 负</strong>
+              </div>
+              <div class="status-item">
+                <span>任务奖励</span>
+                <strong>4,000</strong>
+              </div>
+              <div class="status-item">
+                <span>人机局</span>
+                <strong>可进入</strong>
+              </div>
+            </section>
+            <p class="home-legal">先选游戏，再进场次 · 金币仅用于内部娱乐，不可转为现金</p>
+            </div>
+          </section>
+
+          <section class="game-lane" data-lobby-view="games" aria-label="游戏类型选择" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回主房间</button>
+              <div>
+                <p>游戏类型</p>
+                <h1>选择玩法</h1>
+              </div>
+            </div>
+            <button class="game-tile game-tile-active" type="button" data-game="doudizhu">
+              <span class="tile-art table-art" aria-hidden="true">
+                <span class="seat seat-top"></span>
+                <span class="seat seat-left"></span>
+                <span class="seat seat-right"></span>
+                <span class="card card-a">A</span>
+                <span class="card card-k">K</span>
+              </span>
+              <span class="tile-copy">
+                <strong>斗地主</strong>
+                <small>不洗牌、欢乐经典、经典场</small>
+              </span>
+              <span class="tile-state open">正式</span>
+            </button>
+
+            <button class="game-tile game-tile-active" type="button" data-game="texas">
+              <span class="tile-art poker-art" aria-hidden="true">
+                <span class="chip chip-red"></span>
+                <span class="chip chip-blue"></span>
+                <span class="card card-q">Q</span>
+              </span>
+              <span class="tile-copy">
+                <strong>德州扑克</strong>
+                <small>三人无限注 · 人机 · 金币场</small>
+              </span>
+              <span class="tile-state local">人机</span>
+            </button>
+
+            <button class="game-tile game-tile-active" type="button" data-game="zhajinhua">
+              <span class="tile-art poker-art" aria-hidden="true">
+                <span class="chip chip-red"></span>
+                <span class="card card-a">A</span>
+                <span class="card card-k">K</span>
+                <span class="card card-q">Q</span>
+              </span>
+              <span class="tile-copy">
+                <strong>炸金花</strong>
+                <small>三人三张 · 看牌比牌 · 可玩</small>
+              </span>
+              <span class="tile-state local">人机</span>
+            </button>
+
+            <button class="game-tile game-tile-active" type="button" data-game="mahjong">
+              <span class="tile-art mahjong-art" aria-hidden="true">
+                <span class="mahjong-tile">中</span>
+                <span class="mahjong-tile">發</span>
+                <span class="mahjong-tile">白</span>
+              </span>
+              <span class="tile-copy">
+                <strong>麻将合集</strong>
+                <small>二人 · 血战 · 血流 · 自研</small>
+              </span>
+              <span class="tile-state local">人机</span>
+            </button>
+
+            <button class="game-tile game-tile-active" type="button" data-game="guandan">
+              <span class="tile-art" aria-hidden="true">
+                <span class="card card-a">掼</span>
+                <span class="card card-k">蛋</span>
+                <span class="card card-q">2v2</span>
+              </span>
+              <span class="tile-copy">
+                <strong>掼蛋</strong>
+                <small>四人两两 · 级牌逢人配 · 可玩</small>
+              </span>
+              <span class="tile-state local">人机</span>
+            </button>
+
+            <button class="game-tile game-tile-active" type="button" data-game="blackjack">
+              <span class="tile-art poker-art" aria-hidden="true">
+                <span class="card card-a">A</span>
+                <span class="card card-k">K</span>
+                <span class="chip chip-gold"></span>
+              </span>
+              <span class="tile-copy">
+                <strong>二十一点</strong>
+                <small>标准 BJ · 加倍分牌 · 可玩</small>
+              </span>
+              <span class="tile-state local">人机</span>
+            </button>
+
+            <button class="game-tile gold-tile" type="button" data-game="real">
+              <span class="tile-art candidate-art" aria-hidden="true">
+                <span class="candidate-chip">金</span>
+                <span class="card card-a">金</span>
+              </span>
+              <span class="tile-copy">
+                <strong>链游测试区</strong>
+                <small>赛季积分 入座 · 不可提现</small>
+              </span>
+              <span class="tile-state local gold-state">演示</span>
+            </button>
+          </section>
+
+          <!-- 链游测试区：赛季积分 演示账本入座结算 -->
+          <section class="room-band crypto-room-band" data-lobby-view="rooms" aria-label="链游测试区" data-room-game="real" hidden>
+            <div class="crypto-hero">
+              <div class="crypto-hero-top">
+                <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+                <div class="crypto-hero-titles">
+                  <p>链游测试区 · 全玩法同步 · 赛季积分 结算</p>
+                  <h1>全玩法链游测试场</h1>
+                </div>
+                <div class="crypto-hero-status">
+                  <span class="online-pill crypto-pill">可入座</span>
+                  <button class="crypto-supply-btn" type="button" data-lobby-action="recharge">补给中心</button>
+                </div>
+              </div>
+              <div class="crypto-wallet-bar">
+                <div class="crypto-wallet-main">
+                  <span class="crypto-wallet-label">赛季积分 余额</span>
+                  <strong class="crypto-wallet-value"><b id="cryptoRoomBalance">100.00</b></strong>
+                </div>
+                <div class="crypto-wallet-tips">
+                  <span>赛季积分 演示账本</span>
+                  <span>不可转为现金或外部资产</span>
+                  <span>3 赛季积分 转换 60,000 金币</span>
+                </div>
+              </div>
+              <p class="crypto-disclaimer">链游测试场使用 赛季积分 演示账本入座结算。请在补给中心发放 赛季积分（演示，不可转为现金或外部资产）。</p>
+              <nav class="crypto-jump-nav" aria-label="玩法快捷">
+                <a class="crypto-jump" href="#real-sec-ddz">斗地主</a>
+                <a class="crypto-jump" href="#real-sec-texas">德州</a>
+                <a class="crypto-jump" href="#real-sec-zjh">炸金花</a>
+                <a class="crypto-jump" href="#real-sec-mj">麻将</a>
+                <a class="crypto-jump" href="#real-sec-gd">掼蛋</a>
+                <a class="crypto-jump" href="#real-sec-bj">二十一点</a>
+                <a class="crypto-jump crypto-jump-supply" href="#real-sec-supply">补给</a>
+              </nav>
+            </div>
+
+                        <div class="crypto-section" id="real-sec-ddz">
+            <p class="crypto-section-title">斗地主 <small>赛季积分 · 全场次同步</small></p>
+            <div class="room-grid real-show-grid">
+              <button class="room-card gold-room show-card primary-room" type="button" data-game-room="doudizhu" data-room="c_novice" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face red">3</span><span class="show-card-face">A</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>0.5</b></span>
+                  <strong class="room-name-center">新手场</strong>
+                  <span class="room-meta">赛季积分 · 最低 2</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="doudizhu" data-room="c_micro" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face red">A</span><span class="show-card-face">K</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>1</b></span>
+                  <strong class="room-name-center">微桌</strong>
+                  <span class="room-meta">赛季积分 · 最低 3</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="doudizhu" data-room="c_classic" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face">2</span><span class="show-card-face red">A</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>2</b></span>
+                  <strong class="room-name-center">经典场</strong>
+                  <span class="room-meta">赛季积分 · 最低 6</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="doudizhu" data-room="c_std" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face red">K</span><span class="show-card-face">Q</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>3</b></span>
+                  <strong class="room-name-center">标准桌</strong>
+                  <span class="room-meta">赛季积分 · 最低 10</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="doudizhu" data-room="c_mid" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face">J</span><span class="show-card-face red">10</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>5</b></span>
+                  <strong class="room-name-center">中级场</strong>
+                  <span class="room-meta">赛季积分 · 最低 15</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="doudizhu" data-room="c_high" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face red">2</span><span class="show-card-face">王</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>10</b></span>
+                  <strong class="room-name-center">高级场</strong>
+                  <span class="room-meta">赛季积分 · 最低 30</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="doudizhu" data-room="c_top" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face">大</span><span class="show-card-face red">王</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>25</b></span>
+                  <strong class="room-name-center">顶级场</strong>
+                  <span class="room-meta">赛季积分 · 最低 80</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+            </div>
+
+            <div class="crypto-section" id="real-sec-texas">
+            <p class="crypto-section-title">德州扑克 <small>无限注 · 全场次同步</small></p>
+            <div class="room-grid real-show-grid">
+              <button class="room-card gold-room show-card primary-room" type="button" data-game-room="texas" data-texas="c_micro" data-currency="crypto">
+                <span class="show-art show-texas" aria-hidden="true">
+                  <span class="show-card-face red">A♠</span><span class="show-card-face">K♠</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>盲注</em><b>0.5/1</b></span>
+                  <strong class="room-name-center">微盲桌</strong>
+                  <span class="room-meta">带入 10 赛季积分</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="texas" data-texas="c_mid" data-currency="crypto">
+                <span class="show-art show-texas" aria-hidden="true">
+                  <span class="show-card-face red">♥A</span><span class="show-card-face red">♥K</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>盲注</em><b>1/2</b></span>
+                  <strong class="room-name-center">常规桌</strong>
+                  <span class="room-meta">带入 25 赛季积分</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="texas" data-texas="c_high" data-currency="crypto">
+                <span class="show-art show-texas" aria-hidden="true">
+                  <span class="show-card-face">Q♠</span><span class="show-card-face red">J♠</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>盲注</em><b>2/5</b></span>
+                  <strong class="room-name-center">高盲桌</strong>
+                  <span class="room-meta">带入 50 赛季积分</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+            </div>
+
+            <div class="crypto-section" id="real-sec-bj">
+            <p class="crypto-section-title">二十一点 <small>赛季积分 · 标准 BJ</small></p>
+            <div class="room-grid real-show-grid">
+              <button class="room-card gold-room show-card primary-room" type="button" data-game-room="blackjack" data-bj="micro" data-currency="crypto">
+                <span class="show-art show-zjh" aria-hidden="true">
+                  <span class="show-card-face red">A</span><span class="show-card-face">K</span><span class="show-badge">BJ</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底注</em><b>1</b></span>
+                  <strong class="room-name-center">微注场</strong>
+                  <span class="room-meta">赛季积分 · 最低 10</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="blackjack" data-bj="c_mid" data-currency="crypto">
+                <span class="show-art show-zjh" aria-hidden="true">
+                  <span class="show-card-face">10</span><span class="show-card-face red">A</span><span class="show-badge">BJ</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底注</em><b>2</b></span>
+                  <strong class="room-name-center">进阶场</strong>
+                  <span class="room-meta">赛季积分 · 最低 20</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="blackjack" data-bj="c_high" data-currency="crypto">
+                <span class="show-art show-zjh" aria-hidden="true">
+                  <span class="show-card-face red">Q</span><span class="show-card-face">J</span><span class="show-badge">BJ</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底注</em><b>5</b></span>
+                  <strong class="room-name-center">高手场</strong>
+                  <span class="room-meta">赛季积分 · 最低 40</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+            </div>
+
+            <div class="crypto-section" id="real-sec-zjh">
+            <p class="crypto-section-title">炸金花 <small>三人三张 · 全场次同步</small></p>
+            <div class="room-grid real-show-grid">
+              <button class="room-card gold-room show-card primary-room" type="button" data-game-room="zhajinhua" data-zjh="micro" data-currency="crypto">
+                <span class="show-art show-zjh" aria-hidden="true">
+                  <span class="show-card-face red">A</span><span class="show-card-face red">K</span><span class="show-card-face red">Q</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底注</em><b>1</b></span>
+                  <strong class="room-name-center">微注场</strong>
+                  <span class="room-meta">赛季积分 · 最低 5</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="zhajinhua" data-zjh="c_mid" data-currency="crypto">
+                <span class="show-art show-zjh" aria-hidden="true">
+                  <span class="show-card-face">J</span><span class="show-card-face">10</span><span class="show-card-face">9</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底注</em><b>2</b></span>
+                  <strong class="room-name-center">进阶场</strong>
+                  <span class="room-meta">赛季积分 · 最低 10</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="zhajinhua" data-zjh="c_high" data-currency="crypto">
+                <span class="show-art show-zjh" aria-hidden="true">
+                  <span class="show-card-face red">K</span><span class="show-card-face">Q</span><span class="show-card-face">J</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底注</em><b>5</b></span>
+                  <strong class="room-name-center">高手场</strong>
+                  <span class="room-meta">赛季积分 · 最低 20</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+            </div>
+
+            <div class="crypto-section" id="real-sec-mj">
+            <p class="crypto-section-title">麻将 <small>四人/二人/血战/血流 · 全同步</small></p>
+            <div class="room-grid real-show-grid">
+              <button class="room-card gold-room show-card primary-room" type="button" data-game-room="mahjong" data-mj-mode="siren_c" data-currency="crypto">
+                <span class="show-art show-mj" aria-hidden="true">
+                  <span class="show-mj-tile">中</span><span class="show-mj-tile">發</span><span class="show-mj-tile">白</span><span class="show-mj-tile">东</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>2</b></span>
+                  <strong class="room-name-center">四人麻将</strong>
+                  <span class="room-meta">赛季积分 · 最低 10</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="mahjong" data-mj-mode="er_c" data-currency="crypto">
+                <span class="show-art show-mj" aria-hidden="true">
+                  <span class="show-mj-tile">一</span><span class="show-mj-tile">万</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>2</b></span>
+                  <strong class="room-name-center">二人麻将</strong>
+                  <span class="room-meta">赛季积分 · 最低 8</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="mahjong" data-mj-mode="xuezhan_c" data-currency="crypto">
+                <span class="show-art show-mj" aria-hidden="true">
+                  <span class="show-mj-tile red">血</span><span class="show-mj-tile">战</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>2</b></span>
+                  <strong class="room-name-center">血战到底</strong>
+                  <span class="room-meta">赛季积分 · 最低 10</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="mahjong" data-mj-mode="xueliu_c" data-currency="crypto">
+                <span class="show-art show-mj" aria-hidden="true">
+                  <span class="show-mj-tile red">流</span><span class="show-mj-tile">河</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>3</b></span>
+                  <strong class="room-name-center">血流成河</strong>
+                  <span class="room-meta">赛季积分 · 最低 15</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+            </div>
+
+            <div class="crypto-section" id="real-sec-gd">
+            <p class="crypto-section-title">掼蛋 <small>2v2 升级 · 全场次同步</small></p>
+            <div class="room-grid real-show-grid">
+              <button class="room-card gold-room show-card primary-room" type="button" data-game-room="guandan" data-gd="micro" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face red">A</span><span class="show-card-face">♥</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>2</b></span>
+                  <strong class="room-name-center">链游微注</strong>
+                  <span class="room-meta">赛季积分 · 最低 8</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="guandan" data-gd="std" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face">K</span><span class="show-card-face red">Q</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>5</b></span>
+                  <strong class="room-name-center">链游标准</strong>
+                  <span class="room-meta">赛季积分 · 最低 20</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card gold-room show-card" type="button" data-game-room="guandan" data-gd="high" data-currency="crypto">
+                <span class="show-art show-ddz" aria-hidden="true">
+                  <span class="show-card-face red">2</span><span class="show-card-face">级</span><span class="show-badge">链游</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>底分</em><b>10</b></span>
+                  <strong class="room-name-center">链游高桌</strong>
+                  <span class="room-meta">赛季积分 · 最低 40</span>
+                </span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+            </div>
+
+            <div class="crypto-section" id="real-sec-supply">
+            <p class="crypto-section-title">补给 <small>赛季积分 / 金币</small></p>
+            <div class="room-grid real-show-grid real-show-grid-supply">
+              <button class="room-card gold-room show-card show-supply" type="button" data-lobby-action="recharge">
+                <span class="show-art show-wallet" aria-hidden="true">
+                  <span class="show-usdt">₮</span>
+                  <span class="show-coin"></span>
+                  <span class="show-badge">补给</span>
+                </span>
+                <span class="show-body">
+                  <span class="room-stake-tl"><em>账本</em><b>₮</b></span>
+                  <strong class="room-name-center">补给中心</strong>
+                  <span class="room-meta">发放 赛季积分 / 转换金币</span>
+                </span>
+                <span class="room-action secondary">去补给</span>
+              </button>
+            </div>
+            </div>
+          </section>
+
+          <!-- 炸金花：自研可玩 -->
+          <section class="room-band" data-lobby-view="rooms" aria-label="二十一点场次" data-room-game="blackjack" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>二十一点</p>
+                <h1>选择场次</h1>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <p>标准规则 · 庄家 S17 · 黑杰克 3:2</p>
+                <h1>要牌 / 停牌 / 加倍 / 分牌</h1>
+              </div>
+              <div class="online-pill">影子积分</div>
+            </div>
+            <div class="room-grid">
+              <button class="room-card room-card-qq primary-room" type="button" data-game-room="blackjack" data-bj="novice">
+                <span class="room-stake-tl" aria-label="最低注 50"><em>底注</em><b>50</b></span>
+                <strong class="room-name-center">新手场</strong>
+                <span class="room-meta">最低 500 金币 · 对庄家</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="blackjack" data-bj="mid">
+                <span class="room-stake-tl" aria-label="最低注 100"><em>底注</em><b>100</b></span>
+                <strong class="room-name-center">进阶场</strong>
+                <span class="room-meta">最低 1,500 金币</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="blackjack" data-bj="high">
+                <span class="room-stake-tl" aria-label="最低注 200"><em>底注</em><b>200</b></span>
+                <strong class="room-name-center">高手场</strong>
+                <span class="room-meta">最低 3,000 金币</span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="room-band" data-lobby-view="rooms" aria-label="炸金花场次" data-room-game="zhajinhua" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>炸金花</p>
+                <h1>选择场次</h1>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <p>三人三张 · 自研人机</p>
+                <h1>看牌 / 跟注 / 比牌 / 弃牌</h1>
+              </div>
+              <div class="online-pill">影子积分</div>
+            </div>
+            <div class="room-grid">
+              <button class="room-card room-card-qq primary-room" type="button" data-game-room="zhajinhua" data-zjh="novice">
+                <span class="room-stake-tl" aria-label="底注 50"><em>底注</em><b>50</b></span>
+                <strong class="room-name-center">新手场</strong>
+                <span class="room-meta">最低 500 金币 · 三人 AI</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="zhajinhua" data-zjh="mid">
+                <span class="room-stake-tl" aria-label="底注 100"><em>底注</em><b>100</b></span>
+                <strong class="room-name-center">进阶场</strong>
+                <span class="room-meta">最低 1,500 金币</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="zhajinhua" data-zjh="high">
+                <span class="room-stake-tl" aria-label="底注 200"><em>底注</em><b>200</b></span>
+                <strong class="room-name-center">高手场</strong>
+                <span class="room-meta">最低 3,000 金币</span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="room-band" data-lobby-view="rooms" aria-label="斗地主场次" data-room-game="doudizhu" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>斗地主</p>
+                <h1>选择场次</h1>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <p id="ddzVariantDesc">经典三人 · 叫分</p>
+                <h1 id="ddzVariantTitle">选择场次</h1>
+              </div>
+              <div class="online-pill" id="ddzOnlinePill">匹配中</div>
+            </div>
+            <div class="p0-lane-seg" role="tablist" aria-label="货币场次">
+              <button class="on" type="button" data-ddz-lane="gold">金币场</button>
+              <button type="button" data-ddz-lane="season">赛季积分场</button>
+            </div>
+            <div class="variant-tabs" id="ddzVariantTabs" aria-label="斗地主玩法">
+              <button class="variant-tab active" type="button" data-ddz-variant="buxipai">不洗牌</button>
+              <button class="variant-tab" type="button" data-ddz-variant="huanle">欢乐经典</button>
+              <button class="variant-tab" type="button" data-ddz-variant="classic">经典</button>
+              <button class="variant-tab" type="button" data-ddz-variant="lianzha">连炸</button>
+              <button class="variant-tab" type="button" data-ddz-variant="laizi">天地癞子</button>
+            </div>
+
+            <div class="room-grid room-grid-six" id="ddzRoomGrid" aria-label="场次列表">
+              <!-- 由 JS 按玩法 Tab 渲染，参照 QQ 斗地主 -->
+            </div>
+
+            <div class="start-strip p0-start-dock">
+              <button class="friend-room-button" type="button" data-lobby-action="friend-room">好友房</button>
+              <button class="quick-start-button" type="button" id="ddzQuickStart" data-lobby-action="quick-doudizhu-classic">快速开始</button>
+              <small class="p0-dock-hint">经典场 · 匹配真人，超时 AI 补位</small>
+            </div>
+          </section>
+
+          <section class="room-band" data-lobby-view="rooms" aria-label="德州扑克场次" data-room-game="texas" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>德州扑克</p>
+                <h1>选择牌桌</h1>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <p>无限注德州</p>
+                <h1>选择牌桌</h1>
+              </div>
+              <div class="online-pill">影子积分</div>
+            </div>
+            <div class="room-grid">
+              <button class="room-card room-card-qq primary-room" type="button" data-game-room="texas" data-texas="micro">
+                <span class="room-stake-tl" aria-label="盲注 10/20"><em>盲注</em><b>10/20</b></span>
+                <strong class="room-name-center">微盲桌</strong>
+                <span class="room-meta">带入 1,000 · 三人 AI</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="texas" data-texas="mid">
+                <span class="room-stake-tl" aria-label="盲注 25/50"><em>盲注</em><b>25/50</b></span>
+                <strong class="room-name-center">常规桌</strong>
+                <span class="room-meta">带入 2,500 · 三人 AI</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="texas" data-texas="high">
+                <span class="room-stake-tl" aria-label="盲注 50/100"><em>盲注</em><b>50/100</b></span>
+                <strong class="room-name-center">高盲桌</strong>
+                <span class="room-meta">带入 5,000 · 三人 AI</span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- 麻将合集场次 -->
+          <section class="room-band" data-lobby-view="rooms" aria-label="麻将场次" data-room-game="mahjong" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>麻将</p>
+                <h1>选择玩法</h1>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <p>自研规则骨架</p>
+                <h1>二人 / 四人 / 血战 / 血流</h1>
+              </div>
+              <div class="online-pill">影子积分</div>
+            </div>
+            <div class="room-grid room-grid-four">
+              <button class="room-card room-card-qq primary-room" type="button" data-game-room="mahjong" data-mj-mode="siren">
+                <span class="room-stake-tl" aria-label="底分 100"><em>底分</em><b>100</b></span>
+                <strong class="room-name-center">四人麻将</strong>
+                <span class="room-meta">4 人经典 · 人机</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="mahjong" data-mj-mode="er">
+                <span class="room-stake-tl" aria-label="底分 100"><em>底分</em><b>100</b></span>
+                <strong class="room-name-center">二人麻将</strong>
+                <span class="room-meta">2 人桌 · 人机</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="mahjong" data-mj-mode="xuezhan">
+                <span class="room-stake-tl" aria-label="底分 100"><em>底分</em><b>100</b></span>
+                <strong class="room-name-center">血战到底</strong>
+                <span class="room-meta">换三张 · 定缺 · 胡退场</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="mahjong" data-mj-mode="xueliu">
+                <span class="room-stake-tl" aria-label="底分 200"><em>底分</em><b>200</b></span>
+                <strong class="room-name-center">血流成河</strong>
+                <span class="room-meta">换三张 · 定缺 · 胡留场</span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- 掼蛋场次 -->
+          <section class="room-band" data-lobby-view="rooms" aria-label="掼蛋场次" data-room-game="guandan" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>掼蛋</p>
+                <h1>选择场次</h1>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <p>四人 2v2 · 级牌 / 逢人配</p>
+                <h1>进贡 · 接风 · 升级过 A</h1>
+              </div>
+              <div class="online-pill">可玩</div>
+            </div>
+            <div class="room-grid room-grid-four">
+              <button class="room-card room-card-qq primary-room" type="button" data-game-room="guandan" data-gd="novice">
+                <span class="room-stake-tl" aria-label="底分 100"><em>底分</em><b>100</b></span>
+                <strong class="room-name-center">新手场</strong>
+                <span class="room-meta">金币 · 人机 3 人</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="guandan" data-gd="mid">
+                <span class="room-stake-tl" aria-label="底分 200"><em>底分</em><b>200</b></span>
+                <strong class="room-name-center">进阶场</strong>
+                <span class="room-meta">金币 · 更高底分</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="guandan" data-gd="micro" data-currency="crypto">
+                <span class="room-stake-tl" aria-label="底分 2"><em>底分</em><b>2</b></span>
+                <strong class="room-name-center">链游微注</strong>
+                <span class="room-meta">赛季积分 · 最低 8</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="guandan" data-gd="std" data-currency="crypto">
+                <span class="room-stake-tl" aria-label="底分 5"><em>底分</em><b>5</b></span>
+                <strong class="room-name-center">链游标准</strong>
+                <span class="room-meta">赛季积分 · 最低 20</span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- 个人中心 -->
+          <section class="panel-page profile-page" data-lobby-view="profile" aria-label="个人中心" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>账号设置</p>
+                <h1>个人中心</h1>
+              </div>
+              <div class="theme-switcher profile-theme-switcher" data-theme-switcher aria-label="游戏皮肤"></div>
+            </div>
+            <div class="profile-layout">
+              <div class="profile-preview card-panel profile-preview-full">
+                <div class="profile-preview-avatar profile-preview-figure" id="profilePreviewAvatar">
+                  <div id="wardrobeAvatarPreview" class="avatar-renderer-mount wardrobe-avatar-preview"></div>
+                  <img id="profilePreviewImg" class="char-float char-fullbody" src="./public/characters/male-hero.png" alt="我的形象" width="160" height="280" hidden />
+                  <span class="profile-costume-tag" id="profileCostumeTag">默认装</span>
+                </div>
+                <div id="profileAvatarRenderer" class="avatar-renderer-mount profile-avatar-mount" hidden aria-hidden="true"></div>
+                <strong id="profilePreviewName">茶馆</strong>
+                <span id="profilePreviewId">ID 830126 · Lv.12</span>
+                <span class="profile-preview-beans">金币 <b id="profilePreviewIngots">0</b></span>
+                <span class="profile-preview-beans crypto-line">赛季积分 <b id="profilePreviewCrypto">100.00</b></span>
+                <p class="field-hint profile-preview-tip">点选衣橱即可预览 · 保存后同步牌桌</p>
+                <strong id="wardrobePreviewTitle">预览中</strong>
+                <span id="wardrobePreviewMeta">人物 · 衣服 · 配饰</span>
+                <div class="wardrobe-cosmetic-preview" id="wardrobeCosmeticPreview" aria-label="当前皮肤预览">
+                  <span class="cosmetic-preview-chip" id="wardrobeTablePreview">桌布：默认</span>
+                  <span class="cosmetic-preview-chip" id="wardrobeCardBackPreview">牌背：默认</span>
+                  <span class="cosmetic-preview-chip" id="wardrobeFramePreview">头像框：默认</span>
+                </div>
+                <div class="wardrobe-detail-panel" id="wardrobeDetailPanel" aria-live="polite">
+                  <span class="wardrobe-detail-kicker">皮肤详情</span>
+                  <strong>基础衣橱</strong>
+                  <p>选择桌布、牌背或头像框查看来源与联名信息。</p>
+                </div>
+                <div class="wardrobe-actions">
+                  <button type="button" id="wardrobeSaveBtn" class="gold-button">保存形象</button>
+                  <button type="button" id="wardrobeCancelBtn" class="muted-button">取消预览</button>
+                  <button type="button" id="wardrobeResetBtn" class="muted-button">恢复默认</button>
+                </div>
+                <p class="profile-save-status" id="wardrobeStatus" aria-live="polite"></p>
+              </div>
+
+              <div class="profile-form card-panel">
+                <label class="field">
+                  <span>自定义昵称</span>
+                  <input id="profileNameInput" type="text" maxlength="12" placeholder="输入昵称" autocomplete="off" />
+                </label>
+
+                <div class="field profile-wardrobe" id="profileWardrobe">
+                  <span class="section-label">衣橱</span>
+                  <p class="field-hint">先点「人物」切换 Q 版立绘，再换衣服、桌布、牌背或头像框。点选立即预览，保存后同步牌桌。</p>
+                  <label class="skin-link-row">
+                    <input id="linkSkinClothesToggle" type="checkbox" checked />
+                    <span>大厅皮肤与衣服联动</span>
+                  </label>
+                  <div class="custom-char-row">
+                    <label class="gold-button file-upload-btn" for="customCharFile">上传自定义形象</label>
+                    <input id="customCharFile" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+                    <button type="button" id="clearCustomCharBtn" class="muted-button">清除上传</button>
+                  </div>
+                  <small class="field-hint" id="customCharHint">支持 PNG/JPG 全身立绘；本地压缩保存</small>
+                  <div id="wardrobeTabs" class="wardrobe-tabs" role="tablist" aria-label="衣橱分类"></div>
+                  <div id="wardrobeGrid" class="wardrobe-grid" role="listbox" aria-label="衣橱物品"></div>
+                  <div class="field custom-skin-panel" id="customSkinPanel" hidden>
+                    <span>自定义染色调节</span>
+                    <div class="skin-sliders">
+                      <label class="skin-slider-row">
+                        <em>色相</em>
+                        <input id="customSkinHue" type="range" min="0" max="360" step="1" value="270" />
+                        <b id="customSkinHueVal">270°</b>
+                      </label>
+                      <label class="skin-slider-row">
+                        <em>饱和</em>
+                        <input id="customSkinSat" type="range" min="0.5" max="1.8" step="0.05" value="1.15" />
+                      </label>
+                      <label class="skin-slider-row">
+                        <em>亮度</em>
+                        <input id="customSkinBright" type="range" min="0.75" max="1.35" step="0.05" value="1.05" />
+                      </label>
+                      <label class="skin-slider-row">
+                        <em>主题色</em>
+                        <input id="customSkinColor" type="color" value="#c084fc" />
+                      </label>
+                    </div>
+                    <small class="field-hint">选中「自定义染色」后调节目标衣服色；肤色不变。</small>
+                  </div>
+                </div>
+
+                <div hidden>
+                  <div class="char-tabs" id="charPickerTabs" role="tablist" aria-label="形象分类"></div>
+                  <div class="avatar-picker char-picker" id="avatarPicker" role="listbox" aria-label="选择形象"></div>
+                  <div class="lobby-skin-picker" id="lobbySkinPicker" role="listbox" aria-label="选择大厅皮肤"></div>
+                  <div class="costume-picker" id="costumePicker" role="listbox" aria-label="选择衣服换装"></div>
+                  <div class="costume-picker gear-picker" id="gearPicker" role="listbox" aria-label="选择配饰"></div>
+                  <p id="costumePickerHint"></p>
+                </div>
+
+                <label class="field">
+                  <span>内部备注</span>
+                  <input id="profilePayAddress" type="text" maxlength="128" placeholder="本地备注" autocomplete="off" />
+                  <small class="field-hint">仅用于本地资料，不接外部资产。</small>
+                </label>
+
+                <label class="field">
+                  <span>个性签名</span>
+                  <input id="profileBio" type="text" maxlength="40" placeholder="一句话介绍自己" autocomplete="off" />
+                </label>
+
+                <div class="profile-actions">
+                  <button type="button" id="profileSaveBtn" class="gold-button">保存资料</button>
+                  <button type="button" id="profileResetBtn" class="muted-button">恢复默认</button>
+                  <button type="button" class="muted-button" data-lobby-action="recharge">去补给</button>
+                </div>
+                <p class="profile-save-status" id="profileSaveStatus" aria-live="polite"></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 补给 -->
+          <section class="panel-page recharge-page" data-lobby-view="recharge" aria-label="补给" hidden>
+            <header class="rc-topbar" aria-label="补给中心顶栏">
+              <button class="view-back-button rc-back" type="button" data-lobby-action="home">返回</button>
+              <div class="rc-topbar-title">
+                <h1>补给中心</h1>
+                <p class="rc-topbar-sub">演示账本 · 不可提现 · 不可兑外部资产</p>
+                <label class="chip-currency-picker">房间筹码
+                  <select id="chipCurrencyPicker" aria-label="选择筹码币种">
+                    <option value="SHADOW_POINTS">影子积分</option>
+                    <option value="USDT_SHADOW">USDT</option>
+                    <option value="TON_SHADOW">TON</option>
+                    <option value="STARS">Telegram Stars</option>
+                    <option value="BTC_SHADOW">BTC</option>
+                  </select>
+                </label>
+              </div>
+              <div class="rc-summary" aria-label="资产总览">
+                <div class="rc-sum-card rc-usdt">
+                  <span class="rc-sum-icon" aria-hidden="true">₮</span>
+                  <div>
+                    <em>赛季积分</em>
+                    <strong id="rechargeUsdtPreview">0.00</strong>
+                  </div>
+                </div>
+                <div class="rc-sum-card rc-ingot">
+                  <span class="rc-sum-icon gold-coin-icon" aria-hidden="true"></span>
+                  <div>
+                    <em>金币</em>
+                    <strong id="rechargeIngotPreview">128,600</strong>
+                  </div>
+                </div>
+              </div>
+            </header>
+            <p class="crypto-disclaimer rc-tip" id="rechargeLedgerTip">
+              测试码/测试编号仅界面演示 · 不连接外部网络
+            </p>
+
+            <div class="rc-main">
+              <!-- 左：赛季积分 测试码 + 发放 -->
+              <div class="card-panel rc-panel usdt-wallet-panel" id="usdtRechargePanel">
+                <header class="rc-panel-head">
+                  <h2><span class="usdt-badge">₮</span> 赛季积分 发放</h2>
+                  <span class="net-pill" id="usdtNetworkPill">测试网A</span>
+                </header>
+
+                <div class="rc-deposit">
+                  <div class="qr-frame usdt-qr-frame" aria-label="赛季积分 测试码">
+                    <img id="rechargeQrImg" alt="赛季积分 测试码" hidden width="148" height="148" />
+                    <canvas id="rechargeQrCanvas" width="148" height="148" aria-hidden="true"></canvas>
+                  </div>
+                  <div class="rc-deposit-form">
+                    <label class="field">
+                      <span>测试网络</span>
+                      <select id="usdtNetworkSelect" class="usdt-network-select">
+                        <option value="测试网A" selected>测试网 A（推荐）</option>
+                        <option value="测试网 B">测试网 B</option>
+                        <option value="测试网 C">测试网 C</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>测试编号</span>
+                      <div class="address-row">
+                        <input id="rechargeAddressShow" type="text" readonly spellcheck="false" autocomplete="off" />
+                        <button type="button" id="copyAddressBtn" class="muted-button">复制</button>
+                      </div>
+                    </label>
+                    <p class="rc-memo">Memo：<code id="usdtMemoTag">—</code>
+                      <small class="field-hint" id="rechargeCopyStatus">测试编号 · 查看测试码后点下方「模拟发放」</small>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="rc-block">
+                  <h3>快捷发放</h3>
+                  <div class="pack-grid usdt-pack-grid rc-packs-4">
+                    <button type="button" class="pack-card primary-pack usdt-pack" data-usdt-deposit="3">
+                      <strong>3</strong><span>赛季积分</span>
+                    </button>
+                    <button type="button" class="pack-card usdt-pack" data-usdt-deposit="10">
+                      <strong>10</strong><span>赛季积分</span>
+                    </button>
+                    <button type="button" class="pack-card usdt-pack" data-usdt-deposit="50">
+                      <strong>50</strong><span>赛季积分</span>
+                    </button>
+                    <button type="button" class="pack-card usdt-pack" data-usdt-deposit="100">
+                      <strong>100</strong><span>赛季积分</span>
+                    </button>
+                  </div>
+                  <div class="rc-custom-row">
+                    <input id="customUsdtRecharge" type="number" min="0" step="0.01" placeholder="自定义数量" />
+                    <button type="button" id="customRechargeBtn" class="gold-button usdt-recharge-btn">模拟发放</button>
+                  </div>
+                  <small class="field-hint" id="customRechargeHint">发放进赛季积分账本后，可直接入座链游测试场或转换金币</small>
+                </div>
+
+                <p class="profile-save-status" id="rechargeStatus" aria-live="polite"></p>
+              </div>
+
+              <!-- 右：金币 + 转换 -->
+              <div class="rc-side">
+                <div class="card-panel rc-panel" id="ingotSupplyPanel">
+                  <header class="rc-panel-head">
+                    <h2>金币</h2>
+                  </header>
+                  <p class="recharge-tip">输光后可领每日补助 · 每天 4 次 × 4,000</p>
+                  <div class="wallet-preview-row">
+                    <span class="wallet-icon gold-coin-icon" aria-hidden="true"></span>
+                    <div>
+                      <strong id="rechargeIngotPreviewSide">128,600</strong>
+                      <span>当前金币</span>
+                    </div>
+                  </div>
+                  <button type="button" class="gold-button rc-full-btn" data-lobby-action="claim">领取每日补助</button>
+                </div>
+
+                <div class="card-panel rc-panel" id="usdtIngotPanel">
+                  <header class="rc-panel-head">
+                    <h2>赛季积分 → 金币</h2>
+                  </header>
+                  <p class="recharge-tip">3 赛季积分 转换 60,000 金币</p>
+                  <div class="pack-grid rc-packs-2">
+                    <button type="button" class="pack-card primary-pack" data-usdt-buy-ingot="3">
+                      <strong>3 赛季积分</strong><span>转换 60,000 金币</span>
+                    </button>
+                    <button type="button" class="pack-card" data-usdt-buy-ingot="10">
+                      <strong>10 赛季积分</strong><span>转换 200,000 金币</span>
+                    </button>
+                  </div>
+                  <div class="rc-custom-row">
+                    <input id="customUsdtExchange" type="number" min="0" step="0.01" placeholder="赛季积分 数量" />
+                    <button type="button" id="customExchangeBtn" class="muted-button">转换</button>
+                  </div>
+                  <small class="field-hint" id="customExchangeHint">汇率：3 赛季积分 转换 60,000 金币（即 1 赛季积分 = 20,000 金币）</small>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 战绩 -->
+          <section class="panel-page records-page" data-lobby-view="records" aria-label="战绩" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>对局统计</p>
+                <h1>战绩中心</h1>
+              </div>
+            </div>
+            <div class="records-summary" id="recordsSummary"></div>
+            <div class="records-filter" role="tablist" aria-label="游戏分类">
+              <button type="button" class="rec-tab active" data-record-filter="all">全部</button>
+              <button type="button" class="rec-tab" data-record-filter="doudizhu">斗地主</button>
+              <button type="button" class="rec-tab" data-record-filter="texas">德州扑克</button>
+              <button type="button" class="rec-tab" data-record-filter="other">其他</button>
+            </div>
+            <div class="records-list card-panel" id="recordsList"></div>
+          </section>
+
+          <!-- 链游中心 -->
+          <section class="panel-page chain-page" data-lobby-view="chain" aria-label="链游中心" hidden>
+            <div class="view-head chain-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>测试资产仓库</p>
+                <h1>链游中心</h1>
+              </div>
+              <div class="chain-badges" aria-label="阶段标签">
+                <span>测试网</span>
+                <span>规划中</span>
+                <span>合规后开放</span>
+              </div>
+            </div>
+
+            <section class="chain-vault" aria-label="玩家测试资产">
+              <div class="chain-vault-hero">
+                <span class="chain-orbit" aria-hidden="true"></span>
+                <div>
+                  <small>内部展示 · 不连接外部网络</small>
+                  <strong id="chainWalletTitle">模拟签名未开启</strong>
+                  <p id="chainWalletMeta">当前阶段只展示测试资产和签名状态。</p>
+                </div>
+                <button type="button" class="gold-button chain-bind-btn" id="chainBindButton">模拟绑定钱包</button>
+              </div>
+              <div class="chain-asset-grid" id="chainAssetGrid" aria-label="资产总览"></div>
+            </section>
+
+            <section class="chain-layout">
+              <div class="chain-panel chain-collectibles">
+                <div class="chain-panel-head">
+                  <span>纪念资产</span>
+                  <strong>皮肤与碎片</strong>
+                  <p>NFT 皮肤占位卡 · 仅展示，不能交易</p>
+                </div>
+                <div class="chain-collectible-grid" id="chainCollectibleGrid"></div>
+              </div>
+              <div class="chain-panel chain-roadmap">
+                <div class="chain-panel-head">
+                  <span>阶段说明</span>
+                  <strong>能力边界</strong>
+                </div>
+                <ul>
+                  <li><b>测试网</b><em>仅用于产品演示和内部资产展示。</em></li>
+                  <li><b>规划中</b><em>真实网络能力需另行评审。</em></li>
+                  <li><b>合规后开放</b><em>完成地区限制、审计和风控后再评估。</em></li>
+                </ul>
+              </div>
+            </section>
+          </section>
+
+        </div>
+      </div>
+
+      <section id="tableView" class="table-view qq-table-view harbor-table" aria-label="斗地主人机牌桌" hidden>
+        <!-- 顶栏：返回 + 底牌 + 记牌器 + 快捷 -->
+        <div class="qq-hud">
+          <button id="backToLobbyButton" class="qq-back-btn" type="button" aria-label="返回">←</button>
+          <div class="landlord-cards-wrap hud-bottom-cards">
+            <div id="bottomCards" class="bottom-cards"></div>
+          </div>
+          <div class="qq-deck-meter" id="deckMeter" role="status" aria-label="记牌器 · 各点数剩余张数" title="记牌器：显示各点数还剩几张">
+            <span class="qq-meter-label">记牌</span>
+            <span class="qq-meter-item" data-rank="17"><b>大王</b><i>1</i></span>
+            <span class="qq-meter-item" data-rank="16"><b>小王</b><i>1</i></span>
+            <span class="qq-meter-item" data-rank="15"><b>2</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="14"><b>A</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="13"><b>K</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="12"><b>Q</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="11"><b>J</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="10"><b>10</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="9"><b>9</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="8"><b>8</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="7"><b>7</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="6"><b>6</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="5"><b>5</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="4"><b>4</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="3"><b>3</b><i>4</i></span>
+          </div>
+          <div class="qq-mult-pill" id="multBadge" hidden>1倍</div>
+          <div class="qq-hud-tools">
+            <button type="button" class="qq-tool-btn" data-lobby-action="claim" title="礼包">🎁 礼包</button>
+            <button type="button" class="qq-tool-btn" id="trusteeButton" title="托管">托管</button>
+            <button type="button" class="qq-tool-btn" data-lobby-action="support" title="更多">更多</button>
+          </div>
+        </div>
+
+        <div class="qq-room-line">
+          <span id="roomName">新手场</span>
+          <span>· 底分 <b id="stakeLabel">100</b></span>
+          <span id="tableStatus" class="qq-status-text">准备开局</span>
+        </div>
+
+        <div class="ddz-table qq-felt" aria-label="三人牌桌">
+          <!-- 桌面广告：中心冠名 + 左右灯牌，内容由 ops 广告配置写入 -->
+          <div class="qq-logo-mark" aria-hidden="true">
+            <strong>欢乐斗地主</strong>
+            <small>不洗牌 · 人机桌</small>
+          </div>
+          <a class="table-skin-ad brand-slot brand-surface-table" data-ad-slot="doudizhu-table-skin" href="#" target="_blank" rel="noreferrer">
+            <span class="ad-label">桌面</span>
+            <strong data-brand-name>合作</strong>
+            <small data-brand-copy>活动</small>
+          </a>
+          <a class="card-face-ad brand-slot brand-surface-card" data-ad-slot="doudizhu-card-face" href="#" target="_blank" rel="noreferrer">
+            <span class="ad-label">牌面</span>
+            <strong data-brand-name>合作</strong>
+          </a>
+          <a class="table-center-ad ddz-table-brand-ad brand-slot brand-surface-table" data-ad-slot="doudizhu-table-center" href="#" target="_blank" rel="noreferrer" aria-label="牌桌冠名广告">
+            <span class="ad-label">冠名</span>
+            <strong data-brand-name>合作活动</strong>
+            <small data-brand-copy>桌布广告位</small>
+          </a>
+          <a class="table-rail-ad table-rail-ad-left brand-slot brand-surface-table" data-ad-slot="doudizhu-table-rail-left" href="#" target="_blank" rel="noreferrer" aria-label="左侧灯牌广告">
+            <span class="ad-label">灯牌</span>
+            <strong data-brand-name>合作</strong>
+            <small data-brand-copy>活动入口</small>
+          </a>
+          <a class="table-rail-ad table-rail-ad-right brand-slot brand-surface-table" data-ad-slot="doudizhu-table-rail-right" href="#" target="_blank" rel="noreferrer" aria-label="右侧灯牌广告">
+            <span class="ad-label">灯牌</span>
+            <strong data-brand-name>合作</strong>
+            <small data-brand-copy>活动入口</small>
+          </a>
+
+          <!-- 左家：全身立绘，标签在信息区，不压人像 -->
+          <div class="side-slot left-slot">
+            <div class="character-panel qq-char full-body-char" data-char="1">
+              <div class="char-figure-wrap">
+                <img class="char-figure char-float" src="./public/characters/female-glam.png" alt="茶友A" width="96" height="148" />
+                <span class="char-hourglass" aria-hidden="true"></span>
+              </div>
+              <div class="qq-player-meta">
+                <div class="char-tag-row">
+                  <span class="char-role-badge" id="roleBadge1">农</span>
+                  <span class="char-name-tag">茶友A</span>
+                </div>
+                <span class="costume-chip ddz-costume-ad brand-slot brand-surface-costume" data-ad-slot="doudizhu-costume-seat-1"><em>合作</em></span>
+                <div id="opponentLeft" class="player-seat"></div>
+                <div class="qq-bean-line">🪙 <span data-bean="1">—</span></div>
+                <div class="remain-chips" id="remain1" aria-label="剩余手牌">17</div>
+              </div>
+            </div>
+            <div id="playZone1" class="play-zone play-zone-left" aria-label="上家出牌"></div>
+          </div>
+
+          <!-- 右家：全身立绘 -->
+          <div class="side-slot right-slot">
+            <div class="character-panel qq-char full-body-char" data-char="2">
+              <div class="char-figure-wrap">
+                <img class="char-figure char-float" src="./public/characters/male-charm.png" alt="茶友B" width="96" height="148" />
+                <span class="char-hourglass" aria-hidden="true"></span>
+              </div>
+              <div class="qq-player-meta">
+                <div class="char-tag-row">
+                  <span class="char-role-badge" id="roleBadge2">农</span>
+                  <span class="char-name-tag">茶友B</span>
+                </div>
+                <span class="costume-chip ddz-costume-ad brand-slot brand-surface-costume" data-ad-slot="doudizhu-costume-seat-2"><em>合作</em></span>
+                <div id="opponentRight" class="player-seat"></div>
+                <div class="qq-bean-line">🪙 <span data-bean="2">—</span></div>
+                <div class="remain-chips" id="remain2" aria-label="剩余手牌">17</div>
+              </div>
+            </div>
+            <div id="playZone2" class="play-zone play-zone-right" aria-label="下家出牌"></div>
+          </div>
+
+          <!-- 桌心：出牌区 + 中央操作 -->
+          <div class="center-pot qq-center">
+            <div id="lastPlayText" class="table-msg">请选择场次开始人机局</div>
+
+            <div class="qq-center-actions action-panel">
+              <div id="bidControls" class="action-row qq-action-row" hidden>
+                <button data-bid="0" type="button" class="qq-btn qq-btn-blue">不叫</button>
+                <button data-bid="1" type="button" class="qq-btn qq-btn-gold">1 分</button>
+                <button data-bid="2" type="button" class="qq-btn qq-btn-gold">2 分</button>
+                <button data-bid="3" type="button" class="qq-btn qq-btn-gold">3 分</button>
+              </div>
+              <div id="doubleControls" class="action-row qq-action-row" hidden>
+                <button data-double="1" type="button" class="qq-btn qq-btn-blue">不加倍</button>
+                <button data-double="2" type="button" class="qq-btn qq-btn-gold">加倍</button>
+                <button data-double="4" type="button" class="qq-btn qq-btn-gold" id="superDoubleBtn">超级加倍</button>
+              </div>
+              <div id="playControls" class="action-row qq-action-row" hidden>
+                <button id="passButton" type="button" class="qq-btn qq-btn-gold muted-button">不出</button>
+                <div class="qq-timer" id="turnTimer" aria-hidden="true" hidden>20</div>
+                <button id="hintButton" type="button" class="qq-btn qq-btn-gold">提示</button>
+                <button id="playButton" type="button" class="qq-btn qq-btn-play">出牌</button>
+              </div>
+              <div id="settleControls" class="action-row qq-action-row qq-settle-row" hidden>
+                <button id="againButton" type="button" class="qq-btn qq-btn-gold">继续游戏</button>
+                <button id="settleBackButton" type="button" class="qq-btn qq-btn-blue muted-button">回大厅</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 自己出牌区（在手牌上方） -->
+          <div class="self-slot">
+            <div id="playZone0" class="play-zone play-zone-self" aria-label="我的出牌"></div>
+            <div class="hand-wrap">
+              <div id="handArea" class="hand-area" aria-label="我的手牌 · 可按住拖选"></div>
+              <a class="card-face-ad card-face-ad-hand brand-slot brand-surface-card" data-ad-slot="doudizhu-card-face-hand" href="#" target="_blank" rel="noreferrer">
+                <span class="ad-label">牌面</span><strong data-brand-name>合作</strong>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- QQ 底栏：全身立绘 + 信息（标签不压人像） -->
+        <div class="qq-bottom-bar">
+          <div class="character-panel self-char qq-self-char full-body-char" data-char="0">
+            <div class="char-figure-wrap char-figure-self">
+              <img class="char-figure char-float" src="./public/characters/male-hero.png" alt="我" width="56" height="86" />
+              <div id="tableSelfAvatarRenderer" class="avatar-renderer-mount table-avatar-mount" aria-label="牌桌衣橱形象"></div>
+            </div>
+            <div class="qq-self-info">
+              <div class="char-tag-row">
+                <span class="char-role-badge" id="roleBadge0">我</span>
+                <span class="char-name-tag">茶馆</span>
+              </div>
+              <span class="costume-chip ddz-costume-ad brand-slot brand-surface-costume" data-ad-slot="doudizhu-costume-seat-0"><em>合作</em></span>
+              <div id="selfSeat" class="player-seat"></div>
+              <div class="qq-bean-line">🪙 <span id="selfBeanDisplay">—</span></div>
+            </div>
+          </div>
+          <div class="qq-bottom-right">
+            <div class="qq-mult-chip">倍 <b id="footerMult">1</b></div>
+            <button type="button" class="qq-chat-btn" id="chatToastBtn">聊天</button>
+          </div>
+        </div>
+
+        <!-- 斗地主局末结算弹窗 -->
+        <div id="ddzResultModal" class="tx-result-modal ddz-result-modal" hidden aria-modal="true" role="dialog" aria-labelledby="ddzResultTitle">
+          <div class="tx-result-backdrop" data-ddz-result-dismiss></div>
+          <div class="tx-result-panel">
+            <div class="tx-result-banner" id="ddzResultBanner">
+              <span id="ddzResultTitle">本局结束</span>
+            </div>
+            <p class="tx-result-sub" id="ddzResultSub">—</p>
+            <div class="tx-result-table-wrap">
+              <table class="tx-result-table" aria-label="本局输赢">
+                <thead>
+                  <tr>
+                    <th>玩家</th>
+                    <th>身份</th>
+                    <th>剩余</th>
+                    <th>本局</th>
+                  </tr>
+                </thead>
+                <tbody id="ddzResultBody"></tbody>
+              </table>
+            </div>
+            <div class="tx-result-you" id="ddzResultYou"></div>
+            <div class="tx-result-actions">
+              <button type="button" id="ddzResultAgain" class="qq-btn qq-btn-gold p0-next">下一局</button>
+              <button type="button" id="ddzResultLobby" class="qq-btn qq-btn-blue">回房间</button>
+            </div>
+            <div class="p0-settle-ad" id="ddzSettleAd">
+              <a href="#" data-lobby-action="recharge">
+                <em>AD</em>
+                <span><b>每日补给</b><small>点余额可领影子积分</small></span>
+              </a>
+              <button type="button" id="ddzSettleAdClose" data-lobby-action="dismiss-settle-ad" aria-label="关闭广告">×</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 德州扑克牌桌 -->
+      <section id="texasTableView" class="table-view texas-view" aria-label="德州扑克人机牌桌" hidden>
+        <div class="table-top">
+          <button id="texasBackBtn" class="icon-text-button" type="button">返回大厅</button>
+          <div>
+            <span id="texasPhase">翻牌前</span>
+            <strong id="texasStatus">准备开局</strong>
+          </div>
+          <div class="stake-pill" id="texasPot">底池 0</div>
+        </div>
+
+        <div class="texas-table">
+          <div class="tx-felt" aria-hidden="true"></div>
+          <div class="tx-ad-bar" aria-label="品牌位 · BTC">
+            <a class="tx-ad-chip skin brand-slot brand-btc brand-surface-table" data-ad-slot="texas-table-skin" href="https://bitcoin.org" target="_blank" rel="noreferrer"><span class="ad-label">桌面</span> BTC</a>
+            <a class="tx-ad-chip face brand-slot brand-btc brand-surface-card" data-ad-slot="texas-card-face" href="https://bitcoin.org" target="_blank" rel="noreferrer"><span class="ad-label">牌面</span> BTC</a>
+          </div>
+          <div class="table-center-ad brand-slot brand-btc brand-surface-table tx-table-center-ad" data-ad-slot="texas-table-center" aria-hidden="true">BTC · Bitcoin</div>
+
+          <div class="tx-center">
+            <div id="texasBoard" class="tx-board" aria-label="公共牌"></div>
+            <div id="texasPotChip" class="tx-pot-chip">0</div>
+            <div id="texasTimer" class="tx-timer" hidden>24</div>
+          </div>
+
+          <div class="tx-seat tx-seat-1 full-body-char" data-texas-seat="1" data-char="1">
+            <div class="tx-seat-head">
+              <div class="tx-char-col">
+                <div class="char-figure-wrap">
+                  <img class="char-figure char-float" src="./public/characters/female-glam.png" alt="茶友A" width="72" height="110" />
+                </div>
+              </div>
+              <div class="tx-seat-info">
+                <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="texas-costume-1"><em>BTC</em></span>
+                <div id="texasMeta1" class="tx-meta"></div>
+                <div id="texasTag1" class="tx-tag">—</div>
+                <div id="texasBet1" class="tx-bet"></div>
+              </div>
+            </div>
+            <i class="tx-dealer" data-tx-dealer="1" hidden>D</i>
+            <span class="tx-chips" aria-hidden="true"></span>
+            <div id="texasHole1" class="tx-hole" aria-label="对手底牌"></div>
+          </div>
+
+          <div class="tx-seat tx-seat-2 full-body-char" data-texas-seat="2" data-char="2">
+            <div id="texasHole2" class="tx-hole" aria-label="对手底牌"></div>
+            <i class="tx-dealer" data-tx-dealer="2" hidden>D</i>
+            <span class="tx-chips" aria-hidden="true"></span>
+            <div class="tx-seat-head">
+              <div class="tx-seat-info">
+                <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="texas-costume-2"><em>BTC</em></span>
+                <div id="texasMeta2" class="tx-meta"></div>
+                <div id="texasTag2" class="tx-tag">—</div>
+                <div id="texasBet2" class="tx-bet"></div>
+              </div>
+              <div class="tx-char-col">
+                <div class="char-figure-wrap">
+                  <img class="char-figure char-float" src="./public/characters/male-charm.png" alt="茶友B" width="72" height="110" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tx-seat tx-seat-0 full-body-char" data-texas-seat="0" data-char="0">
+            <div id="texasHole0" class="tx-hole tx-hole-hero" aria-label="我的手牌"></div>
+            <span class="tx-chips" aria-hidden="true"></span>
+            <div class="tx-seat-head">
+              <div class="tx-char-col">
+                <div class="char-figure-wrap">
+                  <img class="char-figure char-float" src="./public/characters/male-hero.png" alt="我" width="72" height="110" />
+                </div>
+              </div>
+              <div class="tx-seat-info">
+                <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="texas-costume-0"><em>BTC</em></span>
+                <div id="texasMeta0" class="tx-meta"></div>
+                <div id="texasTag0" class="tx-tag">—</div>
+                <div id="texasBet0" class="tx-bet"></div>
+              </div>
+            </div>
+            <i class="tx-dealer" data-tx-dealer="0" hidden>D</i>
+          </div>
+        </div>
+
+        <div id="texasActions" class="tx-actions action-row" aria-label="操作"></div>
+        <div id="texasSettleRow" class="action-row" hidden>
+          <button id="texasAgainBtn" type="button" class="tx-side-start">开始</button>
+          <button id="texasLobbyBtn" class="muted-button tx-side-exit" type="button">离开</button>
+        </div>
+
+        <!-- 局末结算弹窗 -->
+        <div id="texasResultModal" class="tx-result-modal" hidden aria-modal="true" role="dialog" aria-labelledby="txResultTitle">
+          <div class="tx-result-backdrop" data-tx-result-dismiss></div>
+          <div class="tx-result-panel">
+            <div class="tx-result-banner" id="txResultBanner">
+              <span id="txResultTitle">本局结束</span>
+            </div>
+            <p class="tx-result-sub" id="txResultSub">—</p>
+            <div class="tx-result-table-wrap">
+              <table class="tx-result-table" aria-label="本局输赢">
+                <thead>
+                  <tr>
+                    <th>玩家</th>
+                    <th>牌型</th>
+                    <th>筹码</th>
+                    <th>本局</th>
+                  </tr>
+                </thead>
+                <tbody id="txResultBody"></tbody>
+              </table>
+            </div>
+            <div class="tx-result-you" id="txResultYou"></div>
+            <div class="tx-result-actions">
+              <button type="button" id="txResultAgain" class="qq-btn qq-btn-gold">继续游戏</button>
+              <button type="button" id="txResultLobby" class="qq-btn qq-btn-blue">回大厅</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 通用多人桌：炸金花 / 麻将 -->
+      <section id="multiGameView" class="table-view multi-game-view" aria-label="多人玩法牌桌" hidden>
+        <header class="mg-hud table-top">
+          <button id="mgBackBtn" class="icon-text-button mg-back" type="button">← 返回</button>
+          <div class="mg-hud-mid">
+            <span id="mgTitle" class="mg-hud-title">玩法</span>
+            <strong id="mgStatus" class="mg-hud-status">准备开局</strong>
+          </div>
+          <div class="stake-pill mg-hud-pill" id="mgSub">—</div>
+        </header>
+
+        <div class="mg-table">
+          <div class="mj-room-bg" aria-hidden="true"></div>
+          <div class="mj-felt" aria-hidden="true">
+            <div class="mj-wall mj-wall-n" id="mjWallN"></div>
+            <div class="mj-wall mj-wall-w" id="mjWallW"></div>
+            <div class="mj-wall mj-wall-e" id="mjWallE"></div>
+            <div class="mj-wall mj-wall-s" id="mjWallS"></div>
+            <div class="mj-compass">
+              <span class="mj-wind mj-wind-n">北</span>
+              <span class="mj-wind mj-wind-w">西</span>
+              <span class="mj-wind mj-wind-e">东</span>
+              <span class="mj-wind mj-wind-s">南</span>
+              <strong id="mjWallCount" class="mj-wall-count">—</strong>
+            </div>
+          </div>
+          <div class="mg-ad-bar" aria-label="品牌位 · BTC">
+            <a class="tx-ad-chip skin brand-slot brand-btc brand-surface-table" data-ad-slot="multi-table-skin" href="https://bitcoin.org" target="_blank" rel="noreferrer"><span class="ad-label">桌面</span> BTC</a>
+            <a class="tx-ad-chip face brand-slot brand-btc brand-surface-card" data-ad-slot="multi-card-face" href="https://bitcoin.org" target="_blank" rel="noreferrer"><span class="ad-label">牌面</span> BTC</a>
+          </div>
+          <div class="table-center-ad brand-slot brand-btc brand-surface-table mg-table-center-ad" data-ad-slot="multi-table-center" aria-hidden="true">BTC · Bitcoin</div>
+          <!-- 对手：麻将四人时 CSS 网格分布 左/对家/右；炸金花仍用顶排 -->
+          <div class="mg-row-top">
+            <div class="mg-seat mg-seat-1 full-body-char" data-mg-seat="1" data-char="1">
+              <div class="char-figure-wrap">
+                <img class="char-figure char-float" src="./public/characters/female-glam.png" alt="茶友A" width="108" height="168" />
+              </div>
+              <div class="mg-seat-info">
+                <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-1"><em>BTC</em></span>
+                <div id="mgMeta1" class="mg-meta"></div>
+                <div id="mgCount1" class="mg-count">0</div>
+                <div id="mgPlay1" class="mg-play" aria-label="出牌"></div>
+              </div>
+            </div>
+            <div class="mg-seat mg-seat-2 full-body-char" data-mg-seat="2" data-char="2">
+              <div class="char-figure-wrap">
+                <img class="char-figure char-float" src="./public/characters/male-charm.png" alt="茶友B" width="108" height="168" />
+              </div>
+              <div class="mg-seat-info">
+                <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-2"><em>BTC</em></span>
+                <div id="mgMeta2" class="mg-meta"></div>
+                <div id="mgCount2" class="mg-count">0</div>
+                <div id="mgPlay2" class="mg-play" aria-label="出牌"></div>
+              </div>
+            </div>
+            <div class="mg-seat mg-seat-3 full-body-char" data-mg-seat="3" data-char="3" hidden>
+              <div class="char-figure-wrap">
+                <img class="char-figure char-float" src="./public/characters/animal-fox.png" alt="茶友C" width="108" height="168" />
+              </div>
+              <div class="mg-seat-info">
+                <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-3"><em>BTC</em></span>
+                <div id="mgMeta3" class="mg-meta"></div>
+                <div id="mgCount3" class="mg-count">0</div>
+                <div id="mgPlay3" class="mg-play" aria-label="出牌"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="mgCenter" class="mg-center" aria-label="弃牌区"></div>
+
+          <div class="mg-row-hero">
+            <div class="mg-seat mg-seat-0 full-body-char" data-mg-seat="0" data-char="0">
+              <div class="char-figure-wrap">
+                <img class="char-figure char-float" src="./public/characters/male-hero.png" alt="我" width="108" height="168" />
+              </div>
+              <div class="mg-seat-info">
+                <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-0"><em>BTC</em></span>
+                <div id="mgMeta0" class="mg-meta"></div>
+                <div id="mgCount0" class="mg-count">0</div>
+                <div id="mgPlay0" class="mg-play" aria-label="我的明牌"></div>
+              </div>
+            </div>
+            <div class="mg-hand-dock">
+              <div id="mgHand" class="mg-hand" aria-label="我的手牌"></div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="mg-footer">
+          <div class="mj-dock" aria-label="本局资产">
+            <span class="mj-dock-gold"><i class="gold-coin-icon" aria-hidden="true"></i><b id="mjGold">—</b></span>
+          </div>
+          <div id="mgActions" class="tx-actions action-row mg-actions" aria-label="操作"></div>
+          <div id="mgSettleRow" class="action-row mg-settle" hidden>
+            <button id="mgAgainBtn" type="button" class="qq-btn qq-btn-gold">再来一局</button>
+            <button id="mgLobbyBtn" class="qq-btn qq-btn-blue muted-button" type="button">回大厅</button>
+          </div>
+        </footer>
+
+        <div id="mgResultModal" class="tx-result-modal" hidden aria-modal="true" role="dialog" aria-labelledby="mgResultTitle">
+          <div class="tx-result-backdrop" data-mg-result-dismiss></div>
+          <div class="tx-result-panel">
+            <div class="tx-result-banner" id="mgResultBanner">
+              <span id="mgResultTitle">本局结束</span>
+            </div>
+            <p class="tx-result-sub" id="mgResultSub">—</p>
+            <div class="tx-result-table-wrap">
+              <table class="tx-result-table" aria-label="本局输赢">
+                <thead>
+                  <tr>
+                    <th>玩家</th>
+                    <th>状态</th>
+                    <th>本局</th>
+                  </tr>
+                </thead>
+                <tbody id="mgResultBody"></tbody>
+              </table>
+            </div>
+            <div class="tx-result-you" id="mgResultYou"></div>
+            <div class="tx-result-actions">
+              <button type="button" id="mgResultAgain" class="qq-btn qq-btn-gold">继续游戏</button>
+              <button type="button" id="mgResultLobby" class="qq-btn qq-btn-blue">回大厅</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <nav class="home-tabbar" aria-label="底部导航">
+        <button type="button" class="home-tab is-active" data-lobby-action="home">
+          <span class="home-tab-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>
+          </span>
+          <strong>大厅</strong>
+        </button>
+        <button type="button" class="home-tab" data-lobby-action="records">
+          <span class="home-tab-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2.8 13.7 8h5.6l-4.5 3.3 1.7 5.3L12 13.6 7.5 16.6 9.2 11.3 4.7 8h5.6z"/></svg>
+          </span>
+          <strong>战绩</strong>
+        </button>
+        <button type="button" class="home-tab" data-lobby-action="recharge">
+          <span class="home-tab-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7 7V6a5 5 0 0 1 10 0v1h2.2A1.8 1.8 0 0 1 21 8.8V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.8A1.8 1.8 0 0 1 4.8 7H7zm2 0h6V6a3 3 0 0 0-6 0v1z"/></svg>
+          </span>
+          <span class="home-tab-dot" aria-hidden="true"></span>
+          <strong>补给</strong>
+        </button>
+        <button type="button" class="home-tab" data-lobby-action="rules">
+          <span class="home-tab-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M6 3.5h9.2A2.8 2.8 0 0 1 18 6.3V21H7.2A2.2 2.2 0 0 1 5 18.8V5.7A2.2 2.2 0 0 1 7.2 3.5H6zm3 5v1.8h7V8.5H9zm0 4v1.8h7V12.5H9z"/></svg>
+          </span>
+          <strong>说明</strong>
+        </button>
+        <button type="button" class="home-tab" data-lobby-action="profile">
+          <span class="home-tab-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 12a4.4 4.4 0 1 0-4.4-4.4A4.4 4.4 0 0 0 12 12zm0 2c-4.2 0-7.6 2.1-7.6 4.8V21h15.2v-2.2c0-2.7-3.4-4.8-7.6-4.8z"/></svg>
+          </span>
+          <strong>我</strong>
+        </button>
+      </nav>
+
+      <div class="p0-match-mask" id="ddzMatchMask" hidden>
+        <div class="p0-match-card">
+          <div class="p0-match-dot"></div>
+          <h2>匹配中</h2>
+          <p id="ddzMatchCopy">经典场 · 已就位 1/3 · 约 8 秒补齐</p>
+          <button type="button" id="ddzMatchCancel">取消匹配</button>
+        </div>
+      </div>
+      <div class="p0-friend-panel" id="ddzFriendPanel" hidden>
+        <div class="p0-friend-card">
+          <small>房间号</small>
+          <strong id="ddzFriendId">882194</strong>
+          <button type="button" id="ddzFriendCopy">复制房间号</button>
+          <label class="p0-ai-opt">
+            <span><b>用 AI 补位</b><small>满座前可用机器人先开局</small></span>
+            <input id="ddzFriendAi" type="checkbox" />
+          </label>
+          <button type="button" class="p0-friend-ghost" id="ddzFriendLink">生成邀请链接</button>
+          <button type="button" class="p0-friend-gold" id="ddzFriendShare">发给好友</button>
+          <div class="p0-tg-preview" id="ddzFriendPreview" hidden>
+            <p>来茶馆打一局经典斗地主。点链接直接入座。</p>
+            <code id="ddzFriendUrl">t.me/share</code>
+          </div>
+          <button type="button" class="p0-friend-ghost" id="ddzFriendClose">返回场次</button>
+        </div>
+      </div>
+    </main>
+    <!-- Pinus / Pomelo 协议客户端（window.pinus） -->
+    <script src="./public/pinus/pinusclient.js"></script>
+    <script src="./public/colyseus/colyseus.js"></script>
+    <script type="module" src="./src/app.js?v=home-restore1"></script>
+  </body>
+</html>

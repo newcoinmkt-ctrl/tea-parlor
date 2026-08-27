@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="none">
+  <defs>
+    <radialGradient id="g1" cx="50%" cy="0%" r="82%">
+      <stop offset="0" stop-color="#1d684e" stop-opacity=".42"/>
+      <stop offset=".5" stop-color="#0b2b22" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#04100d" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="felt" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+      <path d="M0 0H12" stroke="#ffffff" stroke-opacity=".035"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g1)"/>
+  <rect width="1600" height="900" fill="url(#felt)" opacity=".55"/>
+</svg>
