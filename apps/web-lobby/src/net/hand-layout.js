@@ -11,20 +11,36 @@ export function layoutOverlapRow(area, items, opts = {}) {
   const available = Math.max(0, area.clientWidth - padX(area));
   if (available < 8) return;
 
-  const maxW = opts.maxW ?? 52;
+  const landscape = document.documentElement.classList.contains("table-landscape")
+    || document.documentElement.classList.contains("css-landscape")
+    || (window.innerWidth > window.innerHeight);
+  const maxW = opts.maxW ?? (landscape ? 56 : 52);
   const minW = opts.minW ?? 28;
-  const minPeek = opts.minPeek ?? 18;
+  const minPeek = opts.minPeek ?? (landscape ? 32 : 18);
   const ratio = opts.ratio ?? 1.45;
+  const preferGap = landscape && opts.gap !== false;
 
   let cardW = Math.min(maxW, Math.max(minW, Math.round(available / Math.min(n, 8))));
-  let peek = n === 1 ? cardW : (available - cardW) / (n - 1);
-  if (peek > cardW - 2) peek = Math.max(minPeek, cardW - 8);
-  if (n > 1 && peek < minPeek) {
-    cardW = Math.max(minW, Math.floor(available - (n - 1) * minPeek));
+  let overlap = 0;
+  let peek = cardW;
+  if (n === 1) {
+    peek = cardW;
+  } else if (preferGap && n * minW + (n - 1) * 4 <= available) {
+    cardW = Math.min(maxW, Math.floor((available - (n - 1) * 4) / n));
+    peek = cardW + 4;
+    overlap = 0;
+    area.style.setProperty("gap", "4px", "important");
+  } else {
+    area.style.removeProperty("gap");
     peek = (available - cardW) / (n - 1);
+    if (peek > cardW - 2) peek = Math.max(minPeek, cardW - 8);
+    if (peek < minPeek) {
+      cardW = Math.max(minW, Math.floor(available - (n - 1) * minPeek));
+      peek = (available - cardW) / (n - 1);
+    }
+    peek = Math.max(12, Math.min(peek, cardW - 2));
+    overlap = Math.max(0, Math.round(cardW - peek));
   }
-  peek = Math.max(12, Math.min(peek, cardW - 2));
-  const overlap = Math.max(0, Math.round(cardW - peek));
   const height = Math.round(cardW * ratio);
 
   area.classList.add("hand-fitted");
@@ -115,7 +131,6 @@ export function initHandFit() {
   requestAnimationFrame(run);
   window.addEventListener("resize", run);
   window.addEventListener("orientationchange", run);
-  window.addEventListener("table-orient", run);
   if (window.visualViewport) window.visualViewport.addEventListener("resize", run);
 
   const obs = new MutationObserver(() => {
