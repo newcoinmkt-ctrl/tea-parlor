@@ -3,7 +3,7 @@
  * 房间快照与 Pinus publicState 同构，可直接 applyPinusRoom
  */
 
-const DEFAULT_URL = 'ws://127.0.0.1:2567';
+function defaultColyseusUrl() { if (typeof window !== 'undefined' && window.TEA_PARLOR_COLYSEUS_URL) { return String(window.TEA_PARLOR_COLYSEUS_URL); } return 'ws://127.0.0.1:2567'; }
 
 let client = null;
 let room = null;
@@ -35,7 +35,7 @@ export function getLastRoom() {
   return lastRoomState;
 }
 
-export async function connectColyseus(endpoint = DEFAULT_URL) {
+export async function connectColyseus(endpoint = defaultColyseusUrl()) {
   const { Client } = getSDK();
   // colyseus.js Client accepts http(s) or ws(s); normalize
   let url = endpoint;
@@ -58,7 +58,7 @@ export async function leaveColyseus() {
  * 加入/创建斗地主人机房
  */
 export async function startColyseusDdzSession({
-  endpoint = DEFAULT_URL,
+  endpoint = defaultColyseusUrl(),
   uid,
   name,
   roomId = 'novice',

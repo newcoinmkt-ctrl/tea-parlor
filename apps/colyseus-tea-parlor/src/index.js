@@ -15,7 +15,7 @@ import { DoudizhuRoom } from './rooms/DoudizhuRoom.js';
 const { Server } = colyseus;
 const { WebSocketTransport } = wsTransport;
 
-const PORT = Number(process.env.COLYSEUS_PORT || 2567);
+const PORT = Number(process.env.PORT || process.env.COLYSEUS_PORT || 2567);
 const HOST = process.env.COLYSEUS_HOST || '0.0.0.0';
 
 const app = express();

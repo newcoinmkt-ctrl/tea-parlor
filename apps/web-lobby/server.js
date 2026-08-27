@@ -7,7 +7,8 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 const monorepoRoot = resolve(root, '../..');
 const packagesRoot = resolve(monorepoRoot, 'packages');
 const port = Number(process.env.PORT || 5173);
-const host = process.env.HOST || '127.0.0.1';
+const host = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
+const colyseusUrl = process.env.COLYSEUS_URL || 'ws://127.0.0.1:2567';
 
 /**
  * 显式覆盖（可选）。未列出的包也会在请求时从 packages/<name>/src 解析，
@@ -72,6 +73,25 @@ export function resolvePublicPath(pathname) {
 export function createWebLobbyServer() {
   return createServer((req, res) => {
     const pathname = new URL(req.url, `http://${req.headers.host}`).pathname;
+    if (pathname === '/health') {
+      res.writeHead(200, {
+        'content-type': 'application/json; charset=utf-8',
+        'cache-control': 'no-store',
+        'access-control-allow-origin': '*',
+      });
+      res.end(JSON.stringify({ ok: true, service: 'web-lobby' }));
+      return;
+    }
+    if (pathname === '/runtime-config.js') {
+      const body = 'window.TEA_PARLOR_COLYSEUS_URL = ' + JSON.stringify(colyseusUrl) + ';\n';
+      res.writeHead(200, {
+        'content-type': 'text/javascript; charset=utf-8',
+        'cache-control': 'no-store',
+        'access-control-allow-origin': '*',
+      });
+      res.end(body);
+      return;
+    }
     const filePath = resolvePublicPath(pathname);
 
     if (!filePath || !existsSync(filePath)) {

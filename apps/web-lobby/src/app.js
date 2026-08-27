@@ -4391,7 +4391,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
       throw new Error('未加载 colyseus.js');
     }
     session = await colyseusClient.startColyseusDdzSession({
-      endpoint: 'ws://127.0.0.1:2567',
+      endpoint: (typeof window !== 'undefined' && window.TEA_PARLOR_COLYSEUS_URL) || 'ws://127.0.0.1:2567',
       uid: pinusUid,
       name,
       roomId: room.id,
