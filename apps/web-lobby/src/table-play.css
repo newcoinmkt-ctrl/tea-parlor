@@ -809,3 +809,160 @@ html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-car
   margin-top: 4px !important;
   margin-bottom: 4px !important;
 }
+
+
+/* ── play6: pin the open table to the viewport; dock hand+actions at the bottom ── */
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  display: block !important;
+  overflow: hidden !important;
+  z-index: 400 !important;
+  box-sizing: border-box !important;
+}
+
+.lobby-shell.p0-tg.table-active #tableView.harbor-table .qq-hud,
+.lobby-shell.table-active #tableView.harbor-table .qq-hud {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 40px !important;
+  z-index: 6 !important;
+}
+
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  z-index: 12 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding: 0 6px 8px !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+}
+
+.lobby-shell.p0-tg.table-active #tableView.harbor-table .qq-bottom-bar,
+.lobby-shell.table-active #tableView.harbor-table .qq-bottom-bar {
+  position: absolute !important;
+  left: 4px !important;
+  bottom: 8px !important;
+  top: auto !important;
+  width: 56px !important;
+  z-index: 13 !important;
+  pointer-events: none !important;
+}
+
+.lobby-shell.p0-tg.table-active #tableView.harbor-table .side-slot.left-slot,
+.lobby-shell.table-active #tableView.harbor-table .side-slot.left-slot {
+  position: absolute !important;
+  left: 4px !important;
+  top: 22% !important;
+  bottom: auto !important;
+  z-index: 5 !important;
+}
+.lobby-shell.p0-tg.table-active #tableView.harbor-table .side-slot.right-slot,
+.lobby-shell.table-active #tableView.harbor-table .side-slot.right-slot {
+  position: absolute !important;
+  right: 4px !important;
+  left: auto !important;
+  top: 22% !important;
+  bottom: auto !important;
+  z-index: 5 !important;
+}
+
+.lobby-shell.texas-active #texasTableView,
+.lobby-shell.multi-active #multiGameView {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100dvh !important;
+  z-index: 400 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.lobby-shell.p0-tg.texas-active .home-tabbar,
+.lobby-shell.p0-tg.multi-active .home-tabbar,
+.lobby-shell.p0-tg.table-active .home-tabbar,
+.lobby-shell.texas-active .home-tabbar,
+.lobby-shell.multi-active .home-tabbar,
+.lobby-shell.table-active .home-tabbar {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  z-index: 0 !important;
+  bottom: -80px !important;
+}
+
+/* Mahjong 13 tiles in 414px */
+.lobby-shell.multi-active #mgHand,
+.lobby-shell.multi-active .mg-hand,
+.mj-4p #mgHand,
+.mj-2p #mgHand {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  padding: 0 4px !important;
+}
+.lobby-shell.multi-active #mgHand .mj-tile,
+.lobby-shell.multi-active #mgHand .mg-hand-tile,
+.mj-4p #mgHand .mj-tile,
+.mj-4p #mgHand .mg-hand-tile {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 26px !important;
+  width: auto !important;
+  margin: 0 1px 0 0 !important;
+}
+
+/* Guandan columns must shrink to the tray */
+.lobby-shell.multi-active #mgHand.gd-hand-cols,
+.gd-active #mgHand,
+.lobby-shell.multi-active #mgHand {
+  gap: 0 !important;
+}
+.lobby-shell.multi-active #mgHand .gd-col {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 24px !important;
+  width: auto !important;
+}
+.lobby-shell.multi-active #mgHand .gd-card,
+.lobby-shell.multi-active #mgHand .playing-card,
+.gd-active #mgHand .gd-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 24px !important;
+  margin-left: 0 !important;
+}

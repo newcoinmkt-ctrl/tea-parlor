@@ -4653,14 +4653,49 @@ function syncP0Tabbar() {
     || (ddz && !ddz.hidden)
     || (mg && !mg.hidden),
   );
+  const pin = ['position', 'top', 'left', 'right', 'bottom', 'width', 'height', 'z-index'];
+  [tx, ddz, mg].forEach((el) => {
+    if (!el) return;
+    const open = playing || tableOpen;
+    if (open && !el.hidden && el.getAttribute('hidden') == null) {
+      el.style.setProperty('position', 'fixed', 'important');
+      el.style.setProperty('top', '0', 'important');
+      el.style.setProperty('left', '0', 'important');
+      el.style.setProperty('right', '0', 'important');
+      el.style.setProperty('bottom', '0', 'important');
+      el.style.setProperty('width', '100%', 'important');
+      el.style.setProperty('height', '100%', 'important');
+      el.style.setProperty('z-index', '400', 'important');
+      if (el.id === 'tableView') {
+        const slot = el.querySelector('.self-slot');
+        if (slot) {
+          slot.style.setProperty('position', 'absolute', 'important');
+          slot.style.setProperty('left', '0', 'important');
+          slot.style.setProperty('right', '0', 'important');
+          slot.style.setProperty('bottom', '0', 'important');
+          slot.style.setProperty('top', 'auto', 'important');
+          slot.style.setProperty('width', '100%', 'important');
+          slot.style.setProperty('z-index', '12', 'important');
+        }
+      }
+    } else if (!open) {
+      pin.forEach((k) => el.style.removeProperty(k));
+    }
+  });
   if (playing || tableOpen) {
     bar.style.setProperty('display', 'none', 'important');
     bar.style.setProperty('visibility', 'hidden', 'important');
     bar.style.setProperty('pointer-events', 'none', 'important');
+    bar.style.setProperty('height', '0', 'important');
+    bar.style.setProperty('opacity', '0', 'important');
+    bar.style.setProperty('z-index', '0', 'important');
   } else {
     bar.style.setProperty('display', 'grid', 'important');
     bar.style.setProperty('visibility', 'visible', 'important');
     bar.style.setProperty('pointer-events', 'auto', 'important');
+    bar.style.removeProperty('height');
+    bar.style.removeProperty('opacity');
+    bar.style.removeProperty('z-index');
   }
 }
 
