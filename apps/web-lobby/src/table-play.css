@@ -381,3 +381,119 @@ html.table-landscape .lobby-shell.table-active .home-tabbar,
 html.table-landscape .quick-dock {
   display: none !important;
 }
+
+/* ── Beat leftover p0-tg / harbor rules that still clip the table ── */
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-room-line {
+  display: none !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot .hand-area,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot .hand-area,
+html.table-landscape .lobby-shell.table-active #tableView #handArea {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: flex-end !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  padding: 12px 2px 4px !important;
+  box-sizing: border-box !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot .playing-card,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot .playing-card,
+html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-card {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 44px !important;
+  height: 46px !important;
+  margin-left: -14px !important;
+  flex: 0 0 32px !important;
+  box-sizing: border-box !important;
+}
+html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-card:first-child,
+html.table-landscape .lobby-shell.p0-tg.table-active #tableView.harbor-table .self-slot .playing-card:first-child {
+  margin-left: 0 !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView #playControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView #doubleControls:not([hidden]) {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active #tableView #bidControls .qq-btn,
+html.table-landscape .lobby-shell.p0-tg.table-active #tableView #playControls .qq-btn {
+  min-width: 44px !important;
+  max-width: 64px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 8px !important;
+  font-size: 13px !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .remain-chips,
+html.table-landscape .lobby-shell.table-active #tableView .remain-chips {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  min-width: 28px !important;
+  height: 24px !important;
+  padding: 0 6px !important;
+  border-radius: 4px !important;
+  background: linear-gradient(180deg, #efe0b8, #c9a56a) !important;
+  color: #5a3a18 !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .qq-hud-tools {
+  display: flex !important;
+  gap: 4px !important;
+  flex: 0 0 auto !important;
+}
+html.table-landscape .lobby-shell.table-active #tableView .qq-tool-btn {
+  min-height: 28px !important;
+  padding: 0 6px !important;
+  font-size: 11px !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .play-zone-left,
+html.table-landscape .lobby-shell.table-active #tableView .play-zone-right {
+  max-width: min(160px, 28vw) !important;
+}
+
+@media (max-width: 520px) {
+  html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-card,
+  html.table-landscape .lobby-shell.p0-tg.table-active #tableView.harbor-table .self-slot .playing-card {
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 42px !important;
+    margin-left: -16px !important;
+    flex-basis: 28px !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .qq-deck-meter {
+    display: none !important;
+  }
+}

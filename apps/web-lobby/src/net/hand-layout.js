@@ -38,7 +38,7 @@ export function layoutOverlapRow(area, items, opts = {}) {
       cardW = Math.max(minW, Math.floor(available - (n - 1) * minPeek));
       peek = (available - cardW) / (n - 1);
     }
-    peek = Math.max(12, Math.min(peek, cardW - 2));
+    peek = Math.max(11, Math.min(peek, cardW - 2));
     overlap = Math.max(0, Math.round(cardW - peek));
   }
   const height = Math.round(cardW * ratio);
@@ -93,9 +93,9 @@ export function fitAllHands(root = document) {
   if (handArea) {
     const wide = (handArea.clientWidth || 360) > 520;
     layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
-      maxW: wide ? 58 : 48,
-      minW: 34,
-      minPeek: wide ? 24 : 16,
+      maxW: wide ? 52 : 40,
+      minW: 24,
+      minPeek: wide ? 18 : 12,
       ratio: 1.42,
       gap: false,
     });
