@@ -12,12 +12,14 @@ function padX(el) {
 export function layoutOverlapRow(area, items, opts = {}) {
   const n = items.length;
   if (!area || n === 0) return;
+  const dock = area.closest(".mg-hand-dock, .self-slot, .hand-wrap") || area.parentElement || area;
+  const dockW = Math.round((dock.getBoundingClientRect && dock.getBoundingClientRect().width) || dock.clientWidth || 0);
+  const viewW = Math.max(0, window.innerWidth);
   let available = Math.max(0, area.clientWidth - padX(area));
-  if (available < 8) {
-    const parent = area.parentElement;
-    available = Math.max(0, ((parent && parent.clientWidth) || 0) - padX(area));
-  }
-  if (available < 8) available = Math.min(360, Math.max(240, window.innerWidth - 24));
+  if (available < 8) available = Math.max(0, dockW - padX(area));
+  if (available < 8) available = Math.min(360, Math.max(240, viewW - 24));
+  const cap = Math.min(dockW || available, viewW || available);
+  if (cap > 8) available = Math.min(available, Math.max(80, cap - padX(area)));
 
   const landscape = document.documentElement.classList.contains("table-landscape")
     || document.documentElement.classList.contains("css-landscape")
@@ -54,29 +56,32 @@ export function layoutOverlapRow(area, items, opts = {}) {
 export function layoutGuandanCols(area) {
   const cols = [...area.querySelectorAll(".gd-col")];
   if (!cols.length) return;
+  const cards = [...area.querySelectorAll(".gd-card")];
+  if (!cards.length) return;
   const dock = area.closest(".mg-hand-dock") || area.parentElement || area;
   const dockW = Math.round((dock.getBoundingClientRect && dock.getBoundingClientRect().width) || dock.clientWidth || 0);
-  const viewW = Math.max(0, window.innerWidth - 12);
-  const available = Math.max(80, Math.min(dockW || availableFallback(area), viewW) - padX(area));
-  const n = cols.length;
-  const gapN = n > 1 ? 1 : 0;
-  const colW = Math.min(32, Math.max(16, Math.floor((available - (n - 1) * gapN) / n)));
-  const gap = n > 1 ? Math.max(0, Math.min(2, (available - colW * n) / (n - 1))) : 0;
-  area.style.setProperty("gap", gap + "px", "important");
-  area.classList.add("hand-fitted");
+  const viewW = Math.max(0, window.innerWidth);
+  // Flatten rank columns so every card is a flex item of one horizontal row.
   cols.forEach((col) => {
-    col.style.setProperty("width", colW + "px", "important");
-    col.style.setProperty("min-width", "0", "important");
-    col.style.setProperty("max-width", colW + "px", "important");
-    col.style.setProperty("flex", "1 1 0", "important");
-    col.querySelectorAll(".gd-card").forEach((card, i) => {
-      card.style.setProperty("width", colW + "px", "important");
-      card.style.setProperty("min-width", "0", "important");
-      card.style.setProperty("max-width", colW + "px", "important");
-      card.style.setProperty("height", Math.round(colW * 1.4) + "px", "important");
-      if (i > 0) card.style.setProperty("margin-top", Math.round(-colW * 0.72) + "px", "important");
-    });
+    col.style.setProperty("display", "contents", "important");
+    col.style.removeProperty("width");
+    col.style.removeProperty("min-width");
+    col.style.removeProperty("max-width");
+    col.style.removeProperty("flex");
   });
+  cards.forEach((card) => {
+    card.style.removeProperty("margin-top");
+    card.style.removeProperty("max-width");
+  });
+  area.style.removeProperty("gap");
+  area.style.setProperty("display", "flex", "important");
+  area.style.setProperty("flex-direction", "row", "important");
+  area.style.setProperty("flex-wrap", "nowrap", "important");
+  // layoutOverlapRow uses dock getBoundingClientRect vs innerWidth.
+  if (dockW > 8 && area.clientWidth < 8) {
+    area.style.setProperty("width", Math.min(dockW, viewW) + "px", "important");
+  }
+  layoutOverlapRow(area, cards, { maxW: 40, minW: 20, minPeek: 10, ratio: 1.4 });
 }
 
 export function layoutTexasHero(area) {

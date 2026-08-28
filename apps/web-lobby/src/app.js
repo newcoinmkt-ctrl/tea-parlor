@@ -2010,8 +2010,76 @@ function applyCostumeTheme(costumeId) {
   document.body.dataset.costume = id;
 }
 
+function readTexasDealerIndex(source, depth = 0) {
+  if (source == null || depth > 3) return null;
+  if (typeof source === 'number' && Number.isFinite(source)) {
+    const n = Math.trunc(source);
+    return n >= 0 && n <= 2 ? n : null;
+  }
+  if (typeof source !== 'object') return null;
+  const keys = ['dealer', 'dealerIndex', 'dealerSeat', 'dealerPos', 'button', 'buttonIndex', 'btn', 'btnSeat'];
+  for (const k of keys) {
+    if (source[k] == null || source[k] === '') continue;
+    const nested = readTexasDealerIndex(source[k], depth + 1);
+    if (nested != null) return nested;
+  }
+  for (const k of ['state', 'game', 'engine', 'table']) {
+    if (source[k] && source[k] !== source) {
+      const nested = readTexasDealerIndex(source[k], depth + 1);
+      if (nested != null) return nested;
+    }
+  }
+  return null;
+}
+
+/** Hide all dealer D badges; unhide only the dealer seat. Fallback seat 0. */
+let _txDealerSyncing = false;
+function syncTexasDealer(state) {
+  if (_txDealerSyncing) return;
+  const badges = document.querySelectorAll('.tx-dealer');
+  if (!badges.length) return;
+  _txDealerSyncing = true;
+  try {
+  badges.forEach((el) => {
+    el.hidden = true;
+    el.setAttribute('hidden', '');
+  });
+  let idx = readTexasDealerIndex(state);
+  if (idx == null) idx = readTexasDealerIndex(texasUI);
+  if (idx == null) idx = readTexasDealerIndex(window.__texasState);
+  if (idx == null) idx = 0;
+  const el = document.querySelector(`.tx-dealer[data-tx-dealer="${idx}"]`);
+  if (el) {
+    el.hidden = false;
+    el.removeAttribute('hidden');
+  }
+  } finally {
+    _txDealerSyncing = false;
+  }
+}
+
+function hookTexasDealerRender(ui) {
+  if (!ui || ui._play9DealerHook) return;
+  ui._play9DealerHook = true;
+  ['render', 'update', 'sync'].forEach((name) => {
+    if (typeof ui[name] !== 'function') return;
+    const orig = ui[name].bind(ui);
+    ui[name] = (...args) => {
+      const r = orig(...args);
+      syncTexasDealer(ui);
+      return r;
+    };
+  });
+}
+
 function initTexas() {
-  // 延迟到 startTexas 创建
+  syncTexasDealer(null);
+  const root = document.getElementById('texasTableView');
+  if (root && !root._txDealerObs) {
+    const obs = new MutationObserver(() => syncTexasDealer(texasUI));
+    obs.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden', 'class'] });
+    root._txDealerObs = obs;
+  }
 }
 
 function cashoutTexas(stack) {
@@ -2106,6 +2174,8 @@ function startTexas(tableKey = 'micro', options = {}) {
     },
   });
   texasUI.start();
+  hookTexasDealerRender(texasUI);
+  syncTexasDealer(texasUI);
   try {
     resetAllCharActions();
     playCharAction(0, 'deal');
@@ -2720,6 +2790,7 @@ function scrollCryptoToSection(el) {
 }
 
 function handleLobbyAction(action, opts = {}) {
+  if (action !== 'rules') hideRulesToast();
   if (action === 'home') setLobbyView('home');
   else if (action === 'open-games' || action === 'games') setLobbyView('games');
   else if (action === 'quick-doudizhu') {

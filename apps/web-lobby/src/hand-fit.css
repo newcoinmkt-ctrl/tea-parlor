@@ -115,3 +115,30 @@
   right: 8px !important;
   overflow: hidden !important;
 }
+
+
+/* play9: gutter + flatten guandan cols + compact mahjong actions */
+.gd-col {
+  display: contents !important;
+}
+.gd-yard .mg-hand-dock {
+  left: 56px !important;
+  right: 8px !important;
+  overflow: hidden !important;
+}
+.mg-hand-dock {
+  padding-left: 56px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+}
+.mg-hand-dock #mgHand,
+.gd-yard .mg-hand-dock {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.mj-4p #mgActions .qq-btn,
+.mj-2p #mgActions .qq-btn,
+.mg-actions .qq-btn {
+  width: fit-content !important;
+  flex: 0 0 auto !important;
+}
