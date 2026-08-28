@@ -92,7 +92,7 @@ export function fitAllHands(root = document) {
   const handArea = root.querySelector("#handArea");
   if (handArea) {
     layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
-      maxW: 50, minW: 30, minPeek: 18, ratio: 1.46,
+      maxW: 62, minW: 32, minPeek: 22, ratio: 1.42,
     });
   }
 

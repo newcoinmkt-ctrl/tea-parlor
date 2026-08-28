@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="./src/styles.css?v=home-restore1" />
     <link rel="stylesheet" href="./src/themes/tokens.css?v=theme-interactive" />
     <link rel="stylesheet" href="./src/themes/classic-green.css?v=theme-interactive" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=land3" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=land3" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=land4" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=land4" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -1362,7 +1362,11 @@
           <!-- 桌心：出牌区 + 中央操作 -->
           <div class="center-pot qq-center">
             <div id="lastPlayText" class="table-msg">请选择场次开始人机局</div>
+          </div>
 
+          <!-- 自己：出牌区 + 操作钮 + 手牌（JJ：按钮在手牌正上方） -->
+          <div class="self-slot">
+            <div id="playZone0" class="play-zone play-zone-self" aria-label="我的出牌"></div>
             <div class="qq-center-actions action-panel">
               <div id="bidControls" class="action-row qq-action-row" hidden>
                 <button data-bid="0" type="button" class="qq-btn qq-btn-blue">不叫</button>
@@ -1386,11 +1390,6 @@
                 <button id="settleBackButton" type="button" class="qq-btn qq-btn-blue muted-button">回大厅</button>
               </div>
             </div>
-          </div>
-
-          <!-- 自己出牌区（在手牌上方） -->
-          <div class="self-slot">
-            <div id="playZone0" class="play-zone play-zone-self" aria-label="我的出牌"></div>
             <div class="hand-wrap">
               <div id="handArea" class="hand-area" aria-label="我的手牌 · 可按住拖选"></div>
               <a class="card-face-ad card-face-ad-hand brand-slot brand-surface-card" data-ad-slot="doudizhu-card-face-hand" href="#" target="_blank" rel="noreferrer">
@@ -1771,6 +1770,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=land3"></script>
+    <script type="module" src="./src/app.js?v=land4"></script>
   </body>
 </html>
