@@ -19,35 +19,24 @@ export function layoutOverlapRow(area, items, opts = {}) {
     || document.documentElement.classList.contains("css-landscape")
     || (window.innerWidth > window.innerHeight);
   const maxW = opts.maxW ?? (landscape ? 56 : 52);
-  const minW = opts.minW ?? 28;
-  const minPeek = opts.minPeek ?? (landscape ? 32 : 18);
+  const minW = opts.minW ?? 22;
+  const minPeek = opts.minPeek ?? 12;
   const ratio = opts.ratio ?? 1.45;
-  const preferGap = landscape && opts.gap !== false;
 
-  let cardW = Math.min(maxW, Math.max(minW, Math.round(available / Math.min(n, 8))));
-  let overlap = 0;
-  let peek = cardW;
-  if (n === 1) {
-    peek = cardW;
-  } else if (preferGap && n * minW + (n - 1) * 4 <= available) {
-    cardW = Math.min(maxW, Math.floor((available - (n - 1) * 4) / n));
-    peek = cardW + 4;
-    overlap = 0;
-    area.style.setProperty("gap", "4px", "important");
-  } else {
-    area.style.removeProperty("gap");
-    peek = (available - cardW) / (n - 1);
-    if (peek > cardW - 2) peek = Math.max(minPeek, cardW - 8);
-    if (peek < minPeek) {
-      cardW = Math.max(minW, Math.floor(available - (n - 1) * minPeek));
-      peek = (available - cardW) / (n - 1);
-    }
-    peek = Math.max(11, Math.min(peek, cardW - 2));
-    overlap = Math.max(0, Math.round(cardW - peek));
+  area.style.removeProperty("gap");
+  const slots = Math.max(n - 1, 1);
+  let peek = Math.max(minPeek, Math.floor((available - minW) / slots));
+  let cardW = Math.min(maxW, Math.max(minW, available - slots * peek));
+  if (cardW + slots * peek > available) {
+    peek = Math.max(8, Math.floor((available - minW) / slots));
+    cardW = Math.max(minW, available - slots * peek);
   }
+  peek = Math.min(peek, cardW - 2);
+  const overlap = Math.max(0, Math.round(cardW - peek));
   const height = Math.round(cardW * ratio);
 
   area.classList.add("hand-fitted");
+  area.style.setProperty("overflow-x", "hidden", "important");
   items.forEach((el, i) => {
     el.style.setProperty("width", cardW + "px", "important");
     el.style.setProperty("min-width", cardW + "px", "important");
@@ -63,7 +52,7 @@ export function layoutGuandanCols(area) {
   if (!cols.length) return;
   const available = Math.max(0, area.clientWidth - padX(area));
   const n = cols.length;
-  const colW = Math.min(48, Math.max(26, Math.floor((available - (n - 1) * 2) / n)));
+  const colW = Math.min(40, Math.max(18, Math.floor((available - (n - 1) * 2) / n)));
   const gap = n > 1 ? Math.max(2, Math.min(6, (available - colW * n) / (n - 1))) : 0;
   area.style.setProperty("gap", gap + "px", "important");
   area.classList.add("hand-fitted");
@@ -114,10 +103,11 @@ export function fitAllHands(root = document) {
       if (items.length) {
         const isTile = items.some((el) => el.classList.contains("mg-hand-tile") || el.classList.contains("mj-tile"));
         layoutOverlapRow(mg, items, {
-          maxW: isTile ? 42 : 48,
-          minW: isTile ? 26 : 28,
-          minPeek: isTile ? 16 : 18,
+          maxW: isTile ? 34 : 40,
+          minW: 20,
+          minPeek: isTile ? 14 : 12,
           ratio: isTile ? 1.28 : 1.42,
+          gap: false,
         });
       }
     }

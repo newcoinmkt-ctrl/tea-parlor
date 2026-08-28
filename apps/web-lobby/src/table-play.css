@@ -12,8 +12,8 @@
   }
 }
 
-html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) > #tableView.harbor-table:not([hidden]),
-html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) > #tableView.harbor-table:not([hidden]) {
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active)  #tableView.harbor-table:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active)  #tableView.harbor-table:not([hidden]) {
   position: absolute !important;
   inset: 0 !important;
   width: 100% !important;
@@ -712,4 +712,100 @@ html.table-landscape .lobby-shell.multi-active .mg-hand-dock {
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
+}
+
+
+/* ── play5: table must fill the viewport so the dock sits at the bottom ── */
+html.table-landscape,
+html.table-landscape body,
+html.table-landscape .lobby-shell.table-active,
+html.table-landscape .lobby-shell.texas-active,
+html.table-landscape .lobby-shell.multi-active,
+.lobby-shell.table-active,
+.lobby-shell.texas-active,
+.lobby-shell.multi-active {
+  height: 100% !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+}
+
+.lobby-shell.table-active #tableView.harbor-table,
+.lobby-shell.texas-active #texasTableView,
+.lobby-shell.multi-active #multiGameView,
+html.table-landscape .lobby-shell.table-active #tableView.harbor-table,
+html.table-landscape .lobby-shell.texas-active #texasTableView,
+html.table-landscape .lobby-shell.multi-active #multiGameView {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  box-sizing: border-box !important;
+  z-index: 50 !important;
+}
+
+.lobby-shell.table-active .home-tabbar,
+.lobby-shell.texas-active .home-tabbar,
+.lobby-shell.multi-active .home-tabbar,
+.lobby-shell.table-active .quick-dock,
+.lobby-shell.texas-active .quick-dock,
+.lobby-shell.multi-active .quick-dock,
+.lobby-shell.p0-tg.table-active .home-tabbar,
+.lobby-shell.p0-tg.texas-active .home-tabbar,
+.lobby-shell.p0-tg.multi-active .home-tabbar {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 17 cards: first 28px + 16 peeks of 18px = 316, fits 414 */
+.lobby-shell.table-active #tableView #handArea .playing-card,
+html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-card {
+  width: 28px !important;
+  min-width: 22px !important;
+  max-width: 34px !important;
+  flex: 0 0 28px !important;
+  margin-left: -10px !important;
+  box-sizing: border-box !important;
+}
+.lobby-shell.table-active #tableView #handArea .playing-card:first-child {
+  margin-left: 0 !important;
+}
+
+.lobby-shell.multi-active #mgHand,
+.lobby-shell.multi-active .mg-hand,
+.lobby-shell.multi-active .mg-hand-dock {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+.lobby-shell.multi-active #mgHand .mj-tile,
+.lobby-shell.multi-active #mgHand .mg-hand-tile,
+.lobby-shell.multi-active #mgHand .mg-hand-card,
+.lobby-shell.multi-active #mgHand .playing-card,
+.lobby-shell.multi-active #mgHand .mg-card,
+.lobby-shell.multi-active #mgHand .gd-card {
+  min-width: 0 !important;
+  max-width: 36px !important;
+  box-sizing: border-box !important;
+}
+
+.lobby-shell.table-active #tableView .qq-room-line,
+.lobby-shell.p0-tg.table-active #tableView.harbor-table .qq-room-line {
+  display: none !important;
+}
+
+.lobby-shell.table-active #tableView .self-slot {
+  z-index: 20 !important;
+}
+.lobby-shell.table-active #tableView .qq-center-actions {
+  margin-top: 4px !important;
+  margin-bottom: 4px !important;
 }

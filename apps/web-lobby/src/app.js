@@ -2897,7 +2897,15 @@ function showRulesToast(initialTab = 'overview') {
   }, { once: true });
 }
 
+function hideRulesToast() {
+  const tip = document.getElementById('rulesToast');
+  if (!tip) return;
+  tip.hidden = true;
+  tip.classList.remove('is-open');
+}
+
 function setLobbyView(view = 'home', gameType = null) {
+  hideRulesToast();
   // 其它游戏已下线，统一并入链游测试区
   if (view === 'rooms' && (gameType === 'other' || gameType === 'candidate')) {
     gameType = 'real';
