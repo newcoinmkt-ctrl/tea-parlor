@@ -205,6 +205,13 @@ let ddzVariant = 'classic';
 let ddzLane = 'gold';
 let ddzMatchTimer = 0;
 
+const DDZ_TIER_IDS = {
+  gold: ['novice', 'classic', 'high'],
+  season: ['c_novice', 'c_classic', 'c_high'],
+};
+const DDZ_QUEUE = ['匹配中 · 2/3', '可立即入座', '排队 1 桌'];
+const DDZ_TIER_LABEL = ['新手', '经典', '高级'];
+
 /** 链游测试区结算币种标签（内部键仍为 crypto，余额走赛季积分账本） */
 const CRYPTO_SYMBOL = '赛季积分';
 /** 内部折算：3 赛季积分 = 60,000 金币 */
@@ -4038,13 +4045,6 @@ function renderAccount() {
   if (prevCrypto) prevCrypto.textContent = formatCrypto(getUsdt());
   applyProfileToRuntime();
 }
-
-const DDZ_TIER_IDS = {
-  gold: ['novice', 'classic', 'high'],
-  season: ['c_novice', 'c_classic', 'c_high'],
-};
-const DDZ_QUEUE = ['匹配中 · 2/3', '可立即入座', '排队 1 桌'];
-const DDZ_TIER_LABEL = ['新手', '经典', '高级'];
 
 function initTelegramMiniApp() {
   const tg = window.Telegram?.WebApp;
