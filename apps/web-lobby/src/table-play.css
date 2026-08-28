@@ -1,0 +1,306 @@
+/* Playable Dou Dizhu in Telegram: beats harbor + p0-tg. Do not rewrite styles.css. */
+
+/* ── Kill CSS-rotate (fixed children escape Telegram WebView) ── */
+@media (orientation: portrait) {
+  html.css-landscape .lobby-shell.table-active {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: 100% !important;
+    transform: none !important;
+  }
+}
+
+/* ── Table fills the Mini App, never viewport-fixed ── */
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) > #tableView.harbor-table:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) > #tableView.harbor-table:not([hidden]) {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  z-index: 50 !important;
+  box-sizing: border-box !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .qq-room-line,
+html.table-landscape .lobby-shell.table-active #tableView .qq-logo-mark,
+html.table-landscape .lobby-shell.table-active #tableView .brand-slot,
+html.table-landscape .lobby-shell.table-active #tableView .costume-chip,
+html.table-landscape .lobby-shell.table-active #tableView .qq-bean-line,
+html.table-landscape .lobby-shell.table-active #tableView .player-seat,
+html.table-landscape .lobby-shell.table-active #tableView .qq-chat-btn,
+html.table-landscape .lobby-shell.table-active #tableView .qq-self-info,
+html.table-landscape .lobby-shell.table-active #tableView .qq-bottom-right,
+html.table-landscape .lobby-shell.table-active #tableView .table-msg {
+  display: none !important;
+}
+
+/* ── Action rows: compact, in-flow, above the hand. Never position:fixed ── */
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView #playControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView #doubleControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView #settleControls:not([hidden]),
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls:not([hidden]),
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls:not([hidden]),
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls:not([hidden]),
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #settleControls:not([hidden]) {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  inset: auto !important;
+  transform: none !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  grid-template-columns: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0 auto 6px !important;
+  padding: 4px 8px !important;
+  background: rgba(8, 16, 28, 0.55) !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  z-index: 80 !important;
+  pointer-events: auto !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active #tableView #bidControls .qq-btn,
+html.table-landscape .lobby-shell.p0-tg.table-active #tableView #playControls .qq-btn,
+html.table-landscape .lobby-shell.p0-tg.table-active #tableView #doubleControls .qq-btn,
+html.table-landscape .lobby-shell.table-active #tableView.harbor-table #bidControls .qq-btn,
+html.table-landscape .lobby-shell.table-active #tableView.harbor-table #bidControls .qq-btn[data-bid],
+html.table-landscape .lobby-shell.table-active #tableView.harbor-table #bidControls .qq-btn[data-bid="3"],
+html.table-landscape .lobby-shell.table-active #tableView.harbor-table .qq-center-actions .qq-btn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 52px !important;
+  max-width: 76px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 36px !important;
+  padding: 0 10px !important;
+  font-size: 14px !important;
+  white-space: nowrap !important;
+  transform: none !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .qq-center-actions,
+html.table-landscape .lobby-shell.table-active #tableView .action-panel {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  background: transparent !important;
+  z-index: 80 !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .ddz-table,
+html.table-landscape .lobby-shell.table-active #tableView .qq-felt {
+  position: absolute !important;
+  inset: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .qq-hud {
+  position: absolute !important;
+  top: 4px !important;
+  left: 6px !important;
+  right: 6px !important;
+  height: auto !important;
+  z-index: 40 !important;
+  overflow: visible !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .qq-bottom-bar {
+  position: absolute !important;
+  left: 4px !important;
+  right: auto !important;
+  bottom: max(4px, env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  background: transparent !important;
+  overflow: visible !important;
+  z-index: 25 !important;
+  transform: none !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .self-slot {
+  position: absolute !important;
+  right: 6px !important;
+  bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+  z-index: 90 !important;
+  transform: none !important;
+  pointer-events: none !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .self-slot .hand-wrap,
+html.table-landscape .lobby-shell.table-active #tableView .self-slot .hand-area,
+html.table-landscape .lobby-shell.table-active #tableView .self-slot .playing-card,
+html.table-landscape .lobby-shell.table-active #tableView .self-slot .qq-center-actions,
+html.table-landscape .lobby-shell.table-active #tableView .self-slot .qq-btn,
+html.table-landscape .lobby-shell.table-active #tableView .play-zone-self {
+  pointer-events: auto !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .hand-wrap,
+html.table-landscape .lobby-shell.table-active #tableView .hand-area {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .play-zone-self {
+  min-height: 36px !important;
+  margin-bottom: 4px !important;
+  justify-content: center !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .center-pot,
+html.table-landscape .lobby-shell.table-active #tableView .qq-center {
+  position: absolute !important;
+  left: 50% !important;
+  top: 38% !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(280px, 50%) !important;
+  height: auto !important;
+  overflow: visible !important;
+  z-index: 6 !important;
+  pointer-events: none !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView .pass-bubble,
+html.table-landscape .lobby-shell.table-active #tableView .bid-bubble {
+  position: relative !important;
+  z-index: 7 !important;
+}
+
+/* ── Portrait: stacked, compact, tappable ── */
+@media (orientation: portrait) {
+  html.table-landscape .lobby-shell.table-active #tableView .qq-deck-meter {
+    display: none !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.left-slot,
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.right-slot {
+    position: absolute !important;
+    top: 10% !important;
+    width: auto !important;
+    max-width: 32% !important;
+    overflow: visible !important;
+    z-index: 8 !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.left-slot { left: 2% !important; right: auto !important; }
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.right-slot { right: 2% !important; left: auto !important; }
+  html.table-landscape .lobby-shell.table-active #tableView .char-figure-wrap,
+  html.table-landscape .lobby-shell.table-active #tableView .full-body-char img.char-figure {
+    max-width: 72px !important;
+    max-height: 110px !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    object-fit: contain !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .qq-self-char .char-figure-wrap,
+  html.table-landscape .lobby-shell.table-active #tableView .qq-bottom-bar .char-figure,
+  html.table-landscape .lobby-shell.table-active #tableView .qq-self-char img.char-figure {
+    max-width: 64px !important;
+    max-height: 96px !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .self-slot {
+    left: 68px !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .hand-area {
+    min-height: 78px !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .play-zone-left,
+  html.table-landscape .lobby-shell.table-active #tableView .play-zone-right {
+    max-width: 42vw !important;
+    overflow: visible !important;
+  }
+}
+
+/* ── Landscape: JJ-style, room for a real hand ── */
+@media (orientation: landscape) {
+  html.table-landscape .lobby-shell.table-active #tableView .qq-deck-meter {
+    display: flex !important;
+    max-width: min(420px, 55%) !important;
+    max-height: 28px !important;
+    overflow-x: auto !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .qq-meter-item[data-rank="3"],
+  html.table-landscape .lobby-shell.table-active #tableView .qq-meter-item[data-rank="4"],
+  html.table-landscape .lobby-shell.table-active #tableView .qq-meter-item[data-rank="5"],
+  html.table-landscape .lobby-shell.table-active #tableView .qq-meter-item[data-rank="6"],
+  html.table-landscape .lobby-shell.table-active #tableView .qq-meter-item[data-rank="7"],
+  html.table-landscape .lobby-shell.table-active #tableView .qq-meter-item[data-rank="8"],
+  html.table-landscape .lobby-shell.table-active #tableView .qq-meter-item[data-rank="9"] {
+    display: none !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.left-slot,
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.right-slot {
+    position: absolute !important;
+    top: 16% !important;
+    max-width: 22% !important;
+    overflow: visible !important;
+    z-index: 8 !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.left-slot { left: 2% !important; right: auto !important; }
+  html.table-landscape .lobby-shell.table-active #tableView .side-slot.right-slot { right: 2% !important; left: auto !important; }
+  html.table-landscape .lobby-shell.table-active #tableView .char-figure-wrap,
+  html.table-landscape .lobby-shell.table-active #tableView .full-body-char img.char-figure {
+    max-width: min(14vw, 96px) !important;
+    max-height: min(36vh, 140px) !important;
+    overflow: visible !important;
+    object-fit: contain !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .qq-self-char .char-figure-wrap,
+  html.table-landscape .lobby-shell.table-active #tableView .qq-bottom-bar .char-figure,
+  html.table-landscape .lobby-shell.table-active #tableView .qq-self-char img.char-figure {
+    max-width: min(12vw, 84px) !important;
+    max-height: min(28vh, 110px) !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .self-slot {
+    left: 88px !important;
+  }
+  html.table-landscape .lobby-shell.table-active #tableView .hand-area {
+    min-height: 88px !important;
+  }
+}
+
+html.table-landscape .home-tabbar,
+html.table-landscape .lobby-shell.table-active .home-tabbar,
+html.table-landscape .quick-dock {
+  display: none !important;
+}

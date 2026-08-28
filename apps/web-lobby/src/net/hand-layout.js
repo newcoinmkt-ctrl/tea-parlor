@@ -91,8 +91,13 @@ export function layoutTexasHero(area) {
 export function fitAllHands(root = document) {
   const handArea = root.querySelector("#handArea");
   if (handArea) {
+    const wide = (handArea.clientWidth || 360) > 520;
     layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
-      maxW: 62, minW: 32, minPeek: 22, ratio: 1.42,
+      maxW: wide ? 58 : 48,
+      minW: 34,
+      minPeek: wide ? 24 : 16,
+      ratio: 1.42,
+      gap: false,
     });
   }
 

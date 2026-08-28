@@ -4593,7 +4593,7 @@ function pinP0ActionBar(el) {
   if (!el) return;
   const home = document.querySelector('#tableView .qq-center-actions');
   if (home && el.parentElement !== home) home.appendChild(el);
-  ['position', 'left', 'right', 'bottom', 'top', 'width', 'max-width', 'min-width', 'grid-template-columns'].forEach((k) => {
+  ['position', 'left', 'right', 'bottom', 'top', 'width', 'max-width', 'min-width', 'min-height', 'height', 'transform', 'inset', 'grid-template-columns', 'background'].forEach((k) => {
     el.style.removeProperty(k);
   });
   if (el.hidden) {
@@ -5480,9 +5480,8 @@ function renderGame() {
   pinP0ActionBar(nodes.playControls);
   const selfSlot = document.querySelector('#tableView .self-slot');
   const bottomBar = document.querySelector('#tableView .qq-bottom-bar');
-  const lift = 'calc(84px + env(safe-area-inset-bottom, 0px))';
-  if (selfSlot) selfSlot.style.setProperty('bottom', lift, 'important');
-  if (bottomBar) bottomBar.style.setProperty('bottom', lift, 'important');
+  if (selfSlot) selfSlot.style.removeProperty('bottom');
+  if (bottomBar) bottomBar.style.removeProperty('bottom');
 
   // 地主加倍阶段：只显示不加倍/反加倍（隐藏超级加倍）
   if (nodes.superDoubleBtn) {
