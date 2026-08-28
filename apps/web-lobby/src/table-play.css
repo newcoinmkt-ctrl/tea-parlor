@@ -966,3 +966,62 @@ html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-car
   max-width: 24px !important;
   margin-left: 0 !important;
 }
+
+
+/* ── play7: Guandan columns must fit the phone tray ── */
+.lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock,
+.gd-yard .mg-hand-dock {
+  position: absolute !important;
+  left: 4px !important;
+  right: 4px !important;
+  bottom: 52px !important;
+  top: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  z-index: 12 !important;
+}
+
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-cols,
+.gd-yard #mgHand.gd-hand-cols,
+.gd-yard .gd-hand-cols {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  gap: 1px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  padding: 4px 2px 0 !important;
+  justify-content: flex-start !important;
+}
+
+.lobby-shell.multi-active .gd-yard .gd-col,
+.gd-yard .gd-col {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 28px !important;
+  width: auto !important;
+}
+
+.lobby-shell.multi-active .gd-yard .gd-col .gd-card,
+.gd-yard .gd-col .gd-card,
+.gd-yard .gd-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 28px !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+  padding: 2px !important;
+  margin-left: 0 !important;
+}
+
+.lobby-shell.multi-active .gd-yard .gd-toolbar,
+.gd-yard .gd-toolbar {
+  z-index: 16 !important;
+  pointer-events: auto !important;
+}
