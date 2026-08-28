@@ -1,4 +1,4 @@
-/** Landscape table: native lock when possible, CSS rotate fallback in portrait Mini Apps. */
+/** Table viewport: Telegram.WebApp.viewportStableHeight, never 100vh, never CSS-rotate. */
 
 function isPlayingTable() {
   const shell = document.querySelector(".lobby-shell");
@@ -14,11 +14,28 @@ function isMobileish() {
   return coarse || w <= 900 || Boolean(window.Telegram?.WebApp);
 }
 
-function physicalLandscape() {
-  return (window.innerWidth || 0) > (window.innerHeight || 0);
+export function syncViewportHeight() {
+  const root = document.documentElement;
+  const tg = window.Telegram?.WebApp;
+  const vv = window.visualViewport;
+  let h = window.innerHeight || 0;
+  try {
+    if (tg) {
+      tg.ready?.();
+      tg.expand?.();
+      const inset = tg.safeAreaInset || tg.contentSafeAreaInset || {};
+      if (inset.top != null) root.style.setProperty("--safe-top", inset.top + "px");
+      if (inset.bottom != null) root.style.setProperty("--safe-bottom", inset.bottom + "px");
+      if (tg.viewportStableHeight) h = tg.viewportStableHeight;
+    } else if (vv && vv.height) {
+      h = vv.height;
+    }
+  } catch (_) {}
+  if (h > 0) root.style.setProperty("--vvh", Math.round(h) + "px");
 }
 
 export function syncTableLandscape() {
+  syncViewportHeight();
   const on = isPlayingTable() && isMobileish();
   const root = document.documentElement;
   const body = document.body;
@@ -38,7 +55,6 @@ export function syncTableLandscape() {
     try { tg?.exitFullscreen?.(); } catch (_) {}
   }
 
-  // Telegram WebView lets position:fixed escape a CSS-rotated shell, so never fake-rotate.
   root.classList.remove("css-landscape");
   document.body?.classList.remove("css-landscape");
   window.dispatchEvent(new Event("table-orient"));
@@ -56,5 +72,6 @@ export function initTableOrientation() {
   window.addEventListener("resize", run);
   window.addEventListener("orientationchange", () => setTimeout(run, 80));
   if (window.visualViewport) window.visualViewport.addEventListener("resize", run);
+  try { window.Telegram?.WebApp?.onEvent?.("viewportChanged", run); } catch (_) {}
   return run;
 }
