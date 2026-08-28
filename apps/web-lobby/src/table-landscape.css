@@ -12,7 +12,7 @@ html.table-landscape body {
     z-index: 80 !important;
     top: 0 !important;
     left: 100dvw !important;
-    width: var(--vvh, 100dvh) !important;
+    width: var(--tg-vh, 100dvh) !important;
     height: 100dvw !important;
     max-width: none !important;
     max-height: none !important;
@@ -35,7 +35,7 @@ html.table-landscape .lobby-shell.table-active {
   display: flex !important;
   flex-direction: column !important;
   height: 100% !important;
-  max-height: var(--vvh, 100dvh) !important;
+  max-height: var(--tg-vh, 100dvh) !important;
 }
 
 html.css-landscape .lobby-shell.table-active {

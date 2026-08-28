@@ -1,5 +1,5 @@
 :root {
-  --vvh: 100dvh;
+  --tg-vh: 100dvh;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --ui-btn-h: clamp(36px, 5.2vw, 44px);
@@ -9,9 +9,9 @@
 html, body,
 .lobby-shell,
 .lobby-shell.p0-tg {
-  height: var(--vvh, 100dvh) !important;
-  max-height: var(--vvh, 100dvh) !important;
-  min-height: 0 !important;
+  height: var(--tg-vh, 100dvh) !important;
+  max-height: var(--tg-vh, 100dvh) !important;
+  min-height: var(--tg-vh, 100dvh) !important;
 }
 .lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) {
   padding-bottom: var(--safe-bottom);
@@ -745,8 +745,8 @@ html.table-landscape .lobby-shell.multi-active,
 .lobby-shell.texas-active,
 .lobby-shell.multi-active {
   height: 100% !important;
-  height: var(--vvh, 100dvh) !important;
-  max-height: var(--vvh, 100dvh) !important;
+  height: var(--tg-vh, 100dvh) !important;
+  max-height: var(--tg-vh, 100dvh) !important;
   overflow: hidden !important;
 }
 
@@ -842,8 +842,8 @@ html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-car
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  min-height: var(--vvh, 100dvh) !important;
-  max-height: var(--vvh, 100dvh) !important;
+  min-height: var(--tg-vh, 100dvh) !important;
+  max-height: var(--tg-vh, 100dvh) !important;
   display: block !important;
   overflow: hidden !important;
   z-index: 400 !important;
@@ -916,7 +916,7 @@ html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-car
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  min-height: var(--vvh, 100dvh) !important;
+  min-height: var(--tg-vh, 100dvh) !important;
   z-index: 400 !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
@@ -1082,7 +1082,7 @@ html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-car
   width: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  height: var(--vvh, 100dvh) !important;
+  height: var(--tg-vh, 100dvh) !important;
   margin: 0 !important;
   border-radius: 0 !important;
   background: rgba(8, 14, 22, 0.96) !important;
@@ -1093,4 +1093,38 @@ html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-car
 #rulesToast.rules-toast.is-open {
   transform: none !important;
   opacity: 1 !important;
+}
+
+
+/* play8b: bid/play sit above the hand, not on top of it */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot {
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  padding-bottom: calc(8px + var(--safe-bottom, 0px)) !important;
+  overflow: visible !important;
+}
+.lobby-shell.table-active #tableView .qq-center-actions,
+.lobby-shell.table-active #tableView #bidControls,
+.lobby-shell.table-active #tableView #playControls,
+.lobby-shell.table-active #tableView #doubleControls {
+  order: 1 !important;
+  position: relative !important;
+  z-index: 11 !important;
+  margin: 0 0 4px !important;
+  transform: none !important;
+}
+.lobby-shell.table-active #tableView #handArea,
+.lobby-shell.table-active #tableView .self-slot .hand-wrap,
+.lobby-shell.table-active #tableView .self-slot .hand-area {
+  order: 2 !important;
+  position: relative !important;
+  z-index: 12 !important;
+  margin-top: 0 !important;
+}
+.lobby-shell.table-active #tableView #bidControls .qq-btn,
+.lobby-shell.table-active #tableView #playControls .qq-btn {
+  height: clamp(32px, 4.6vw, 36px) !important;
+  min-height: clamp(32px, 4.6vw, 36px) !important;
+  max-height: 36px !important;
 }

@@ -5992,7 +5992,7 @@ function applyTelegramSafeArea() {
       h = vv.height;
     }
   } catch (_) {}
-  if (h > 0) root.style.setProperty('--vvh', Math.round(h) + 'px');
+  if (h > 0) root.style.setProperty('--tg-vh', Math.round(h) + 'px');
 }
 applyTelegramSafeArea();
 try { window.Telegram?.WebApp?.onEvent?.('viewportChanged', applyTelegramSafeArea); } catch (_) {}

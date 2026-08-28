@@ -31,7 +31,7 @@ export function syncViewportHeight() {
       h = vv.height;
     }
   } catch (_) {}
-  if (h > 0) root.style.setProperty("--vvh", Math.round(h) + "px");
+  if (h > 0) root.style.setProperty("--tg-vh", Math.round(h) + "px");
 }
 
 export function syncTableLandscape() {
