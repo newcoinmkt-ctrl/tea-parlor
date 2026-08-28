@@ -11,7 +11,7 @@
 .texas-active #texasHole0 {
   box-sizing: border-box !important;
   max-width: 100% !important;
-  overflow-x: visible !important;
+  overflow-x: hidden !important;
   overflow-y: visible !important;
 }
 
@@ -100,4 +100,18 @@
 [data-double] {
   min-height: 44px !important;
   min-width: 68px !important;
+}
+
+
+/* Avatar gutter: first card stays tappable */
+.lobby-shell.table-active #tableView #handArea {
+  padding-left: 56px !important;
+  padding-right: 8px !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+.gd-yard .mg-hand-dock {
+  left: 56px !important;
+  right: 8px !important;
+  overflow: hidden !important;
 }
