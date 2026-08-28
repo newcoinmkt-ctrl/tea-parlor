@@ -4607,6 +4607,16 @@ function pinP0ActionBar(el) {
   el.style.setProperty('pointer-events', 'auto', 'important');
   el.style.setProperty('position', 'relative', 'important');
   el.style.setProperty('transform', 'none', 'important');
+  el.style.setProperty('left', 'auto', 'important');
+  el.style.setProperty('right', 'auto', 'important');
+  el.style.setProperty('top', 'auto', 'important');
+  el.style.setProperty('bottom', 'auto', 'important');
+  el.style.setProperty('width', '100%', 'important');
+  el.style.setProperty('min-width', '0', 'important');
+  el.style.setProperty('max-width', '100%', 'important');
+  el.style.setProperty('flex-wrap', 'wrap', 'important');
+  el.style.setProperty('grid-template-columns', 'none', 'important');
+  el.style.setProperty('box-sizing', 'border-box', 'important');
   el.style.setProperty('z-index', '6', 'important');
 }
 

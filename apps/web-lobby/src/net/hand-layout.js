@@ -8,8 +8,12 @@ function padX(el) {
 export function layoutOverlapRow(area, items, opts = {}) {
   const n = items.length;
   if (!area || n === 0) return;
-  const available = Math.max(0, area.clientWidth - padX(area));
-  if (available < 8) return;
+  let available = Math.max(0, area.clientWidth - padX(area));
+  if (available < 8) {
+    const parent = area.parentElement;
+    available = Math.max(0, ((parent && parent.clientWidth) || 0) - padX(area));
+  }
+  if (available < 8) available = Math.min(360, Math.max(240, window.innerWidth - 24));
 
   const landscape = document.documentElement.classList.contains("table-landscape")
     || document.documentElement.classList.contains("css-landscape")

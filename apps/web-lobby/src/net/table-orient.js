@@ -41,7 +41,6 @@ export function syncTableLandscape() {
   // Telegram WebView lets position:fixed escape a CSS-rotated shell, so never fake-rotate.
   root.classList.remove("css-landscape");
   document.body?.classList.remove("css-landscape");
-  body?.classList.toggle("css-landscape", fake);
   window.dispatchEvent(new Event("table-orient"));
 }
 

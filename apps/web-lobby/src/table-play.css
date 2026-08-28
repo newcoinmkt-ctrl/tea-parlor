@@ -28,7 +28,7 @@ html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.mul
   grid-template-areas:
     "hud hud hud"
     "left felt right"
-    "me dock dock" !important;
+    "dock dock dock" !important;
   gap: 0 4px !important;
   overflow: hidden !important;
   z-index: 50 !important;
@@ -174,8 +174,13 @@ html.table-landscape .lobby-shell.table-active #tableView .self-slot {
 }
 
 html.table-landscape .lobby-shell.table-active #tableView .qq-bottom-bar {
-  grid-area: me !important;
-  position: relative !important;
+  grid-area: dock !important;
+  position: absolute !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 64px !important;
+  pointer-events: none !important;
+  z-index: 9 !important;
   inset: auto !important;
   left: auto !important;
   right: auto !important;
@@ -226,13 +231,14 @@ html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-act
   top: auto !important;
   bottom: auto !important;
   transform: none !important;
-  width: max-content !important;
+  width: 100% !important;
   max-width: 100% !important;
+  min-width: 0 !important;
   height: auto !important;
   min-height: 0 !important;
   display: flex !important;
   flex-direction: row !important;
-  flex-wrap: nowrap !important;
+  flex-wrap: wrap !important;
   grid-template-columns: none !important;
   align-items: center !important;
   justify-content: center !important;
@@ -495,5 +501,215 @@ html.table-landscape .lobby-shell.table-active #tableView .play-zone-right {
   }
   html.table-landscape .lobby-shell.table-active #tableView .qq-deck-meter {
     display: none !important;
+  }
+}
+
+
+/* ── play4 last word: beat p0-tg fixed 430px bid dock ── */
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table {
+  grid-template-areas:
+    "hud hud hud"
+    "left felt right"
+    "dock dock dock" !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar {
+  grid-area: dock !important;
+  position: absolute !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  right: auto !important;
+  width: 64px !important;
+  height: auto !important;
+  z-index: 9 !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot {
+  grid-area: dock !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 4px 2px !important;
+  box-sizing: border-box !important;
+}
+
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls:not([hidden]),
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls:not([hidden]),
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #settleControls:not([hidden]) {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  inset: auto !important;
+  transform: none !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  grid-template-columns: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 0 6px !important;
+  padding: 4px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  background: rgba(8, 16, 28, 0.55) !important;
+  border-radius: 14px !important;
+  z-index: 80 !important;
+}
+
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls .qq-btn,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls .qq-btn[data-bid],
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls .qq-btn[data-bid="3"],
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls .qq-btn,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls .qq-btn,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-center-actions .qq-btn,
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls .qq-btn,
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls .qq-btn[data-bid],
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls .qq-btn[data-bid="3"],
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls .qq-btn,
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls .qq-btn,
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-center-actions .qq-btn {
+  flex: 1 1 52px !important;
+  min-width: 52px !important;
+  max-width: 80px !important;
+  width: auto !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 6px !important;
+  font-size: 13px !important;
+  transform: none !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+html.table-landscape .lobby-shell.table-active #tableView #handArea,
+.lobby-shell.p0-tg.table-active #tableView.harbor-table #handArea {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Texas / 麻将 / 掼蛋 / 炸金花 / 二十一：action rows stay on screen */
+html.table-landscape .lobby-shell.texas-active #texasTableView,
+html.table-landscape .lobby-shell.multi-active #multiGameView {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+html.table-landscape .lobby-shell.texas-active #texasActions,
+html.table-landscape .lobby-shell.texas-active #texasActions.tx-actions,
+.lobby-shell.texas-active #texasActions {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px !important;
+}
+
+html.table-landscape .lobby-shell.texas-active #texasActions .qq-btn,
+.lobby-shell.texas-active #texasActions .qq-btn {
+  flex: 1 1 64px !important;
+  min-width: 56px !important;
+  max-width: 96px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 8px !important;
+  font-size: 13px !important;
+}
+
+html.table-landscape .lobby-shell.multi-active #mgActions,
+.lobby-shell.multi-active #mgActions,
+.multi-game-view #mgActions {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px !important;
+}
+
+html.table-landscape .lobby-shell.multi-active #mgActions .qq-btn,
+.lobby-shell.multi-active #mgActions .qq-btn,
+.zjh-active #mgActions .qq-btn {
+  flex: 1 1 56px !important;
+  min-width: 52px !important;
+  max-width: 88px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 8px !important;
+  font-size: 13px !important;
+}
+
+html.table-landscape .lobby-shell.multi-active #mgHand,
+html.table-landscape .lobby-shell.multi-active .mg-hand-dock {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+/* Lobby / 战绩 / 补给 / 说明 / 我：phone chrome stays inside the viewport */
+@media (max-width: 520px) {
+  .lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) {
+    overflow-x: hidden !important;
+  }
+  .lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .lobby-stage,
+  .lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .home-view,
+  .lobby-shell.p0-tg #ddzRoomGrid {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .lobby-shell.p0-tg #ddzRoomGrid .p0-room,
+  .lobby-shell.p0-tg #ddzRoomGrid .room-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  .lobby-shell.p0-tg .home-tabbar {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
