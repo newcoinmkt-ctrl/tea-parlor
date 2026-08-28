@@ -4591,29 +4591,33 @@ function hideLobbyTopbar() {
 
 function pinP0ActionBar(el) {
   if (!el) return;
-  const shell = nodes.shell || document.querySelector('.lobby-shell');
-  if (shell && el.parentElement !== shell) shell.appendChild(el);
+  const home = document.querySelector('#tableView .qq-center-actions');
+  if (home && el.parentElement !== home) home.appendChild(el);
+  ['position', 'left', 'right', 'bottom', 'top', 'width', 'max-width', 'min-width', 'grid-template-columns'].forEach((k) => {
+    el.style.removeProperty(k);
+  });
   if (el.hidden) {
     el.style.setProperty('display', 'none', 'important');
+    el.style.setProperty('visibility', 'hidden', 'important');
+    el.style.setProperty('pointer-events', 'none', 'important');
     return;
   }
-  const cols = el.id === 'bidControls'
-    ? 'repeat(4, minmax(72px, 1fr))'
-    : el.id === 'doubleControls'
-      ? 'repeat(3, minmax(88px, 1fr))'
-      : 'minmax(88px, 1fr) minmax(88px, 1fr) minmax(108px, 1.2fr)';
-  el.style.setProperty('position', 'fixed', 'important');
-  el.style.setProperty('left', '0', 'important');
-  el.style.setProperty('right', '0', 'important');
-  el.style.setProperty('bottom', '0', 'important');
-  el.style.setProperty('transform', 'none', 'important');
-  el.style.setProperty('width', '100vw', 'important');
-  el.style.setProperty('max-width', '100vw', 'important');
-  el.style.setProperty('min-width', '0', 'important');
-  el.style.setProperty('display', 'grid', 'important');
-  el.style.setProperty('grid-template-columns', cols, 'important');
-  el.style.setProperty('z-index', '480', 'important');
+  el.style.setProperty('display', 'flex', 'important');
+  el.style.setProperty('visibility', 'visible', 'important');
   el.style.setProperty('pointer-events', 'auto', 'important');
+  el.style.setProperty('position', 'relative', 'important');
+  el.style.setProperty('transform', 'none', 'important');
+  el.style.setProperty('z-index', '6', 'important');
+}
+
+function hideTableActionBars() {
+  ['playControls', 'bidControls', 'doubleControls', 'settleControls'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.hidden = true;
+    el.setAttribute('hidden', '');
+    pinP0ActionBar(el);
+  });
 }
 
 function syncP0Tabbar() {
@@ -4658,6 +4662,7 @@ function restoreLobbyChrome() {
     || (mg && !mg.hidden && mg.getAttribute('hidden') == null),
   );
   if (!playing && !tableOpen) {
+    hideTableActionBars();
     const stage = document.querySelector('.lobby-stage');
     if (stage) {
       if (stage.style.pointerEvents === 'none') stage.style.removeProperty('pointer-events');

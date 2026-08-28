@@ -381,3 +381,30 @@ html.table-landscape .gd-yard .mg-hand-dock {
   bottom: auto !important;
   position: relative !important;
 }
+
+html.table-landscape .home-tabbar,
+.lobby-shell.table-active .home-tabbar,
+.lobby-shell.texas-active .home-tabbar,
+.lobby-shell.multi-active .home-tabbar,
+html.table-landscape .quick-dock {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#playControls[hidden],
+#bidControls[hidden],
+#doubleControls[hidden],
+#settleControls[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#tableView .qq-center-actions .qq-action-row:not([hidden]) {
+  position: relative !important;
+  inset: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
