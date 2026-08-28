@@ -1491,3 +1491,142 @@ html.table-landscape .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.
   padding-right: 0 !important;
   overflow: hidden !important;
 }
+
+
+/* ── play9 follow-up: Guandan 2-row pack; ZJH hide right-side 说明 overlay ── */
+
+/* Guandan: keep .gd-col as contents (no vertical stacks over 恢复/一键理牌) */
+.gd-yard .gd-col,
+.lobby-shell.multi-active .gd-yard .gd-col,
+#mgHand .gd-col {
+  display: contents !important;
+}
+
+.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock,
+html.table-landscape .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock {
+  left: 56px !important;
+  right: 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+#mgHand.gd-hand-2row,
+.gd-yard #mgHand.gd-hand-2row,
+.gd-yard #mgHand.gd-hand-cols.gd-hand-2row,
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-2row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-content: flex-end !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.gd-yard #mgHand.gd-hand-2row .gd-card,
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-2row .gd-card,
+.lobby-shell.multi-active #mgHand.gd-hand-2row .gd-card {
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+.gd-row-break {
+  display: block !important;
+  flex: 1 0 100% !important;
+  flex-basis: 100% !important;
+  width: 100% !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.gd-yard .gd-toolbar,
+.lobby-shell.multi-active .gd-yard .gd-toolbar {
+  position: relative !important;
+  order: 0 !important;
+  z-index: 20 !important;
+}
+.gd-yard #mgHand,
+.gd-yard .mg-hand-dock #mgHand {
+  order: 1 !important;
+}
+
+/* ZJH: hide leftover 说明 / help / aside / mahjong chrome that paints a dark
+   vertical strip over 茶友 on the right. Do NOT hide the lobby 说明 tab. */
+.lobby-shell.multi-active .mode-rail,
+.lobby-shell.multi-active #multiGameView aside,
+.lobby-shell.multi-active .zjh-help,
+.lobby-shell.multi-active .mg-help,
+.lobby-shell.multi-active .mg-rule-tip,
+.lobby-shell.multi-active .zjh-active .mg-rule-tip,
+.lobby-shell.multi-active .zjh-active aside,
+.lobby-shell.multi-active .zjh-active .mj-felt,
+.lobby-shell.multi-active .zjh-active .mj-room-bg,
+.lobby-shell.multi-active .zjh-active .mj-wall,
+.lobby-shell.multi-active .zjh-active .mj-compass,
+.lobby-shell.multi-active .zjh-active .mg-ad-bar,
+.lobby-shell.multi-active .zjh-active .table-center-ad,
+.lobby-shell.multi-active .zjh-active .mg-table-center-ad,
+.lobby-shell.multi-active .zjh-active .card-face-ad-hand,
+.lobby-shell.multi-active .zjh-active .card-face-ad,
+.lobby-shell.multi-active #rulesToast:not(.is-open) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Portrait Mini App: never keep the landscape 3-column mg-table that shoves
+   hero/help into an 18vw right rail covering 茶友. */
+html.table-landscape .lobby-shell.multi-active .zjh-active .mg-table,
+.lobby-shell.multi-active .multi-game-view.zjh-active .mg-table,
+.lobby-shell.multi-active .zjh-active .mg-table {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.lobby-shell.multi-active .home-tabbar,
+.lobby-shell.multi-active .quick-dock {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Rules toast: still gone unless .is-open (opaque inset 0). */
+#rulesToast:not(.is-open),
+#rulesToast[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transform: none !important;
+}
+#rulesToast.is-open {
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(8, 14, 22, 0.96) !important;
+  z-index: 600 !important;
+  height: var(--tg-vh, 100dvh) !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}

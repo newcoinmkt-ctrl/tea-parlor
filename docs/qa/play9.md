@@ -1,19 +1,21 @@
 # play9 — UI-only table layout pass
 
 Working copy: `/workspace/tea-fix/apps/web-lobby`
-Cache: `hand-fit.css`, `table-landscape.css`, `table-play.css`, `app.js` all `?v=play9`.
-`styles.css` not rewritten (not even present in this working copy). On-chain withdraw not touched. No games added. No clone / no push. `DDZ_TIER_IDS` stays at app.js:208 (before `boot()`). `--vvh` still only set by `applyDeviceAdapt` as `h * 0.01` px. Never `100vh`. `table-orient.js` still only **removes** `css-landscape`.
+Cache: `hand-fit.css`, `table-landscape.css`, `table-play.css`, `app.js` all `?v=play9` (unchanged this follow-up).
+`styles.css` not rewritten. On-chain withdraw not touched. No games added. No merge / no push. `DDZ_TIER_IDS` stays at app.js:208 (before `boot()`). `--vvh` still only set by `applyDeviceAdapt` as `h * 0.01` px. Never `100vh`. `table-orient.js` **not edited** — it still only **removes** `css-landscape` (no CSS rotate). Telegram `lockOrientation` is best-effort.
+
+**This round is portrait Mini App only.** Do not claim landscape table acceptance.
 
 ## Files changed
 
 | File | Why |
 |---|---|
 | `apps/web-lobby/index.html` | cache `v=play9` on the 4 overlay assets |
-| `apps/web-lobby/src/table-play.css` | last-word DDZ dock, Guandan flatten, mahjong gutter, one Texas D, opaque rules toast |
-| `apps/web-lobby/src/table-landscape.css` | neutralize css-rotate; Guandan dock `left:56px` |
-| `apps/web-lobby/src/hand-fit.css` | `.gd-col{display:contents}`, dock gutter, compact 弃 |
-| `apps/web-lobby/src/net/hand-layout.js` | `layoutGuandanCols` → one `layoutOverlapRow`; dock rect vs `innerWidth` |
-| `apps/web-lobby/src/app.js` | one Texas D; `hideRulesToast` at top of `handleLobbyAction` when `action !== 'rules'` |
+| `apps/web-lobby/src/table-play.css` | last-word DDZ dock, Guandan 2-row wrap, ZJH hide right 说明 overlay, opaque rules toast |
+| `apps/web-lobby/src/table-landscape.css` | neutralize css-rotate; Guandan dock `left:56px` (not edited this follow-up) |
+| `apps/web-lobby/src/hand-fit.css` | `.gd-col{display:contents}`, dock gutter, 2-row wrap |
+| `apps/web-lobby/src/net/hand-layout.js` | Guandan pack: peek≥18, 2 rows when 27×peek overflows; last.right ≤ innerWidth-4 |
+| `apps/web-lobby/src/app.js` | one Texas D; `hideRulesToast` at top of `handleLobbyAction` when `action !== 'rules'` (not edited this follow-up) |
 | `PLAY9.md` | this file |
 | `apps/web-lobby/src/net/table-orient.js` | **not edited** — already never adds `css-landscape` |
 
@@ -34,10 +36,44 @@ play9 last word in `table-play.css`:
 
 ### 2. Guandan
 
-- JS: `layoutGuandanCols` sets `.gd-col { display:contents }`, clears `margin-top`, packs all `.gd-card` with `layoutOverlapRow` using `dock.getBoundingClientRect().width` vs `innerWidth`
-- CSS: `.gd-col { display:contents !important }`
-- `.gd-yard .mg-hand-dock { left:56px; right:8px; overflow:hidden }` (position is the gutter; padding 0 so it does not stack)
-- `.gd-toolbar` `position:relative; order:0` above `#mgHand` `order:1` — 恢复 / 一键理牌 sit **above** the fan, not on it
+- `.gd-col { display:contents !important }` — no vertical rank stacks covering 恢复 / 一键理牌
+- Dock: `left:56px; right:8px; overflow-x:hidden` (avatar gutter). Padding not stacked.
+- `.gd-toolbar` `position:relative; order:0` above `#mgHand` `order:1` — 恢复 / 一键理牌 stay **above** the fan
+- Packing (`layoutGuandanCols`):
+  - `available = min(dock.getBoundingClientRect().width, innerWidth-8) - pad`, also capped so last.right ≤ `min(dock.right, innerWidth-4)`
+  - `cardW = clamp(28, 44, …)`, `peek ≥ 18` (visible strip so cards are tappable)
+  - If `n * 18 + (cardW - 18) > available` → **2 rows** (`ceil(n/2)` / `floor(n/2)`), `flex-wrap:wrap`, each row packed independently with negative `margin-left` (overlap = cardW − peek)
+  - Else one overlapping row
+  - Last card right ≤ dock right and ≤ `innerWidth - 4`. Never overflow the right edge.
+  - 27 cards on 414: 2 rows of 14/13, peek ~23/25, last.right ~400 < 410
+- Row height ~ card height; total hand stays in the lower half
+
+### 2b. Zha Jinhua right-side 说明 overlay
+
+Live play9 QA: a dark vertical panel of 说明 / seat text sat on the right of the zjh table covering 茶友. Cause: leftover help/aside + `html.table-landscape` 3-column `.mg-table` (Telegram `lockOrientation` is best-effort; we stay in portrait with **no CSS rotate**).
+
+Hidden on the open zjh table only (lobby 说明 tab is untouched):
+
+- `.lobby-shell.multi-active .mode-rail`
+- `.lobby-shell.multi-active #multiGameView aside`
+- `.lobby-shell.multi-active .zjh-help`
+- `.lobby-shell.multi-active .mg-help`
+- `.lobby-shell.multi-active .mg-rule-tip`
+- `.lobby-shell.multi-active .zjh-active aside`
+- `.lobby-shell.multi-active .zjh-active .mj-felt`
+- `.lobby-shell.multi-active .zjh-active .mj-room-bg`
+- `.lobby-shell.multi-active .zjh-active .mj-wall`
+- `.lobby-shell.multi-active .zjh-active .mj-compass`
+- `.lobby-shell.multi-active .zjh-active .mg-ad-bar`
+- `.lobby-shell.multi-active .zjh-active .table-center-ad`
+- `.lobby-shell.multi-active .zjh-active .mg-table-center-ad`
+- `.lobby-shell.multi-active .zjh-active .card-face-ad-hand`
+- `.lobby-shell.multi-active .zjh-active .card-face-ad`
+- `.lobby-shell.multi-active #rulesToast:not(.is-open)`
+- `.lobby-shell.multi-active .home-tabbar`
+- `.lobby-shell.multi-active .quick-dock`
+
+Also: `.zjh-active .mg-table` is `flex-direction:column` (kills the landscape 18vw right rail).
 
 ### 3. Mahjong
 
@@ -81,7 +117,7 @@ This working copy has **no** `src/texas/ui.js` (import still `./texas/ui.js`). `
 
 ## Self-test
 
-Measure on 360×640, 414×896, and a short viewport. `--tg-vh` may equal `innerHeight`; `--vvh` stays ~1vh.
+Measure on **portrait** 360×640, 414×896, and a short viewport. `--tg-vh` may equal `innerHeight`; `--vvh` stays ~1vh. Landscape table layout is **not** accepted this round (Telegram native `lockOrientation` is best-effort; no CSS rotate).
 
 1. **Dou Dizhu bid**
    - 17 cards in `#handArea`, no x-overflow.
@@ -91,11 +127,13 @@ Measure on 360×640, 414×896, and a short viewport. `--tg-vh` may equal `innerH
    - `.self-slot` `position:fixed; bottom:0`; table `height` is `var(--tg-vh)`, never `100vh`.
    - `html` class list must **not** contain `css-landscape`.
 
-2. **Guandan**
+2. **Guandan** (portrait Mini App)
    - `.gd-col` computed `display:contents`.
-   - All `.gd-card` share one horizontal overlapping row (no `margin-top` stack).
+   - 27 cards: two overlapping rows if `27*18+(cardW-18) > available`; peek ≥ 18px.
+   - Last card `right <= innerWidth - 4` (play9 QA fail was last.right=430 vs 414).
    - 恢复 / 一键理牌 sit above the fan, not covering tiles.
-   - Dock `left` 56px.
+   - Dock `left` 56px, `overflow-x:hidden`.
+   - Do not claim landscape table acceptance.
 
 3. **Mahjong**
    - Hero avatar does not cover tile 1–2 (`padding-left:56px` on `.mg-hand-dock`).
@@ -109,3 +147,7 @@ Measure on 360×640, 414×896, and a short viewport. `--tg-vh` may equal `innerH
 5. **Rules toast**
    - Open 说明: opaque fullscreen (`background rgba(8,14,22,0.96)`), `inset:0`.
    - Tap 我 / 大厅 / 战绩 / 补给: toast `display:none` (not a semi-transparent leftover).
+
+6. **Zha Jinhua** (portrait)
+   - No dark vertical 说明/help strip on the right covering 茶友.
+   - Lobby 说明 tab still works when not at the table.

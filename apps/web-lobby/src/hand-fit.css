@@ -142,3 +142,36 @@
   width: fit-content !important;
   flex: 0 0 auto !important;
 }
+
+/* play9 follow-up: Guandan 2-row fan; dock never overflows the right edge */
+.gd-col {
+  display: contents !important;
+}
+.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock {
+  left: 56px !important;
+  right: 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+#mgHand.gd-hand-2row,
+.gd-yard #mgHand.gd-hand-2row,
+.hand-area.hand-fitted.gd-hand-2row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-content: flex-end !important;
+  align-items: flex-end !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+.gd-row-break {
+  display: block !important;
+  flex: 1 0 100% !important;
+  flex-basis: 100% !important;
+  width: 100% !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
