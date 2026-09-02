@@ -1,0 +1,27 @@
+{
+  "url": "http://127.0.0.1:8765/",
+  "mode": "local-preview-no-inject",
+  "viewport": [414, 896],
+  "cache": "play9c",
+  "pngs": {
+    "lobby-414.png": "/workspace/tea-qa-play9c/lobby-414.png"
+  },
+  "guandan": {
+    "PASS": false,
+    "n": 0,
+    "uniqueTops": [],
+    "minTop": null,
+    "lastRight": null,
+    "minPeek": null,
+    "innerWidth": 414,
+    "innerHeight": 896
+  },
+  "rules": {
+    "PASS": false,
+    "toast_visible_after_me": null,
+    "save_tappable": null,
+    "note": "Click on 说明 was dispatched at (286.6,869.0) but follow-up screenshot/evaluate blocked."
+  },
+  "pass": [],
+  "fail": ["掼蛋", "说明->我"]
+}

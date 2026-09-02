@@ -1,0 +1,16 @@
+{
+  "n": 0,
+  "uniqueTops": [],
+  "rowCount": 0,
+  "minTop": null,
+  "lastRight": null,
+  "minPeek": null,
+  "innerWidth": 414,
+  "innerHeight": 896,
+  "overflowOk": false,
+  "peekOk": false,
+  "rowsOk": false,
+  "lowerHalfOk": false,
+  "PASS": false,
+  "note": "Could not capture 掼蛋 table: Playwright CDP/screenshot freezes after the first in-page action (same class of hang as waiting on Mini App). Lobby 414 PNG was captured from local preview v=play9c without CSS/JS inject."
+}
