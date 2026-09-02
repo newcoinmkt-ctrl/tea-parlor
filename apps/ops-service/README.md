@@ -18,7 +18,8 @@ It does not implement real-money recharge, withdrawal, crypto custody, or casino
 
 ```bash
 ADMIN_TOKEN=change-me npm start -w @tea-parlor/ops-service
-# 本地未设环境变量时，默认口令 tea-parlor-ops
+# Production requires ADMIN_TOKEN. The admin page has no default password.
+# Local-only example value (README only): tea-parlor-ops
 ```
 
 打开控制台：http://127.0.0.1:5190/admin

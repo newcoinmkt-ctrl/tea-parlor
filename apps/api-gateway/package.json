@@ -14,7 +14,8 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
-    "@tea-parlor/avatar-system": "file:../../packages/avatar-system"
+    "@tea-parlor/avatar-system": "file:../../packages/avatar-system",
+    "@tea-parlor/wallet-service": "file:../wallet-service"
   },
   "engines": {
     "node": ">=18"

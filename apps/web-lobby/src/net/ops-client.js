@@ -26,8 +26,23 @@ export async function reportOpsRevenue(payload) {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(2500),
   });
   if (!res.ok) throw new Error(`ops_revenue_${res.status}`);
+  return res.json();
+}
+
+export async function reportAdEvent(eventType, payload = {}) {
+  const res = await fetch(`${resolveOpsBase()}/public/ad-events`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      ...payload,
+      eventType,
+    }),
+    signal: AbortSignal.timeout(2500),
+  });
+  if (!res.ok) throw new Error(`ops_ad_event_${res.status}`);
   return res.json();
 }
 
@@ -50,6 +65,7 @@ export async function touchOpsPlayer({ playerId, name }) {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ playerId, name }),
+    signal: AbortSignal.timeout(2500),
   });
   if (!res.ok) throw new Error(`ops_touch_${res.status}`);
   return res.json();

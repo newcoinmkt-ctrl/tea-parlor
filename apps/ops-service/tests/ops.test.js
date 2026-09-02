@@ -4,7 +4,7 @@ import { readFileSync, rmSync } from 'node:fs';
 import { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 import { createDoudizhuRealtimeServer } from '@tea-parlor/doudizhu-game-server';
-import { LedgerEntryType } from '@tea-parlor/wallet-service';
+import { createWalletService, GoldLedgerType, LedgerEntryType } from '@tea-parlor/wallet-service';
 import { createOpsService } from '../src/server.js';
 
 test('admin routes require a token and expose user ledger audit data', async () => {
@@ -151,6 +151,11 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
   assert.ok(publicTableAds.body.placements.some((placement) => placement.slotType === 'table-rail'));
   assert.ok(publicTableAds.body.placements.some((placement) => placement.slotType === 'character-costume'));
   assert.ok(publicTableAds.body.placements.some((placement) => placement.slotType === 'card-back'));
+  assert.ok(publicTableAds.body.placements.some((placement) => placement.slotType === 'card-front'));
+  assert.ok(publicTableAds.body.placements.every((placement) => placement.auditStatus === 'approved'));
+  assert.ok(publicTableAds.body.placements.every((placement) => placement.safeAreaPolicy === 'do_not_cover_cards_buttons_timer_result'));
+  assert.ok(publicTableAds.body.placements.every((placement) => Number(placement.weight) > 0));
+  assert.ok(publicTableAds.body.placements.every((placement) => placement.schedule && placement.geoRules));
 
   const updated = await invoke(ops.handler, 'PUT', '/admin/ad-placements/doudizhu-costume-seat-1', {
     headers: authHeaders(),
@@ -163,11 +168,16 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
       priority: 15,
       categoryId: 'exchange',
       logoId: 'btc',
+      materialId: 'btc',
       advertiserName: 'Alpha Exchange',
       campaignTitle: '农民外套',
       copy: '平台任务入口',
       landingUrl: 'https://example.com/alpha',
       assetTheme: 'exchange',
+      weight: 8,
+      rotationMode: 'weighted',
+      schedule: { timezone: 'Asia/Shanghai', daysOfWeek: [1, 2], hours: [10, 20] },
+      geoRules: { includeCountries: ['CN'], excludeCountries: ['US'] },
       startAt: '2026-08-01T00:00:00.000Z',
       endAt: '2026-09-01T00:00:00.000Z',
     },
@@ -176,6 +186,11 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
   assert.equal(updated.body.placement.gameId, 'doudizhu');
   assert.equal(updated.body.placement.seatIndex, 1);
   assert.equal(updated.body.placement.logoId, 'btc');
+  assert.equal(updated.body.placement.materialId, 'btc');
+  assert.equal(updated.body.placement.weight, 8);
+  assert.equal(updated.body.placement.rotationMode, 'weighted');
+  assert.deepEqual(updated.body.placement.schedule.daysOfWeek, [1, 2]);
+  assert.deepEqual(updated.body.placement.geoRules.includeCountries, ['CN']);
   assert.equal(updated.body.placement.startAt, '2026-08-01T00:00:00.000Z');
   assert.equal(updated.body.placement.endAt, '2026-09-01T00:00:00.000Z');
   assert.equal(updated.body.placement.updatedAt, '2026-08-14T00:00:00.000Z');
@@ -185,6 +200,12 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
     headers: authHeaders(),
   });
   assert.ok(filtered.body.placements.some((placement) => placement.advertiserName === 'Alpha Exchange' && placement.logo?.id === 'btc'));
+
+  const preview = await invoke(ops.handler, 'GET', '/admin/ad-placements/doudizhu-costume-seat-1/preview', {
+    headers: authHeaders(),
+  });
+  assert.equal(preview.status, 200);
+  assert.match(preview.body.html, /data-safe-area="do_not_cover_cards_buttons_timer_result"/);
 
   const settlementAd = await invoke(ops.handler, 'PUT', '/admin/ad-placements/doudizhu-settle-test', {
     headers: authHeaders(),
@@ -256,11 +277,63 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
   });
   assert.equal(future.status, 200);
 
+  const pendingAd = await invoke(ops.handler, 'PUT', '/admin/ad-placements/doudizhu-pending-ad', {
+    headers: authHeaders(),
+    body: {
+      gameId: 'doudizhu',
+      surface: 'game-table',
+      slotType: 'table-rail',
+      enabled: true,
+      auditStatus: 'pending',
+      advertiserName: 'Pending',
+      campaignTitle: '待审核广告',
+      copy: '不应公开展示',
+      landingUrl: 'https://example.com/pending',
+    },
+  });
+  assert.equal(pendingAd.status, 200);
+
+  const material = await invoke(ops.handler, 'POST', '/admin/ad-materials', {
+    headers: authHeaders(),
+    body: {
+      id: 'pending-material',
+      name: '待审核素材',
+      type: 'image',
+      auditStatus: 'pending',
+      width: 320,
+      height: 120,
+      data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    },
+  });
+  assert.equal(material.status, 200);
+  assert.equal(material.body.logo.auditStatus, 'pending');
+
+  const pendingMaterialAd = await invoke(ops.handler, 'PUT', '/admin/ad-placements/doudizhu-pending-material', {
+    headers: authHeaders(),
+    body: {
+      gameId: 'doudizhu',
+      surface: 'game-table',
+      slotType: 'table-rail',
+      enabled: true,
+      auditStatus: 'approved',
+      materialId: 'pending-material',
+      logoId: 'pending-material',
+      advertiserName: 'Pending Material',
+      campaignTitle: '素材待审',
+      copy: '不应公开展示',
+      landingUrl: 'https://example.com/pending-material',
+    },
+  });
+  assert.equal(pendingMaterialAd.status, 200);
+
   const publicAfterFilters = await invoke(ops.handler, 'GET', '/public/ad-placements?surface=game-table&gameId=doudizhu');
   const publicSlots = publicAfterFilters.body.placements.map((placement) => placement.slotId);
   assert.ok(!publicSlots.includes('doudizhu-disabled-ad'));
   assert.ok(!publicSlots.includes('doudizhu-expired-ad'));
   assert.ok(!publicSlots.includes('doudizhu-future-ad'));
+  assert.ok(!publicSlots.includes('doudizhu-pending-ad'));
+  assert.ok(!publicSlots.includes('doudizhu-pending-material'));
+  assert.ok(!publicAfterFilters.body.logos.some((logo) => logo.id === 'pending-material'));
 
   const adminAfterFilters = await invoke(ops.handler, 'GET', '/admin/ad-placements?gameId=doudizhu', {
     headers: authHeaders(),
@@ -269,6 +342,46 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
   assert.ok(adminSlots.includes('doudizhu-disabled-ad'));
   assert.ok(adminSlots.includes('doudizhu-expired-ad'));
   assert.ok(adminSlots.includes('doudizhu-future-ad'));
+  assert.ok(adminSlots.includes('doudizhu-pending-ad'));
+  assert.ok(adminSlots.includes('doudizhu-pending-material'));
+
+  const lightWeighted = await invoke(ops.handler, 'PUT', '/admin/ad-placements/doudizhu-weight-light', {
+    headers: authHeaders(),
+    body: {
+      gameId: 'doudizhu',
+      surface: 'game-table',
+      slotType: 'table-rail',
+      enabled: true,
+      advertiserName: 'Light',
+      campaignTitle: '低权重',
+      copy: '轮播测试',
+      landingUrl: 'https://example.com/light',
+      weight: 1,
+      rotationMode: 'weighted',
+      priority: 900,
+    },
+  });
+  assert.equal(lightWeighted.status, 200);
+  const heavyWeighted = await invoke(ops.handler, 'PUT', '/admin/ad-placements/doudizhu-weight-heavy', {
+    headers: authHeaders(),
+    body: {
+      gameId: 'doudizhu',
+      surface: 'game-table',
+      slotType: 'table-rail',
+      enabled: true,
+      advertiserName: 'Heavy',
+      campaignTitle: '高权重',
+      copy: '轮播测试',
+      landingUrl: 'https://example.com/heavy',
+      weight: 100,
+      rotationMode: 'weighted',
+      priority: 900,
+    },
+  });
+  assert.equal(heavyWeighted.status, 200);
+  const weighted = await invoke(ops.handler, 'GET', '/public/ad-placements?surface=game-table&slotType=table-rail&rotationSeed=test');
+  const weightedSlots = weighted.body.placements.map((placement) => placement.slotId);
+  assert.ok(weightedSlots.indexOf('doudizhu-weight-heavy') < weightedSlots.indexOf('doudizhu-weight-light'));
 
   const invalid = await invoke(ops.handler, 'PUT', '/admin/ad-placements/bad-ad', {
     headers: authHeaders(),
@@ -284,6 +397,22 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
   });
   assert.equal(invalid.status, 400);
   assert.equal(invalid.body.reason, 'https_landing_url_required');
+
+  const invalidImage = await invoke(ops.handler, 'PUT', '/admin/ad-placements/bad-image-ad', {
+    headers: authHeaders(),
+    body: {
+      gameId: 'doudizhu',
+      surface: 'game-table',
+      slotType: 'table-rail',
+      advertiserName: 'Bad Image',
+      campaignTitle: 'bad',
+      copy: 'bad',
+      landingUrl: 'https://example.com/valid',
+      imageUrl: 'http://example.com/insecure.png',
+    },
+  });
+  assert.equal(invalidImage.status, 400);
+  assert.equal(invalidImage.body.reason, 'https_image_url_required');
 
   const badRange = await invoke(ops.handler, 'PUT', '/admin/ad-placements/bad-range', {
     headers: authHeaders(),
@@ -328,6 +457,30 @@ test('ops service exposes configurable ad placements for lobby, table, and chara
   assert.equal(publicWriteAttempt.status, 401);
   const afterLedger = await invoke(ops.handler, 'GET', '/admin/ledger', { headers: authHeaders() });
   assert.equal(afterLedger.body.ledger.length, beforeLedger.body.ledger.length);
+
+  const beforeClickLedger = await invoke(ops.handler, 'GET', '/admin/ledger', { headers: authHeaders() });
+  const click = await invoke(ops.handler, 'POST', '/public/ad-clicks', {
+    body: {
+      slotId: 'doudizhu-table-center',
+      playerId: 'alice',
+      eventId: 'click:doudizhu-table-center:1',
+    },
+  });
+  assert.equal(click.status, 200);
+  assert.equal(click.body.event.eventType, 'click');
+  assert.equal(click.body.event.policy, 'ad_event_only_no_wallet_ledger_write');
+  const events = await invoke(ops.handler, 'GET', '/admin/ad-events?eventType=click', { headers: authHeaders() });
+  assert.ok(events.body.events.some((event) => event.eventId === 'click:doudizhu-table-center:1'));
+  const duplicateClick = await invoke(ops.handler, 'POST', '/public/ad-clicks', {
+    body: {
+      slotId: 'doudizhu-table-center',
+      playerId: 'alice',
+      eventId: 'click:doudizhu-table-center:1',
+    },
+  });
+  assert.equal(duplicateClick.body.duplicate, true);
+  const afterClickLedger = await invoke(ops.handler, 'GET', '/admin/ledger', { headers: authHeaders() });
+  assert.equal(afterClickLedger.body.ledger.length, beforeClickLedger.body.ledger.length);
 });
 
 test('ops console can take a game offline, grant shadow points, and summarize the ledger', async () => {
@@ -396,8 +549,13 @@ test('ops console can take a game offline, grant shadow points, and summarize th
   assert.equal(coBrandSkin.rarity, 'epic');
   assert.equal(coBrandSkin.coBranded, true);
   assert.equal(coBrandSkin.slotType, 'table_skin');
+  assert.equal(coBrandSkin.listingStatus, 'published');
+  assert.equal(coBrandSkin.auditStatus, 'approved');
+  assert.deepEqual(coBrandSkin.logoPlacementPolicy, ['table_corner']);
   assert.ok(catalog.body.skins.some((item) => item.slotType === 'card_back'));
   assert.ok(catalog.body.skins.some((item) => item.slotType === 'avatar_frame'));
+  assert.equal(catalog.body.skins.some((item) => item.slotType === 'card_front' && item.coBranded), false);
+  assert.ok(catalog.body.skins.some((item) => item.group === '链游纪念' && item.nft?.tradable === false));
 
   const hideChar = await invoke(ops.handler, 'PUT', '/admin/characters/tea_fox', {
     headers: authHeaders(),
@@ -420,12 +578,19 @@ test('ops console can take a game offline, grant shadow points, and summarize th
       coBranded: true,
       slotType: 'avatar_frame',
       surface: 'avatar',
+      listingStatus: 'scheduled',
+      auditStatus: 'pending',
+      logoPlacementPolicy: ['chest_badge', 'sleeve_badge', 'head'],
     },
   });
   assert.equal(updateSkin.status, 200);
   assert.equal(updateSkin.body.skin.rarity, 'legendary');
   assert.equal(updateSkin.body.skin.source, '本地联名配置');
   assert.equal(updateSkin.body.skin.slotType, 'avatar_frame');
+  assert.equal(updateSkin.body.skin.listingStatus, 'reviewing');
+  assert.equal(updateSkin.body.skin.configStatus, 'reviewing');
+  assert.equal(updateSkin.body.skin.auditStatus, 'pending');
+  assert.deepEqual(updateSkin.body.skin.logoPlacementPolicy, ['chest_badge', 'sleeve_badge']);
   const publicLooks = await invoke(ops.handler, 'GET', '/public/catalog');
   assert.equal(publicLooks.body.characters.find((item) => item.id === 'tea_fox').enabled, false);
   assert.equal(publicLooks.body.skins.find((item) => item.id === 'cyber-neon').enabled, false);
@@ -502,7 +667,12 @@ test('ops console can take a game offline, grant shadow points, and summarize th
   assert.match(page, /人物/);
   assert.match(page, /皮肤/);
   assert.match(page, /服饰 Logo|服饰Logo/);
-  assert.match(page, /品类|上传 Logo|新建 \/ 编辑广告/);
+  assert.match(page, /品类|上传素材|新建 \/ 编辑广告/);
+  assert.match(page, /审计日志/);
+  assert.match(page, /配置发布与回滚/);
+  assert.match(page, /UID \/ TG ID \/ 昵称/);
+  assert.match(page, /草稿|审核中|已发布|已下架/);
+  assert.doesNotMatch(page, /资金提现|资金充值|法币|主网/);
 });
 
 test('ops store persists game and ad changes across service restarts', async () => {
@@ -599,6 +769,219 @@ test('ops store persists game and ad changes across service restarts', async () 
   }
 });
 
+test('ops service enforces RBAC, audit logs writes, and supports config rollback', async () => {
+  const ops = createOpsService({
+    adminToken: 'secret',
+    roleTokens: {
+      game_operator: { token: 'operator-token', id: 'op-1', name: 'Game Ops' },
+      support: { token: 'support-token', id: 'cs-1', name: 'Support' },
+      auditor: { token: 'audit-token', id: 'audit-1', name: 'Audit' },
+    },
+    clock: () => '2026-08-30T00:00:00.000Z',
+  });
+
+  const me = await invoke(ops.handler, 'GET', '/admin/me', { headers: authHeaders('operator-token') });
+  assert.equal(me.body.admin.role, 'game_operator');
+  assert.equal(me.body.admin.roleLabel, '游戏运营');
+
+  const supportCreateAd = await invoke(ops.handler, 'PUT', '/admin/ad-placements/support-ad', {
+    headers: authHeaders('support-token'),
+    body: {
+      gameId: 'lobby',
+      surface: 'lobby',
+      slotType: 'banner',
+      advertiserName: 'Support',
+      campaignTitle: '越权',
+      copy: '越权',
+      landingUrl: 'https://example.com/support',
+    },
+  });
+  assert.equal(supportCreateAd.status, 403);
+  assert.equal(supportCreateAd.body.reason, 'rbac_forbidden');
+
+  const auditorWrite = await invoke(ops.handler, 'PUT', '/admin/games/doudizhu', {
+    headers: authHeaders('audit-token'),
+    body: { enabled: false },
+  });
+  assert.equal(auditorWrite.status, 403);
+
+  const supportFreezeWithoutReason = await invoke(ops.handler, 'POST', '/admin/users/alice/freeze', {
+    headers: authHeaders('support-token'),
+    body: {},
+  });
+  assert.equal(supportFreezeWithoutReason.status, 400);
+  assert.equal(supportFreezeWithoutReason.body.reason, 'freeze_reason_required');
+
+  const supportFreeze = await invoke(ops.handler, 'POST', '/admin/users/alice/freeze', {
+    headers: authHeaders('support-token'),
+    body: { reason: 'risk_review' },
+  });
+  assert.equal(supportFreeze.status, 200);
+  assert.equal(supportFreeze.body.user.frozen, true);
+
+  const supportGrant = await invoke(ops.handler, 'POST', '/admin/users/alice/grant', {
+    headers: authHeaders('support-token'),
+    body: { amount: 1, reason: 'bad' },
+  });
+  assert.equal(supportGrant.status, 403);
+
+  const supportUnfreezeWithoutReason = await invoke(ops.handler, 'POST', '/admin/users/alice/unfreeze', {
+    headers: authHeaders('support-token'),
+    body: {},
+  });
+  assert.equal(supportUnfreezeWithoutReason.status, 400);
+  assert.equal(supportUnfreezeWithoutReason.body.reason, 'unfreeze_reason_required');
+
+  const created = await invoke(ops.handler, 'POST', '/admin/users', {
+    headers: authHeaders(),
+    body: {
+      userId: 'ops:search-1',
+      tgId: '998877',
+      displayName: '茶客甲',
+      nickname: 'SearchNick',
+      amount: 200,
+      reason: 'seed',
+    },
+  });
+  assert.equal(created.status, 200);
+  assert.equal(created.body.user.tgId, '998877');
+  assert.equal(created.body.user.shadowPoints.available, 200);
+  assert.ok(Array.isArray(created.body.user.ledger));
+
+  const foundByTg = await invoke(ops.handler, 'GET', '/admin/users?tgId=998877', { headers: authHeaders('support-token') });
+  assert.equal(foundByTg.body.users.length, 1);
+  const foundByNick = await invoke(ops.handler, 'GET', '/admin/users?nickname=searchnick', { headers: authHeaders('support-token') });
+  assert.equal(foundByNick.body.users[0].userId, 'ops:search-1');
+
+  const detail = await invoke(ops.handler, 'GET', '/admin/users/ops:search-1', { headers: authHeaders('support-token') });
+  assert.equal(detail.body.user.nickname, '茶客甲');
+  assert.equal(detail.body.user.profile.nickname, 'SearchNick');
+  assert.equal(detail.body.user.ledgerCount, 1);
+  assert.equal(detail.body.user.stats.rounds, 0);
+
+  const publish = await invoke(ops.handler, 'POST', '/admin/config-versions/publish', {
+    headers: authHeaders('operator-token'),
+    body: { version: 'v1', scope: 'ops-config', note: 'baseline' },
+  });
+  assert.equal(publish.status, 200);
+  assert.equal(publish.body.version.version, 'v1');
+
+  const offline = await invoke(ops.handler, 'PUT', '/admin/games/doudizhu', {
+    headers: authHeaders('operator-token'),
+    body: { enabled: false },
+  });
+  assert.equal(offline.status, 200);
+
+  const rollback = await invoke(ops.handler, 'POST', '/admin/config-versions/v1/rollback', {
+    headers: authHeaders('operator-token'),
+    body: { reason: 'restore' },
+  });
+  assert.equal(rollback.status, 200);
+  const games = await invoke(ops.handler, 'GET', '/admin/games', { headers: authHeaders('audit-token') });
+  assert.equal(games.body.games.find((game) => game.id === 'doudizhu').enabled, true);
+
+  await invoke(ops.handler, 'POST', '/public/ad-impressions', {
+    body: { slotId: 'lobby-top-banner', eventId: 'impression:lobby:1' },
+  });
+  await invoke(ops.handler, 'POST', '/public/ad-clicks', {
+    body: { slotId: 'lobby-top-banner', eventId: 'click:lobby:1' },
+  });
+  const dashboard = await invoke(ops.handler, 'GET', '/admin/dashboard', { headers: authHeaders('audit-token') });
+  assert.equal(dashboard.body.dashboard.adImpressions, 1);
+  assert.equal(dashboard.body.dashboard.adClicks, 1);
+  assert.equal(dashboard.body.dashboard.policy, 'ops_dashboard_no_real_money_backend');
+
+  const logs = await invoke(ops.handler, 'GET', '/admin/audit-logs', { headers: authHeaders('audit-token') });
+  assert.ok(logs.body.logs.some((log) => log.status === 'denied' && log.role === 'support'));
+  assert.ok(logs.body.logs.some((log) => log.action === 'user.freeze' && log.actorId === 'cs-1' && log.status === 'success'));
+  assert.ok(logs.body.logs.some((log) => log.action === 'config.rollback' && log.status === 'success'));
+});
+
+test('ops service queries invite risk state and gates manual invite reward operations', async () => {
+  const wallet = createWalletService({
+    clock: () => '2026-08-31T10:00:00.000Z',
+    inviteBindWindowLimit: 1,
+  });
+  wallet.registerUser({ userId: '100' });
+  wallet.registerUser({ userId: '201', startParam: 'ref_100' });
+  wallet.registerUser({ userId: '202', startParam: 'ref_100' });
+  const pending = wallet.qualifyInvite({ inviteeUserId: '202' });
+  assert.equal(pending.pending_review, true);
+
+  const ops = createOpsService({
+    adminToken: 'secret',
+    walletService: wallet,
+    roleTokens: {
+      support: { token: 'support-token', id: 'support-1', name: '客服一号' },
+      auditor: { token: 'auditor-token', id: 'auditor-1', name: '审计一号' },
+    },
+    clock: () => '2026-08-31T10:00:00.000Z',
+  });
+
+  const invitees = await invoke(ops.handler, 'GET', '/admin/invites/100/invitees', {
+    headers: authHeaders('auditor-token'),
+  });
+  assert.equal(invitees.status, 200);
+  assert.equal(invitees.body.invitees.length, 2);
+  const abnormal = invitees.body.invitees.find((item) => item.userId === '202');
+  assert.equal(abnormal.risk_status, 'abnormal');
+  assert.equal(abnormal.reward_settled, false);
+  assert.equal(invitees.body.reviews[0].status, 'pending_review');
+
+  const newbieLedger = await invoke(ops.handler, 'GET', `/admin/gold-ledger?userId=202&type=${GoldLedgerType.NEWBIE_INVITE}`, {
+    headers: authHeaders('support-token'),
+  });
+  assert.equal(newbieLedger.status, 200);
+  assert.equal(newbieLedger.body.ledger.length, 1);
+  assert.equal(newbieLedger.body.ledger[0].amount, 2000);
+
+  const forbiddenApprove = await invoke(ops.handler, 'POST', '/admin/invite-rewards/approve', {
+    headers: authHeaders('support-token'),
+    body: { inviteeUserId: '202', reason: '客服无权补发' },
+  });
+  assert.equal(forbiddenApprove.status, 403);
+  assert.equal(forbiddenApprove.body.reason, 'rbac_forbidden');
+
+  const approved = await invoke(ops.handler, 'POST', '/admin/invite-rewards/approve', {
+    headers: authHeaders(),
+    body: { inviteeUserId: '202', reason: '人工审核通过' },
+  });
+  assert.equal(approved.status, 200);
+  assert.equal(approved.body.review.status, 'paid');
+  assert.equal(approved.body.ledgerEntry.type, GoldLedgerType.INVITE_SUCCESS);
+  assert.equal(wallet.getUser('100').valid_invite_count, 1);
+
+  const forbiddenFreeze = await invoke(ops.handler, 'POST', '/admin/invite-rewards/freeze', {
+    headers: authHeaders('support-token'),
+    body: { ledgerId: approved.body.ledgerEntry.id, reason: '客服无权冻结' },
+  });
+  assert.equal(forbiddenFreeze.status, 403);
+  assert.equal(forbiddenFreeze.body.reason, 'rbac_forbidden');
+
+  const frozen = await invoke(ops.handler, 'POST', '/admin/invite-rewards/freeze', {
+    headers: authHeaders(),
+    body: { ledgerId: approved.body.ledgerEntry.id, reason: '作弊复核' },
+  });
+  assert.equal(frozen.status, 200);
+  assert.equal(frozen.body.review.status, 'frozen');
+  assert.equal(frozen.body.reversal.goldLedgerEntry.amount, -4000);
+
+  const inviterLedger = await invoke(ops.handler, 'GET', `/admin/gold-ledger?userId=100&type=${GoldLedgerType.INVITE_SUCCESS}`, {
+    headers: authHeaders('auditor-token'),
+  });
+  assert.deepEqual(inviterLedger.body.ledger.map((entry) => entry.amount), [4000, -4000]);
+
+  const auditLogs = await invoke(ops.handler, 'GET', '/admin/audit-logs?action=invite_reward', {
+    headers: authHeaders(),
+  });
+  assert.ok(auditLogs.body.logs.some((log) => log.action === 'invite_reward.approve' && log.status === 'success'));
+  assert.ok(auditLogs.body.logs.some((log) => log.action === 'invite_reward.freeze' && log.status === 'success'));
+  const allAuditLogs = await invoke(ops.handler, 'GET', '/admin/audit-logs', {
+    headers: authHeaders(),
+  });
+  assert.ok(allAuditLogs.body.logs.some((log) => log.action === 'post.invite-rewards.approve' && log.status === 'denied'));
+});
+
 test('ops service exposes quarantined GitHub game candidates without enabling runtime play', async () => {
   const ops = createOpsService({
     adminToken: 'secret',
@@ -652,6 +1035,6 @@ function invoke(handler, method, url, options = {}) {
   });
 }
 
-function authHeaders() {
-  return { authorization: 'Bearer secret' };
+function authHeaders(token = 'secret') {
+  return { authorization: `Bearer ${token}` };
 }

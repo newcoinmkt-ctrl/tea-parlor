@@ -3,9 +3,34 @@
  * 消息协议与 H5 pinus 快照兼容（publicState 同构）
  */
 import colyseus from 'colyseus';
+import { verifySessionToken } from '@tea-parlor/session-auth';
 import { DdzTable } from '../ddzLogic.js';
 
 const { Room } = colyseus;
+
+
+/**
+ * P0 鉴权（评审 #3 遗留的 onJoin TODO(auth)）：
+ * 校验网关签发的 session token，且 uid 必须与 token 身份一致，
+ * 不再盲信客户端传来的 options.uid。
+ * 未配置密钥时保持本地开发信任模式（仅限测试）。
+ * 抽成纯函数便于单元测试。
+ */
+export function verifyRoomJoin(options = {}, deps = {}) {
+  const sessionSecret = deps.sessionSecret ?? process.env.API_GATEWAY_SESSION_SECRET ?? null;
+  if (!sessionSecret) {
+    return { ok: true, uid: options.uid || null, trusted: true };
+  }
+  const verified = verifySessionToken(options.token || '', { sessionSecret });
+  if (!verified.ok) {
+    return { ok: false, reason: 'auth_failed', detail: verified.reason };
+  }
+  const tokenUserId = String(verified.user.id);
+  if (options.uid != null && tokenUserId !== String(options.uid)) {
+    return { ok: false, reason: 'auth_identity_mismatch' };
+  }
+  return { ok: true, uid: tokenUserId, trusted: false };
+}
 
 export class DoudizhuRoom extends Room {
   maxClients = 4;
@@ -19,6 +44,10 @@ export class DoudizhuRoom extends Room {
     this.patchRate = null; // 用显式消息推送状态，不依赖 Schema
     this.table = null;
     this.humanUid = null;
+    this.sessionSecret = options.sessionSecret ?? process.env.API_GATEWAY_SESSION_SECRET ?? null;
+    if (!this.sessionSecret) {
+      console.warn('[colyseus] API_GATEWAY_SESSION_SECRET 未配置：入房鉴权关闭（信任模式），仅限本地开发/测试使用');
+    }
 
     this.onMessage('hello', (client, msg) => {
       client.send('hello', { ok: true, uid: client.sessionId, echo: msg || null });
@@ -55,7 +84,12 @@ export class DoudizhuRoom extends Room {
   }
 
   async onJoin(client, options = {}) {
-    const uid = options.uid || client.sessionId;
+    const auth = verifyRoomJoin(options, { sessionSecret: this.sessionSecret });
+    if (!auth.ok) {
+      client.send('error', { msg: auth.reason, detail: auth.detail || null });
+      throw new Error(auth.reason);
+    }
+    const uid = auth.uid || client.sessionId;
     const name = options.name || '茶馆';
     const roomKey = options.roomKey || this.metadata?.roomKey || 'novice';
     const currency = options.currency || 'ingot';

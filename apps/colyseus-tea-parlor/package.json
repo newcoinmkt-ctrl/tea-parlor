@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@colyseus/ws-transport": "^0.15.3",
+    "@tea-parlor/session-auth": "file:../../packages/session-auth",
     "colyseus": "^0.15.26",
     "cors": "^2.8.5",
     "express": "^4.21.2"

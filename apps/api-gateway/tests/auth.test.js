@@ -17,6 +17,7 @@ import {
   verifyTelegramInitData,
 } from '../src/telegram-auth.js';
 import { createApiGateway } from '../src/server.js';
+import { createWalletService, LedgerEntryType, GoldLedgerType } from '@tea-parlor/wallet-service';
 
 const BOT_TOKEN = '123456:TEST_BOT_TOKEN';
 const SESSION_SECRET = 'test-session-secret';
@@ -207,6 +208,59 @@ test('login endpoint returns session token and /me returns authenticated user pr
   });
 });
 
+test('login endpoint can bind invite start_param and grant invited newbie gold', async () => {
+  const walletService = createWalletService({ clock: () => '2026-08-30T09:00:00.000Z' });
+  walletService.registerUser({ userId: '100' });
+  const handler = createApiGateway({
+    botToken: BOT_TOKEN,
+    sessionSecret: SESSION_SECRET,
+    nowSeconds: NOW,
+    walletService,
+  });
+  const login = await request(handler, 'POST', '/auth/telegram', {
+    initData: makeInitData({
+      user: { id: 201, first_name: 'Bob' },
+      extra: { start_param: 'inv_100' },
+    }),
+  });
+
+  assert.equal(login.status, 200);
+  assert.equal(login.body.invite.bound, true);
+  assert.equal(login.body.invite.grantType, GoldLedgerType.NEWBIE_INVITE);
+  assert.equal(login.body.invite.grantAmount, 2000);
+  assert.equal(walletService.getUser('201').referred_by, '100');
+  assert.equal(walletService.getAccount('201').available, 2000);
+});
+
+test('login invite attribution trusts signed initData start_param over body referrer', async () => {
+  const walletService = createWalletService({ clock: () => '2026-08-30T09:30:00.000Z' });
+  walletService.registerUser({ userId: '100' });
+  walletService.registerUser({ userId: '999' });
+  const handler = createApiGateway({
+    botToken: BOT_TOKEN,
+    sessionSecret: SESSION_SECRET,
+    nowSeconds: NOW,
+    walletService,
+  });
+  const login = await request(handler, 'POST', '/auth/telegram', {
+    initData: makeInitData({
+      user: { id: 202, first_name: 'Carol' },
+      extra: { start_param: 'ref_100' },
+    }),
+    start_param: 'ref_999',
+    device_hash: 'spoofed-body-device',
+  }, {
+    'x-forwarded-for': '203.0.113.8',
+    'x-device-hash': 'device-hash-header',
+  });
+
+  assert.equal(login.status, 200);
+  assert.equal(login.body.invite.bound, true);
+  assert.equal(walletService.getUser('202').referred_by, '100');
+  assert.equal(walletService.queryGoldLedger({ userId: '202', type: GoldLedgerType.NEWBIE_INVITE }).length, 1);
+  assert.equal(walletService.queryInviteRiskLogs({ userId: '202', refUserId: '100' }).some((row) => row.result === 'bound'), true);
+});
+
 test('login endpoint rejects bad initData without leaking secrets', async () => {
   const handler = createApiGateway({
     botToken: BOT_TOKEN,
@@ -287,6 +341,166 @@ test('avatar equipment save validates invalid and unowned items on backend', asy
   assert.equal(saved.status, 200);
   assert.equal(saved.body.ok, true);
   assert.equal(saved.body.avatar.equipment.top, 'top_black');
+});
+
+test('wallet endpoints expose server ledger balances and idempotent grants, locks, settlements', async () => {
+  const walletService = createWalletService();
+  const handler = createApiGateway({
+    sessionSecret: SESSION_SECRET,
+    walletService,
+  });
+  const token = createSessionToken({
+    user: { id: 42, first_name: 'Alice' },
+    authDate: NOW,
+  }, {
+    sessionSecret: SESSION_SECRET,
+    issuedAt: NOW,
+  });
+  const headers = { authorization: `Bearer ${token}` };
+
+  const initial = await request(handler, 'GET', '/wallet/summary', null, headers);
+  assert.equal(initial.status, 200);
+  assert.equal(initial.body.balances.shadowPoints.available, 0);
+  assert.match(initial.body.compliance, /不可充值、不可提现、不可兑换真实资产/);
+
+  const grant = await request(handler, 'POST', '/wallet/grants/daily', {
+    amount: 4000,
+    idempotencyKey: 'wallet:grant:daily:42:2026-08-29:1',
+  }, headers);
+  assert.equal(grant.status, 200);
+  assert.equal(grant.body.summary.balances.shadowPoints.available, 4000);
+
+  const repeatedGrant = await request(handler, 'POST', '/wallet/grants/daily', {
+    amount: 4000,
+    idempotencyKey: 'wallet:grant:daily:42:2026-08-29:1',
+  }, headers);
+  assert.equal(repeatedGrant.status, 200);
+  assert.equal(walletService.queryLedger({ userId: '42', type: LedgerEntryType.ISSUE }).length, 1);
+
+  const lock = await request(handler, 'POST', '/wallet/lock', {
+    amount: 100,
+    referenceId: 'round-authority',
+    idempotencyKey: 'wallet:lock:round-authority:42',
+    gameId: 'doudizhu',
+    roomId: 'classic',
+  }, headers);
+  assert.equal(lock.status, 200);
+  assert.equal(lock.body.summary.balances.shadowPoints.available, 3900);
+  assert.equal(lock.body.summary.balances.shadowPoints.locked, 100);
+  walletService.issuePoints({ userId: 'bot-a', amount: 100, idempotencyKey: 'issue:bot-a' });
+  walletService.issuePoints({ userId: 'bot-b', amount: 100, idempotencyKey: 'issue:bot-b' });
+
+  const settlement = await request(handler, 'POST', '/wallet/settlement', {
+    participants: ['42', 'bot-a', 'bot-b'],
+    settlementIntent: {
+      type: 'settlement_intent',
+      gameId: 'doudizhu',
+      roomId: 'classic',
+      roundId: 'round-authority',
+      idempotencyKey: 'settlement:round-authority',
+      ledgerPolicy: 'adapter_returns_intent_only',
+      winnerSide: 'landlord',
+      scores: [4, -2, -2],
+    },
+  }, headers);
+  assert.equal(settlement.status, 200);
+  assert.equal(settlement.body.summary.balances.shadowPoints.available, 4004);
+  assert.equal(settlement.body.summary.balances.shadowPoints.locked, 0);
+  assert.equal(walletService.queryLedger({ userId: '42', type: LedgerEntryType.SETTLEMENT }).length, 1);
+});
+
+test('invite endpoints bind first inviter, claim share reward, qualify first round, and expose gold ledger', async () => {
+  const walletService = createWalletService({ clock: () => '2026-08-30T08:00:00.000Z' });
+  const handler = createApiGateway({
+    sessionSecret: SESSION_SECRET,
+    walletService,
+    botUsername: 'TeaParlorTestBot',
+    miniAppShortName: 'tea',
+    internalServiceToken: 'internal-test-token',
+  });
+  const inviterToken = createSessionToken({
+    user: { id: 100, first_name: 'Inviter' },
+    authDate: NOW,
+  }, {
+    sessionSecret: SESSION_SECRET,
+    issuedAt: NOW,
+  });
+  const inviteeToken = createSessionToken({
+    user: { id: 200, first_name: 'Invitee' },
+    authDate: NOW,
+  }, {
+    sessionSecret: SESSION_SECRET,
+    issuedAt: NOW,
+  });
+  const inviterHeaders = { authorization: `Bearer ${inviterToken}` };
+  const inviteeHeaders = { authorization: `Bearer ${inviteeToken}` };
+
+  walletService.registerUser({ userId: '100' });
+  const me = await request(handler, 'GET', '/invite/me', null, inviterHeaders);
+  assert.equal(me.status, 200);
+  assert.match(me.body.invite_link, /https:\/\/t\.me\/TeaParlorTestBot\/tea\?startapp=ref_100/);
+  assert.equal(me.body.valid_invite_count, 0);
+  assert.equal(me.body.share_claimed_today, false);
+  assert.ok(Array.isArray(me.body.milestones));
+
+  const bound = await request(handler, 'POST', '/invite/bind', {
+    start_param: 'inv_100',
+  }, inviteeHeaders);
+  assert.equal(bound.status, 200);
+  assert.equal(bound.body.bound, true);
+  assert.equal(walletService.getUser('200').referred_by, '100');
+
+  const overwrite = await request(handler, 'POST', '/invite/bind', {
+    start_param: 'inv_300',
+  }, inviteeHeaders);
+  assert.equal(overwrite.status, 400);
+  assert.equal(overwrite.body.reason, 'invite_already_bound');
+  assert.equal(walletService.getUser('200').referred_by, '100');
+
+  const share = await request(handler, 'POST', '/invite/share-claimed', {
+    date: '2026-08-30',
+  }, inviterHeaders);
+  assert.equal(share.status, 200);
+  assert.equal(share.body.ledgerEntry.type, GoldLedgerType.SHARE);
+
+  const secondShare = await request(handler, 'POST', '/invite/share-claimed', {
+    date: '2026-08-30',
+    idempotencyKey: 'share-second-manual',
+  }, inviterHeaders);
+  assert.equal(secondShare.status, 400);
+  assert.equal(secondShare.body.reason, 'share_reward_already_claimed_today');
+
+  const qualified = await request(handler, 'POST', '/invite/qualify', {
+    invitee_user_id: '200',
+  }, {
+    'x-service-token': 'internal-test-token',
+  });
+  assert.equal(qualified.status, 200);
+  assert.equal(qualified.body.ledgerEntry.type, GoldLedgerType.INVITE_SUCCESS);
+  assert.equal(walletService.getUser('100').valid_invite_count, 1);
+  assert.equal(walletService.queryNotifications({ userId: '100' }).some((item) => item.body === '有好友通过你的链接进入游戏室'), true);
+  const meAfterQualify = await request(handler, 'GET', '/invite/me', null, inviterHeaders);
+  assert.deepEqual(meAfterQualify.body.milestones.map((item) => [item.count, item.amount]), [[3, 0], [5, 2000], [10, 5000]]);
+  assert.equal(meAfterQualify.body.recentInvites.length, 1);
+  assert.equal(meAfterQualify.body.recentInvites[0].masked_name, '玩家 ****200');
+  assert.equal(meAfterQualify.body.recentInvites[0].first_round_completed, true);
+  assert.equal(meAfterQualify.body.recentInvites[0].reward_settled, true);
+
+  const repeatQualify = await request(handler, 'POST', '/invite/qualify', {
+    invitee_user_id: '200',
+    idempotencyKey: 'invite-qualify-repeat',
+  }, {
+    'x-service-token': 'internal-test-token',
+  });
+  assert.equal(repeatQualify.status, 400);
+  assert.equal(repeatQualify.body.reason, 'invite_success_already_credited');
+
+  const ledger = await request(handler, 'GET', '/invite/ledger', null, inviterHeaders);
+  assert.equal(ledger.status, 200);
+  assert.equal(ledger.body.ledger.some((entry) => entry.type === GoldLedgerType.SHARE), true);
+  assert.equal(ledger.body.ledger.some((entry) => entry.type === GoldLedgerType.INVITE_SUCCESS), true);
+  assert.match(ledger.body.compliance, /不可提现/);
+  assert.match(ledger.body.compliance, /不可用户间转账/);
 });
 
 async function request(handler, method, url, body = null, headers = {}) {

@@ -29,6 +29,22 @@ const STATIC_TYPES = {
   '.json': 'application/json; charset=utf-8',
 };
 
+const OPS_ROLES = Object.freeze({
+  SUPER_ADMIN: 'super_admin',
+  GAME_OPERATOR: 'game_operator',
+  SUPPORT: 'support',
+  AUDITOR: 'auditor',
+});
+
+const ROLE_LABELS = Object.freeze({
+  [OPS_ROLES.SUPER_ADMIN]: '超级管理员',
+  [OPS_ROLES.GAME_OPERATOR]: '游戏运营',
+  [OPS_ROLES.SUPPORT]: '客服人员',
+  [OPS_ROLES.AUDITOR]: '审计人员',
+});
+
+const CONFIG_STATUS = Object.freeze(['draft', 'reviewing', 'published', 'archived']);
+
 export function createOpsService(options = {}) {
   const adminToken = options.adminToken || process.env.ADMIN_TOKEN || null;
   const walletService = options.walletService || createWalletService({ clock: options.clock });
@@ -47,6 +63,13 @@ export function createOpsService(options = {}) {
   let costumeLogos = normalizeCostumeLogos(saved?.costumeLogos || DEFAULT_COSTUME_LOGOS);
   const adCategories = createAdCategoryMap(saved?.adCategories || []);
   const adLogos = createAdLogoMap(saved?.adLogos || []);
+  const adEvents = new Map(saved?.adEvents || []);
+  const auditLogs = new Map((saved?.auditLogs || []).map((item) => [item.id, item]));
+  const configVersions = new Map((saved?.configVersions || []).map((item) => [item.version, item]));
+  const adminUsers = createAdminUserMap({
+    adminToken,
+    roleTokens: options.roleTokens || {},
+  });
   const userProfiles = new Map(saved?.userProfiles || []);
   const pendingRevenueEvents = new Map(saved?.pendingRevenueEvents || []);
 
@@ -67,6 +90,9 @@ export function createOpsService(options = {}) {
       costumeLogos,
       adCategories,
       adLogos,
+      adEvents,
+      auditLogs,
+      configVersions,
       userProfiles,
       pendingRevenueEvents,
       wallet: walletService.exportSnapshot ? walletService.exportSnapshot() : null,
@@ -90,8 +116,15 @@ export function createOpsService(options = {}) {
           ok: true,
           placements: listAdPlacements(Object.fromEntries(url.searchParams.entries()), false),
           categories: listAdCategories(),
-          logos: listAdLogos(false),
+          logos: listAdLogos(false, true),
         });
+      }
+
+      if (req.method === 'POST' && (url.pathname === '/public/ad-events' || url.pathname === '/public/ad-impressions' || url.pathname === '/public/ad-clicks')) {
+        const body = await readJson(req);
+        const defaultType = url.pathname.endsWith('clicks') ? 'click' : url.pathname.endsWith('impressions') ? 'impression' : '';
+        const recorded = recordAdEvent({ ...body, eventType: body.eventType || defaultType }, req);
+        return sendJson(res, recorded.ok ? 200 : 400, recorded);
       }
 
       const publicLogoMatch = url.pathname.match(/^\/public\/ad-logos\/([^/]+)$/);
@@ -115,7 +148,7 @@ export function createOpsService(options = {}) {
           skins: listSkins(),
           costumeLogos: publicCostumeLogos(costumeLogos),
           adCategories: listAdCategories(),
-          adLogos: listAdLogos(false),
+          adLogos: listAdLogos(false, true),
           revenue: DEFAULT_REVENUE_POLICY,
         });
       }
@@ -165,8 +198,47 @@ export function createOpsService(options = {}) {
         return;
       }
 
-      const auth = authenticateAdmin(req, adminToken);
+      const auth = authenticateAdmin(req, adminToken, adminUsers);
       if (!auth.ok) return sendJson(res, auth.status, { ok: false, reason: auth.reason });
+      const writeGate = authorizeAdminWrite(req, url, auth.admin);
+      if (!writeGate.ok) {
+        recordAuditLog(req, auth.admin, {
+          action: writeGate.action,
+          object: writeGate.object,
+          status: 'denied',
+          result: { ok: false, reason: writeGate.reason },
+        });
+        return sendJson(res, 403, { ok: false, reason: writeGate.reason, role: auth.admin.role });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/admin/me') {
+        return sendJson(res, 200, { ok: true, admin: publicAdmin(auth.admin), roles: ROLE_LABELS });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/admin/dashboard') {
+        return sendJson(res, 200, { ok: true, dashboard: dashboardMetrics() });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/admin/audit-logs') {
+        return sendJson(res, 200, { ok: true, logs: listAuditLogs(Object.fromEntries(url.searchParams.entries())) });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/admin/config-versions') {
+        return sendJson(res, 200, { ok: true, versions: listConfigVersions() });
+      }
+
+      if (req.method === 'POST' && url.pathname === '/admin/config-versions/publish') {
+        const body = await readJson(req);
+        const result = publishConfigVersion(body, auth.admin);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'config.publish', body.scope || 'ops-config');
+      }
+
+      const rollbackMatch = url.pathname.match(/^\/admin\/config-versions\/([^/]+)\/rollback$/);
+      if (req.method === 'POST' && rollbackMatch) {
+        const body = await readJson(req);
+        const result = rollbackConfigVersion(decodeURIComponent(rollbackMatch[1]), auth.admin, body);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'config.rollback', rollbackMatch[1]);
+      }
 
       if (req.method === 'GET' && url.pathname === '/admin/users') {
         return sendJson(res, 200, { ok: true, users: listUsers(url.searchParams) });
@@ -175,7 +247,7 @@ export function createOpsService(options = {}) {
       if (req.method === 'POST' && url.pathname === '/admin/users') {
         const body = await readJson(req);
         const created = createManagedUser(body);
-        return sendJson(res, created.ok ? 200 : 400, created);
+        return sendAdminWrite(res, created.ok ? 200 : 400, created, req, auth.admin, 'user.create', body.userId || 'user');
       }
 
       const userMatch = url.pathname.match(/^\/admin\/users\/([^/]+)$/);
@@ -190,22 +262,23 @@ export function createOpsService(options = {}) {
         const action = freezeMatch[2];
         const body = await readJson(req);
         const result = action === 'freeze'
-          ? freezeUser(userId, body.reason || 'manual_ops_freeze')
-          : unfreezeUser(userId);
-        return sendJson(res, 200, result);
+          ? freezeUser(userId, body.reason)
+          : unfreezeUser(userId, body.reason);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, `user.${action}`, userId);
       }
 
       const grantMatch = url.pathname.match(/^\/admin\/users\/([^/]+)\/grant$/);
       if (req.method === 'POST' && grantMatch) {
         const body = await readJson(req);
         const granted = grantUser(decodeURIComponent(grantMatch[1]), body);
-        return sendJson(res, granted.ok ? 200 : 400, granted);
+        return sendAdminWrite(res, granted.ok ? 200 : 400, granted, req, auth.admin, 'user.grant', decodeURIComponent(grantMatch[1]));
       }
 
       const profileMatch = url.pathname.match(/^\/admin\/users\/([^/]+)$/);
       if (req.method === 'PUT' && profileMatch) {
         const body = await readJson(req);
-        return sendJson(res, 200, updateUserProfile(decodeURIComponent(profileMatch[1]), body));
+        const result = updateUserProfile(decodeURIComponent(profileMatch[1]), body);
+        return sendAdminWrite(res, 200, result, req, auth.admin, 'user.update', decodeURIComponent(profileMatch[1]));
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/ledger/summary') {
@@ -221,6 +294,78 @@ export function createOpsService(options = {}) {
           ok: true,
           ledger: queryLedger(Object.fromEntries(url.searchParams.entries())),
         });
+      }
+
+      const inviteesMatch = url.pathname.match(/^\/admin\/invites\/([^/]+)\/invitees$/);
+      if (req.method === 'GET' && inviteesMatch) {
+        const inviterUserId = decodeURIComponent(inviteesMatch[1]);
+        return sendJson(res, 200, {
+          ok: true,
+          inviterUserId,
+          invitees: walletService.listInvitees
+            ? walletService.listInvitees({ inviterUserId, limit: Number(url.searchParams.get('limit') || 100) })
+            : [],
+          reviews: walletService.listInviteRewardReviews
+            ? walletService.listInviteRewardReviews({ inviterUserId })
+            : [],
+        });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/admin/gold-ledger') {
+        return sendJson(res, 200, {
+          ok: true,
+          ledger: walletService.queryGoldLedger
+            ? walletService.queryGoldLedger({
+                userId: url.searchParams.get('userId') || '',
+                type: url.searchParams.get('type') || '',
+                refUserId: url.searchParams.get('refUserId') || '',
+                limit: Number(url.searchParams.get('limit') || 100),
+              })
+            : [],
+        });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/admin/invite-rewards') {
+        return sendJson(res, 200, {
+          ok: true,
+          reviews: walletService.listInviteRewardReviews
+            ? walletService.listInviteRewardReviews({
+                status: url.searchParams.get('status') || '',
+                inviterUserId: url.searchParams.get('inviterUserId') || '',
+                inviteeUserId: url.searchParams.get('inviteeUserId') || '',
+                limit: Number(url.searchParams.get('limit') || 100),
+              })
+            : [],
+        });
+      }
+
+      if (req.method === 'POST' && url.pathname === '/admin/invite-rewards/approve') {
+        const body = await readJson(req);
+        const result = walletService.approveInviteReward
+          ? walletService.approveInviteReward({
+              reviewId: body.reviewId || body.review_id || '',
+              inviteeUserId: body.inviteeUserId || body.invitee_user_id || '',
+              operatorId: auth.admin.id,
+              reason: body.reason || '',
+              idempotencyKey: body.idempotencyKey || body.idempotency_key || '',
+            })
+          : { ok: false, reason: 'invite_reward_ops_not_supported' };
+        persist();
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'invite_reward.approve', body.reviewId || body.inviteeUserId || 'invite_reward');
+      }
+
+      if (req.method === 'POST' && url.pathname === '/admin/invite-rewards/freeze') {
+        const body = await readJson(req);
+        const result = walletService.freezeInviteReward
+          ? walletService.freezeInviteReward({
+              ledgerId: body.ledgerId || body.ledger_id || '',
+              operatorId: auth.admin.id,
+              reason: body.reason || '',
+              idempotencyKey: body.idempotencyKey || body.idempotency_key || '',
+            })
+          : { ok: false, reason: 'invite_reward_ops_not_supported' };
+        persist();
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'invite_reward.freeze', body.ledgerId || 'invite_reward');
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/rooms') {
@@ -257,7 +402,7 @@ export function createOpsService(options = {}) {
       if (req.method === 'PUT' && characterMatch) {
         const body = await readJson(req);
         const result = upsertCharacter(decodeURIComponent(characterMatch[1]), body);
-        return sendJson(res, result.ok ? 200 : 400, result);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'character.update', decodeURIComponent(characterMatch[1]));
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/costume-logos') {
@@ -272,7 +417,7 @@ export function createOpsService(options = {}) {
         const body = await readJson(req);
         costumeLogos = normalizeCostumeLogos({ ...costumeLogos, ...body });
         persist();
-        return sendJson(res, 200, { ok: true, costumeLogos: publicCostumeLogos(costumeLogos) });
+        return sendAdminWrite(res, 200, { ok: true, costumeLogos: publicCostumeLogos(costumeLogos) }, req, auth.admin, 'costume_logo.update', 'costume-logos');
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/skins') {
@@ -283,14 +428,14 @@ export function createOpsService(options = {}) {
       if (req.method === 'PUT' && skinMatch) {
         const body = await readJson(req);
         const result = upsertSkin(decodeURIComponent(skinMatch[1]), body);
-        return sendJson(res, result.ok ? 200 : 400, result);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'skin.update', decodeURIComponent(skinMatch[1]));
       }
 
       const gameMatch = url.pathname.match(/^\/admin\/games\/([^/]+)$/);
       if (req.method === 'PUT' && gameMatch) {
         const body = await readJson(req);
         const result = upsertGame(decodeURIComponent(gameMatch[1]), body);
-        return sendJson(res, result.ok ? 200 : 400, result);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'game.update', decodeURIComponent(gameMatch[1]));
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/ad-placements') {
@@ -305,7 +450,7 @@ export function createOpsService(options = {}) {
       if (req.method === 'POST' && url.pathname === '/admin/ad-placements') {
         const body = await readJson(req);
         const created = upsertAdPlacement(body.slotId || `ad-${Date.now()}`, body);
-        return sendJson(res, created.ok ? 200 : 400, created);
+        return sendAdminWrite(res, created.ok ? 200 : 400, created, req, auth.admin, 'ad.create', body.slotId || 'new-ad');
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/ad-categories') {
@@ -315,29 +460,55 @@ export function createOpsService(options = {}) {
       if (req.method === 'POST' && url.pathname === '/admin/ad-categories') {
         const body = await readJson(req);
         const created = upsertAdCategory(body);
-        return sendJson(res, created.ok ? 200 : 400, created);
+        return sendAdminWrite(res, created.ok ? 200 : 400, created, req, auth.admin, 'ad_category.create', body.id || 'ad-category');
       }
 
       const categoryMatch = url.pathname.match(/^\/admin\/ad-categories\/([^/]+)$/);
       if (req.method === 'PUT' && categoryMatch) {
         const body = await readJson(req);
         const result = upsertAdCategory({ ...body, id: decodeURIComponent(categoryMatch[1]) });
-        return sendJson(res, result.ok ? 200 : 400, result);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'ad_category.update', decodeURIComponent(categoryMatch[1]));
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/ad-logos') {
         return sendJson(res, 200, { ok: true, logos: listAdLogos(false) });
       }
 
+      if (req.method === 'GET' && url.pathname === '/admin/ad-materials') {
+        return sendJson(res, 200, { ok: true, materials: listAdLogos(false) });
+      }
+
       if (req.method === 'POST' && url.pathname === '/admin/ad-logos') {
         const body = await readJson(req);
         const created = upsertAdLogo(body);
-        return sendJson(res, created.ok ? 200 : 400, created);
+        return sendAdminWrite(res, created.ok ? 200 : 400, created, req, auth.admin, 'ad_material.create', body.id || 'ad-material');
+      }
+
+      if (req.method === 'POST' && url.pathname === '/admin/ad-materials') {
+        const body = await readJson(req);
+        const created = upsertAdLogo(body);
+        return sendAdminWrite(res, created.ok ? 200 : 400, created, req, auth.admin, 'ad_material.create', body.id || 'ad-material');
       }
 
       const logoDelete = url.pathname.match(/^\/admin\/ad-logos\/([^/]+)$/);
       if (req.method === 'DELETE' && logoDelete) {
-        return sendJson(res, 200, deleteAdLogo(decodeURIComponent(logoDelete[1])));
+        const result = deleteAdLogo(decodeURIComponent(logoDelete[1]));
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'ad_material.delete', decodeURIComponent(logoDelete[1]));
+      }
+
+      const materialMatch = url.pathname.match(/^\/admin\/ad-materials\/([^/]+)$/);
+      if (req.method === 'PUT' && materialMatch) {
+        const body = await readJson(req);
+        const result = upsertAdLogo({ ...body, id: decodeURIComponent(materialMatch[1]), data: body.data || body.image || adLogos.get(decodeURIComponent(materialMatch[1]))?.data });
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'ad_material.update', decodeURIComponent(materialMatch[1]));
+      }
+      if (req.method === 'DELETE' && materialMatch) {
+        const result = deleteAdLogo(decodeURIComponent(materialMatch[1]));
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'ad_material.delete', decodeURIComponent(materialMatch[1]));
+      }
+
+      if (req.method === 'GET' && url.pathname === '/admin/ad-events') {
+        return sendJson(res, 200, { ok: true, events: listAdEvents(Object.fromEntries(url.searchParams.entries())) });
       }
 
       if (req.method === 'GET' && url.pathname === '/admin/game-candidates') {
@@ -348,21 +519,26 @@ export function createOpsService(options = {}) {
       }
 
       const adMatch = url.pathname.match(/^\/admin\/ad-placements\/([^/]+)$/);
+      const adPreviewMatch = url.pathname.match(/^\/admin\/ad-placements\/([^/]+)\/preview$/);
+      if (req.method === 'GET' && adPreviewMatch) {
+        const placement = adPlacements.get(decodeURIComponent(adPreviewMatch[1]));
+        return sendJson(res, placement ? 200 : 404, placement ? { ok: true, placement: decorateAdPlacement(normalizeStoredAdPlacement(placement)), html: previewAdHtml(decorateAdPlacement(normalizeStoredAdPlacement(placement))) } : { ok: false, reason: 'ad_not_found' });
+      }
       if (req.method === 'DELETE' && adMatch) {
         const removed = deleteAdPlacement(decodeURIComponent(adMatch[1]));
-        return sendJson(res, removed.ok ? 200 : 400, removed);
+        return sendAdminWrite(res, removed.ok ? 200 : 400, removed, req, auth.admin, 'ad.delete', decodeURIComponent(adMatch[1]));
       }
       if (req.method === 'PUT' && adMatch) {
         const body = await readJson(req);
         const result = upsertAdPlacement(decodeURIComponent(adMatch[1]), body);
-        return sendJson(res, result.ok ? 200 : 400, result);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'ad.update', decodeURIComponent(adMatch[1]));
       }
 
       const configMatch = url.pathname.match(/^\/admin\/room-configs\/([^/]+)\/([^/]+)$/);
       if (req.method === 'PUT' && configMatch) {
         const body = await readJson(req);
         const result = upsertRoomConfig(configMatch[1], decodeURIComponent(configMatch[2]), body);
-        return sendJson(res, result.ok ? 200 : 400, result);
+        return sendAdminWrite(res, result.ok ? 200 : 400, result, req, auth.admin, 'room_config.update', `${configMatch[1]}:${decodeURIComponent(configMatch[2])}`);
       }
 
       return sendJson(res, 404, { ok: false, reason: 'not_found' });
@@ -371,16 +547,148 @@ export function createOpsService(options = {}) {
     }
   }
 
+  function sendAdminWrite(res, statusCode, payload, req, admin, action, object) {
+    recordAuditLog(req, admin, {
+      action,
+      object,
+      status: payload?.ok === false ? 'failed' : 'success',
+      result: summarizeAuditResult(payload),
+    });
+    return sendJson(res, statusCode, payload);
+  }
+
+  function recordAuditLog(req, admin, { action, object, status, result }) {
+    const id = `audit_${auditLogs.size + 1}`;
+    auditLogs.set(id, {
+      id,
+      actorId: admin?.id || 'unknown',
+      actorName: admin?.name || admin?.id || 'unknown',
+      role: admin?.role || 'unknown',
+      roleLabel: ROLE_LABELS[admin?.role] || admin?.role || 'unknown',
+      at: clock(),
+      ip: clientIp(req),
+      action: String(action || 'unknown').slice(0, 80),
+      object: String(object || '').slice(0, 120),
+      status,
+      result,
+    });
+    persist();
+  }
+
+  function listAuditLogs(filter = {}) {
+    return [...auditLogs.values()]
+      .filter((log) => !filter.actorId || log.actorId === filter.actorId)
+      .filter((log) => !filter.role || log.role === filter.role)
+      .filter((log) => !filter.action || log.action.includes(filter.action))
+      .slice(-300)
+      .reverse();
+  }
+
+  function dashboardMetrics() {
+    const rooms = listRooms();
+    const events = [...adEvents.values()];
+    const uniquePlayers = new Set();
+    for (const entry of queryLedger({})) if (entry.userId && entry.userId !== PLATFORM_USER_ID) uniquePlayers.add(entry.userId);
+    for (const room of rooms) {
+      if (room.roomId?.includes('friend') || room.roomId?.startsWith('fr_')) uniquePlayers.add(room.roomId);
+    }
+    const durations = Object.values(gameServers).flatMap((server) => [...(server?.rooms?.values?.() || [])].map(roomDurationSeconds)).filter((n) => n > 0);
+    return {
+      dau: uniquePlayers.size,
+      rounds: rooms.filter((room) => room.roundId || room.status === 'settled').length,
+      averageDurationSeconds: durations.length ? Math.round(durations.reduce((sum, n) => sum + n, 0) / durations.length) : 0,
+      friendRooms: rooms.filter((room) => String(room.roomId || '').includes('friend') || String(room.roomId || '').startsWith('fr_')).length,
+      adImpressions: events.filter((event) => event.eventType === 'impression').length,
+      adClicks: events.filter((event) => event.eventType === 'click').length,
+      auditLogCount: auditLogs.size,
+      policy: 'ops_dashboard_no_real_money_backend',
+    };
+  }
+
+  function publishConfigVersion(body = {}, admin = {}) {
+    const version = cleanText(body.version || `v${configVersions.size + 1}`, 40);
+    if (!version) return { ok: false, reason: 'version_required' };
+    if (configVersions.has(version)) return { ok: false, reason: 'version_exists' };
+    const snapshot = configSnapshot();
+    const record = {
+      version,
+      scope: cleanText(body.scope || 'ops-config', 40) || 'ops-config',
+      note: cleanText(body.note || '', 160),
+      status: 'published',
+      createdAt: clock(),
+      createdBy: publicAdmin(admin),
+      snapshot,
+      policy: 'config_version_only_no_real_money_backend',
+    };
+    configVersions.set(version, record);
+    persist();
+    return { ok: true, version: publicConfigVersion(record) };
+  }
+
+  function rollbackConfigVersion(version, admin = {}, body = {}) {
+    const record = configVersions.get(version);
+    if (!record) return { ok: false, reason: 'config_version_not_found' };
+    applyConfigSnapshot(record.snapshot);
+    const rollbackVersion = cleanText(body.rollbackVersion || `rollback-${version}-${configVersions.size + 1}`, 80);
+    const next = {
+      version: rollbackVersion,
+      scope: record.scope,
+      note: cleanText(body.reason || `rollback to ${version}`, 160),
+      status: 'published',
+      createdAt: clock(),
+      createdBy: publicAdmin(admin),
+      rollbackOf: version,
+      snapshot: configSnapshot(),
+      policy: 'config_version_only_no_real_money_backend',
+    };
+    configVersions.set(next.version, next);
+    persist();
+    return { ok: true, restored: publicConfigVersion(record), version: publicConfigVersion(next) };
+  }
+
+  function listConfigVersions() {
+    return [...configVersions.values()].map(publicConfigVersion).reverse();
+  }
+
+  function configSnapshot() {
+    return {
+      roomConfigs: [...roomConfigs.entries()],
+      games: [...games.values()],
+      characters: [...characters.values()],
+      skins: [...skins.values()],
+      costumeLogos,
+      adCategories: [...adCategories.values()],
+      adLogos: [...adLogos.values()],
+      adPlacements: [...adPlacements.entries()],
+    };
+  }
+
+  function applyConfigSnapshot(snapshot = {}) {
+    replaceMap(roomConfigs, snapshot.roomConfigs || []);
+    replaceValueMap(games, snapshot.games || [], 'id');
+    replaceValueMap(characters, snapshot.characters || [], 'id');
+    replaceValueMap(skins, snapshot.skins || [], 'id');
+    costumeLogos = normalizeCostumeLogos(snapshot.costumeLogos || DEFAULT_COSTUME_LOGOS);
+    replaceValueMap(adCategories, snapshot.adCategories || [], 'id');
+    replaceValueMap(adLogos, snapshot.adLogos || [], 'id');
+    replaceMap(adPlacements, snapshot.adPlacements || []);
+  }
+
   function listUsers(searchParams) {
     const userId = searchParams.get ? searchParams.get('userId') : searchParams.userId;
+    const query = String((searchParams.get ? searchParams.get('q') : searchParams.q) || userId || '').trim().toLowerCase();
+    const tgId = String((searchParams.get ? searchParams.get('tgId') : searchParams.tgId) || '').trim().toLowerCase();
+    const nickname = String((searchParams.get ? searchParams.get('nickname') : searchParams.nickname) || '').trim().toLowerCase();
     const accounts = walletService?.listAccounts
-      ? walletService.listAccounts(userId ? { userId } : {})
+      ? walletService.listAccounts(userId && !query ? { userId } : {})
       : [];
     const accountUserIds = new Set(accounts.map((account) => account.userId));
     for (const frozenUserId of frozenUsers.keys()) accountUserIds.add(frozenUserId);
     for (const profileId of userProfiles.keys()) accountUserIds.add(profileId);
-    const ids = userId ? [...accountUserIds].filter((id) => id === userId) : [...accountUserIds];
-    return ids.sort().map(getUserAudit);
+    return [...accountUserIds]
+      .sort()
+      .map(getUserAudit)
+      .filter((user) => matchesUserSearch(user, { query, tgId, nickname }));
   }
 
   function getUserAudit(userId) {
@@ -388,21 +696,73 @@ export function createOpsService(options = {}) {
     const ledger = queryLedger({ userId });
     const freeze = frozenUsers.get(userId) || null;
     const profile = userProfiles.get(userId) || null;
+    const matchStats = userMatchStats(userId);
     return {
       userId,
+      uid: userId,
+      tgId: profile?.tgId || null,
+      nickname: profile?.displayName || profile?.nickname || userId,
       frozen: Boolean(freeze),
       freeze,
       profile,
       account,
+      shadowPoints: {
+        available: Number(account?.available || 0),
+        locked: Number(account?.locked || 0),
+        total: Number(account?.total || Number(account?.available || 0) + Number(account?.locked || 0)),
+      },
+      ledger: ledger.slice(-50),
       ledgerCount: ledger.length,
       lastLedgerEntry: ledger.at(-1) || null,
+      stats: matchStats,
+    };
+  }
+
+  function matchesUserSearch(user, { query, tgId, nickname }) {
+    const profile = user.profile || {};
+    const haystack = [
+      user.userId,
+      user.uid,
+      profile.tgId,
+      profile.displayName,
+      profile.nickname,
+      profile.note,
+    ].map((item) => String(item || '').toLowerCase());
+    if (query && !haystack.some((item) => item.includes(query))) return false;
+    if (tgId && !String(profile.tgId || '').toLowerCase().includes(tgId)) return false;
+    if (nickname && ![profile.displayName, profile.nickname].some((item) => String(item || '').toLowerCase().includes(nickname))) return false;
+    return true;
+  }
+
+  function userMatchStats(userId) {
+    let rounds = 0;
+    let wins = 0;
+    let friendRooms = 0;
+    for (const server of Object.values(gameServers)) {
+      for (const room of server?.rooms?.values?.() || []) {
+        const players = room.players || [];
+        if (!players.some((player) => player.id === userId || player.userId === userId)) continue;
+        rounds += room.roundId || room.status === 'settled' ? 1 : 0;
+        if (String(room.roomId || '').includes('friend') || String(room.roomId || '').startsWith('fr_')) friendRooms += 1;
+        const scores = room.settlementIntent?.scores || [];
+        const seat = players.find((player) => player.id === userId || player.userId === userId)?.seatIndex;
+        if (Number.isInteger(seat) && Number(scores[seat] || 0) > 0) wins += 1;
+      }
+    }
+    return {
+      rounds,
+      wins,
+      winRate: rounds ? Number((wins / rounds).toFixed(4)) : 0,
+      friendRooms,
     };
   }
 
   function freezeUser(userId, reason) {
+    const cleanReason = cleanText(reason, 160);
+    if (!cleanReason) return { ok: false, reason: 'freeze_reason_required' };
     const freeze = {
       userId,
-      reason: String(reason || 'manual_ops_freeze').slice(0, 160),
+      reason: cleanReason,
       createdAt: clock(),
     };
     frozenUsers.set(userId, freeze);
@@ -411,7 +771,9 @@ export function createOpsService(options = {}) {
     return { ok: true, user: getUserAudit(userId) };
   }
 
-  function unfreezeUser(userId) {
+  function unfreezeUser(userId, reason) {
+    const cleanReason = cleanText(reason, 160);
+    if (!cleanReason) return { ok: false, reason: 'unfreeze_reason_required' };
     frozenUsers.delete(userId);
     persist();
     return { ok: true, user: getUserAudit(userId) };
@@ -462,6 +824,8 @@ export function createOpsService(options = {}) {
     const current = userProfiles.get(userId) || {
       userId,
       displayName: '',
+      tgId: '',
+      nickname: '',
       note: '',
       source: patch.source || 'ops',
       createdAt: clock(),
@@ -471,6 +835,12 @@ export function createOpsService(options = {}) {
       displayName: patch.displayName != null
         ? String(patch.displayName).trim().slice(0, 24)
         : current.displayName,
+      tgId: patch.tgId != null || patch.telegramId != null
+        ? String(patch.tgId || patch.telegramId || '').trim().slice(0, 32)
+        : current.tgId,
+      nickname: patch.nickname != null
+        ? String(patch.nickname || '').trim().slice(0, 32)
+        : current.nickname,
       note: patch.note != null ? String(patch.note).trim().slice(0, 160) : current.note,
       source: patch.source || current.source || 'ops',
       updatedAt: clock(),
@@ -499,6 +869,8 @@ export function createOpsService(options = {}) {
     if (userProfiles.has(userId)) return { ok: false, reason: 'user_exists' };
     ensureProfile(userId, {
       displayName: body.displayName || userId,
+      tgId: body.tgId || body.telegramId || '',
+      nickname: body.nickname || body.displayName || userId,
       note: body.note || '',
       source: 'ops',
     });
@@ -848,25 +1220,26 @@ export function createOpsService(options = {}) {
 
   function listAdPlacements(filter = {}, includeDisabled = false) {
     const now = Date.parse(clock());
-    return [...adPlacements.values()]
+    const list = [...adPlacements.values()]
       .map((placement) => normalizeStoredAdPlacement(placement))
-      .filter((placement) => includeDisabled || (placement.enabled && isAdPlacementActive(placement, now)))
+      .filter((placement) => includeDisabled || isPublicAdPlacement(placement, now, adLogos))
       .filter((placement) => !filter.gameId || placement.gameId === filter.gameId)
       .filter((placement) => !filter.surface || placement.surface === filter.surface)
       .filter((placement) => !filter.slotType || placement.slotType === filter.slotType)
       .filter((placement) => filter.seatIndex === undefined || filter.seatIndex === '' || String(placement.seatIndex ?? '') === String(filter.seatIndex))
       .filter((placement) => !filter.categoryId || placement.categoryId === filter.categoryId)
-      .sort((a, b) => a.priority - b.priority || a.slotId.localeCompare(b.slotId))
-      .map(decorateAdPlacement);
+      .sort((a, b) => weightedAdOrder(a, b, filter.rotationSeed || filter.seed) || a.priority - b.priority || a.slotId.localeCompare(b.slotId));
+    return (includeDisabled ? list : collapseWeightedRotation(list, filter.rotationSeed || filter.seed)).map(decorateAdPlacement);
   }
 
   function decorateAdPlacement(placement) {
-    const logo = placement.logoId ? adLogos.get(placement.logoId) : null;
+    const logo = (placement.materialId || placement.logoId) ? adLogos.get(placement.materialId || placement.logoId) : null;
     const category = placement.categoryId ? adCategories.get(placement.categoryId) : null;
     return {
       ...placement,
       categoryName: category?.name || '',
       logo: logo ? publicLogo(logo) : null,
+      material: logo ? publicLogo(logo) : null,
     };
   }
 
@@ -892,8 +1265,10 @@ export function createOpsService(options = {}) {
     return { ok: true, category: next };
   }
 
-  function listAdLogos(includeData = false) {
-    return [...adLogos.values()].map((logo) => publicLogo(logo, includeData));
+  function listAdLogos(includeData = false, publicOnly = false) {
+    return [...adLogos.values()]
+      .filter((logo) => !publicOnly || (logo.enabled !== false && (logo.auditStatus || 'approved') === 'approved'))
+      .map((logo) => publicLogo(logo, includeData));
   }
 
   function upsertAdLogo(body = {}) {
@@ -909,6 +1284,12 @@ export function createOpsService(options = {}) {
       builtin: false,
       mime: parsed.mime,
       data: parsed.data,
+      type: body.type === 'image' ? 'image' : 'logo',
+      format: cleanEnum(body.format || mimeToFormat(parsed.mime), 'png', ['png', 'jpeg', 'webp', 'svg']),
+      width: positiveInt(body.width, 0, 4096),
+      height: positiveInt(body.height, 0, 4096),
+      auditStatus: cleanEnum(body.auditStatus, 'pending', ['approved', 'pending', 'rejected']),
+      enabled: body.enabled !== false,
     });
     persist();
     return { ok: true, logo: publicLogo(adLogos.get(id)) };
@@ -938,6 +1319,10 @@ export function createOpsService(options = {}) {
     }
     if (logo.builtin) {
       sendJson(res, 200, { ok: true, builtin: true, id: logo.id });
+      return;
+    }
+    if (logo.enabled === false || logo.auditStatus !== 'approved') {
+      sendJson(res, 404, { ok: false, reason: 'logo_not_available' });
       return;
     }
     const buffer = Buffer.from(logo.data, 'base64');
@@ -983,6 +1368,44 @@ export function createOpsService(options = {}) {
     return { ok: true, placement: next.placement };
   }
 
+  function recordAdEvent(body = {}, req = {}) {
+    const eventType = cleanEnum(body.eventType, '', ['impression', 'click']);
+    if (!eventType) return { ok: false, reason: 'invalid_ad_event_type' };
+    const placementId = cleanText(body.placementId || body.slotId, 80);
+    if (!placementId) return { ok: false, reason: 'ad_slot_required' };
+    const placement = adPlacements.get(placementId) || [...adPlacements.values()].find((item) => item.slotId === placementId);
+    if (!placement) return { ok: false, reason: 'ad_not_found' };
+    const active = isPublicAdPlacement(normalizeStoredAdPlacement(placement), Date.parse(clock()), adLogos);
+    if (!active) return { ok: false, reason: 'ad_not_public' };
+    const eventId = cleanText(body.eventId || `${eventType}:${placementId}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`, 120);
+    if (adEvents.has(eventId)) return { ok: true, duplicate: true, event: adEvents.get(eventId), policy: 'ad_event_only_no_wallet_ledger_write' };
+    const event = {
+      eventId,
+      eventType,
+      slotId: placement.slotId,
+      placementId,
+      gameId: placement.gameId,
+      surface: placement.surface,
+      slotType: placement.slotType,
+      seatIndex: placement.seatIndex ?? null,
+      playerId: cleanText(body.playerId, 64) || 'anonymous',
+      url: cleanUrl(body.url || placement.landingUrl) || '',
+      userAgent: cleanText(req.headers?.['user-agent'] || body.userAgent, 160),
+      createdAt: clock(),
+      policy: 'ad_event_only_no_wallet_ledger_write',
+    };
+    adEvents.set(eventId, event);
+    persist();
+    return { ok: true, event, policy: event.policy };
+  }
+
+  function listAdEvents(filter = {}) {
+    return [...adEvents.values()]
+      .filter((event) => !filter.eventType || event.eventType === filter.eventType)
+      .filter((event) => !filter.slotId || event.slotId === filter.slotId || event.placementId === filter.slotId)
+      .slice(-500);
+  }
+
   function listen(port = 0, host = options.host || '127.0.0.1') {
     const server = createServer(handler);
     return new Promise((resolve, reject) => {
@@ -1020,6 +1443,9 @@ export function createOpsService(options = {}) {
     characters,
     skins,
     getCostumeLogos: () => costumeLogos,
+    auditLogs,
+    configVersions,
+    adminUsers,
     userProfiles,
     listUsers,
     getUserAudit,
@@ -1039,17 +1465,155 @@ export function createOpsService(options = {}) {
     grantUser,
     createManagedUser,
     ledgerSummary,
+    dashboardMetrics,
+    listAuditLogs,
+    listConfigVersions,
     persist,
   };
 }
 
-function authenticateAdmin(req, adminToken) {
+function authenticateAdmin(req, adminToken, adminUsers = new Map()) {
   if (!adminToken) return { ok: false, status: 500, reason: 'admin_token_not_configured' };
   const authorization = req.headers.authorization || '';
   const bearer = authorization.startsWith('Bearer ') ? authorization.slice(7) : null;
   const headerToken = req.headers['x-admin-token'];
-  if (bearer === adminToken || headerToken === adminToken) return { ok: true };
+  const token = bearer || headerToken || '';
+  const admin = adminUsers.get(token);
+  if (admin) return { ok: true, admin };
+  if (bearer === adminToken || headerToken === adminToken) {
+    return { ok: true, admin: { id: 'super-admin', name: '超级管理员', role: OPS_ROLES.SUPER_ADMIN } };
+  }
   return { ok: false, status: 401, reason: 'admin_auth_required' };
+}
+
+function createAdminUserMap({ adminToken, roleTokens = {} } = {}) {
+  const users = new Map();
+  if (adminToken) {
+    users.set(adminToken, { id: 'super-admin', name: '超级管理员', role: OPS_ROLES.SUPER_ADMIN });
+  }
+  for (const [role, value] of Object.entries(roleTokens || {})) {
+    const token = typeof value === 'string' ? value : value?.token;
+    if (!token) continue;
+    const roleId = normalizeRole(role);
+    users.set(token, normalizeAdmin({
+      id: typeof value === 'string' ? `${roleId}-admin` : value.id,
+      name: typeof value === 'string' ? ROLE_LABELS[roleId] : value.name,
+      role: roleId,
+    }, token));
+  }
+  return users;
+}
+
+function normalizeAdmin(admin = {}, token = '') {
+  const role = normalizeRole(admin.role);
+  return {
+    id: cleanText(admin.id || `${role}-${String(token).slice(0, 6)}`, 48) || `${role}-admin`,
+    name: cleanText(admin.name || ROLE_LABELS[role], 48) || ROLE_LABELS[role],
+    role,
+  };
+}
+
+function normalizeRole(role) {
+  const value = String(role || '').trim();
+  if (value === OPS_ROLES.GAME_OPERATOR || value === 'game-operator' || value === 'operator') return OPS_ROLES.GAME_OPERATOR;
+  if (value === OPS_ROLES.SUPPORT || value === 'customer_service' || value === 'customer-service') return OPS_ROLES.SUPPORT;
+  if (value === OPS_ROLES.AUDITOR || value === 'audit') return OPS_ROLES.AUDITOR;
+  return OPS_ROLES.SUPER_ADMIN;
+}
+
+function publicAdmin(admin = {}) {
+  return {
+    id: admin.id || 'unknown',
+    name: admin.name || admin.id || 'unknown',
+    role: admin.role || 'unknown',
+    roleLabel: ROLE_LABELS[admin.role] || admin.role || 'unknown',
+  };
+}
+
+function authorizeAdminWrite(req, url, admin = {}) {
+  if (req.method === 'GET' || req.method === 'OPTIONS') return { ok: true };
+  const action = inferAuditAction(req.method, url.pathname);
+  const object = inferAuditObject(url.pathname);
+  if (admin.role === OPS_ROLES.SUPER_ADMIN) return { ok: true, action, object };
+  const path = url.pathname;
+  if (admin.role === OPS_ROLES.GAME_OPERATOR) {
+    const allowed = /^\/admin\/(games|room-configs|characters|skins|costume-logos|ad-|config-versions)/.test(path);
+    return allowed ? { ok: true, action, object } : { ok: false, reason: 'rbac_forbidden', action, object };
+  }
+  if (admin.role === OPS_ROLES.SUPPORT) {
+    const allowed = /^\/admin\/users\/[^/]+\/(freeze|unfreeze)$/.test(path) || (req.method === 'PUT' && /^\/admin\/users\/[^/]+$/.test(path));
+    return allowed ? { ok: true, action, object } : { ok: false, reason: 'rbac_forbidden', action, object };
+  }
+  return { ok: false, reason: 'rbac_forbidden', action, object };
+}
+
+function inferAuditAction(method, pathname) {
+  const resource = pathname.split('/').filter(Boolean).slice(1).join('.') || 'unknown';
+  return `${method.toLowerCase()}.${resource}`;
+}
+
+function inferAuditObject(pathname) {
+  return decodeURIComponent(pathname.split('/').filter(Boolean).slice(1).join('/'));
+}
+
+function summarizeAuditResult(payload = {}) {
+  if (!payload || typeof payload !== 'object') return { ok: Boolean(payload) };
+  const summary = { ok: payload.ok !== false };
+  if (payload.reason) summary.reason = payload.reason;
+  for (const key of ['user', 'config', 'placement', 'skin', 'game', 'category', 'logo', 'version']) {
+    const value = payload[key];
+    if (!value) continue;
+    summary[key] = value.id || value.userId || value.roomKey || value.slotId || value.version || true;
+  }
+  return summary;
+}
+
+function clientIp(req = {}) {
+  const forwarded = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
+  return forwarded || req.socket?.remoteAddress || 'local';
+}
+
+function normalizeConfigStatus(value, fallback = 'published') {
+  const aliases = {
+    unpublished: 'archived',
+    scheduled: 'reviewing',
+    pending: 'reviewing',
+    approved: 'published',
+  };
+  const raw = aliases[String(value || '').trim()] || String(value || '').trim();
+  return CONFIG_STATUS.includes(raw) ? raw : fallback;
+}
+
+function publicConfigVersion(record = {}) {
+  return {
+    version: record.version,
+    scope: record.scope,
+    note: record.note || '',
+    status: record.status,
+    createdAt: record.createdAt,
+    createdBy: record.createdBy,
+    rollbackOf: record.rollbackOf || null,
+    policy: record.policy,
+  };
+}
+
+function replaceMap(target, entries) {
+  target.clear();
+  for (const [key, value] of entries || []) target.set(key, value);
+}
+
+function replaceValueMap(target, items, key = 'id') {
+  target.clear();
+  for (const item of items || []) {
+    if (item?.[key]) target.set(item[key], item);
+  }
+}
+
+function roomDurationSeconds(room = {}) {
+  const events = room.events || [];
+  const first = Date.parse(events[0]?.at || room.createdAt || '');
+  const last = Date.parse(events.at(-1)?.at || room.updatedAt || room.settledAt || '');
+  return Number.isFinite(first) && Number.isFinite(last) && last > first ? Math.round((last - first) / 1000) : 0;
 }
 
 async function readJson(req) {
@@ -1259,6 +1823,24 @@ function defaultAdPlacements() {
       updatedAt: null,
       policy: 'ad_config_only_no_real_money_settlement',
     }],
+    ['doudizhu-card-front', {
+      slotId: 'doudizhu-card-front',
+      gameId: 'doudizhu',
+      surface: 'game-table',
+      slotType: 'card-front',
+      seatIndex: null,
+      enabled: true,
+      priority: 72,
+      advertiserName: 'CardSponsor',
+      campaignTitle: '牌面角标',
+      copy: '正面花色区广告',
+      landingUrl: 'https://example.com/card-front',
+      assetTheme: 'platform',
+      startAt: null,
+      endAt: null,
+      updatedAt: null,
+      policy: 'ad_config_only_no_real_money_settlement',
+    }],
     ['doudizhu-settlement-banner', {
       slotId: 'doudizhu-settlement-banner',
       gameId: 'doudizhu',
@@ -1305,7 +1887,7 @@ function normalizeAdPlacement(slotId, body, clock) {
     return { ok: false, reason: 'invalid_slot_id' };
   }
   const allowedSurfaces = new Set(['lobby', 'game-table', 'settlement-page']);
-  const allowedSlotTypes = new Set(['banner', 'table', 'table-surface', 'table-rail', 'character-costume', 'card-back', 'settlement']);
+  const allowedSlotTypes = new Set(['banner', 'table', 'table-surface', 'table-rail', 'character-costume', 'card-back', 'card-front', 'settlement']);
   if (!allowedSurfaces.has(body.surface)) return { ok: false, reason: 'invalid_ad_surface' };
   if (!allowedSlotTypes.has(body.slotType)) return { ok: false, reason: 'invalid_ad_slot_type' };
   const gameId = cleanText(body.gameId || inferGameIdFromSlot(slotId, body.surface), 32);
@@ -1323,30 +1905,44 @@ function normalizeAdPlacement(slotId, body, clock) {
   const campaignTitle = cleanText(body.campaignTitle, 36);
   const copy = cleanText(body.copy, 48);
   const landingUrl = cleanUrl(body.landingUrl);
+  const imageUrl = body.imageUrl ? cleanUrl(body.imageUrl) : '';
   if (!advertiserName || !campaignTitle || !copy) {
     return { ok: false, reason: 'ad_copy_required' };
   }
   if (!landingUrl) return { ok: false, reason: 'https_landing_url_required' };
+  if (body.imageUrl && !imageUrl) return { ok: false, reason: 'https_image_url_required' };
+  const weight = Number(body.weight);
+  const priority = Number(body.priority);
   return {
     ok: true,
     placement: {
+      placementId: cleanText(body.placementId || slotId, 80),
       slotId,
       gameId,
       surface: body.surface,
       slotType: body.slotType,
       seatIndex: seatIndex.value,
       enabled: body.enabled !== false,
-      priority: Number.isFinite(Number(body.priority)) ? Number(body.priority) : 100,
+      priority: Number.isFinite(priority) ? priority : 100,
       advertiserName,
       campaignTitle,
       copy,
       landingUrl,
+      imageUrl,
       assetTheme: cleanText(body.assetTheme || body.categoryId || 'platform', 24),
       categoryId: cleanText(body.categoryId || body.assetTheme || 'other', 32) || 'other',
       logoId: body.logoId && /^[a-z0-9:_-]{2,32}$/i.test(body.logoId) ? String(body.logoId) : '',
       short: cleanText(body.short || body.advertiserName, 8),
       startAt: startAt.value,
       endAt: endAt.value,
+      weight: Number.isFinite(weight) && weight > 0 ? Math.min(1000, weight) : 1,
+      rotationMode: cleanEnum(body.rotationMode, 'priority', ['priority', 'weighted', 'random']),
+      schedule: normalizeSchedule(body.schedule),
+      geoRules: normalizeGeoRules(body.geoRules),
+      auditStatus: cleanEnum(body.auditStatus, 'approved', ['approved', 'pending', 'rejected']),
+      configStatus: normalizeConfigStatus(body.configStatus || body.listingStatus, 'published'),
+      materialId: body.materialId && /^[a-z0-9:_-]{2,32}$/i.test(body.materialId) ? String(body.materialId) : (body.logoId && /^[a-z0-9:_-]{2,32}$/i.test(body.logoId) ? String(body.logoId) : ''),
+      safeAreaPolicy: 'do_not_cover_cards_buttons_timer_result',
       updatedAt: clock(),
       policy: 'ad_config_only_no_real_money_settlement',
     },
@@ -1356,10 +1952,20 @@ function normalizeAdPlacement(slotId, body, clock) {
 function normalizeStoredAdPlacement(placement = {}) {
   return {
     ...placement,
+    placementId: placement.placementId || placement.slotId || '',
     gameId: cleanText(placement.gameId || inferGameIdFromSlot(placement.slotId, placement.surface), 32) || 'general',
     seatIndex: Number.isInteger(placement.seatIndex) ? placement.seatIndex : null,
     startAt: placement.startAt || null,
     endAt: placement.endAt || null,
+    priority: Number.isFinite(Number(placement.priority)) ? Number(placement.priority) : 100,
+    weight: Number.isFinite(Number(placement.weight)) && Number(placement.weight) > 0 ? Number(placement.weight) : 1,
+    rotationMode: cleanEnum(placement.rotationMode, 'priority', ['priority', 'weighted', 'random']),
+    schedule: normalizeSchedule(placement.schedule),
+    geoRules: normalizeGeoRules(placement.geoRules),
+    auditStatus: cleanEnum(placement.auditStatus, 'approved', ['approved', 'pending', 'rejected']),
+    configStatus: normalizeConfigStatus(placement.configStatus || placement.listingStatus, 'published'),
+    materialId: placement.materialId || '',
+    safeAreaPolicy: placement.safeAreaPolicy || 'do_not_cover_cards_buttons_timer_result',
   };
 }
 
@@ -1369,6 +1975,52 @@ function isAdPlacementActive(placement, now) {
   if (Number.isFinite(start) && now < start) return false;
   if (Number.isFinite(end) && now > end) return false;
   return true;
+}
+
+function isPublicAdPlacement(placement, now, materials = new Map()) {
+  if (!placement.enabled || !isAdPlacementActive(placement, now) || placement.auditStatus !== 'approved') return false;
+  if ((placement.configStatus || 'published') !== 'published') return false;
+  const materialId = placement.materialId || placement.logoId;
+  if (!materialId) return true;
+  const material = materials.get(materialId);
+  return !material || (material.enabled !== false && (material.auditStatus || 'approved') === 'approved');
+}
+
+function weightedAdOrder(a, b, seed = '') {
+  if (a.rotationMode !== 'weighted' && b.rotationMode !== 'weighted' && a.rotationMode !== 'random' && b.rotationMode !== 'random') return 0;
+  const aw = Number(a.weight || 1);
+  const bw = Number(b.weight || 1);
+  const as = a.rotationMode === 'weighted'
+    ? -aw + seededScore(`${seed}:${a.slotId}:${a.placementId}`)
+    : seededScore(`${seed}:${a.slotId}:${a.placementId}`);
+  const bs = b.rotationMode === 'weighted'
+    ? -bw + seededScore(`${seed}:${b.slotId}:${b.placementId}`)
+    : seededScore(`${seed}:${b.slotId}:${b.placementId}`);
+  return as - bs;
+}
+
+function collapseWeightedRotation(list, seed = '') {
+  const groups = new Map();
+  for (const ad of list) {
+    const key = `${ad.gameId}|${ad.surface}|${ad.slotType}|${ad.seatIndex ?? ''}|${ad.slotId}`;
+    const group = groups.get(key) || [];
+    group.push(ad);
+    groups.set(key, group);
+  }
+  return [...groups.values()].map((group) => {
+    if (group.length === 1) return group[0];
+    return group.slice().sort((a, b) => weightedAdOrder(a, b, seed) || a.priority - b.priority)[0];
+  }).sort((a, b) => a.priority - b.priority || a.slotId.localeCompare(b.slotId));
+}
+
+function seededScore(value) {
+  const text = String(value || 'default');
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) / 4294967295;
 }
 
 function inferGameIdFromSlot(slotId = '', surface = '') {
@@ -1414,8 +2066,87 @@ function parseImagePayload(raw) {
   return { ok: true, mime, data: data.replace(/\s/g, '') };
 }
 
+function mimeToFormat(mime = '') {
+  if (/svg/i.test(mime)) return 'svg';
+  if (/webp/i.test(mime)) return 'webp';
+  if (/jpe?g/i.test(mime)) return 'jpeg';
+  return 'png';
+}
+
+function positiveInt(value, fallback = 0, max = 4096) {
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 0) return fallback;
+  return Math.min(max, n);
+}
+
 function cleanText(value, maxLength) {
   return String(value || '').replace(/[<>]/g, '').trim().slice(0, maxLength);
+}
+
+function cleanEnum(value, fallback, allowed) {
+  return allowed.includes(value) ? value : fallback;
+}
+
+function normalizeSchedule(schedule = {}) {
+  if (!schedule || typeof schedule !== 'object' || Array.isArray(schedule)) {
+    return { timezone: 'UTC', daysOfWeek: [], hours: [] };
+  }
+  return {
+    timezone: cleanText(schedule.timezone || 'UTC', 40) || 'UTC',
+    daysOfWeek: Array.isArray(schedule.daysOfWeek)
+      ? schedule.daysOfWeek.map((item) => Number(item)).filter((item) => Number.isInteger(item) && item >= 0 && item <= 6)
+      : [],
+    hours: Array.isArray(schedule.hours)
+      ? schedule.hours.map((item) => Number(item)).filter((item) => Number.isInteger(item) && item >= 0 && item <= 23)
+      : [],
+  };
+}
+
+function normalizeGeoRules(geoRules = {}) {
+  if (!geoRules || typeof geoRules !== 'object' || Array.isArray(geoRules)) {
+    return { includeCountries: [], excludeCountries: [] };
+  }
+  const cleanCountries = (items) => Array.isArray(items)
+    ? items.map((item) => String(item).trim().toUpperCase()).filter((item) => /^[A-Z]{2}$/.test(item)).slice(0, 50)
+    : [];
+  return {
+    includeCountries: cleanCountries(geoRules.includeCountries),
+    excludeCountries: cleanCountries(geoRules.excludeCountries),
+  };
+}
+
+function previewAdHtml(ad = {}) {
+  const title = escapeHtml(ad.campaignTitle || ad.advertiserName || '广告预览');
+  const copy = escapeHtml(ad.copy || '');
+  const surface = escapeHtml(ad.surface || 'unknown');
+  const slotType = escapeHtml(ad.slotType || 'unknown');
+  const logo = ad.logo?.url || ad.material?.url
+    ? `<img src="${escapeAttribute(ad.logo?.url || ad.material?.url)}" alt="" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">`
+    : '';
+  return [
+    `<div class="ad-preview" data-surface="${surface}" data-slot-type="${slotType}" data-safe-area="${escapeAttribute(ad.safeAreaPolicy || 'do_not_cover_cards_buttons_timer_result')}">`,
+    logo,
+    '<div>',
+    `<strong>${title}</strong>`,
+    copy ? `<small>${copy}</small>` : '',
+    `<em>${surface} / ${slotType}</em>`,
+    '</div>',
+    '</div>',
+  ].join('');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[ch]));
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
 function cleanUrl(value) {
@@ -1482,13 +2213,18 @@ function serveAdminAsset(req, res, pathname) {
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   const defaultStore = fileURLToPath(new URL('../data/ops-store.json', import.meta.url));
+  const adminToken = process.env.ADMIN_TOKEN;
+  if (!adminToken) {
+    console.error('ADMIN_TOKEN is required. The admin page ships no default password.');
+    process.exit(1);
+  }
   const service = createOpsService({
-    adminToken: process.env.ADMIN_TOKEN || 'tea-parlor-ops',
+    adminToken,
     storePath: process.env.OPS_STORE_PATH || defaultStore,
     seedDemo: process.env.OPS_SEED_DEMO !== '0',
   });
   service.listen(Number(process.env.PORT || 5190)).then(({ url }) => {
     console.log(`Ops console ${url}/admin`);
-    console.log('Admin token is read from ADMIN_TOKEN (local default: tea-parlor-ops). Shadow points only.');
+    console.log('Admin token is read from ADMIN_TOKEN. Shadow points only. Gold is not withdrawable.');
   });
 }
