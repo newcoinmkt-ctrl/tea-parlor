@@ -1630,3 +1630,90 @@ html.table-landscape .lobby-shell.multi-active .zjh-active .mg-table,
   visibility: visible !important;
   pointer-events: auto !important;
 }
+
+
+/* play9c-tab: lobby tabs above 说明 toast so 切 Tab 能关掉弹层 */
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
+  z-index: 610 !important;
+  pointer-events: auto !important;
+}
+#rulesToast.is-open {
+  z-index: 600 !important;
+}
+
+/* play9c-final: flatten Guandan to 1-2 overlapping rows in the lower half;
+   kill styles.css vertical stack (margin-top:-44px / column flex). */
+#mgHand.gd-hand-cols,
+#mgHand.gd-hand-cols.gd-hand-2row,
+.gd-yard #mgHand,
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-cols {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-content: flex-end !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+#mgHand .gd-col,
+.gd-yard #mgHand .gd-col,
+.lobby-shell.multi-active #mgHand .gd-col,
+.lobby-shell.multi-active .gd-yard #mgHand .gd-col {
+  display: contents !important;
+}
+
+#mgHand .gd-card,
+#mgHand .gd-col .gd-card,
+.gd-yard #mgHand .gd-card,
+.gd-yard #mgHand .gd-col .gd-card,
+.lobby-shell.multi-active #mgHand .gd-card,
+.lobby-shell.multi-active .gd-yard .gd-col .gd-card {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: auto !important;
+  flex: 0 0 auto !important;
+}
+
+#mgHand .gd-bomb-tag,
+.gd-yard #mgHand .gd-bomb-tag {
+  display: none !important;
+}
+
+html.table-landscape .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock,
+.gd-yard .mg-hand-dock {
+  position: absolute !important;
+  left: 56px !important;
+  right: 8px !important;
+  top: 50% !important;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+  height: auto !important;
+  max-height: 50% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
+  position: fixed !important;
+  z-index: 620 !important;
+  pointer-events: auto !important;
+}
+#rulesToast.is-open {
+  z-index: 600 !important;
+}
+#rulesToast:not(.is-open),
+#rulesToast[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}

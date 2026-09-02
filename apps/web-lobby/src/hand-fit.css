@@ -175,3 +175,13 @@
   overflow: hidden !important;
   pointer-events: none !important;
 }
+
+/* play9c-final: only flatten hero Guandan cols, never opponent seats */
+#mgHand .gd-col { display: contents !important; }
+#mgHand .gd-card { margin-top: 0 !important; }
+.gd-yard .mg-hand-dock {
+  top: 50% !important;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+  max-height: 50% !important;
+  overflow-x: hidden !important;
+}

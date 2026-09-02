@@ -60,6 +60,8 @@ function applyOverlapItems(items, pack, zBase = 20) {
     el.style.setProperty("min-width", pack.cardW + "px", "important");
     el.style.setProperty("max-width", pack.cardW + "px", "important");
     el.style.setProperty("height", pack.height + "px", "important");
+    el.style.setProperty("margin-top", "0px", "important");
+    el.style.setProperty("margin-bottom", "0px", "important");
     el.style.setProperty("margin-left", i === 0 ? "0px" : "-" + pack.overlap + "px", "important");
     el.style.setProperty("flex", "0 0 " + pack.cardW + "px", "important");
     el.style.setProperty("z-index", String(zBase + i), "important");
@@ -91,12 +93,12 @@ export function layoutOverlapRow(area, items, opts = {}) {
 }
 
 function ensureRowBreak(area, beforeEl) {
-  let br = area.querySelector(":scope > .gd-row-break, .gd-row-break");
+  let br = area.querySelector(":scope > .gd-row-break");
   if (!beforeEl) {
-    if (br) br.remove();
+    area.querySelectorAll(".gd-row-break").forEach((el) => el.remove());
     return;
   }
-  const host = beforeEl.parentElement || area;
+  const host = area;
   if (!br || br.parentElement !== host) {
     if (br) br.remove();
     br = document.createElement("span");
@@ -118,29 +120,42 @@ function ensureRowBreak(area, beforeEl) {
 }
 
 export function layoutGuandanCols(area) {
-  const cols = [...area.querySelectorAll(".gd-col")];
-  if (!cols.length) return;
+  // Only the hero hand. Opponent .gd-card live elsewhere (y~140) and must not be packed.
   const cards = [...area.querySelectorAll(".gd-card")];
   if (!cards.length) return;
+
+  cards.forEach((card) => {
+    if (card.parentElement !== area) area.appendChild(card);
+  });
+  area.querySelectorAll(".gd-col, .gd-bomb-tag").forEach((el) => el.remove());
+  area.querySelectorAll(":scope > .gd-row-break").forEach((el) => el.remove());
+
   const { available, dock } = measureHandAvailable(area);
 
-  cols.forEach((col) => {
-    col.style.setProperty("display", "contents", "important");
-    col.style.removeProperty("width");
-    col.style.removeProperty("min-width");
-    col.style.removeProperty("max-width");
-    col.style.removeProperty("flex");
-  });
-  cards.forEach((card) => {
-    card.style.removeProperty("margin-top");
-  });
   area.style.removeProperty("gap");
   area.style.setProperty("display", "flex", "important");
   area.style.setProperty("flex-direction", "row", "important");
+  area.style.setProperty("justify-content", "flex-start", "important");
+  area.style.setProperty("align-items", "flex-end", "important");
+  area.style.setProperty("align-content", "flex-end", "important");
   area.classList.add("hand-fitted");
 
+  if (dock && dock.style) {
+    dock.style.setProperty("top", "50%", "important");
+    dock.style.setProperty("bottom", "calc(52px + env(safe-area-inset-bottom, 0px))", "important");
+    dock.style.setProperty("left", "56px", "important");
+    dock.style.setProperty("right", "8px", "important");
+    dock.style.setProperty("height", "auto", "important");
+    dock.style.setProperty("max-height", "50%", "important");
+    dock.style.setProperty("display", "flex", "important");
+    dock.style.setProperty("flex-direction", "column", "important");
+    dock.style.setProperty("justify-content", "flex-end", "important");
+    dock.style.setProperty("overflow-x", "hidden", "important");
+    dock.style.setProperty("overflow-y", "visible", "important");
+  }
+
   const n = cards.length;
-  const minPeek = 18;
+  const minPeek = 24;
   const minW = 28;
   const maxW = 44;
   const ratio = 1.4;
