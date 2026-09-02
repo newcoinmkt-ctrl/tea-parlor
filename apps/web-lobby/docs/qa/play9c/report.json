@@ -1,0 +1,237 @@
+{
+  "url": "http://127.0.0.1:8765/",
+  "mode": "play9c1-real-lobby-pw",
+  "viewport": [
+    414,
+    896
+  ],
+  "device_scale_factor": 1,
+  "cache": "play9c1",
+  "started": "2026-09-02T02:45:36Z",
+  "teaParlorFound": true,
+  "consoleErrors": [],
+  "pngs": {
+    "rules-open-414.png": "/workspace/tea-qa-play9c/rules-open-414.png",
+    "me-after-rules-414.png": "/workspace/tea-qa-play9c/me-after-rules-414.png",
+    "gd-414.png": "/workspace/tea-qa-play9c/gd-414.png"
+  },
+  "pass": [
+    "rules toast is-open",
+    "toast gone + 保存形象 tappable"
+  ],
+  "fail": [
+    "guandan checks={'n_ok': True, 'rows_ok': False, 'lower_ok': True, 'overflow_ok': True, 'peek_ok': True, 'idleLobby': False} metrics={'n': 27, 'uniqueTops': [648, 697, 747, 796], 'minTop': 648, 'lastRight': 396, 'minPeek': 25, 'innerWidth': 414, 'innerHeight': 896}"
+  ],
+  "rules": {
+    "name": "rules",
+    "PASS": true,
+    "boot": {
+      "ready": "complete",
+      "teaType": "object",
+      "teaObj": true,
+      "start": "function",
+      "title": "Tea Parlor H5 大厅",
+      "tabs": 5
+    },
+    "scene": {
+      "title": "Tea Parlor H5 大厅",
+      "teaType": "object",
+      "active": [
+        {
+          "action": "rules",
+          "text": "说明"
+        }
+      ],
+      "toast": {
+        "exists": true,
+        "isOpen": true,
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "opacity": "1",
+        "w": 414,
+        "h": 896,
+        "top": 0
+      },
+      "save": {
+        "exists": true,
+        "text": "保存形象",
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "tappable": false,
+        "hit": false
+      },
+      "nCards": 0,
+      "shell": "lobby-shell p0-tg lobby-view-home",
+      "bodyStart": "茶馆主房间 影子积分 128,600 ◆ 赛季积分 100.00 斗地主 麻将 德州 掼蛋 炸金花 二十一点 链游中心 更多游戏 牌类合集 补给中心 战绩中心 链游合集 大厅 战绩 补给 说明 我 玩法说明 总览 斗地主 德州 炸金花 麻将 掼蛋 二十一点 大厅入口：侧栏可选斗地主 / 德州 / 炸金花 / 麻将 / 掼蛋 / 二十一点 / 链游测试区 / "
+    },
+    "png": "/workspace/tea-qa-play9c/rules-open-414.png",
+    "open_ok": true,
+    "idleLobby": false
+  },
+  "me": {
+    "name": "me",
+    "PASS": true,
+    "toastGone": true,
+    "saveTappable": true,
+    "boot": {
+      "ready": "complete",
+      "teaType": "object",
+      "teaObj": true,
+      "start": "function",
+      "title": "Tea Parlor H5 大厅",
+      "tabs": 5
+    },
+    "scene": {
+      "title": "Tea Parlor H5 大厅",
+      "teaType": "object",
+      "active": [
+        {
+          "action": "profile",
+          "text": "我"
+        }
+      ],
+      "toast": {
+        "exists": true,
+        "isOpen": false,
+        "hidden": true,
+        "display": "none",
+        "visibility": "hidden",
+        "opacity": "0",
+        "w": 0,
+        "h": 0,
+        "top": 0
+      },
+      "save": {
+        "exists": true,
+        "text": "保存形象",
+        "w": 346,
+        "h": 44,
+        "top": 787.09375,
+        "tappable": true,
+        "hit": true
+      },
+      "nCards": 0,
+      "shell": "lobby-shell p0-tg lobby-view-profile",
+      "bodyStart": "返回大厅 账号设置 个人中心 西装绅士 茶馆 ID 830126 · Lv.12 金币 128,600 赛季积分 100.00 点选衣橱即可预览 · 保存后同步牌桌 西装绅士 默认衣服 · 0 件配饰 · 3 件皮肤 · 点选即可预览 桌布：翠绿绒桌布 牌背：绿毡牌背 头像框：默认头像框 皮肤详情 基础衣橱 选择桌布、牌背或头像框查看来源与联名信息。 保存形"
+    },
+    "png": "/workspace/tea-qa-play9c/me-after-rules-414.png",
+    "save": {
+      "exists": true,
+      "text": "保存形象",
+      "w": 346,
+      "h": 44,
+      "top": 787.09375,
+      "tappable": true,
+      "hit": true
+    },
+    "idleLobby": false
+  },
+  "guandan": {
+    "name": "gd",
+    "PASS": false,
+    "boot": {
+      "ready": "complete",
+      "teaType": "object",
+      "teaObj": true,
+      "start": "function",
+      "title": "Tea Parlor H5 大厅",
+      "tabs": 5
+    },
+    "scene": {
+      "title": "Tea Parlor H5 大厅",
+      "teaType": "object",
+      "active": [
+        {
+          "action": "home",
+          "text": "大厅"
+        }
+      ],
+      "toast": {
+        "exists": false
+      },
+      "save": {
+        "exists": true,
+        "text": "保存形象",
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "tappable": false,
+        "hit": false
+      },
+      "nCards": 27,
+      "shell": "lobby-shell p0-tg lobby-view-home table-active multi-active",
+      "bodyStart": "← 返回 500 27 500 27 500 27 500 27 15 2★ ♥ 2★ ♥ 2 ♣ 2 ♣ A ♣ A ♦ K ♠ Q ♣ J ♠ J ♠ J ♥ J ♦ 9 ♥ 9 ♦ 8 ♠ 8 ♥ 8 ♣ 7 ♣ 7 ♦ 6 ♠ 5 ♠ 5 ♥ 5 ♥ 5 ♣ 5 ♦ 4 ♦ 3 ♦ 不出 出牌 级牌 2 大 2 小 2 2★ 8 A 8 K 8 Q "
+    },
+    "png": "/workspace/tea-qa-play9c/gd-414.png",
+    "metrics": {
+      "n": 27,
+      "uniqueTops": [
+        648,
+        697,
+        747,
+        796
+      ],
+      "minTop": 648,
+      "lastRight": 396,
+      "minPeek": 25,
+      "innerWidth": 414,
+      "innerHeight": 896,
+      "rowCount": 4,
+      "overflowOk": true,
+      "peekOk": true,
+      "rowsOk": false,
+      "lowerHalfOk": true,
+      "PASS": false
+    },
+    "checks": {
+      "n_ok": true,
+      "rows_ok": false,
+      "lower_ok": true,
+      "overflow_ok": true,
+      "peek_ok": true,
+      "idleLobby": false
+    }
+  },
+  "pngShows": {
+    "rules-open-414.png": "rules toast open (display=flex 414x896); active=[{'action': 'rules', 'text': '说明'}]",
+    "me-after-rules-414.png": "profile/wardrobe save exists=True tappable=True text='保存形象' hit=True; toastOpen=False active=[{'action': 'profile', 'text': '我'}] shell=lobby-shell p0-tg lobby-view-profile",
+    "gd-414.png": "gd-card n=27; active=[{'action': 'home', 'text': '大厅'}]; shell=lobby-shell p0-tg lobby-view-home table-active multi-active"
+  },
+  "chromiumVersion": "151.0.7922.34",
+  "log": [
+    "play9c1 capture from REAL tea-fix lobby",
+    "URL=http://127.0.0.1:8765/",
+    "chromium 151.0.7922.34",
+    "=== A rules-open-414 ===",
+    "  goto commit",
+    "  commit ok",
+    "  boot {'ready': 'loading', 'teaType': 'undefined', 'teaObj': False, 'start': 'undefined', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  boot {'ready': 'interactive', 'teaType': 'undefined', 'teaObj': False, 'start': 'undefined', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  boot {'ready': 'complete', 'teaType': 'object', 'teaObj': True, 'start': 'function', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  scene {'title': 'Tea Parlor H5 大厅', 'teaType': 'object', 'active': [{'action': 'rules', 'text': '说明'}], 'toast': {'exists': True, 'isOpen': True, 'hidden': False, 'display': 'flex', 'visibility': 'visible', 'opacity': '1', 'w': 414, 'h': 896, 'top': 0}, 'save': {'exists': True, 'text': '保存形象', 'w': 0, 'h': 0, 'top': 0, 'tappable': False, 'hit': False}, 'nCards': 0, 'shell': 'lobby-shell p0-tg lobby-view-home', 'bodyStart': '茶馆主房间 影子积分 128,600 ◆ 赛季积分 100.00 斗地主 麻将 德州 掼蛋 炸金花 二十一点 链游中心 更多游戏 牌类合集 补给中心 战绩中心 链游合集 大厅 战绩 补给 说明 我 玩法说明 总览 斗地主 德州 炸金花 麻将 掼蛋 二十一点 大厅入口：侧栏可选斗地主 / 德州 / 炸金花 / 麻将 / 掼蛋 / 二十一点 / 链游测试区 / '}",
+    "  saved /workspace/tea-qa-play9c/rules-open-414.png bytes=120085",
+    "  PASS rules",
+    "=== B me-after-rules-414 ===",
+    "  goto commit",
+    "  commit ok",
+    "  boot {'ready': 'loading', 'teaType': 'undefined', 'teaObj': False, 'start': 'undefined', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  boot {'ready': 'interactive', 'teaType': 'undefined', 'teaObj': False, 'start': 'undefined', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  boot {'ready': 'complete', 'teaType': 'object', 'teaObj': True, 'start': 'function', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  scene {'title': 'Tea Parlor H5 大厅', 'teaType': 'object', 'active': [{'action': 'profile', 'text': '我'}], 'toast': {'exists': True, 'isOpen': False, 'hidden': True, 'display': 'none', 'visibility': 'hidden', 'opacity': '0', 'w': 0, 'h': 0, 'top': 0}, 'save': {'exists': True, 'text': '保存形象', 'w': 346, 'h': 44, 'top': 787.09375, 'tappable': True, 'hit': True}, 'nCards': 0, 'shell': 'lobby-shell p0-tg lobby-view-profile', 'bodyStart': '返回大厅 账号设置 个人中心 西装绅士 茶馆 ID 830126 · Lv.12 金币 128,600 赛季积分 100.00 点选衣橱即可预览 · 保存后同步牌桌 西装绅士 默认衣服 · 0 件配饰 · 3 件皮肤 · 点选即可预览 桌布：翠绿绒桌布 牌背：绿毡牌背 头像框：默认头像框 皮肤详情 基础衣橱 选择桌布、牌背或头像框查看来源与联名信息。 保存形'}",
+    "  saved /workspace/tea-qa-play9c/me-after-rules-414.png bytes=299652",
+    "  PASS me",
+    "=== C gd-414 ===",
+    "  goto commit",
+    "  commit ok",
+    "  boot {'ready': 'loading', 'teaType': 'undefined', 'teaObj': False, 'start': 'undefined', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  boot {'ready': 'complete', 'teaType': 'object', 'teaObj': True, 'start': 'function', 'title': 'Tea Parlor H5 大厅', 'tabs': 5}",
+    "  startGuanDan('novice')",
+    "  gd-card n=27",
+    "  metrics {'n': 27, 'uniqueTops': [648, 697, 747, 796], 'minTop': 648, 'lastRight': 396, 'minPeek': 25, 'innerWidth': 414, 'innerHeight': 896}",
+    "  saved /workspace/tea-qa-play9c/gd-414.png bytes=393393",
+    "  FAIL gd"
+  ],
+  "finished": "2026-09-02T02:45:40Z"
+}

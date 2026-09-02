@@ -1,0 +1,20 @@
+{
+  "n": 27,
+  "uniqueTops": [
+    648,
+    697,
+    747,
+    796
+  ],
+  "minTop": 648,
+  "lastRight": 396,
+  "minPeek": 25,
+  "innerWidth": 414,
+  "innerHeight": 896,
+  "rowCount": 4,
+  "overflowOk": true,
+  "peekOk": true,
+  "rowsOk": false,
+  "lowerHalfOk": true,
+  "PASS": false
+}

@@ -211,6 +211,7 @@ const DDZ_TIER_IDS = {
 };
 const DDZ_QUEUE = ['匹配中 · 2/3', '可立即入座', '排队 1 桌'];
 const DDZ_TIER_LABEL = ['新手', '经典', '高级'];
+let _txDealerSyncing = false;
 
 /** 链游测试区结算币种标签（内部键仍为 crypto，余额走赛季积分账本） */
 const CRYPTO_SYMBOL = '赛季积分';
@@ -607,7 +608,7 @@ const chainCenterController = createChainCenterController({
   escapeHtml,
 });
 
-boot();
+queueMicrotask(() => { boot(); });
 
 async function boot() {
   try {
@@ -2010,8 +2011,82 @@ function applyCostumeTheme(costumeId) {
   document.body.dataset.costume = id;
 }
 
+function readTexasDealerIndex(source, depth = 0) {
+  if (source == null || depth > 3) return null;
+  if (typeof source === 'number' && Number.isFinite(source)) {
+    const n = Math.trunc(source);
+    return n >= 0 && n <= 2 ? n : null;
+  }
+  if (typeof source !== 'object') return null;
+  const keys = ['dealer', 'dealerIndex', 'dealerSeat', 'dealerPos', 'button', 'buttonIndex', 'btn', 'btnSeat'];
+  for (const k of keys) {
+    if (source[k] == null || source[k] === '') continue;
+    const nested = readTexasDealerIndex(source[k], depth + 1);
+    if (nested != null) return nested;
+  }
+  for (const k of ['state', 'game', 'engine', 'table']) {
+    if (source[k] && source[k] !== source) {
+      const nested = readTexasDealerIndex(source[k], depth + 1);
+      if (nested != null) return nested;
+    }
+  }
+  return null;
+}
+
+/** Hide all dealer D badges; unhide only the dealer seat. Fallback seat 0. */
+function syncTexasDealer(state) {
+  if (_txDealerSyncing) return;
+  const badges = document.querySelectorAll('.tx-dealer');
+  if (!badges.length) return;
+  let idx = readTexasDealerIndex(state);
+  if (idx == null) idx = readTexasDealerIndex(texasUI);
+  if (idx == null) idx = readTexasDealerIndex(window.__texasState);
+  if (idx == null) idx = 0;
+  const want = String(idx);
+  _txDealerSyncing = true;
+  try {
+    badges.forEach((el) => {
+      const on = el.getAttribute('data-tx-dealer') === want;
+      if (on) {
+        if (el.hidden) {
+          el.hidden = false;
+          el.removeAttribute('hidden');
+        }
+      } else if (!el.hidden) {
+        el.hidden = true;
+        el.setAttribute('hidden', '');
+      }
+    });
+  } finally {
+    _txDealerSyncing = false;
+  }
+}
+
+function hookTexasDealerRender(ui) {
+  if (!ui || ui._play9DealerHook) return;
+  ui._play9DealerHook = true;
+  ['render', 'update', 'sync'].forEach((name) => {
+    if (typeof ui[name] !== 'function') return;
+    const orig = ui[name].bind(ui);
+    ui[name] = (...args) => {
+      const r = orig(...args);
+      syncTexasDealer(ui);
+      return r;
+    };
+  });
+}
+
 function initTexas() {
-  // 延迟到 startTexas 创建
+  syncTexasDealer(null);
+  const root = document.getElementById('texasTableView');
+  if (root && !root._txDealerObs) {
+    const obs = new MutationObserver(() => {
+      clearTimeout(obs._t);
+      obs._t = setTimeout(() => syncTexasDealer(texasUI), 32);
+    });
+    obs.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden', 'class'] });
+    root._txDealerObs = obs;
+  }
 }
 
 function cashoutTexas(stack) {
@@ -2106,6 +2181,8 @@ function startTexas(tableKey = 'micro', options = {}) {
     },
   });
   texasUI.start();
+  hookTexasDealerRender(texasUI);
+  syncTexasDealer(texasUI);
   try {
     resetAllCharActions();
     playCharAction(0, 'deal');
@@ -2720,6 +2797,7 @@ function scrollCryptoToSection(el) {
 }
 
 function handleLobbyAction(action, opts = {}) {
+  if (action !== 'rules') hideRulesToast();
   if (action === 'home') setLobbyView('home');
   else if (action === 'open-games' || action === 'games') setLobbyView('games');
   else if (action === 'quick-doudizhu') {
@@ -2805,7 +2883,7 @@ const RULES_PANELS = {
     + '<p><b>货币</b>：金币 = 内部娱乐积分；赛季积分 = 链游测试区演示账本（不可转为现金或外部资产）。</p>'
     + '<p><b>链游测试区</b>：使用 赛季积分 入座各玩法（含二十一点），规则与金币场一致，仅结算币种不同。</p>'
     + '<p><b>每日补给</b>：仅当金币输光（为 0）后可领，每天最多 4 次。</p>'
-    + '<p><b>操作通用</b>：桌面点选手牌/按钮出牌或下注；人机默认本地，可切 Pinus/Colyseus 联网。</p>'
+    + '<p><b>操作通用</b>：点选手牌或按钮出牌、下注；默认同桌人机，可切换联网对局。</p>'
     + '<p class="muted">金币与 赛季积分 演示账本均不可转为现金或外部资产。</p>'
   ),
   doudizhu: () => (
@@ -2885,7 +2963,12 @@ function showRulesToast(initialTab = 'overview') {
     + '<button type="button" class="rules-toast-close">知道了</button>';
 
   tip.hidden = false;
+  tip.removeAttribute('hidden');
   tip.classList.add('is-open');
+  tip.style.setProperty('display', 'flex', 'important');
+  tip.style.setProperty('visibility', 'visible', 'important');
+  tip.style.setProperty('pointer-events', 'auto', 'important');
+  tip.style.setProperty('opacity', '1', 'important');
 
   const body = tip.querySelector('#rulesToastBody');
   tip.querySelectorAll('.rules-tab').forEach((btn) => {
@@ -2908,7 +2991,21 @@ function hideRulesToast() {
   const tip = document.getElementById('rulesToast');
   if (!tip) return;
   tip.hidden = true;
+  tip.setAttribute('hidden', '');
   tip.classList.remove('is-open');
+  tip.style.setProperty('display', 'none', 'important');
+  tip.style.setProperty('visibility', 'hidden', 'important');
+  tip.style.setProperty('pointer-events', 'none', 'important');
+  tip.style.setProperty('opacity', '0', 'important');
+}
+
+if (typeof document !== 'undefined' && !window.__teaRulesTabGuard) {
+  window.__teaRulesTabGuard = true;
+  document.addEventListener('pointerdown', (ev) => {
+    const tab = ev.target && ev.target.closest && ev.target.closest('[data-lobby-action]');
+    const action = tab && tab.getAttribute('data-lobby-action');
+    if (action && action !== 'rules') hideRulesToast();
+  }, true);
 }
 
 function setLobbyView(view = 'home', gameType = null) {
@@ -4153,6 +4250,15 @@ function shareFriendRoom() {
 }
 
 function bindP0Lobby() {
+  const tabbar = document.querySelector('.home-tabbar');
+  if (tabbar && !tabbar.dataset.play9ToastGuard) {
+    tabbar.dataset.play9ToastGuard = '1';
+    tabbar.addEventListener('click', (ev) => {
+      const tab = ev.target && ev.target.closest && ev.target.closest('[data-lobby-action]');
+      const action = tab && tab.getAttribute('data-lobby-action');
+      if (action && action !== 'rules') hideRulesToast();
+    }, true);
+  }
   document.querySelectorAll('[data-ddz-lane]').forEach((btn) => {
     btn.addEventListener('click', () => {
       ddzLane = btn.getAttribute('data-ddz-lane') || 'gold';

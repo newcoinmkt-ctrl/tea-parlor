@@ -2,9 +2,9 @@
   --tg-vh: 100dvh;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --ui-btn-h: clamp(36px, 5.2vw, 44px);
-  --ui-btn-r: clamp(12px, 2.2vw, 18px);
-  --ui-fs: clamp(12px, 3.3vw, 15px);
+  --ui-btn-h: clamp(32px, 5vw, 44px);
+  --ui-btn-r: clamp(10px, 2vw, 16px);
+  --ui-fs: clamp(12px, 3.2vw, 15px);
 }
 html, body,
 .lobby-shell,
@@ -1127,4 +1127,593 @@ html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-car
   height: clamp(32px, 4.6vw, 36px) !important;
   min-height: clamp(32px, 4.6vw, 36px) !important;
   max-height: 36px !important;
+}
+
+
+/* ── play9: last word. Bid is a flex sibling ABOVE the hand; never overlay. ── */
+:root {
+  --tg-vh: 100dvh;
+  --ui-btn-h: clamp(32px, 5vw, 44px);
+  --ui-btn-r: clamp(10px, 2vw, 16px);
+  --ui-fs: clamp(12px, 3.2vw, 15px);
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table:not([hidden]),
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table:not([hidden]),
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: var(--tg-vh, 100dvh) !important;
+  max-height: var(--tg-vh, 100dvh) !important;
+  min-height: 0 !important;
+  z-index: 400 !important;
+  overflow: hidden !important;
+  display: block !important;
+  transform: none !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  inset: auto 0 0 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  z-index: 50 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+  padding: 0 0 calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .play-zone-self,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .play-zone-self {
+  order: 0 !important;
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 auto !important;
+  z-index: 9 !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .qq-center-actions,
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .action-panel,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .qq-center-actions,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .qq-center-actions {
+  order: 1 !important;
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  z-index: 10 !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .hand-wrap,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .hand-wrap,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .hand-wrap {
+  order: 2 !important;
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  flex: 0 0 auto !important;
+  z-index: 12 !important;
+  margin: 0 !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls:not([hidden]),
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #settleControls:not([hidden]),
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls:not([hidden]),
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls:not([hidden]),
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls:not([hidden]),
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #settleControls:not([hidden]),
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #bidControls,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #doubleControls {
+  order: 1 !important;
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 10 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 4px !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+.lobby-shell.table-active #tableView #handArea {
+  order: 2 !important;
+  position: relative !important;
+  z-index: 12 !important;
+  padding-left: 56px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Avatar stays in the 56px gutter, not over the first card */
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+.lobby-shell.table-active #tableView.harbor-table .qq-bottom-bar {
+  position: fixed !important;
+  left: 4px !important;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  right: auto !important;
+  width: 56px !important;
+  z-index: 48 !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+/* ── Guandan: one overlapping row; toolbar above the fan ── */
+.gd-col,
+.gd-yard .gd-col,
+.lobby-shell.multi-active .gd-yard .gd-col,
+.lobby-shell.multi-active #mgHand .gd-col {
+  display: contents !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  flex: none !important;
+}
+
+html.table-landscape .lobby-shell.multi-active .gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock,
+.gd-yard .mg-hand-dock {
+  position: absolute !important;
+  left: 56px !important;
+  right: 8px !important;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  width: auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  box-sizing: border-box !important;
+}
+
+.gd-yard #mgHand,
+.gd-yard #mgHand.gd-hand-cols,
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-cols {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: flex-end !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.lobby-shell.multi-active .gd-yard .gd-toolbar,
+.gd-yard .gd-toolbar {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0 0 6px !important;
+  z-index: 20 !important;
+  pointer-events: auto !important;
+  order: 0 !important;
+}
+
+.gd-yard .gd-toolbar .gd-act,
+.gd-yard .gd-toolbar .qq-btn {
+  width: fit-content !important;
+  flex: 0 0 auto !important;
+}
+
+.gd-yard #mgHand,
+.gd-yard .mg-hand-dock #mgHand {
+  order: 1 !important;
+}
+
+.lobby-shell.multi-active .gd-yard .gd-col .gd-card,
+.gd-yard .gd-col .gd-card,
+.gd-yard .gd-card {
+  margin-top: 0 !important;
+}
+
+/* ── Mahjong: avatar gutter + one overlapping row; compact 碰/杠/胡/过/弃 ── */
+.multi-game-view #mgHand,
+.multi-game-view .mg-hand-dock,
+.mj-4p #mgHand,
+.mj-2p #mgHand,
+.mj-4p .mg-hand-dock,
+.mj-2p .mg-hand-dock,
+.lobby-shell.multi-active #mgHand,
+.lobby-shell.multi-active .mg-hand-dock {
+  padding-left: 56px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.mj-4p #mgHand,
+.mj-2p #mgHand,
+.lobby-shell.multi-active #mgHand:not(.gd-hand-cols) {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: flex-end !important;
+  overflow: hidden !important;
+}
+
+.mj-4p #mgActions .qq-btn,
+.mj-2p #mgActions .qq-btn,
+.multi-game-view.mj-4p #mgActions .qq-btn,
+.multi-game-view.mj-2p #mgActions .qq-btn,
+.lobby-shell.multi-active:not(.gd-active) #mgActions .qq-btn {
+  width: fit-content !important;
+  flex: 0 0 auto !important;
+  min-width: 44px !important;
+  max-width: 88px !important;
+}
+
+/* ── Texas: only one dealer D; actions stay in the dock ── */
+.tx-dealer[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.lobby-shell.texas-active #texasActions,
+.lobby-shell.texas-active #texasSettleRow {
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Rules toast: opaque fullscreen; gone unless .is-open ── */
+#rulesToast:not(.is-open),
+#rulesToast[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transform: none !important;
+}
+#rulesToast.is-open {
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important;
+  inset: 0 !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(8, 14, 22, 0.96) !important;
+  z-index: 600 !important;
+  height: var(--tg-vh, 100dvh) !important;
+  max-height: var(--tg-vh, 100dvh) !important;
+  width: 100% !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Never CSS-rotate even if css-landscape leaks onto html */
+@media (orientation: portrait) {
+  html.css-landscape .lobby-shell.table-active,
+  html.css-landscape .lobby-shell.texas-active,
+  html.css-landscape .lobby-shell.multi-active {
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    height: var(--tg-vh, 100dvh) !important;
+    inset: auto !important;
+  }
+}
+
+
+/* play9b: one gutter only — do not stack dock left:56px AND padding-left:56px */
+.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.mg-hand-dock #mgHand,
+.gd-yard #mgHand {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.mj-4p .mg-hand-dock,
+.mj-2p .mg-hand-dock,
+.multi-game-view:not(.gd-yard) .mg-hand-dock {
+  padding-left: 56px !important;
+  padding-right: 8px !important;
+}
+
+
+/* play9c: beat play7 7-class .gd-yard dock (left:4px) */
+html.table-landscape .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-active.gd-4p.gd-yard .mg-hand-dock {
+  position: absolute !important;
+  left: 56px !important;
+  right: 8px !important;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow: hidden !important;
+}
+
+
+/* ── play9 follow-up: Guandan 2-row pack; ZJH hide right-side 说明 overlay ── */
+
+/* Guandan: keep .gd-col as contents (no vertical stacks over 恢复/一键理牌) */
+.gd-yard .gd-col,
+.lobby-shell.multi-active .gd-yard .gd-col,
+#mgHand .gd-col {
+  display: contents !important;
+}
+
+.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock,
+html.table-landscape .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock {
+  left: 56px !important;
+  right: 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+#mgHand.gd-hand-2row,
+.gd-yard #mgHand.gd-hand-2row,
+.gd-yard #mgHand.gd-hand-cols.gd-hand-2row,
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-2row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-content: flex-end !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.gd-yard #mgHand.gd-hand-2row .gd-card,
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-2row .gd-card,
+.lobby-shell.multi-active #mgHand.gd-hand-2row .gd-card {
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+.gd-row-break {
+  display: block !important;
+  flex: 1 0 100% !important;
+  flex-basis: 100% !important;
+  width: 100% !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.gd-yard .gd-toolbar,
+.lobby-shell.multi-active .gd-yard .gd-toolbar {
+  position: relative !important;
+  order: 0 !important;
+  z-index: 20 !important;
+}
+.gd-yard #mgHand,
+.gd-yard .mg-hand-dock #mgHand {
+  order: 1 !important;
+}
+
+/* ZJH: hide leftover 说明 / help / aside / mahjong chrome that paints a dark
+   vertical strip over 茶友 on the right. Do NOT hide the lobby 说明 tab. */
+.lobby-shell.multi-active .mode-rail,
+.lobby-shell.multi-active #multiGameView aside,
+.lobby-shell.multi-active .zjh-help,
+.lobby-shell.multi-active .mg-help,
+.lobby-shell.multi-active .mg-rule-tip,
+.lobby-shell.multi-active .zjh-active .mg-rule-tip,
+.lobby-shell.multi-active .zjh-active aside,
+.lobby-shell.multi-active .zjh-active .mj-felt,
+.lobby-shell.multi-active .zjh-active .mj-room-bg,
+.lobby-shell.multi-active .zjh-active .mj-wall,
+.lobby-shell.multi-active .zjh-active .mj-compass,
+.lobby-shell.multi-active .zjh-active .mg-ad-bar,
+.lobby-shell.multi-active .zjh-active .table-center-ad,
+.lobby-shell.multi-active .zjh-active .mg-table-center-ad,
+.lobby-shell.multi-active .zjh-active .card-face-ad-hand,
+.lobby-shell.multi-active .zjh-active .card-face-ad,
+.lobby-shell.multi-active #rulesToast:not(.is-open) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Portrait Mini App: never keep the landscape 3-column mg-table that shoves
+   hero/help into an 18vw right rail covering 茶友. */
+html.table-landscape .lobby-shell.multi-active .zjh-active .mg-table,
+.lobby-shell.multi-active .multi-game-view.zjh-active .mg-table,
+.lobby-shell.multi-active .zjh-active .mg-table {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.lobby-shell.multi-active .home-tabbar,
+.lobby-shell.multi-active .quick-dock {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Rules toast: still gone unless .is-open (opaque inset 0). */
+#rulesToast:not(.is-open),
+#rulesToast[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transform: none !important;
+}
+#rulesToast.is-open {
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(8, 14, 22, 0.96) !important;
+  z-index: 600 !important;
+  height: var(--tg-vh, 100dvh) !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+
+/* play9c-tab: lobby tabs above 说明 toast so 切 Tab 能关掉弹层 */
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
+  z-index: 610 !important;
+  pointer-events: auto !important;
+}
+#rulesToast.is-open {
+  z-index: 600 !important;
+}
+
+/* play9c-final: flatten Guandan to 1-2 overlapping rows in the lower half;
+   kill styles.css vertical stack (margin-top:-44px / column flex). */
+#mgHand.gd-hand-cols,
+#mgHand.gd-hand-cols.gd-hand-2row,
+.gd-yard #mgHand,
+.lobby-shell.multi-active .gd-yard #mgHand.gd-hand-cols {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-content: flex-end !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+#mgHand .gd-col,
+.gd-yard #mgHand .gd-col,
+.lobby-shell.multi-active #mgHand .gd-col,
+.lobby-shell.multi-active .gd-yard #mgHand .gd-col {
+  display: contents !important;
+}
+
+#mgHand .gd-card,
+#mgHand .gd-col .gd-card,
+.gd-yard #mgHand .gd-card,
+.gd-yard #mgHand .gd-col .gd-card,
+.lobby-shell.multi-active #mgHand .gd-card,
+.lobby-shell.multi-active .gd-yard .gd-col .gd-card {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: auto !important;
+  flex: 0 0 auto !important;
+}
+
+#mgHand .gd-bomb-tag,
+.gd-yard #mgHand .gd-bomb-tag {
+  display: none !important;
+}
+
+html.table-landscape .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock,
+.gd-yard .mg-hand-dock {
+  position: absolute !important;
+  left: 56px !important;
+  right: 8px !important;
+  top: 50% !important;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+  height: auto !important;
+  max-height: 50% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
+  position: fixed !important;
+  z-index: 620 !important;
+  pointer-events: auto !important;
+}
+#rulesToast.is-open {
+  z-index: 600 !important;
+}
+#rulesToast:not(.is-open),
+#rulesToast[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }

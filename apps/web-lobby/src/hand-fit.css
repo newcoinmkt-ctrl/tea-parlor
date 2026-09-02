@@ -115,3 +115,73 @@
   right: 8px !important;
   overflow: hidden !important;
 }
+
+
+/* play9: gutter + flatten guandan cols + compact mahjong actions */
+.gd-col {
+  display: contents !important;
+}
+.gd-yard .mg-hand-dock {
+  left: 56px !important;
+  right: 8px !important;
+  overflow: hidden !important;
+}
+.mg-hand-dock {
+  padding-left: 56px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+}
+.mg-hand-dock #mgHand,
+.gd-yard .mg-hand-dock {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.mj-4p #mgActions .qq-btn,
+.mj-2p #mgActions .qq-btn,
+.mg-actions .qq-btn {
+  width: fit-content !important;
+  flex: 0 0 auto !important;
+}
+
+/* play9 follow-up: Guandan 2-row fan; dock never overflows the right edge */
+.gd-col {
+  display: contents !important;
+}
+.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock {
+  left: 56px !important;
+  right: 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+#mgHand.gd-hand-2row,
+.gd-yard #mgHand.gd-hand-2row,
+.hand-area.hand-fitted.gd-hand-2row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-content: flex-end !important;
+  align-items: flex-end !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+.gd-row-break {
+  display: block !important;
+  flex: 1 0 100% !important;
+  flex-basis: 100% !important;
+  width: 100% !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* play9c-final: only flatten hero Guandan cols, never opponent seats */
+#mgHand .gd-col { display: contents !important; }
+#mgHand .gd-card { margin-top: 0 !important; }
+.gd-yard .mg-hand-dock {
+  top: 50% !important;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+  max-height: 50% !important;
+  overflow-x: hidden !important;
+}

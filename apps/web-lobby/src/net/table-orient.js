@@ -31,7 +31,12 @@ export function syncViewportHeight() {
       h = vv.height;
     }
   } catch (_) {}
-  if (h > 0) root.style.setProperty("--tg-vh", Math.round(h) + "px");
+  if (h > 0) {
+    const next = Math.round(h) + "px";
+    if (root.style.getPropertyValue("--tg-vh") !== next) {
+      root.style.setProperty("--tg-vh", next);
+    }
+  }
 }
 
 export function syncTableLandscape() {
@@ -62,8 +67,12 @@ export function syncTableLandscape() {
 
 export function initTableOrientation() {
   const shell = document.querySelector(".lobby-shell");
+  let running = false;
   const run = () => {
+    if (running) return;
+    running = true;
     try { syncTableLandscape(); } catch (err) { console.warn("[table-orient]", err); }
+    finally { running = false; }
   };
   run();
   if (shell) {
