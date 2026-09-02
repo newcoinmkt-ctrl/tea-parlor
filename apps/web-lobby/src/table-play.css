@@ -750,10 +750,10 @@ html.table-landscape .lobby-shell.multi-active,
   overflow: hidden !important;
 }
 
-.lobby-shell.table-active #tableView.harbor-table,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table,
 .lobby-shell.texas-active #texasTableView,
 .lobby-shell.multi-active #multiGameView,
-html.table-landscape .lobby-shell.table-active #tableView.harbor-table,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table,
 html.table-landscape .lobby-shell.texas-active #texasTableView,
 html.table-landscape .lobby-shell.multi-active #multiGameView {
   position: absolute !important;
@@ -2146,14 +2146,7 @@ html body .multi-game-view:not(.gd-yard):not(.gd-active) .gd-again-pill {
   padding: 0 !important;
 }
 
-/* Never keep DDZ table under mahjong/zjh/guandan */
-.lobby-shell.multi-active #tableView,
-.lobby-shell.texas-active #tableView,
-.lobby-shell.multi-active #tableView.harbor-table {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
+/* superseded by play9d1 kill switch at file end */
 
 /* Always hide identical 底牌 backs / gold B cluster on 414 tables */
 html body .lobby-shell.table-active #tableView.harbor-table .landlord-cards-wrap,
@@ -2174,4 +2167,47 @@ html body .gd-yard [data-mg-seat="0"] {
   bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
   top: auto !important;
   z-index: 20 !important;
+}
+
+/* play9d1: never paint DDZ table under Guandan / mahjong / zjh / texas */
+html.table-landscape #tableView[hidden],
+html.table-portrait-dock #tableView[hidden],
+html body #tableView[hidden],
+html.table-landscape .lobby-shell.multi-active #tableView,
+html.table-portrait-dock .lobby-shell.multi-active #tableView,
+html body .lobby-shell.multi-active #tableView,
+html.table-landscape .lobby-shell.texas-active #tableView,
+html.table-portrait-dock .lobby-shell.texas-active #tableView,
+html body .lobby-shell.texas-active #tableView,
+html.table-landscape .lobby-shell.table-active.multi-active #tableView,
+html.table-landscape .lobby-shell.table-active.multi-active #tableView.harbor-table,
+html.table-landscape .lobby-shell.p0-tg.table-active.multi-active #tableView.harbor-table,
+html body .lobby-shell.p0-tg.table-active.multi-active #tableView.harbor-table,
+html body .lobby-shell.p0-tg.texas-active #tableView {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  z-index: -1 !important;
+}
+
+html.table-landscape .lobby-shell.multi-active #bidControls,
+html.table-landscape .lobby-shell.multi-active #playControls,
+html.table-landscape .lobby-shell.multi-active #handArea,
+html.table-landscape .lobby-shell.texas-active #bidControls,
+html.table-landscape .lobby-shell.texas-active #playControls,
+html.table-landscape .lobby-shell.texas-active #handArea,
+.lobby-shell.multi-active #bidControls,
+.lobby-shell.multi-active #playControls,
+.lobby-shell.multi-active #handArea,
+.lobby-shell.texas-active #bidControls,
+.lobby-shell.texas-active #playControls,
+.lobby-shell.texas-active #handArea,
+.lobby-shell.multi-active #tableView .qq-bottom-bar,
+.lobby-shell.texas-active #tableView .qq-bottom-bar,
+#bidControls[hidden],
+#playControls[hidden],
+#handArea[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }

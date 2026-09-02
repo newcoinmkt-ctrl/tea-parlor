@@ -543,12 +543,12 @@ export function createGuanDanUI(options = {}) {
       el.actions.innerHTML = '';
       if (snap.phase === Phase.PLAY && snap.humanTurn) {
         el.actions.innerHTML = `
-          <button type="button" class="gd-act gd-act-pass" data-gd="pass">不出</button>
-          <button type="button" class="gd-act gd-act-play" data-gd="play">出牌</button>
+          <button type="button" class="gd-act gd-act-pass" data-gd="pass">过</button>
+          <button type="button" class="gd-act gd-act-play" data-gd="play">出</button>
         `;
         el.actions.querySelector('[data-gd="pass"]')?.addEventListener('click', () => {
           const r = table.act(0, null);
-          if (!r.ok && el.status) el.status.textContent = r.reason === 'must_lead' ? '首出必须出牌' : '不能过';
+          if (!r.ok && el.status) el.status.textContent = r.reason === 'must_lead' ? '首出必须出' : '不能过';
           selected = new Set();
           render();
           scheduleAi();
@@ -562,7 +562,7 @@ export function createGuanDanUI(options = {}) {
               invalid_hand: '牌型不合法',
               cannot_beat: '压不住上家',
               not_in_hand: '选牌有误',
-              must_lead: '请先出牌',
+              must_lead: '请先出',
             };
             if (el.status) el.status.textContent = map[r.reason] || r.reason || '不能出';
             return;

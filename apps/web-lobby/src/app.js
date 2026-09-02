@@ -2285,13 +2285,36 @@ function needEntryMsg(label, minEntry, currency) {
     : `${label} 需要 ${format(minEntry)} 金币`;
 }
 
+
+function buryDdzLayer() {
+  const ids = ['tableView', 'bidControls', 'playControls', 'handArea', 'doubleControls', 'settleControls'];
+  ids.forEach((id) => {
+    const el = id === 'tableView'
+      ? (nodes.tableView || document.getElementById('tableView'))
+      : (nodes[id] || document.getElementById(id));
+    if (!el) return;
+    el.hidden = true;
+    el.setAttribute('hidden', '');
+    el.style.setProperty('display', 'none', 'important');
+    el.style.setProperty('pointer-events', 'none', 'important');
+    el.style.setProperty('visibility', 'hidden', 'important');
+    el.style.setProperty('z-index', '-1', 'important');
+  });
+  document.querySelectorAll('#tableView .qq-bottom-bar').forEach((el) => {
+    el.style.setProperty('display', 'none', 'important');
+    el.style.setProperty('visibility', 'hidden', 'important');
+    el.style.setProperty('pointer-events', 'none', 'important');
+  });
+  if (nodes.handArea) nodes.handArea.innerHTML = '';
+}
+
 function prepareMultiTable() {
   clearAi();
   game = null;
   try { texasUI?.hide?.(); } catch (_) { /* ignore */ }
   try { multiUI?.hide?.(); } catch (_) { /* ignore */ }
-  nodes.tableView.hidden = true;
-  nodes.tableView.setAttribute('hidden', '');
+  buryDdzLayer();
+  hideTableActionBars();
   nodes.shell?.classList.remove('table-active', 'texas-active', 'multi-active');
   // 先彻底收起 multi，再由新玩法 show() 打开
   forceCloseMultiView();
@@ -2307,6 +2330,8 @@ function startMahjong(modeKey = 'xuezhan', options = {}) {
     return;
   }
   prepareMultiTable();
+  buryDdzLayer();
+  hideTableActionBars();
   activeGame = 'mahjong';
   multiBuyIn = t.buyIn;
   window.__multiCurrency = currency;
@@ -2341,6 +2366,7 @@ function startMahjong(modeKey = 'xuezhan', options = {}) {
     },
   });
   multiUI.start();
+  buryDdzLayer();
 }
 
 function startZhajinhua(tableKey = 'novice', options = {}) {
@@ -2353,6 +2379,8 @@ function startZhajinhua(tableKey = 'novice', options = {}) {
     return;
   }
   prepareMultiTable();
+  buryDdzLayer();
+  hideTableActionBars();
   activeGame = 'zhajinhua';
   multiBuyIn = t.minEntry;
   window.__multiCurrency = currency;
@@ -2387,6 +2415,7 @@ function startZhajinhua(tableKey = 'novice', options = {}) {
     },
   });
   multiUI.start();
+  buryDdzLayer();
 }
 
 function startBlackjack(tableKey = 'novice', options = {}) {
@@ -2399,6 +2428,8 @@ function startBlackjack(tableKey = 'novice', options = {}) {
     return;
   }
   prepareMultiTable();
+  buryDdzLayer();
+  hideTableActionBars();
   activeGame = 'blackjack';
   multiBuyIn = t.minEntry;
   window.__multiCurrency = currency;
@@ -2445,6 +2476,7 @@ function startBlackjack(tableKey = 'novice', options = {}) {
     },
   });
   multiUI.start();
+  buryDdzLayer();
   try {
     resetAllCharActions();
     [0, 1, 2, 3, 4, 5, 6].forEach((s) => playCharAction(s, 'deal', { holdMs: 700 }));
@@ -2461,6 +2493,8 @@ async function startGuanDan(tableKey = 'novice', options = {}) {
     return;
   }
   prepareMultiTable();
+  buryDdzLayer();
+  hideTableActionBars();
   activeGame = 'guandan';
   multiBuyIn = t.minEntry;
   window.__multiCurrency = currency;
@@ -2509,6 +2543,7 @@ async function startGuanDan(tableKey = 'novice', options = {}) {
   });
   try {
     multiUI.start();
+    buryDdzLayer();
   } catch (e) {
     console.error('[TeaParlor] 掼蛋开局失败', e);
     if (nodes.claimStatus) nodes.claimStatus.textContent = `掼蛋开局失败：${e?.message || e}`;
@@ -4658,6 +4693,19 @@ function showDdzTable() {
   nodes.tableView.style.setProperty('pointer-events', 'auto', 'important');
   nodes.tableView.style.setProperty('visibility', 'visible', 'important');
   nodes.tableView.style.setProperty('z-index', '400', 'important');
+  if (nodes.handArea) {
+    nodes.handArea.hidden = false;
+    nodes.handArea.removeAttribute('hidden');
+    nodes.handArea.style.removeProperty('display');
+    nodes.handArea.style.removeProperty('visibility');
+    nodes.handArea.style.removeProperty('pointer-events');
+    nodes.handArea.style.removeProperty('z-index');
+  }
+  document.querySelectorAll('#tableView .qq-bottom-bar').forEach((el) => {
+    el.style.removeProperty('display');
+    el.style.removeProperty('visibility');
+    el.style.removeProperty('pointer-events');
+  });
   nodes.shell?.classList.add('table-active');
   hideDdzMatch();
   closeFriendRoom();
@@ -4768,6 +4816,10 @@ function hideTableActionBars() {
     el.setAttribute('hidden', '');
     pinP0ActionBar(el);
   });
+  const shell = nodes.shell || document.querySelector('.lobby-shell');
+  if (shell?.classList.contains('multi-active') || shell?.classList.contains('texas-active')) {
+    buryDdzLayer();
+  }
 }
 
 function syncP0Tabbar() {
