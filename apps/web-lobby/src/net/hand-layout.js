@@ -259,8 +259,12 @@ export function fitAllHands(root = document) {
 }
 
 export function initHandFit() {
+  let fitting = false;
   const run = () => {
+    if (fitting) return;
+    fitting = true;
     try { fitAllHands(); } catch (err) { console.warn("[hand-fit]", err); }
+    finally { fitting = false; }
   };
   run();
   requestAnimationFrame(run);
@@ -270,7 +274,8 @@ export function initHandFit() {
 
   const obs = new MutationObserver(() => {
     clearTimeout(obs._t);
-    obs._t = setTimeout(run, 16);
+    if (fitting) return;
+    obs._t = setTimeout(run, 32);
   });
   ["#handArea", "#mgHand", "#texasHole0", "#tableView", "#multiGameView", "#mgActions"]
     .map((sel) => document.querySelector(sel))
