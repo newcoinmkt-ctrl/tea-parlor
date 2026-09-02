@@ -2212,9 +2212,10 @@ function serveAdminAsset(req, res, pathname) {
 }
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
+  const isProd = process.env.NODE_ENV === 'production';
   const defaultStore = fileURLToPath(new URL('../data/ops-store.json', import.meta.url));
-  const adminToken = process.env.ADMIN_TOKEN;
-  if (!adminToken) {
+  const adminToken = process.env.ADMIN_TOKEN || (isProd ? '' : 'tea-parlor-ops');
+  if (isProd && !process.env.ADMIN_TOKEN) {
     console.error('ADMIN_TOKEN is required. The admin page ships no default password.');
     process.exit(1);
   }
@@ -2223,7 +2224,8 @@ if (fileURLToPath(import.meta.url) === process.argv[1]) {
     storePath: process.env.OPS_STORE_PATH || defaultStore,
     seedDemo: process.env.OPS_SEED_DEMO !== '0',
   });
-  service.listen(Number(process.env.PORT || 5190)).then(({ url }) => {
+  const host = process.env.HOST || (isProd ? '0.0.0.0' : '127.0.0.1');
+  service.listen(Number(process.env.PORT || 5190), host).then(({ url }) => {
     console.log(`Ops console ${url}/admin`);
     console.log('Admin token is read from ADMIN_TOKEN. Shadow points only. Gold is not withdrawable.');
   });

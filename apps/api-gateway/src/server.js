@@ -39,6 +39,10 @@ export function createApiGateway(options = {}) {
     try {
       const pathname = new URL(req.url, 'http://api-gateway.local').pathname;
 
+      if (req.method === 'GET' && pathname === '/health') {
+        return sendJson(res, 200, { ok: true, service: 'api-gateway' });
+      }
+
       if (req.method === 'OPTIONS') {
         return sendJson(res, 204, null);
       }
@@ -436,6 +440,7 @@ async function handleAvatarRoute(req, res, pathname, user, avatarRepository) {
 
 export function startApiGateway(options = {}) {
   const port = options.port || Number(process.env.PORT || 3000);
+  const host = options.host || process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
   // P0 修复：独立启动默认启用文件持久化钱包，进程重启不再丢账本与流水。
   // options.walletOptions.file 可覆盖；显式传空字符串可退回内存模式。
   const walletOptions = { ...(options.walletOptions || {}) };
@@ -447,11 +452,11 @@ export function startApiGateway(options = {}) {
     const walletService = createPersistentWalletService({ file, logger, ...rest });
     console.log(`[api-gateway] wallet persistence: ${file} (loaded=${walletService.persistence.loaded})`);
     const persistedServer = createServer(createApiGateway({ ...options, walletService, walletOptions: undefined }));
-    persistedServer.listen(port);
+    persistedServer.listen(port, host);
     return persistedServer;
   }
   const server = createServer(createApiGateway(options));
-  server.listen(port);
+  server.listen(port, host);
   return server;
 }
 

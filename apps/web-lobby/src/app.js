@@ -54,6 +54,7 @@ import {
   fetchChainAssets,
   reportOpsRevenue,
 } from './net/ops-client.js';
+import { loginWithTelegramInitData } from './net/wallet-client.js';
 import {
   createChainCenterController,
   normalizeChainCenterState,
@@ -475,6 +476,7 @@ let recordFilter = 'all';
 /** 'local' 前端人机 | 'colyseus' 推荐联网 | 'pinus' 兼容联网 */
 let playMode = loadPlayMode();
 let pinusUid = null;
+let telegramLoginPromise = Promise.resolve(null);
 let onlineBackend = null; // 'colyseus' | 'pinus' | null
 
 const TEXAS_TABLES = {
@@ -1848,9 +1850,10 @@ async function saveWardrobePreview() {
 
 async function syncSavedAvatarVisualOnly(savedAvatar) {
   try {
-    const token = window.Telegram?.WebApp?.initDataUnsafe?.hash ? null : null;
-    if (token) {
-      await fetch('/avatar/equipment', {
+    const token = window.__teaParlorSessionToken;
+    const gateway = String(window.TEA_PARLOR_API_GATEWAY_URL || '').replace(/\/+$/, '');
+    if (token && gateway) {
+      await fetch(`${gateway}/avatar/equipment`, {
         method: 'PUT',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
         body: JSON.stringify({ avatar: savedAvatar }),
@@ -4158,6 +4161,18 @@ function initTelegramMiniApp() {
     if (home) home.textContent = name;
   }
   const start = String(tg.initDataUnsafe?.start_param || new URLSearchParams(location.search).get('tgWebAppStartParam') || '');
+  const initData = typeof tg.initData === 'string' ? tg.initData : '';
+  if (initData) {
+    telegramLoginPromise = loginWithTelegramInitData(initData, { startParam: start }).then((body) => {
+      if (body?.token) window.__teaParlorSessionToken = body.token;
+      const uid = body?.user?.id != null ? String(body.user.id) : (user?.id != null ? String(user.id) : '');
+      if (uid) window.__teaParlorSessionUserId = uid;
+      return body;
+    }).catch((err) => {
+      console.warn('[tea-parlor] telegram login failed', err?.message || err);
+      return null;
+    });
+  }
   if (start.startsWith('t_')) {
     queueMicrotask(() => {
       setLobbyView('rooms', 'doudizhu');
@@ -4508,6 +4523,10 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
   showDdzTable();
   if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
 
+  try { await telegramLoginPromise; } catch (_) {}
+  const sessionToken = window.__teaParlorSessionToken || '';
+  if (window.__teaParlorSessionUserId) pinusUid = String(window.__teaParlorSessionUserId);
+
   let session;
   if (onlineBackend === 'colyseus') {
     if (!colyseusClient.isColyseusAvailable()) {
@@ -4519,6 +4538,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
       name,
       roomId: room.id,
       currency,
+      token: sessionToken || undefined,
     });
     // 持续同步房间推送
     colyseusClient.onRoomUpdate((st) => {

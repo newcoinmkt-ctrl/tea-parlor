@@ -10,6 +10,24 @@ const port = Number(process.env.PORT || 5173);
 const host = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 const colyseusUrl = process.env.COLYSEUS_URL || 'ws://127.0.0.1:2567';
 
+function trimPublicUrl(value) {
+  return String(value || '').trim().replace(/\/+$/, '');
+}
+
+/** Production must not emit localhost fallbacks when public URLs are unset. */
+export function buildRuntimeConfigScript(env = process.env) {
+  const isProd = env.NODE_ENV === 'production';
+  const colyseus = env.COLYSEUS_URL || 'ws://127.0.0.1:2567';
+  const ops = trimPublicUrl(env.OPS_PUBLIC_URL) || (isProd ? '' : 'http://127.0.0.1:5190');
+  const gateway = trimPublicUrl(env.API_GATEWAY_PUBLIC_URL) || (isProd ? '' : 'http://127.0.0.1:3000');
+  return [
+    'window.TEA_PARLOR_COLYSEUS_URL = ' + JSON.stringify(colyseus) + ';',
+    'window.TEA_PARLOR_OPS_URL = ' + JSON.stringify(ops) + ';',
+    'window.TEA_PARLOR_API_GATEWAY_URL = ' + JSON.stringify(gateway) + ';',
+  ].join('\n') + '\n';
+}
+
+
 /**
  * 显式覆盖（可选）。未列出的包也会在请求时从 packages/<name>/src 解析，
  * 避免 H5 新增 /vendor/<pkg> 后因旧 allowlist 404 导致整站脚本加载失败。
@@ -83,7 +101,7 @@ export function createWebLobbyServer() {
       return;
     }
     if (pathname === '/runtime-config.js') {
-      const body = 'window.TEA_PARLOR_COLYSEUS_URL = ' + JSON.stringify(colyseusUrl) + ';\n';
+      const body = buildRuntimeConfigScript();
       res.writeHead(200, {
         'content-type': 'text/javascript; charset=utf-8',
         'cache-control': 'no-store',
