@@ -1,7 +1,9 @@
 /**
- * 掼蛋 H5 UI — 庭院方桌 · 竖列理牌 · 桌面结算
+ * 掼蛋 UI — 绿毡桌 · 重叠手牌 · 桌面结算
  */
 import { createGuanDanTable, cardText, Phase, isWild } from './engine.js';
+import { fitAllHands } from '../../net/hand-layout.js';
+import { stripGuandanChrome } from '../../net/strip-gd-chrome.js';
 
 let _instance = null;
 
@@ -123,7 +125,8 @@ export function createGuanDanUI(options = {}) {
         <button type="button" class="gd-tool-restore" data-gd-restore>恢复</button>
         <button type="button" class="gd-tool-sort" data-gd-sort>一键理牌</button>
       `;
-      root.appendChild(bar);
+      const dock = root.querySelector('.mg-hand-dock');
+      (dock || root).appendChild(bar);
       bar.querySelectorAll('[data-gd-suit]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const s = Number(btn.getAttribute('data-gd-suit'));
@@ -186,6 +189,8 @@ export function createGuanDanUI(options = {}) {
   function hide() {
     stopAi();
     hideResult();
+    stripGuandanChrome(root);
+    if (el.hand) el.hand.innerHTML = '';
     root.hidden = true;
     root.setAttribute('hidden', '');
     root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p', 'zjh-active');
@@ -538,12 +543,12 @@ export function createGuanDanUI(options = {}) {
       el.actions.innerHTML = '';
       if (snap.phase === Phase.PLAY && snap.humanTurn) {
         el.actions.innerHTML = `
-          <button type="button" class="gd-act gd-act-pass" data-gd="pass">不出</button>
-          <button type="button" class="gd-act gd-act-play" data-gd="play">出牌</button>
+          <button type="button" class="gd-act gd-act-pass" data-gd="pass">过</button>
+          <button type="button" class="gd-act gd-act-play" data-gd="play">出</button>
         `;
         el.actions.querySelector('[data-gd="pass"]')?.addEventListener('click', () => {
           const r = table.act(0, null);
-          if (!r.ok && el.status) el.status.textContent = r.reason === 'must_lead' ? '首出必须出牌' : '不能过';
+          if (!r.ok && el.status) el.status.textContent = r.reason === 'must_lead' ? '首出必须出' : '不能过';
           selected = new Set();
           render();
           scheduleAi();
@@ -557,7 +562,7 @@ export function createGuanDanUI(options = {}) {
               invalid_hand: '牌型不合法',
               cannot_beat: '压不住上家',
               not_in_hand: '选牌有误',
-              must_lead: '请先出牌',
+              must_lead: '请先出',
             };
             if (el.status) el.status.textContent = map[r.reason] || r.reason || '不能出';
             return;
@@ -574,6 +579,11 @@ export function createGuanDanUI(options = {}) {
     }
     if (el.settleRow) el.settleRow.hidden = true;
     if (el.modal) el.modal.hidden = true;
+    try {
+      requestAnimationFrame(() => {
+        try { fitAllHands(root); } catch (_) {}
+      });
+    } catch (_) {}
   }
 
   function showSettle(snap) {

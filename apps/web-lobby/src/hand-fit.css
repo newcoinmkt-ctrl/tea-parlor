@@ -83,9 +83,9 @@
 .qq-action-row,
 .mg-actions,
 .tx-actions,
-#bidControls,
-#doubleControls,
-#playControls {
+#bidControls:not([hidden]),
+#doubleControls:not([hidden]),
+#playControls:not([hidden]) {
   display: flex !important;
   flex-wrap: wrap !important;
   gap: 8px !important;
@@ -184,4 +184,59 @@
   bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
   max-height: 50% !important;
   overflow-x: hidden !important;
+}
+
+
+/* play9d: portrait dock thumb zone; peek/lift */
+.lobby-shell.table-active #bidControls .qq-btn,
+.lobby-shell.table-active #playControls .qq-btn {
+  min-height: 44px !important;
+  min-width: 68px !important;
+}
+.gd-card.is-on,
+.playing-card.selected {
+  transform: translateY(-12px);
+}
+
+/* play9d1: never paint DDZ table under Guandan / mahjong / zjh / texas */
+html.table-landscape #tableView[hidden],
+html.table-portrait-dock #tableView[hidden],
+html body #tableView[hidden],
+html.table-landscape .lobby-shell.multi-active #tableView,
+html.table-portrait-dock .lobby-shell.multi-active #tableView,
+html body .lobby-shell.multi-active #tableView,
+html.table-landscape .lobby-shell.texas-active #tableView,
+html.table-portrait-dock .lobby-shell.texas-active #tableView,
+html body .lobby-shell.texas-active #tableView,
+html.table-landscape .lobby-shell.table-active.multi-active #tableView,
+html.table-landscape .lobby-shell.table-active.multi-active #tableView.harbor-table,
+html.table-landscape .lobby-shell.p0-tg.table-active.multi-active #tableView.harbor-table,
+html body .lobby-shell.p0-tg.table-active.multi-active #tableView.harbor-table,
+html body .lobby-shell.p0-tg.texas-active #tableView {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  z-index: -1 !important;
+}
+
+html.table-landscape .lobby-shell.multi-active #bidControls,
+html.table-landscape .lobby-shell.multi-active #playControls,
+html.table-landscape .lobby-shell.multi-active #handArea,
+html.table-landscape .lobby-shell.texas-active #bidControls,
+html.table-landscape .lobby-shell.texas-active #playControls,
+html.table-landscape .lobby-shell.texas-active #handArea,
+.lobby-shell.multi-active #bidControls,
+.lobby-shell.multi-active #playControls,
+.lobby-shell.multi-active #handArea,
+.lobby-shell.texas-active #bidControls,
+.lobby-shell.texas-active #playControls,
+.lobby-shell.texas-active #handArea,
+.lobby-shell.multi-active #tableView .qq-bottom-bar,
+.lobby-shell.texas-active #tableView .qq-bottom-bar,
+#bidControls[hidden],
+#playControls[hidden],
+#handArea[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }

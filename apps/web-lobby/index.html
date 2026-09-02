@@ -8,17 +8,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
-    <title>Tea Parlor H5 大厅</title>
-    <link rel="stylesheet" href="./src/styles.css?v=home-restore1" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=theme-interactive" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=theme-interactive" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9c1b" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9c1b" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9c1b" />
+    <title>茶馆</title>
+    <link rel="stylesheet" href="./src/styles.css?v=play9d1" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9d1" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9d1" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9d1" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9d1" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9d1" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
-    <main class="lobby-shell p0-tg" aria-label="Tea Parlor H5 大厅">
+    <main class="lobby-shell p0-tg" aria-label="茶馆大厅">
       <header class="topbar topbar-home-layout">
         <div class="topbar-left">
           <div class="profile">
@@ -101,10 +101,10 @@
                 <p class="p0-kicker">Tea Parlor</p>
                 <div class="p0-cta-card">
                   <h1>经典三人 · 叫分</h1>
-                  <p>匹配真人，超时由 AI 补位</p>
+                  <p>经典叫分 · 人机畅玩</p>
                   <button class="p0-primary" type="button" data-lobby-action="quick-doudizhu">斗地主 · 快速开始</button>
                   <button class="p0-secondary" type="button" data-lobby-action="open-zhajinhua">炸金花</button>
-                  <p class="p0-hint">约 <em>8 秒</em>开局 · 一局三五分钟</p>
+                  <p class="p0-hint">经典叫分 · 人机畅玩</p>
                   <button class="p0-more" type="button" data-lobby-action="open-games">更多玩法</button>
                 </div>
               </div>
@@ -156,7 +156,7 @@
                 <img src="./public/assets/home/icon-blackjack.png" alt="" />
                 <strong>二十一点</strong>
               </button>
-              <button class="home-icon-btn" type="button" data-lobby-action="chain">
+              <button class="home-icon-btn" type="button" data-lobby-action="chain" hidden>
                 <img src="./public/assets/home/icon-real.png" alt="" />
                 <strong>链游中心</strong>
               </button>
@@ -176,7 +176,7 @@
                 </span>
                 <strong>牌类合集</strong>
               </button>
-              <button class="home-pack" type="button" data-lobby-action="recharge">
+              <button class="home-pack" type="button" data-lobby-action="recharge" hidden>
                 <span class="home-pack-art" aria-hidden="true">
                   <img src="./public/assets/home/icon-gift.png" alt="" />
                   <img src="./public/assets/home/icon-real.png" alt="" />
@@ -185,7 +185,7 @@
                 </span>
                 <strong>补给中心</strong>
               </button>
-              <button class="home-pack" type="button" data-lobby-action="records">
+              <button class="home-pack" type="button" data-lobby-action="records" hidden>
                 <span class="home-pack-art" aria-hidden="true">
                   <img src="./public/assets/home/icon-texas.png" alt="" />
                   <img src="./public/assets/home/icon-blackjack.png" alt="" />
@@ -194,7 +194,7 @@
                 </span>
                 <strong>战绩中心</strong>
               </button>
-              <button class="home-pack" type="button" data-lobby-action="chain">
+              <button class="home-pack" type="button" data-lobby-action="chain" hidden>
                 <span class="home-pack-art" aria-hidden="true">
                   <img src="./public/assets/home/icon-real.png" alt="" />
                   <img src="./public/assets/home/icon-ddz.png?v=island3" alt="" />
@@ -249,7 +249,7 @@
               </span>
               <span class="tile-copy">
                 <strong>斗地主</strong>
-                <small>不洗牌、欢乐经典、经典场</small>
+                <small>经典叫分 · 人机畅玩</small>
               </span>
               <span class="tile-state open">正式</span>
             </button>
@@ -767,18 +767,18 @@
                 <p id="ddzVariantDesc">经典三人 · 叫分</p>
                 <h1 id="ddzVariantTitle">选择场次</h1>
               </div>
-              <div class="online-pill" id="ddzOnlinePill">匹配中</div>
+              <div class="online-pill" id="ddzOnlinePill">人机畅玩</div>
             </div>
             <div class="p0-lane-seg" role="tablist" aria-label="货币场次">
               <button class="on" type="button" data-ddz-lane="gold">金币场</button>
               <button type="button" data-ddz-lane="season">赛季积分场</button>
             </div>
             <div class="variant-tabs" id="ddzVariantTabs" aria-label="斗地主玩法">
-              <button class="variant-tab active" type="button" data-ddz-variant="buxipai">不洗牌</button>
-              <button class="variant-tab" type="button" data-ddz-variant="huanle">欢乐经典</button>
-              <button class="variant-tab" type="button" data-ddz-variant="classic">经典</button>
-              <button class="variant-tab" type="button" data-ddz-variant="lianzha">连炸</button>
-              <button class="variant-tab" type="button" data-ddz-variant="laizi">天地癞子</button>
+              <button class="variant-tab" type="button" data-ddz-variant="buxipai" hidden>不洗牌</button>
+              <button class="variant-tab" type="button" data-ddz-variant="huanle" hidden>欢乐经典</button>
+              <button class="variant-tab active" type="button" data-ddz-variant="classic">经典</button>
+              <button class="variant-tab" type="button" data-ddz-variant="lianzha" hidden>连炸</button>
+              <button class="variant-tab" type="button" data-ddz-variant="laizi" hidden>天地癞子</button>
             </div>
 
             <div class="room-grid room-grid-six" id="ddzRoomGrid" aria-label="场次列表">
@@ -786,9 +786,9 @@
             </div>
 
             <div class="start-strip p0-start-dock">
-              <button class="friend-room-button" type="button" data-lobby-action="friend-room">好友房</button>
+              <button class="friend-room-button" type="button" data-lobby-action="friend-room" hidden>好友房</button>
               <button class="quick-start-button" type="button" id="ddzQuickStart" data-lobby-action="quick-doudizhu-classic">快速开始</button>
-              <small class="p0-dock-hint">经典场 · 匹配真人，超时 AI 补位</small>
+              <small class="p0-dock-hint">经典叫分 · 人机畅玩</small>
             </div>
           </section>
 
@@ -1291,7 +1291,7 @@
           <!-- 桌面广告：中心冠名 + 左右灯牌，内容由 ops 广告配置写入 -->
           <div class="qq-logo-mark" aria-hidden="true">
             <strong>欢乐斗地主</strong>
-            <small>不洗牌 · 人机桌</small>
+            <small>经典叫分 · 人机畅玩</small>
           </div>
           <a class="table-skin-ad brand-slot brand-surface-table" data-ad-slot="doudizhu-table-skin" href="#" target="_blank" rel="noreferrer">
             <span class="ad-label">桌面</span>
@@ -1743,8 +1743,8 @@
       <div class="p0-match-mask" id="ddzMatchMask" hidden>
         <div class="p0-match-card">
           <div class="p0-match-dot"></div>
-          <h2>匹配中</h2>
-          <p id="ddzMatchCopy">经典场 · 已就位 1/3 · 约 8 秒补齐</p>
+          <h2>人机开局</h2>
+          <p id="ddzMatchCopy">经典叫分 · 人机畅玩</p>
           <button type="button" id="ddzMatchCancel">取消匹配</button>
         </div>
       </div>
@@ -1771,6 +1771,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9c2"></script>
+    <script type="module" src="./src/app.js?v=play9d1"></script>
   </body>
 </html>

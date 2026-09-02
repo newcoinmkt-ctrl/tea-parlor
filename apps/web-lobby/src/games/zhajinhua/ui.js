@@ -1,5 +1,5 @@
 /**
- * 炸金花 H5 UI — QQ 风格不变
+ * 炸金花 UI — QQ 风格不变
  * 玩法：看牌×2、比牌×2 单注、All-in、235、边池、胜率、公平校验码
  */
 import { createZhajinhuaTable, cardText, evalHand, PlayerStatus } from './engine.js';
@@ -389,7 +389,10 @@ export function createZhajinhuaUI(options = {}) {
       } else if (snap.allIn?.[0] && snap.phase === 'play') {
         el.status.textContent = '你已全押，等待开牌…';
       } else {
-        el.status.textContent = `${snap.lastAction || ''} · 等待 ${snap.names[snap.current]}`;
+        {
+          const act = String(snap.lastAction || '').replace(/[·\s]*校验\s*\S+/g, '').replace(/Pinus|Colyseus|checksum|hash/gi, '').trim();
+          el.status.textContent = `${act || '等待'} · ${snap.names[snap.current] || ''}`.replace(/\s·\s*$/, '');
+        }
       }
     }
 

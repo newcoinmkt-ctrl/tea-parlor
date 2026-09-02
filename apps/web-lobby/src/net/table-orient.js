@@ -41,23 +41,21 @@ export function syncViewportHeight() {
 
 export function syncTableLandscape() {
   syncViewportHeight();
+  // Class name is historical: product is PORTRAIT Mini App. We still tag
+  // html/body so leftover play9 selectors apply, but we never lock landscape
+  // or requestFullscreen (those made Telegram stay portrait while CSS waited
+  // for a landscape viewport that never came).
   const on = isPlayingTable() && isMobileish();
   const root = document.documentElement;
   const body = document.body;
   const tg = window.Telegram?.WebApp;
   root.classList.toggle("table-landscape", on);
   body?.classList.toggle("table-landscape", on);
+  root.classList.toggle("table-portrait-dock", on);
+  body?.classList.toggle("table-portrait-dock", on);
 
   if (on) {
     try { tg?.expand?.(); } catch (_) {}
-    try { tg?.requestFullscreen?.(); } catch (_) {}
-    try { tg?.lockOrientation?.("landscape"); } catch (_) {}
-    try { screen.orientation?.lock?.("landscape").catch(() => {}); } catch (_) {}
-    try { screen.orientation?.lock?.("landscape-primary").catch(() => {}); } catch (_) {}
-  } else {
-    try { screen.orientation?.unlock?.(); } catch (_) {}
-    try { tg?.unlockOrientation?.(); } catch (_) {}
-    try { tg?.exitFullscreen?.(); } catch (_) {}
   }
 
   root.classList.remove("css-landscape");

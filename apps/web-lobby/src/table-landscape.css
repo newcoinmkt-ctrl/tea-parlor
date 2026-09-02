@@ -6,21 +6,22 @@ html.table-landscape body {
   overscroll-behavior: none;
 }
 
+/* play9d: never CSS-rotate. Product is portrait Mini App. */
 @media (orientation: portrait) {
-  html.css-landscape .lobby-shell.table-active {
-    position: fixed !important;
-    z-index: 80 !important;
-    top: 0 !important;
-    left: 100dvw !important;
-    width: var(--tg-vh, 100dvh) !important;
-    height: 100dvw !important;
+  html.css-landscape .lobby-shell.table-active,
+  html.css-landscape .lobby-shell.multi-active,
+  html.css-landscape .lobby-shell.texas-active {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: var(--tg-vh, 100dvh) !important;
     max-width: none !important;
     max-height: none !important;
     margin: 0 !important;
-    transform: rotate(90deg) !important;
-    transform-origin: top left !important;
+    transform: none !important;
     overflow: hidden !important;
-    inset: auto !important;
   }
 }
 
@@ -42,9 +43,9 @@ html.css-landscape .lobby-shell.table-active {
   max-height: 100dvw !important;
 }
 
-html.table-landscape #tableView,
-html.table-landscape #texasTableView,
-html.table-landscape #multiGameView {
+html.table-landscape .lobby-shell:not(.multi-active):not(.texas-active) #tableView:not([hidden]),
+html.table-landscape #texasTableView:not([hidden]),
+html.table-landscape #multiGameView:not([hidden]) {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 1 auto !important;
@@ -56,8 +57,8 @@ html.table-landscape #multiGameView {
 }
 
 /* ── Dou Dizhu · keep harbor JJ layout; fill landscape; never clip ── */
-html.table-landscape #tableView.harbor-table,
-html.table-landscape #tableView.qq-table-view {
+html.table-landscape .lobby-shell:not(.multi-active):not(.texas-active) #tableView.harbor-table:not([hidden]),
+html.table-landscape .lobby-shell:not(.multi-active):not(.texas-active) #tableView.qq-table-view:not([hidden]) {
   display: block !important;
   position: absolute !important;
   inset: 0 !important;
@@ -458,4 +459,47 @@ html.table-landscape .quick-dock {
 html.table-landscape .gd-yard .mg-hand-dock {
   left: 56px !important;
   right: 8px !important;
+}
+
+/* play9d1: never paint DDZ table under Guandan / mahjong / zjh / texas */
+html.table-landscape #tableView[hidden],
+html.table-portrait-dock #tableView[hidden],
+html body #tableView[hidden],
+html.table-landscape .lobby-shell.multi-active #tableView,
+html.table-portrait-dock .lobby-shell.multi-active #tableView,
+html body .lobby-shell.multi-active #tableView,
+html.table-landscape .lobby-shell.texas-active #tableView,
+html.table-portrait-dock .lobby-shell.texas-active #tableView,
+html body .lobby-shell.texas-active #tableView,
+html.table-landscape .lobby-shell.table-active.multi-active #tableView,
+html.table-landscape .lobby-shell.table-active.multi-active #tableView.harbor-table,
+html.table-landscape .lobby-shell.p0-tg.table-active.multi-active #tableView.harbor-table,
+html body .lobby-shell.p0-tg.table-active.multi-active #tableView.harbor-table,
+html body .lobby-shell.p0-tg.texas-active #tableView {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  z-index: -1 !important;
+}
+
+html.table-landscape .lobby-shell.multi-active #bidControls,
+html.table-landscape .lobby-shell.multi-active #playControls,
+html.table-landscape .lobby-shell.multi-active #handArea,
+html.table-landscape .lobby-shell.texas-active #bidControls,
+html.table-landscape .lobby-shell.texas-active #playControls,
+html.table-landscape .lobby-shell.texas-active #handArea,
+.lobby-shell.multi-active #bidControls,
+.lobby-shell.multi-active #playControls,
+.lobby-shell.multi-active #handArea,
+.lobby-shell.texas-active #bidControls,
+.lobby-shell.texas-active #playControls,
+.lobby-shell.texas-active #handArea,
+.lobby-shell.multi-active #tableView .qq-bottom-bar,
+.lobby-shell.texas-active #tableView .qq-bottom-bar,
+#bidControls[hidden],
+#playControls[hidden],
+#handArea[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }

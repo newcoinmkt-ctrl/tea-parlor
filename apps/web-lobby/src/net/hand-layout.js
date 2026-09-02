@@ -71,12 +71,14 @@ function applyOverlapItems(items, pack, zBase = 20) {
 export function layoutOverlapRow(area, items, opts = {}) {
   const n = items.length;
   if (!area || n === 0) return;
-  const { available } = measureHandAvailable(area);
-  const landscape = document.documentElement.classList.contains("table-landscape")
-    || document.documentElement.classList.contains("css-landscape")
-    || (window.innerWidth > window.innerHeight);
+  const measured = measureHandAvailable(area);
+  let available = measured.available;
+  const left = (area.getBoundingClientRect && area.getBoundingClientRect().left) || 0;
+  const maxRight = Math.max(0, window.innerWidth - 6);
+  if (maxRight > left) available = Math.min(available, maxRight - left);
+  const landscape = false; // portrait Mini App: never size as landscape
   const pack = packOverlap(n, available, {
-    maxW: opts.maxW ?? (landscape ? 56 : 52),
+    maxW: opts.maxW ?? 40,
     minW: opts.minW ?? 22,
     minPeek: opts.minPeek ?? 12,
     ratio: opts.ratio ?? 1.45,
@@ -90,6 +92,18 @@ export function layoutOverlapRow(area, items, opts = {}) {
   area.style.setProperty("flex-wrap", "nowrap", "important");
   area.style.setProperty("overflow-x", "hidden", "important");
   applyOverlapItems(items, pack);
+  const last = items[items.length - 1];
+  const lastRight = last.getBoundingClientRect ? last.getBoundingClientRect().right : 0;
+  const limit = window.innerWidth - 4;
+  if (lastRight > limit && n > 1) {
+    const overflow = lastRight - limit;
+    const peek = Math.max(8, pack.peek - Math.ceil(overflow / (n - 1)));
+    const overlap = Math.max(0, pack.cardW - peek);
+    items.forEach((el, i) => {
+      if (i === 0) return;
+      el.style.setProperty("margin-left", "-" + overlap + "px", "important");
+    });
+  }
 }
 
 function ensureRowBreak(area, beforeEl) {
@@ -143,7 +157,7 @@ export function layoutGuandanCols(area) {
   if (dock && dock.style) {
     dock.style.setProperty("top", "50%", "important");
     dock.style.setProperty("bottom", "calc(52px + env(safe-area-inset-bottom, 0px))", "important");
-    dock.style.setProperty("left", "56px", "important");
+    dock.style.setProperty("left", "118px", "important");
     dock.style.setProperty("right", "8px", "important");
     dock.style.setProperty("height", "auto", "important");
     dock.style.setProperty("max-height", "50%", "important");
