@@ -63,6 +63,7 @@ export async function startColyseusDdzSession({
   name,
   roomId = 'novice',
   currency = 'ingot',
+  token,
 } = {}) {
   await connectColyseus(endpoint);
   const options = {
@@ -71,6 +72,7 @@ export async function startColyseusDdzSession({
     roomKey: roomId,
     currency,
   };
+  if (token) options.token = token;
 
   room = await client.joinOrCreate('doudizhu', options);
 

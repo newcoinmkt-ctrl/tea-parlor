@@ -1,5 +1,23 @@
 const DEFAULT_OPS_URL = 'http://127.0.0.1:5190';
 
+function trimSlash(url) {
+  return String(url || '').trim().replace(/\/+$/, '');
+}
+
+function isLocalHostName(hostname) {
+  return hostname === '127.0.0.1' || hostname === 'localhost';
+}
+
+function isPublicOpsUrl(url) {
+  const raw = trimSlash(url);
+  if (!raw || !/^https?:\/\//i.test(raw)) return false;
+  try {
+    return !isLocalHostName(new URL(raw).hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function resolveOpsBase() {
   try {
     const fromQuery = new URLSearchParams(window.location.search).get('ops');
@@ -7,6 +25,15 @@ export function resolveOpsBase() {
       return fromQuery.replace(/\/$/, '');
     }
   } catch (_) { /* ignore */ }
+
+  const runtime = typeof window !== 'undefined' ? trimSlash(window.TEA_PARLOR_OPS_URL) : '';
+  if (isPublicOpsUrl(runtime)) return runtime;
+
+  let hostname = '';
+  try { hostname = window.location.hostname; } catch (_) {}
+  if (!isLocalHostName(hostname)) {
+    return runtime && /^https?:\/\//i.test(runtime) ? runtime : '';
+  }
   return DEFAULT_OPS_URL;
 }
 
