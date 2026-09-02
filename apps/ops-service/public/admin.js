@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'tea-parlor-ops-token';
+const TOKEN_KEY = 'tea-parlor-admin-token';
 
 const loginView = document.getElementById('loginView');
 const appView = document.getElementById('appView');
@@ -69,11 +69,13 @@ function esc(value) {
 }
 
 async function loadOverview() {
-  const [summaryRes, gamesRes] = await Promise.all([
+  const [summaryRes, gamesRes, dashboardRes] = await Promise.all([
     api('/admin/ledger/summary'),
     api('/admin/games'),
+    api('/admin/dashboard'),
   ]);
   const s = summaryRes.summary;
+  const d = dashboardRes.dashboard || {};
   const games = gamesRes.games || [];
   document.getElementById('overviewMetrics').innerHTML = [
     ['建档用户', s.userCount],
@@ -84,6 +86,14 @@ async function loadOverview() {
     ['赛季积分事件', s.pendingRevenueEvents || 0],
     ['发放合计', formatMoney(s.issued)],
     ['账本条数', s.ledgerCount],
+  ].map(([label, value]) => `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join('');
+  document.getElementById('opsDashboard').innerHTML = [
+    ['DAU', d.dau || 0],
+    ['对局数', d.rounds || 0],
+    ['平均时长', `${d.averageDurationSeconds || 0}s`],
+    ['好友房数', d.friendRooms || 0],
+    ['广告曝光', d.adImpressions || 0],
+    ['广告点击', d.adClicks || 0],
   ].map(([label, value]) => `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join('');
   document.getElementById('overviewGames').innerHTML = games.map((game) => `
     <article class="item-card">
@@ -160,17 +170,25 @@ async function loadAppearance(kind) {
   const listKey = kind === 'characters' ? 'characters' : 'skins';
   const rootId = kind === 'characters' ? 'characterList' : 'skinList';
   const payload = await api(path);
-  const items = payload[listKey] || [];
+  let items = payload[listKey] || [];
   const root = document.getElementById(rootId);
+
+  // 皮肤类型筛选
+  if (kind === 'skins') {
+    const filter = document.getElementById('skinTypeFilter');
+    const filterValue = filter ? filter.value : '';
+    if (filterValue) items = items.filter((item) => item.slotType === filterValue);
+  }
+
   const groups = [...new Set(items.map((item) => item.group))];
   root.innerHTML = groups.map((group) => {
     const rows = items.filter((item) => item.group === group).map((item) => `
-      <article class="item-card">
+      <article class="item-card" data-skin-id="${kind === 'skins' ? esc(item.id) : ''}" style="${kind === 'skins' ? 'cursor:pointer;' : ''}">
         <div>
           <b>${esc(item.name)}</b>
           <div class="item-meta">
             ${esc(item.id)}${item.summary ? ` · ${esc(item.summary)}` : ''}
-            ${kind === 'skins' ? ` · ${esc(item.slotType || 'table_skin')} · ${esc(item.rarity || 'common')} · ${esc(item.source || '内部配置')}${item.limited ? ' · 限时' : ''}${item.coBranded ? ' · 联名' : ''}` : ''}
+            ${kind === 'skins' ? ` · ${esc(item.slotType || 'table_skin')} · ${esc(item.rarity || 'common')} · ${esc(item.source || '内部配置')} · ${statusLabel(item.configStatus || item.listingStatus)}${item.limited ? ' · 限时' : ''}${item.coBranded ? ' · 联名' : ''}${item.previewUrl ? ' · 有预览图' : ''}` : ''}
           </div>
         </div>
         <label class="check">
@@ -181,8 +199,10 @@ async function loadAppearance(kind) {
     `).join('');
     return `<div class="stack"><h3>${esc(group)}</h3>${rows}</div>`;
   }).join('');
+
   root.querySelectorAll('[data-appear-id]').forEach((input) => {
-    input.addEventListener('change', async () => {
+    input.addEventListener('change', async (event) => {
+      event.stopPropagation();
       const type = input.getAttribute('data-appear');
       const id = input.getAttribute('data-appear-id');
       try {
@@ -200,6 +220,18 @@ async function loadAppearance(kind) {
       }
     });
   });
+
+  // 皮肤点击编辑
+  if (kind === 'skins') {
+    root.querySelectorAll('[data-skin-id]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const skinId = card.getAttribute('data-skin-id');
+        const allSkins = payload[listKey] || [];
+        const skin = allSkins.find((s) => s.id === skinId);
+        if (skin) fillSkinForm(skin);
+      });
+    });
+  }
 }
 
 async function loadCostumeLogos() {
@@ -219,6 +251,116 @@ function fillSelect(select, items, valueKey, labelKey, extra = []) {
     `<option value="${esc(item[valueKey])}">${esc(item[labelKey])}</option>`
   )).join('');
   if (current) select.value = current;
+}
+
+function fillSkinForm(skin) {
+  const form = document.getElementById('skinForm');
+  if (!form) return;
+  form.id.value = skin.id || '';
+  form.name.value = skin.name || '';
+  form.summary.value = skin.summary || '';
+  form.slotType.value = skin.slotType || 'table_skin';
+  form.rarity.value = skin.rarity || 'common';
+  form.source.value = skin.source || '';
+  form.previewUrl.value = skin.previewUrl || '';
+  form.adSlotIds.value = Array.isArray(skin.adSlotIds) ? skin.adSlotIds.join(', ') : '';
+  form.adLogoId.value = skin.adLogoId || '';
+  form.configStatus.value = skin.configStatus || skin.listingStatus || 'published';
+  form.sort.value = skin.sort ?? 0;
+  form.enabled.checked = skin.enabled !== false;
+  form.limited.checked = Boolean(skin.limited);
+  form.coBranded.checked = Boolean(skin.coBranded);
+  renderSkinPreview(skin);
+}
+
+function clearSkinForm() {
+  const form = document.getElementById('skinForm');
+  if (!form) return;
+  form.reset();
+  form.id.value = '';
+  document.getElementById('skinPreview').hidden = true;
+}
+
+function renderSkinPreview(skin) {
+  const preview = document.getElementById('skinPreview');
+  const content = document.getElementById('skinPreviewContent');
+  if (!preview || !content) return;
+  preview.hidden = false;
+  const typeLabels = {
+    table_skin: '桌面皮肤',
+    card_back: '牌背',
+    card_front: '牌面正面',
+    avatar_frame: '头像框',
+    character_costume: '服饰',
+  };
+  const previewImg = skin.previewUrl
+    ? `<div style="margin:12px 0;"><img src="${esc(skin.previewUrl)}" alt="${esc(skin.name)}预览" style="max-width:100%;border-radius:8px;border:1px solid #ddd;" onerror="this.style.display='none'" /></div>`
+    : '<p class="muted" style="margin:12px 0;">未配置预览图，可在上方填写 previewUrl</p>';
+  content.innerHTML = `
+    <div style="padding:12px;background:#f8f8f8;border-radius:8px;">
+      <h4 style="margin:0 0 8px;">${esc(skin.name || '未命名')}</h4>
+      <div class="item-meta" style="margin-bottom:8px;">
+        ${typeLabels[skin.slotType] || skin.slotType} · ${esc(skin.rarity || 'common')}
+        ${skin.enabled ? ' · 已上线' : ' · 已下线'}
+        ${skin.coBranded ? ' · 广告联名' : ''}
+      </div>
+      ${previewImg}
+      ${skin.summary ? `<p style="margin:8px 0 0;font-size:13px;color:#555;">${esc(skin.summary)}</p>` : ''}
+      ${Array.isArray(skin.adSlotIds) && skin.adSlotIds.length
+        ? `<p style="margin:8px 0 0;font-size:12px;color:#888;">关联广告位：${esc(skin.adSlotIds.join(', '))}</p>`
+        : ''}
+    </div>
+  `;
+}
+
+async function submitSkinForm(event) {
+  event.preventDefault();
+  const form = event.target;
+  const skinId = form.id.value;
+  if (!skinId) {
+    showBanner('请先从列表选择一个皮肤', true);
+    return;
+  }
+  const body = {
+    name: form.name.value,
+    summary: form.summary.value,
+    slotType: form.slotType.value,
+    rarity: form.rarity.value,
+    source: form.source.value,
+    previewUrl: form.previewUrl.value || null,
+    adSlotIds: form.adSlotIds.value.split(',').map((s) => s.trim()).filter(Boolean),
+    adLogoId: form.adLogoId.value || null,
+    configStatus: form.configStatus.value,
+    listingStatus: form.configStatus.value,
+    sort: Number(form.sort.value) || 0,
+    enabled: form.enabled.checked,
+    limited: form.limited.checked,
+    coBranded: form.coBranded.checked,
+  };
+  try {
+    const result = await api(`/admin/skins/${encodeURIComponent(skinId)}`, {
+      method: 'PUT',
+      body,
+    });
+    showBanner(`皮肤「${result.item.name}」已保存`);
+    await loadAppearance('skins');
+    renderSkinPreview(result.item);
+  } catch (error) {
+    showBanner(error.message, true);
+  }
+}
+
+function initSkinForm() {
+  const form = document.getElementById('skinForm');
+  const filter = document.getElementById('skinTypeFilter');
+  const clearBtn = document.querySelector('[data-act="clear-skin"]');
+  if (form) form.addEventListener('submit', submitSkinForm);
+  if (filter) {
+    filter.addEventListener('change', () => loadAppearance('skins'));
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener('click', clearSkinForm);
+  }
 }
 
 async function loadAds() {
@@ -241,7 +383,14 @@ async function loadAds() {
   if (logoRoot) {
     logoRoot.innerHTML = (logos || []).map((item) => `
       <article class="item-card">
-        <div><b>${esc(item.name)}</b><div class="item-meta">${esc(item.id)} · ${item.builtin ? '内置' : '自传'}</div></div>
+        <div>
+          <b>${esc(item.name)}</b>
+          <div class="item-meta">
+            ${esc(item.id)} · ${item.builtin ? '内置' : '自传'} · ${esc(item.type || 'logo')} · ${esc(item.format || 'png')}
+            ${item.width || item.height ? ` · ${esc(item.width || 0)}×${esc(item.height || 0)}` : ''}
+            · ${esc(item.auditStatus || 'approved')}
+          </div>
+        </div>
         ${item.builtin ? '' : `<button type="button" class="ghost" data-del-logo="${esc(item.id)}">删除</button>`}
       </article>
     `).join('');
@@ -268,6 +417,7 @@ async function loadAds() {
           ${esc(ad.gameId || 'general')} · ${esc(ad.surface)} · ${esc(ad.slotType)}
           ${ad.seatIndex === null || ad.seatIndex === undefined ? '' : ` · 座位 ${esc(ad.seatIndex)}`}
           · ${esc(ad.categoryName || ad.categoryId || '未分类')} · ${esc(ad.slotId)}
+          · 权重 ${esc(ad.weight || 1)} · ${esc(ad.rotationMode || 'priority')} · ${esc(ad.auditStatus || 'approved')} · ${statusLabel(ad.configStatus)}
         </div>
         <div class="item-meta">${esc(ad.copy)}${ad.startAt || ad.endAt ? ` · ${esc(formatAdRange(ad))}` : ''}</div>
       </div>
@@ -283,6 +433,7 @@ async function loadAds() {
         if (!adForm.elements[key]) continue;
         if (adForm.elements[key].type === 'checkbox') adForm.elements[key].checked = Boolean(value);
         else if (adForm.elements[key].type === 'datetime-local') adForm.elements[key].value = toDateTimeLocal(value);
+        else if (key === 'schedule' || key === 'geoRules') adForm.elements[key].value = JSON.stringify(value || {}, null, 2);
         else adForm.elements[key].value = value ?? '';
       }
     });
@@ -329,9 +480,10 @@ async function loadLedger(filter = {}) {
   `).join('') || '<tr><td colspan="7">暂无流水</td></tr>';
 }
 
-async function loadUsers(userId = '') {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
-  const { users } = await api(`/admin/users${query}`);
+async function loadUsers(filter = {}) {
+  const query = new URLSearchParams(filter);
+  const suffix = query.toString() ? `?${query}` : '';
+  const { users } = await api(`/admin/users${suffix}`);
   document.getElementById('userList').innerHTML = users.length
     ? users.map((user) => `
       <article class="item-card" data-user="${user.userId}">
@@ -339,6 +491,7 @@ async function loadUsers(userId = '') {
           <b>${esc(user.profile?.displayName || user.userId)}</b>
           <div class="item-meta">
             ${esc(user.userId)}
+            ${user.tgId ? ` · TG ${esc(user.tgId)}` : ''}
             · 可用 ${formatMoney(user.account?.available)}
             · 锁定 ${formatMoney(user.account?.locked)}
             ${user.profile?.note ? ` · ${esc(user.profile.note)}` : ''}
@@ -355,16 +508,100 @@ async function loadUsers(userId = '') {
       if (!user) return;
       const form = document.getElementById('userForm');
       form.userId.value = user.userId;
+      form.tgId.value = user.profile?.tgId || '';
       form.displayName.value = user.profile?.displayName || '';
+      form.nickname.value = user.profile?.nickname || '';
       form.note.value = user.profile?.note || '';
       form.reason.value = user.freeze?.reason || '';
+      renderUserDetail(user);
     });
   });
 }
 
+async function loadAdminMe() {
+  const { admin } = await api('/admin/me');
+  const badge = document.getElementById('adminRoleBadge');
+  if (badge) badge.textContent = `${admin.name} · ${admin.roleLabel}`;
+}
+
+async function loadAuditLogs() {
+  const { logs } = await api('/admin/audit-logs');
+  const root = document.getElementById('auditLogList');
+  if (!root) return;
+  root.innerHTML = (logs || []).map((log) => `
+    <article class="item-card">
+      <div>
+        <b>${esc(log.action)} · ${esc(log.object)}</b>
+        <div class="item-meta">${esc(log.at)} · ${esc(log.actorName)} · ${esc(log.roleLabel)} · ${esc(log.ip)}</div>
+        <div class="item-meta">${esc(log.status)} · ${esc(JSON.stringify(log.result || {}))}</div>
+      </div>
+    </article>
+  `).join('') || '<p class="muted">暂无审计日志</p>';
+}
+
+async function loadConfigVersions() {
+  const { versions } = await api('/admin/config-versions');
+  const root = document.getElementById('configVersionList');
+  if (!root) return;
+  root.innerHTML = (versions || []).map((item) => `
+    <article class="item-card">
+      <div>
+        <b>${esc(item.version)} · ${statusLabel(item.status)}</b>
+        <div class="item-meta">${esc(item.scope || 'ops-config')} · ${esc(item.createdAt || '')} · ${esc(item.createdBy?.name || '')}</div>
+        <div class="item-meta">${esc(item.note || '')}${item.rollbackOf ? ` · 回滚自 ${esc(item.rollbackOf)}` : ''}</div>
+      </div>
+      <button type="button" class="ghost" data-rollback="${esc(item.version)}">回滚</button>
+    </article>
+  `).join('') || '<p class="muted">暂无配置版本</p>';
+  root.querySelectorAll('[data-rollback]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        await api(`/admin/config-versions/${encodeURIComponent(btn.getAttribute('data-rollback'))}/rollback`, {
+          method: 'POST',
+          body: { reason: 'manual_rollback' },
+        });
+        showBanner('配置已回滚');
+        await Promise.all([loadConfigVersions(), loadAds(), loadRooms(), loadGames(), loadAppearance('skins')]);
+      } catch (error) {
+        showBanner(error.message, true);
+      }
+    });
+  });
+}
+
+function renderUserDetail(user) {
+  const root = document.getElementById('userDetail');
+  if (!root) return;
+  root.hidden = false;
+  const ledger = (user.ledger || []).slice(-8).reverse();
+  root.innerHTML = `
+    <h3>用户详情</h3>
+    <p class="item-meta">UID ${esc(user.uid)}${user.tgId ? ` · TG ${esc(user.tgId)}` : ''} · ${esc(user.nickname || '')}</p>
+    <div class="metrics">
+      <div class="metric"><span>可用</span><strong>${formatMoney(user.shadowPoints?.available)}</strong></div>
+      <div class="metric"><span>锁定</span><strong>${formatMoney(user.shadowPoints?.locked)}</strong></div>
+      <div class="metric"><span>对局</span><strong>${user.stats?.rounds || 0}</strong></div>
+      <div class="metric"><span>胜率</span><strong>${Math.round((user.stats?.winRate || 0) * 100)}%</strong></div>
+    </div>
+    <p class="item-meta">冻结状态：${user.frozen ? `已冻结 · ${esc(user.freeze?.reason || '')}` : '正常'}</p>
+    <div class="stack">${ledger.map((entry) => `<div class="item-meta">${esc(entry.createdAt || '')} · ${esc(entry.type)} · ${formatMoney(entry.amount)}</div>`).join('') || '<p class="muted">暂无流水</p>'}</div>
+  `;
+}
+
+function statusLabel(status) {
+  return ({
+    draft: '草稿',
+    reviewing: '审核中',
+    published: '已发布',
+    archived: '已下架',
+  })[status] || status || '已发布';
+}
+
 async function bootApp() {
   enterApp();
+  initSkinForm();
   await Promise.all([
+    loadAdminMe(),
     loadOverview(),
     loadGames(),
     loadRooms(),
@@ -374,6 +611,8 @@ async function bootApp() {
     loadAds(),
     loadLedger(),
     loadUsers(),
+    loadAuditLogs(),
+    loadConfigVersions(),
   ]);
 }
 
@@ -480,10 +719,18 @@ document.getElementById('logoUploadForm').addEventListener('submit', async (even
   try {
     await api('/admin/ad-logos', {
       method: 'POST',
-      body: { id: form.id.value, name: form.name.value, data },
+      body: {
+        id: form.id.value,
+        name: form.name.value,
+        data,
+        type: form.type.value,
+        width: Number(form.width.value || 0),
+        height: Number(form.height.value || 0),
+        auditStatus: form.auditStatus.value,
+      },
     });
     form.reset();
-    showBanner('Logo 已上传，可在广告和服饰胸标里选用');
+    showBanner('素材已上传，可在广告和服饰胸标里选用');
     await loadAds();
     await loadCostumeLogos();
   } catch (error) {
@@ -494,6 +741,25 @@ document.getElementById('logoUploadForm').addEventListener('submit', async (even
 document.getElementById('adForm').querySelector('[data-act="new-ad"]').addEventListener('click', () => {
   document.getElementById('adForm').reset();
   document.getElementById('adForm').enabled.checked = true;
+  document.getElementById('adForm').weight.value = 1;
+  document.getElementById('adForm').rotationMode.value = 'priority';
+  document.getElementById('adForm').auditStatus.value = 'approved';
+  document.getElementById('adForm').configStatus.value = 'draft';
+  document.getElementById('adPreview').hidden = true;
+});
+
+document.getElementById('adForm').querySelector('[data-act="preview-ad"]').addEventListener('click', async () => {
+  const form = document.getElementById('adForm');
+  const slotId = form.slotId.value;
+  const preview = document.getElementById('adPreview');
+  if (!slotId || !preview) return;
+  try {
+    const result = await api(`/admin/ad-placements/${encodeURIComponent(slotId)}/preview`);
+    preview.hidden = false;
+    preview.innerHTML = result.html || '<p class="muted">暂无预览</p>';
+  } catch (error) {
+    showBanner(error.message, true);
+  }
 });
 
 document.getElementById('adForm').querySelector('[data-act="delete-ad"]').addEventListener('click', async () => {
@@ -515,10 +781,14 @@ document.getElementById('adForm').addEventListener('submit', async (event) => {
   const body = Object.fromEntries(new FormData(form).entries());
   body.enabled = form.enabled.checked;
   body.priority = Number(body.priority);
+  body.weight = Number(body.weight || 1);
   body.seatIndex = body.seatIndex === '' ? null : Number(body.seatIndex);
   body.startAt = fromDateTimeLocal(body.startAt);
   body.endAt = fromDateTimeLocal(body.endAt);
+  body.materialId = body.logoId || '';
   try {
+    body.schedule = parseJsonField(body.schedule, 'schedule');
+    body.geoRules = parseJsonField(body.geoRules, 'geoRules');
     await api(`/admin/ad-placements/${encodeURIComponent(body.slotId)}`, { method: 'PUT', body });
     showBanner('广告已保存，大厅刷新后生效');
     await loadAds();
@@ -548,6 +818,15 @@ function formatAdRange(ad) {
   return `${start} 至 ${end}`;
 }
 
+function parseJsonField(value, label) {
+  if (!String(value || '').trim()) return {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    throw new Error(`${label}_json_invalid`);
+  }
+}
+
 document.getElementById('ledgerFilter').addEventListener('submit', async (event) => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -563,9 +842,9 @@ document.getElementById('ledgerFilter').addEventListener('submit', async (event)
 
 document.getElementById('userFilter').addEventListener('submit', async (event) => {
   event.preventDefault();
-  const userId = new FormData(event.currentTarget).get('userId');
+  const data = Object.fromEntries(new FormData(event.currentTarget).entries());
   try {
-    await loadUsers(String(userId || ''));
+    await loadUsers(data);
   } catch (error) {
     showBanner(error.message, true);
   }
@@ -577,7 +856,12 @@ document.getElementById('userForm').addEventListener('submit', async (event) => 
   try {
     await api(`/admin/users/${encodeURIComponent(form.userId.value)}`, {
       method: 'PUT',
-      body: { displayName: form.displayName.value, note: form.note.value },
+      body: {
+        displayName: form.displayName.value,
+        tgId: form.tgId.value,
+        nickname: form.nickname.value,
+        note: form.note.value,
+      },
     });
     showBanner('用户资料已保存');
     await loadUsers();
@@ -602,10 +886,14 @@ document.getElementById('userForm').querySelector('[data-act="grant"]').addEvent
 
 document.getElementById('userForm').querySelector('[data-act="freeze"]').addEventListener('click', async () => {
   const form = document.getElementById('userForm');
+  if (!form.reason.value.trim()) {
+    showBanner('冻结必须填写原因', true);
+    return;
+  }
   try {
     await api(`/admin/users/${encodeURIComponent(form.userId.value)}/freeze`, {
       method: 'POST',
-      body: { reason: form.reason.value || 'manual_ops_freeze' },
+      body: { reason: form.reason.value },
     });
     showBanner('用户已冻结，大厅将无法开局');
     await loadUsers();
@@ -616,10 +904,32 @@ document.getElementById('userForm').querySelector('[data-act="freeze"]').addEven
 
 document.getElementById('userForm').querySelector('[data-act="unfreeze"]').addEventListener('click', async () => {
   const form = document.getElementById('userForm');
+  if (!form.unfreezeReason.value.trim()) {
+    showBanner('解冻必须填写原因', true);
+    return;
+  }
   try {
-    await api(`/admin/users/${encodeURIComponent(form.userId.value)}/unfreeze`, { method: 'POST', body: {} });
+    await api(`/admin/users/${encodeURIComponent(form.userId.value)}/unfreeze`, {
+      method: 'POST',
+      body: { reason: form.unfreezeReason.value },
+    });
     showBanner('用户已解冻');
     await loadUsers();
+  } catch (error) {
+    showBanner(error.message, true);
+  }
+});
+
+document.getElementById('configPublishForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const body = Object.fromEntries(new FormData(form).entries());
+  try {
+    await api('/admin/config-versions/publish', { method: 'POST', body });
+    showBanner('配置版本已发布');
+    form.reset();
+    form.scope.value = 'ops-config';
+    await loadConfigVersions();
   } catch (error) {
     showBanner(error.message, true);
   }

@@ -47,10 +47,11 @@ export function verifyTelegramInitData(initData, options = {}) {
     user: sanitizeUser(user),
     authDate,
     queryId: params.get('query_id') || null,
+    startParam: params.get('start_param') || null,
   };
 }
 
-export function createSessionToken({ user, authDate, queryId = null }, options = {}) {
+export function createSessionToken({ user, authDate, queryId = null, startParam = null }, options = {}) {
   const secret = getSessionSecret(options);
   const issuedAt = options.issuedAt ?? options.nowSeconds ?? Math.floor(Date.now() / 1000);
   const payload = {
@@ -58,6 +59,7 @@ export function createSessionToken({ user, authDate, queryId = null }, options =
     user: sanitizeUser(user),
     authDate,
     queryId,
+    startParam,
     iat: issuedAt,
   };
   const encodedPayload = base64urlEncode(JSON.stringify(payload));
@@ -88,7 +90,13 @@ export function verifySessionToken(token, options = {}) {
     if (maxAgeSeconds > 0 && Number.isInteger(issuedAt) && nowSeconds - issuedAt > maxAgeSeconds) {
       return { ok: false, reason: 'token_expired' };
     }
-    return { ok: true, user: sanitizeUser(payload.user), authDate: payload.authDate, queryId: payload.queryId };
+    return {
+      ok: true,
+      user: sanitizeUser(payload.user),
+      authDate: payload.authDate,
+      queryId: payload.queryId,
+      startParam: payload.startParam || null,
+    };
   } catch {
     return { ok: false, reason: 'invalid_token_payload' };
   }

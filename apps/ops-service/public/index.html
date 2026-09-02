@@ -14,9 +14,9 @@
         <p class="muted">与大厅分离运行。在此独立管理玩法、广告、用户和影子积分账本。</p>
         <label>
           管理口令
-          <input id="tokenInput" type="password" autocomplete="current-password" placeholder="tea-parlor-ops" />
+          <input id="tokenInput" type="password" autocomplete="current-password" placeholder="ADMIN_TOKEN" />
         </label>
-        <p class="muted">本地默认口令：<code>tea-parlor-ops</code>（不要填 ADMIN_TOKEN）</p>
+        <p class="muted">口令来自环境变量 <code>ADMIN_TOKEN</code>。生产环境必须配置，页面不提供默认口令。</p>
         <button type="submit">进入控制台</button>
         <p id="loginError" class="error" hidden></p>
       </form>
@@ -27,6 +27,7 @@
         <div>
           <p class="eyebrow">独立后台 · 影子积分</p>
           <h1>运营控制台</h1>
+          <p id="adminRoleBadge" class="muted">角色加载中</p>
         </div>
         <button id="logoutBtn" type="button">退出</button>
       </header>
@@ -41,6 +42,8 @@
         <button type="button" data-tab="ads">广告</button>
         <button type="button" data-tab="users">用户</button>
         <button type="button" data-tab="ledger">账目</button>
+        <button type="button" data-tab="audit">审计</button>
+        <button type="button" data-tab="config">配置版本</button>
       </nav>
 
       <p id="banner" class="banner" hidden></p>
@@ -51,6 +54,7 @@
           <p>收益规则：金币局按底分估算服务费；链游测试区只记录赛季积分待审核事件。大厅只读取配置，账本在后台独立记账。</p>
         </div>
         <div id="overviewMetrics" class="metrics"></div>
+        <div id="opsDashboard" class="metrics"></div>
         <div id="overviewGames" class="stack"></div>
       </section>
 
@@ -101,10 +105,74 @@
 
       <section data-panel="skins" class="panel" hidden>
         <div class="panel-head">
-          <h2>皮肤上架</h2>
-          <p>预留大厅、桌布、牌背、头像框和联名皮肤的上架/下架配置。这里只做内部展示，不接外部资产交易。</p>
+          <h2>皮肤上架与预览</h2>
+          <p>管理桌布、牌背、牌面正面、头像框和联名皮肤。点击皮肤可编辑并预览配置。</p>
         </div>
-        <div id="skinList" class="stack"></div>
+        <div class="split">
+          <div class="stack">
+            <div class="filter-row">
+              <select id="skinTypeFilter">
+                <option value="">全部类型</option>
+                <option value="table_skin">桌面</option>
+                <option value="card_back">牌背</option>
+                <option value="card_front">牌面正面</option>
+                <option value="avatar_frame">头像框</option>
+                <option value="character_costume">服饰</option>
+              </select>
+            </div>
+            <div id="skinList" class="stack"></div>
+          </div>
+          <div class="stack">
+            <form id="skinForm" class="edit-card">
+              <h3>编辑皮肤</h3>
+              <label>皮肤 ID <input name="id" readonly /></label>
+              <label>名称 <input name="name" required maxlength="24" /></label>
+              <label>简介 <input name="summary" maxlength="48" /></label>
+              <label>类型
+                <select name="slotType">
+                  <option value="table_skin">桌面</option>
+                  <option value="card_back">牌背</option>
+                  <option value="card_front">牌面正面</option>
+                  <option value="avatar_frame">头像框</option>
+                  <option value="character_costume">服饰</option>
+                </select>
+              </label>
+              <label>稀有度
+                <select name="rarity">
+                  <option value="common">普通</option>
+                  <option value="uncommon">优良</option>
+                  <option value="rare">稀有</option>
+                  <option value="epic">史诗</option>
+                  <option value="legendary">传说</option>
+                </select>
+              </label>
+              <label>来源 <input name="source" maxlength="32" /></label>
+              <label>预览图 URL <input name="previewUrl" placeholder="https://... 或 /assets/..." maxlength="256" /></label>
+              <label>关联广告位 ID（逗号分隔）<input name="adSlotIds" placeholder="doudizhu-card-front, doudizhu-table-center" /></label>
+              <label>广告 Logo ID <input name="adLogoId" maxlength="48" /></label>
+              <label>配置状态
+                <select name="configStatus">
+                  <option value="draft">草稿</option>
+                  <option value="reviewing">审核中</option>
+                  <option value="published">已发布</option>
+                  <option value="archived">已下架</option>
+                </select>
+              </label>
+              <label>排序 <input name="sort" type="number" /></label>
+              <label class="check"><input name="enabled" type="checkbox" /> 上架展示</label>
+              <label class="check"><input name="limited" type="checkbox" /> 限定</label>
+              <label class="check"><input name="coBranded" type="checkbox" /> 广告联名</label>
+              <div class="btn-row">
+                <button type="submit">保存皮肤</button>
+                <button type="button" data-act="clear-skin" class="ghost">清空</button>
+              </div>
+            </form>
+            <div id="skinPreview" class="edit-card" hidden>
+              <h3>预览</h3>
+              <div id="skinPreviewContent"></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section data-panel="logos" class="panel" hidden>
@@ -147,7 +215,7 @@
       <section data-panel="ads" class="panel" hidden>
         <div class="panel-head">
           <h2>广告内容</h2>
-          <p>可自建品类、上传 Logo、新增广告。落地页须 https，不含结算。</p>
+          <p>可自建品类、上传素材、新增广告。公共投放只展示已启用、已审核且在有效期内的广告，不含钱包账本写入。</p>
         </div>
         <div class="split">
           <div class="stack">
@@ -166,12 +234,27 @@
               </form>
             </div>
             <div>
-              <h3>Logo</h3>
+              <h3>素材库</h3>
               <div id="logoList" class="stack"></div>
               <form id="logoUploadForm" class="edit-card">
-                <h3>上传 Logo</h3>
+                <h3>上传素材</h3>
                 <label>ID <input name="id" required placeholder="acme" /></label>
                 <label>名称 <input name="name" required placeholder="Acme" /></label>
+                <label>类型
+                  <select name="type">
+                    <option value="logo">Logo</option>
+                    <option value="image">图片</option>
+                  </select>
+                </label>
+                <label>宽度 <input name="width" type="number" min="0" max="4096" placeholder="例如 320" /></label>
+                <label>高度 <input name="height" type="number" min="0" max="4096" placeholder="例如 80" /></label>
+                <label>审核状态
+                  <select name="auditStatus">
+                    <option value="pending">待审核</option>
+                    <option value="approved">审核通过</option>
+                    <option value="rejected">审核拒绝</option>
+                  </select>
+                </label>
                 <label>图片 <input name="file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" required /></label>
                 <button type="submit">上传</button>
               </form>
@@ -182,7 +265,7 @@
             <label>广告 ID <input name="slotId" required placeholder="lobby-summer-01" /></label>
             <label>游戏 ID <input name="gameId" required placeholder="doudizhu / lobby / texas" /></label>
             <label>品类 <select name="categoryId"></select></label>
-            <label>Logo <select name="logoId"></select></label>
+            <label>素材/Logo <select name="logoId"></select></label>
             <label>表面
               <select name="surface">
                 <option value="lobby">大厅</option>
@@ -198,6 +281,7 @@
                 <option value="table-rail">边栏</option>
                 <option value="character-costume">服饰</option>
                 <option value="card-back">牌背</option>
+                <option value="card-front">牌面正面</option>
                 <option value="settlement">结算页</option>
               </select>
             </label>
@@ -207,15 +291,43 @@
             <label>标题 <input name="campaignTitle" required maxlength="36" /></label>
             <label>文案 <input name="copy" required maxlength="48" /></label>
             <label>落地页 https:// <input name="landingUrl" required /></label>
+            <label>图片 URL <input name="imageUrl" placeholder="https://..." /></label>
             <label>开始时间 <input name="startAt" type="datetime-local" /></label>
             <label>结束时间 <input name="endAt" type="datetime-local" /></label>
             <label>优先级 <input name="priority" type="number" value="100" /></label>
+            <label>权重 <input name="weight" type="number" min="1" max="1000" value="1" /></label>
+            <label>轮播
+              <select name="rotationMode">
+                <option value="priority">按优先级</option>
+                <option value="weighted">权重轮播</option>
+                <option value="random">随机</option>
+              </select>
+            </label>
+            <label>审核状态
+              <select name="auditStatus">
+                <option value="approved">审核通过</option>
+                <option value="pending">待审核</option>
+                <option value="rejected">审核拒绝</option>
+              </select>
+            </label>
+            <label>配置状态
+              <select name="configStatus">
+                <option value="draft">草稿</option>
+                <option value="reviewing">审核中</option>
+                <option value="published">已发布</option>
+                <option value="archived">已下架</option>
+              </select>
+            </label>
+            <label>排期 JSON <input name="schedule" placeholder='{"timezone":"UTC","hours":[9,10]}' /></label>
+            <label>地域 JSON <input name="geoRules" placeholder='{"excludeCountries":["US"]}' /></label>
             <label class="check"><input name="enabled" type="checkbox" checked /> 上线展示</label>
             <div class="btn-row">
               <button type="submit">保存广告</button>
+              <button type="button" data-act="preview-ad" class="ghost">预览</button>
               <button type="button" data-act="new-ad" class="ghost">清空新建</button>
               <button type="button" data-act="delete-ad" class="ghost">删除</button>
             </div>
+            <div id="adPreview" class="item-card" hidden></div>
           </form>
         </div>
       </section>
@@ -226,7 +338,9 @@
           <p>只管理后台建档的用户。大厅不会自动往这里写人。</p>
         </div>
         <form id="userFilter" class="filter-row">
-          <input name="userId" placeholder="按用户 ID 精确查找" />
+          <input name="q" placeholder="UID / TG ID / 昵称" />
+          <input name="tgId" placeholder="TG ID" />
+          <input name="nickname" placeholder="昵称" />
           <button type="submit">查找</button>
         </form>
         <div class="split">
@@ -235,7 +349,9 @@
             <form id="createUserForm" class="edit-card">
               <h3>新建用户</h3>
               <label>用户 ID <input name="userId" required placeholder="ops:player-1" /></label>
+              <label>TG ID <input name="tgId" maxlength="32" /></label>
               <label>显示名 <input name="displayName" maxlength="24" /></label>
+              <label>昵称 <input name="nickname" maxlength="32" /></label>
               <label>备注 <input name="note" maxlength="160" /></label>
               <label>初始影子积分 <input name="amount" type="number" min="0" step="1" value="1000" /></label>
               <button type="submit">建档</button>
@@ -243,10 +359,13 @@
             <form id="userForm" class="edit-card">
               <h3>管理已有用户</h3>
               <label>用户 ID <input name="userId" required /></label>
+              <label>TG ID <input name="tgId" maxlength="32" /></label>
               <label>显示名 <input name="displayName" maxlength="24" /></label>
+              <label>昵称 <input name="nickname" maxlength="32" /></label>
               <label>备注 <input name="note" maxlength="160" /></label>
               <label>发放积分 <input name="amount" type="number" min="1" step="1" placeholder="例如 1000" /></label>
               <label>冻结原因 <input name="reason" placeholder="risk_review" /></label>
+              <label>解冻原因 <input name="unfreezeReason" placeholder="appeal_passed" /></label>
               <div class="btn-row">
                 <button type="submit" data-act="save">保存资料</button>
                 <button type="button" data-act="grant">发放</button>
@@ -254,6 +373,7 @@
                 <button type="button" data-act="unfreeze" class="ghost">解冻</button>
               </div>
             </form>
+            <div id="userDetail" class="edit-card" hidden></div>
           </div>
         </div>
       </section>
@@ -291,6 +411,28 @@
             <tbody id="ledgerBody"></tbody>
           </table>
         </div>
+      </section>
+
+      <section data-panel="audit" class="panel" hidden>
+        <div class="panel-head">
+          <h2>审计日志</h2>
+          <p>后台写操作和越权拦截都会记录操作人、角色、时间、IP、动作、对象和结果。</p>
+        </div>
+        <div id="auditLogList" class="stack"></div>
+      </section>
+
+      <section data-panel="config" class="panel" hidden>
+        <div class="panel-head">
+          <h2>配置发布与回滚</h2>
+          <p>发布会保存玩法、场次、皮肤、广告和素材配置快照；回滚只恢复运营配置，不触碰影子积分账本。</p>
+        </div>
+        <form id="configPublishForm" class="edit-card">
+          <label>版本号 <input name="version" required placeholder="v2026-08-30-p0" /></label>
+          <label>范围 <input name="scope" value="ops-config" /></label>
+          <label>说明 <input name="note" maxlength="160" /></label>
+          <button type="submit">发布配置版本</button>
+        </form>
+        <div id="configVersionList" class="stack"></div>
       </section>
     </div>
     <script src="./admin.js" type="module"></script>
