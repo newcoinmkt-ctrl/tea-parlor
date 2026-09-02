@@ -608,7 +608,7 @@ const chainCenterController = createChainCenterController({
   escapeHtml,
 });
 
-boot();
+queueMicrotask(() => { boot(); });
 
 async function boot() {
   try {
@@ -2038,21 +2038,25 @@ function syncTexasDealer(state) {
   if (_txDealerSyncing) return;
   const badges = document.querySelectorAll('.tx-dealer');
   if (!badges.length) return;
-  _txDealerSyncing = true;
-  try {
-  badges.forEach((el) => {
-    el.hidden = true;
-    el.setAttribute('hidden', '');
-  });
   let idx = readTexasDealerIndex(state);
   if (idx == null) idx = readTexasDealerIndex(texasUI);
   if (idx == null) idx = readTexasDealerIndex(window.__texasState);
   if (idx == null) idx = 0;
-  const el = document.querySelector(`.tx-dealer[data-tx-dealer="${idx}"]`);
-  if (el) {
-    el.hidden = false;
-    el.removeAttribute('hidden');
-  }
+  const want = String(idx);
+  _txDealerSyncing = true;
+  try {
+    badges.forEach((el) => {
+      const on = el.getAttribute('data-tx-dealer') === want;
+      if (on) {
+        if (el.hidden) {
+          el.hidden = false;
+          el.removeAttribute('hidden');
+        }
+      } else if (!el.hidden) {
+        el.hidden = true;
+        el.setAttribute('hidden', '');
+      }
+    });
   } finally {
     _txDealerSyncing = false;
   }
@@ -2076,7 +2080,10 @@ function initTexas() {
   syncTexasDealer(null);
   const root = document.getElementById('texasTableView');
   if (root && !root._txDealerObs) {
-    const obs = new MutationObserver(() => syncTexasDealer(texasUI));
+    const obs = new MutationObserver(() => {
+      clearTimeout(obs._t);
+      obs._t = setTimeout(() => syncTexasDealer(texasUI), 32);
+    });
     obs.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden', 'class'] });
     root._txDealerObs = obs;
   }

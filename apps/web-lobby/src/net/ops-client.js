@@ -16,7 +16,7 @@ export function resolveAdsUrl(explicit) {
 }
 
 export async function fetchOpsCatalog() {
-  const res = await fetch(`${resolveOpsBase()}/public/catalog`, { cache: 'no-store' });
+  const res = await fetch(`${resolveOpsBase()}/public/catalog`, { cache: 'no-store', signal: AbortSignal.timeout(2500) });
   if (!res.ok) throw new Error(`ops_catalog_${res.status}`);
   return res.json();
 }
@@ -33,14 +33,14 @@ export async function reportOpsRevenue(payload) {
 
 export async function fetchPlayerStatus(playerId) {
   const url = `${resolveOpsBase()}/public/player-status?playerId=${encodeURIComponent(playerId)}`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(2500) });
   if (!res.ok) throw new Error(`ops_status_${res.status}`);
   return res.json();
 }
 
 export async function fetchChainAssets(playerId) {
   const query = playerId ? `?playerId=${encodeURIComponent(playerId)}` : '';
-  const res = await fetch(`${resolveOpsBase()}/public/chain-assets${query}`, { cache: 'no-store' });
+  const res = await fetch(`${resolveOpsBase()}/public/chain-assets${query}`, { cache: 'no-store', signal: AbortSignal.timeout(2500) });
   if (!res.ok) throw new Error(`ops_chain_assets_${res.status}`);
   return res.json();
 }
