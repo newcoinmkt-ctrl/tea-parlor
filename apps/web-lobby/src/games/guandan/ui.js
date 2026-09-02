@@ -1,7 +1,9 @@
 /**
- * 掼蛋 H5 UI — 庭院方桌 · 竖列理牌 · 桌面结算
+ * 掼蛋 UI — 绿毡桌 · 重叠手牌 · 桌面结算
  */
 import { createGuanDanTable, cardText, Phase, isWild } from './engine.js';
+import { fitAllHands } from '../../net/hand-layout.js';
+import { stripGuandanChrome } from '../../net/strip-gd-chrome.js';
 
 let _instance = null;
 
@@ -123,7 +125,8 @@ export function createGuanDanUI(options = {}) {
         <button type="button" class="gd-tool-restore" data-gd-restore>恢复</button>
         <button type="button" class="gd-tool-sort" data-gd-sort>一键理牌</button>
       `;
-      root.appendChild(bar);
+      const dock = root.querySelector('.mg-hand-dock');
+      (dock || root).appendChild(bar);
       bar.querySelectorAll('[data-gd-suit]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const s = Number(btn.getAttribute('data-gd-suit'));
@@ -186,6 +189,8 @@ export function createGuanDanUI(options = {}) {
   function hide() {
     stopAi();
     hideResult();
+    stripGuandanChrome(root);
+    if (el.hand) el.hand.innerHTML = '';
     root.hidden = true;
     root.setAttribute('hidden', '');
     root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p', 'zjh-active');
@@ -574,6 +579,11 @@ export function createGuanDanUI(options = {}) {
     }
     if (el.settleRow) el.settleRow.hidden = true;
     if (el.modal) el.modal.hidden = true;
+    try {
+      requestAnimationFrame(() => {
+        try { fitAllHands(root); } catch (_) {}
+      });
+    } catch (_) {}
   }
 
   function showSettle(snap) {

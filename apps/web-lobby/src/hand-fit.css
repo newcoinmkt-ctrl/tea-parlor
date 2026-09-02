@@ -185,3 +185,15 @@
   max-height: 50% !important;
   overflow-x: hidden !important;
 }
+
+
+/* play9d: portrait dock thumb zone; peek/lift */
+.lobby-shell.table-active #bidControls .qq-btn,
+.lobby-shell.table-active #playControls .qq-btn {
+  min-height: 44px !important;
+  min-width: 68px !important;
+}
+.gd-card.is-on,
+.playing-card.selected {
+  transform: translateY(-12px);
+}

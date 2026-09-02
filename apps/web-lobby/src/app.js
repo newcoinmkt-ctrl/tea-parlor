@@ -41,6 +41,7 @@ import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
 import { initHandFit, fitAllHands } from './net/hand-layout.js';
 import { initTableOrientation } from './net/table-orient.js';
+import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
   savePlayMode,
@@ -210,7 +211,7 @@ const DDZ_TIER_IDS = {
   gold: ['novice', 'classic', 'high'],
   season: ['c_novice', 'c_classic', 'c_high'],
 };
-const DDZ_QUEUE = ['匹配中 · 2/3', '可立即入座', '排队 1 桌'];
+const DDZ_QUEUE = ['人机畅玩', '人机畅玩', '人机畅玩'];
 const DDZ_TIER_LABEL = ['新手', '经典', '高级'];
 let _txDealerSyncing = false;
 
@@ -663,7 +664,7 @@ async function boot() {
         updatePinusModeLabel();
       },
     };
-    console.log('[TeaParlor] 全玩法 H5 已就绪 · 品牌', ACTIVE_BRAND.name, '· 模式', playMode);
+    console.log('[TeaParlor] 全玩法已就绪 · 品牌', ACTIVE_BRAND.name, '· 模式', playMode);
   } catch (e) {
     console.error('[TeaParlor] boot failed', e);
     if (nodes.claimStatus) nodes.claimStatus.textContent = `启动异常：${e?.message || e}`;
@@ -2123,9 +2124,11 @@ function startTexas(tableKey = 'micro', options = {}) {
     if (currency === 'crypto') setLobbyView('recharge');
     return;
   }
-  // 离开斗地主
+  // 离开斗地主 / 掼蛋 HUD
   clearAi();
   game = null;
+  try { multiUI?.hide?.(); } catch (_) { /* ignore */ }
+  forceCloseMultiView();
   nodes.tableView.hidden = true;
   nodes.tableView.setAttribute('hidden', '');
 
@@ -2212,15 +2215,17 @@ function leaveMultiTable() {
 function forceCloseMultiView() {
   const mg = document.getElementById('multiGameView');
   if (mg) {
+    stripGuandanChrome(mg);
     mg.hidden = true;
     mg.setAttribute('hidden', '');
-    mg.classList.remove('zjh-active', 'gd-active', 'gd-4p', 'mj-4p', 'mj-2p');
+    mg.classList.remove('zjh-active', 'gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p');
     delete mg.dataset.game;
     mg.style.display = 'none';
     mg.style.pointerEvents = 'none';
     mg.style.visibility = 'hidden';
     mg.style.zIndex = '-1';
   }
+  stripGuandanChromeFromDocument(document);
   nodes.shell?.classList.remove('multi-active');
   // 仅在未开斗地主/德州时恢复大厅舞台
   if (!nodes.shell?.classList.contains('table-active') && !nodes.shell?.classList.contains('texas-active')) {
@@ -3085,7 +3090,7 @@ function setLobbyView(view = 'home', gameType = null) {
     else if (gameType === 'real') nodes.claimStatus.textContent = `链游测试区：赛季积分 可入座 · 下方更多游戏快捷 · 演示账本`;
     else if (gameType === 'doudizhu') {
       renderDdzRooms(ddzVariant);
-      nodes.claimStatus.textContent = '斗地主 · 经典三人叫分 · 匹配真人，超时 AI 补位';
+      nodes.claimStatus.textContent = '斗地主 · 经典叫分 · 人机畅玩';
     }
     else nodes.claimStatus.textContent = '请选择斗地主场次（金币场）';
   }
@@ -4193,7 +4198,7 @@ function startDdzMatched(roomId, options = {}) {
   const copy = document.getElementById('ddzMatchCopy');
   const room = ROOMS[roomId] || ROOMS.classic;
   const shortName = String(room.name || '经典').replace(/^链游·/, '').replace(/场$/, '');
-  if (copy) copy.textContent = `${shortName}场 · 已就位 1/3 · 约 8 秒补齐`;
+  if (copy) copy.textContent = `${shortName} · 人机畅玩`;
   if (mask) {
     mountP0Overlay(mask);
     mask.hidden = false;
@@ -4320,7 +4325,7 @@ function renderDdzRooms(variantId = ddzVariant) {
 
   const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
   const rooms = ids.map((id) => ROOMS[id]).filter(Boolean);
-  if (onlinePill) onlinePill.textContent = '匹配中';
+  if (onlinePill) onlinePill.textContent = '人机畅玩';
 
   if (!grid) return;
   const unit = ddzLane === 'season' ? '赛季积分' : '影子积分';
@@ -4338,7 +4343,7 @@ function renderDdzRooms(variantId = ddzVariant) {
   }).join('');
 
   const hint = document.querySelector('.p0-dock-hint');
-  if (hint) hint.textContent = '经典场 · 匹配真人，超时 AI 补位';
+  if (hint) hint.textContent = '经典叫分 · 人机畅玩';
   const quick = document.getElementById('ddzQuickStart');
   if (quick) {
     quick.setAttribute('data-room', rooms[1]?.id || rooms[0]?.id || 'classic');
@@ -4417,6 +4422,7 @@ function startRoom(roomId, options = {}) {
   if (activeGame === 'texas' && texasBuyIn > 0) cashoutTexas(texasBuyIn);
   texasUI?.hide?.();
   multiUI?.hide?.();
+  forceCloseMultiView();
   activeGame = 'doudizhu';
 
   clearAi();
@@ -4434,7 +4440,7 @@ function startRoom(roomId, options = {}) {
       console.warn(`[${backend}] fallback local`, err);
       if (nodes.claimStatus) {
         nodes.claimStatus.textContent =
-          `${backend === 'colyseus' ? 'Colyseus' : 'Pinus'} 连接失败（${err.message || err}），已回退本地人机`;
+          `联网失败，已回退人机畅玩`;
       }
       onlineBackend = null;
       startRoomLocal(room, currency, variant);
@@ -4519,7 +4525,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
   const name = profile.name || NAMES[0];
 
   onlineBackend = backend === 'pinus' ? 'pinus' : 'colyseus';
-  hintText = `正在连接 ${onlineBackend === 'colyseus' ? 'Colyseus' : 'Pinus'} · ${v.label}…`;
+  hintText = `正在开局 · ${v.label}…`;
   showDdzTable();
   if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
 
@@ -4572,7 +4578,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
     game.variant = variant;
     game.variantLabel = v.label;
   }
-  hintText = `${onlineBackend === 'colyseus' ? 'Colyseus' : 'Pinus'} 联网 · JJ 规则 · 请叫分`;
+  hintText = `经典叫分 · 请叫分`;
   selected = new Set();
   trustee = false;
   renderGame();
@@ -5562,6 +5568,7 @@ function autoHuman() {
 function renderGame() {
   if (!game) return;
 
+  nodes.tableView?.classList.toggle('is-bidding', game.phase === 'bid');
   if (nodes.roomName) nodes.roomName.textContent = game.roomName;
   if (nodes.stakeLabel) nodes.stakeLabel.textContent = String(game.stake);
   if (nodes.tableStatus) nodes.tableStatus.textContent = statusLine();

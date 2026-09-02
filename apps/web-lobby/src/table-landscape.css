@@ -6,21 +6,22 @@ html.table-landscape body {
   overscroll-behavior: none;
 }
 
+/* play9d: never CSS-rotate. Product is portrait Mini App. */
 @media (orientation: portrait) {
-  html.css-landscape .lobby-shell.table-active {
-    position: fixed !important;
-    z-index: 80 !important;
-    top: 0 !important;
-    left: 100dvw !important;
-    width: var(--tg-vh, 100dvh) !important;
-    height: 100dvw !important;
+  html.css-landscape .lobby-shell.table-active,
+  html.css-landscape .lobby-shell.multi-active,
+  html.css-landscape .lobby-shell.texas-active {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: var(--tg-vh, 100dvh) !important;
     max-width: none !important;
     max-height: none !important;
     margin: 0 !important;
-    transform: rotate(90deg) !important;
-    transform-origin: top left !important;
+    transform: none !important;
     overflow: hidden !important;
-    inset: auto !important;
   }
 }
 
