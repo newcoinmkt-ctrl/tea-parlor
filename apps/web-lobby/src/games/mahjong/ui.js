@@ -148,6 +148,11 @@ export function createMahjongUI(options = {}) {
     clearOpenTimers();
     hideOpenLayer();
     hideResult();
+    // play9g1TearDown: clear tap HUD on table switch
+    selected = null;
+    if (el.actions) { el.actions.hidden = true; el.actions.innerHTML = ''; }
+    if (el.hand) el.hand.innerHTML = '';
+    if (el.settleRow) { el.settleRow.hidden = true; el.settleRow.setAttribute('hidden', ''); }
     root.hidden = true;
     root.setAttribute('hidden', '');
     root.classList.remove('zjh-active', 'gd-active', 'mj-2p', 'mj-4p');
@@ -927,7 +932,7 @@ export function createMahjongUI(options = {}) {
           (o.canHu ? '<button type="button" class="qq-btn qq-btn-gold mj-btn-hu" data-mj-act="hu">胡</button>' : '')
           + (o.canPeng ? '<button type="button" class="qq-btn qq-btn-gold mj-btn-side" data-mj-act="peng">碰</button>' : '')
           + (o.canGang ? '<button type="button" class="qq-btn qq-btn-gold mj-btn-side" data-mj-act="gang">杠</button>' : '')
-          + '<button type="button" class="qq-btn qq-btn-blue mj-btn-qi" data-mj-act="pass">弃</button>';
+          + '<button type="button" class="qq-btn qq-btn-blue mj-btn-qi" data-mj-act="pass">过</button>';
         el.actions.querySelectorAll('[data-mj-act]').forEach((btn) => {
           btn.addEventListener('click', () => {
             table.humanCall(btn.getAttribute('data-mj-act'));

@@ -39,7 +39,7 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9e2';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9g1';
 import { initTableOrientation } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -2246,6 +2246,15 @@ function forceCloseMultiView() {
   const mg = document.getElementById('multiGameView');
   if (mg) {
     stripGuandanChrome(mg);
+    // play9g1TearDown: clear shared multi HUD so leftover 碰/看/弃 cannot intercept lobby taps
+    const acts = mg.querySelector('#mgActions');
+    if (acts) { acts.hidden = true; acts.innerHTML = ''; }
+    const hand = mg.querySelector('#mgHand');
+    if (hand) hand.innerHTML = '';
+    const center = mg.querySelector('#mgCenter');
+    if (center) center.innerHTML = '';
+    const settle = mg.querySelector('#mgSettleRow');
+    if (settle) { settle.hidden = true; settle.setAttribute('hidden', ''); }
     mg.hidden = true;
     mg.setAttribute('hidden', '');
     mg.classList.remove('zjh-active', 'gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p');
@@ -5156,7 +5165,7 @@ function syncP0Tabbar() {
       el.style.setProperty('right', '0', 'important');
       el.style.setProperty('bottom', '0', 'important');
       el.style.setProperty('width', '100%', 'important');
-      el.style.setProperty('height', '100%', 'important');
+      el.style.setProperty('height', 'var(--tg-vh, 100dvh)', 'important');
       el.style.setProperty('z-index', '400', 'important');
       if (el.id === 'tableView') {
         const slot = el.querySelector('.self-slot');

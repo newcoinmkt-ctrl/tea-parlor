@@ -240,3 +240,33 @@ html.table-landscape .lobby-shell.texas-active #handArea,
   pointer-events: none !important;
   visibility: hidden !important;
 }
+
+/* play9g1: select lift + tappable hands for mj / texas / zjh */
+.mg-hand-tile.selected,
+.mj-tile.mg-hand-tile.selected,
+.mg-hand-card.selected {
+  transform: translateY(-14px) !important;
+  z-index: 60 !important;
+  filter: brightness(1.08);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 220, 100, 0.85) !important;
+}
+.mg-hero-column,
+.tx-self-dock {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.mg-hero-column #mgHand,
+.tx-self-dock #texasHole0 {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+.mj-4p #mgActions .qq-btn,
+.mj-2p #mgActions .qq-btn,
+.zjh-active #mgActions .qq-btn,
+.texas-active #texasActions button {
+  min-height: 44px !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}

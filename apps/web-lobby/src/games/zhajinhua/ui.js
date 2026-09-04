@@ -149,6 +149,11 @@ export function createZhajinhuaUI(options = {}) {
   function hide() {
     stopAi();
     hideResult();
+    // play9g1TearDown: clear tap HUD on table switch
+    if (el.actions) { el.actions.hidden = true; el.actions.innerHTML = ''; }
+    if (el.hand) el.hand.innerHTML = '';
+    if (el.center) el.center.innerHTML = '';
+    if (el.settleRow) { el.settleRow.hidden = true; el.settleRow.setAttribute('hidden', ''); }
     root.hidden = true;
     root.setAttribute('hidden', '');
     root.classList.remove('zjh-active', 'gd-active', 'mj-4p', 'mj-2p');
