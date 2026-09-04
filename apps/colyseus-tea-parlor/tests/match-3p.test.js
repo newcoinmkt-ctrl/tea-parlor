@@ -2,7 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createSessionToken } from '@tea-parlor/session-auth';
-import { DdzTable, MATCH_MS } from '../src/ddzLogic.js';
+import {
+  DdzTable,
+  MATCH_MS,
+  EMPTY_ROOM_MS,
+  FRESH_JOIN_MIN_REMAIN_MS,
+} from '../src/ddzLogic.js';
 import { verifyRoomJoin } from '../src/rooms/DoudizhuRoom.js';
 
 test('1 human join → injected 10s fills 2 AI, deal, 3 names', async () => {
@@ -13,6 +18,7 @@ test('1 human join → injected 10s fills 2 AI, deal, 3 names', async () => {
     autoDeal: false,
   });
   await t.ensureReady();
+  assert.equal(t.matchEndsAt, 0, 'empty create must not start match clock');
   const seat = t.occupy('u1', '茶馆');
   assert.equal(seat, 0);
   assert.equal(t.phase, 'match');
@@ -137,9 +143,34 @@ test('trustee: disconnected human seat is played by AI (injected flag)', async (
 
 test('MATCH_MS is 10000 ms (Colyseus clock uses ms)', () => {
   assert.equal(MATCH_MS, 10_000);
+  assert.equal(EMPTY_ROOM_MS, 45_000);
+  assert.equal(FRESH_JOIN_MIN_REMAIN_MS, 2_000);
+  assert.ok(EMPTY_ROOM_MS > MATCH_MS, 'empty dispose must outlive match window');
+  assert.ok(FRESH_JOIN_MIN_REMAIN_MS < MATCH_MS);
+  assert.equal(MATCH_MS - FRESH_JOIN_MIN_REMAIN_MS, 8_000);
 });
 
-test('joining empty matching room resets matchEndsAt to full window', async () => {
+test('empty create: matchEndsAt is 0 until first human', async () => {
+  let now = 1_700_000_000_000;
+  const t = new DdzTable({
+    roomKey: 'novice',
+    match: true,
+    autoDeal: false,
+    now: () => now,
+    matchMs: MATCH_MS,
+  });
+  await t.ensureReady();
+  assert.equal(t.phase, 'match');
+  assert.equal(t.matchEndsAt, 0);
+  assert.equal(t.humanCount, 0);
+  assert.equal(t.canAcceptNewHuman(), true);
+  assert.equal(t.remainingMatchMs(), 0);
+  const snap = t.publicState('ghost');
+  assert.equal(snap.matchEndsAt, 0);
+  assert.equal(snap.phase, 'match');
+});
+
+test('empty waits 8s then first join → endsAt full 10s', async () => {
   let now = 1_700_000_000_000;
   const t = new DdzTable({
     roomKey: 'novice',
@@ -150,25 +181,72 @@ test('joining empty matching room resets matchEndsAt to full window', async () =
     matchMs: MATCH_MS,
   });
   await t.ensureReady();
-  assert.equal(t.phase, 'match');
-  assert.equal(t.matchEndsAt, now + MATCH_MS);
-  // Stale empty room: 8s already elapsed since onCreate
+  assert.equal(t.matchEndsAt, 0);
+  // Stale empty room sits 8s (empty dispose is 45s — match clock never started)
   now += 8_000;
-  assert.ok(t.matchEndsAt - now <= 2_050);
+  assert.equal(t.matchEndsAt, 0);
+  assert.equal(t.canAcceptNewHuman(), true);
   const seat = t.occupy('u_new', '新茶客');
   assert.equal(seat, 0);
   assert.equal(t.humanCount, 1);
-  assert.equal(t.matchEndsAt, now + MATCH_MS, 'first human must reset endsAt');
+  assert.equal(t.matchEndsAt, now + MATCH_MS, 'first human must start full 10s window');
   const snap = t.publicState('u_new');
   assert.equal(snap.phase, 'match');
   assert.equal(snap.matchEndsAt - now, MATCH_MS);
-  // Still matching — deal only via timeout / completeMatch / 3 humans
   assert.equal(t.phase, 'match');
   assert.equal(snap.myHand.length, 0);
   now += MATCH_MS;
   await t.onMatchTimeout();
   assert.ok(['bid', 'play'].includes(t.phase));
   assert.equal(t.seats.filter((s) => s && s.kind === 'ai').length, 2);
+});
+
+test('stale multi-human room rejects new humans when remain < 2000', async () => {
+  let now = 1_700_000_000_000;
+  const t = new DdzTable({
+    roomKey: 'novice',
+    match: true,
+    autoDeal: false,
+    now: () => now,
+    matchMs: MATCH_MS,
+  });
+  await t.ensureReady();
+  t.occupy('u1', '甲');
+  assert.equal(t.matchEndsAt, now + MATCH_MS);
+  assert.equal(t.canAcceptNewHuman(), true); // remain 10s ≥ 2s
+  // Second human within the fresh second is OK
+  now += 500;
+  assert.ok(t.remainingMatchMs() >= FRESH_JOIN_MIN_REMAIN_MS);
+  assert.equal(t.canAcceptNewHuman(), true);
+  t.occupy('u2', '乙');
+  assert.equal(t.humanCount, 2);
+  // After >8s from last reset, remain < 2000 → new humans refused
+  now += 8_500; // remain 1500
+  assert.ok(t.remainingMatchMs() < FRESH_JOIN_MIN_REMAIN_MS);
+  assert.equal(t.canAcceptNewHuman(), false);
+  // Nearly expired (~1s left) must also refuse
+  now = t.matchEndsAt - 1_000;
+  assert.equal(t.canAcceptNewHuman(), false);
+});
+
+
+test('every new human seat resets full MATCH_MS window', async () => {
+  let now = 1_700_000_100_000;
+  const t = new DdzTable({
+    roomKey: 'novice',
+    match: true,
+    autoDeal: false,
+    now: () => now,
+    matchMs: MATCH_MS,
+  });
+  await t.ensureReady();
+  t.occupy('u1', '甲');
+  assert.equal(t.matchEndsAt, now + MATCH_MS);
+  now += 3_000;
+  t.occupy('u2', '乙');
+  assert.equal(t.humanCount, 2);
+  assert.equal(t.matchEndsAt, now + MATCH_MS, 'second human must also reset full 10s');
+  assert.equal(t.phase, 'match');
 });
 
 test('deal only after timeout or 3 humans (not on first join)', async () => {
@@ -184,8 +262,28 @@ test('deal only after timeout or 3 humans (not on first join)', async () => {
   t.occupy('u2', '乙');
   assert.equal(t.phase, 'match');
   assert.equal(t.humanCount, 2);
-  // Second joiner must NOT reset away the shared window to zero; still matching
   assert.ok(t.matchEndsAt - Date.now() > 0);
-  await t.completeMatch(); // would be room timeout or 3rd human in room layer
+  await t.completeMatch();
   assert.ok(['bid', 'play'].includes(t.phase));
+});
+
+test('clearMatchWindow restores empty-room clock semantics', async () => {
+  let now = 1_700_000_000_000;
+  const t = new DdzTable({
+    roomKey: 'novice',
+    match: true,
+    autoDeal: false,
+    now: () => now,
+  });
+  await t.ensureReady();
+  t.occupy('u1', '甲');
+  assert.ok(t.matchEndsAt > 0);
+  t.disconnect('u1');
+  assert.equal(t.humanCount, 0);
+  t.clearMatchWindow();
+  assert.equal(t.matchEndsAt, 0);
+  assert.equal(t.canAcceptNewHuman(), true);
+  now += 20_000;
+  t.occupy('u2', '乙');
+  assert.equal(t.matchEndsAt, now + MATCH_MS);
 });
