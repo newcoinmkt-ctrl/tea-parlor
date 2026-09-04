@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="./src/styles.css?v=play9d1" />
     <link rel="stylesheet" href="./src/themes/tokens.css?v=play9d1" />
     <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9d1" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9d1" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9d1" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9e2" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9g1d" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9g1d" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9g1d" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -1526,7 +1526,6 @@
           </div>
 
           <div class="tx-seat tx-seat-0 full-body-char" data-texas-seat="0" data-char="0">
-            <div id="texasHole0" class="tx-hole tx-hole-hero" aria-label="我的手牌"></div>
             <span class="tx-chips" aria-hidden="true"></span>
             <div class="tx-seat-head">
               <div class="tx-char-col">
@@ -1545,7 +1544,10 @@
           </div>
         </div>
 
-        <div id="texasActions" class="tx-actions action-row" aria-label="操作"></div>
+        <div class="tx-self-dock" aria-label="德州操作与手牌">
+          <div id="texasActions" class="tx-actions action-row" aria-label="操作"></div>
+          <div id="texasHole0" class="tx-hole tx-hole-hero" aria-label="我的手牌"></div>
+        </div>
         <div id="texasSettleRow" class="action-row" hidden>
           <button id="texasAgainBtn" type="button" class="tx-side-start">开始</button>
           <button id="texasLobbyBtn" class="muted-button tx-side-exit" type="button">离开</button>
@@ -1663,8 +1665,11 @@
                 <div id="mgPlay0" class="mg-play" aria-label="我的明牌"></div>
               </div>
             </div>
-            <div class="mg-hand-dock">
-              <div id="mgHand" class="mg-hand" aria-label="我的手牌"></div>
+            <div class="mg-hero-column">
+              <div id="mgActions" class="tx-actions action-row mg-actions" aria-label="操作"></div>
+              <div class="mg-hand-dock">
+                <div id="mgHand" class="mg-hand" aria-label="我的手牌"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1673,7 +1678,6 @@
           <div class="mj-dock" aria-label="本局资产">
             <span class="mj-dock-gold"><i class="gold-coin-icon" aria-hidden="true"></i><b id="mjGold">—</b></span>
           </div>
-          <div id="mgActions" class="tx-actions action-row mg-actions" aria-label="操作"></div>
           <div id="mgSettleRow" class="action-row mg-settle" hidden>
             <button id="mgAgainBtn" type="button" class="qq-btn qq-btn-gold">再来一局</button>
             <button id="mgLobbyBtn" class="qq-btn qq-btn-blue muted-button" type="button">回大厅</button>
@@ -1773,6 +1777,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9f2"></script>
+    <script type="module" src="./src/app.js?v=play9g1d"></script>
   </body>
 </html>

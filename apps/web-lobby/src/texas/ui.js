@@ -134,6 +134,10 @@ export function createTexasUI(options = {}) {
   function hide() {
     stopAi();
     hideResultModal();
+    // play9g1TearDown: clear tap HUD on table switch
+    if (el.actions) el.actions.innerHTML = '';
+    if (el.seats?.[0]?.hole) el.seats[0].hole.innerHTML = '';
+    if (el.settleRow) { el.settleRow.hidden = true; el.settleRow.setAttribute('hidden', ''); }
     root.hidden = true;
     root.setAttribute('hidden', '');
     root.style.setProperty('display', 'none', 'important');

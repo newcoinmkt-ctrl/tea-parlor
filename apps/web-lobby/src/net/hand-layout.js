@@ -328,10 +328,10 @@ export function fitAllHands(root = document) {
       if (items.length) {
         const isTile = items.some((el) => el.classList.contains("mg-hand-tile") || el.classList.contains("mj-tile"));
         layoutOverlapRow(mg, items, {
-          maxW: isTile ? 34 : 40,
-          minW: 20,
-          minPeek: isTile ? 14 : 12,
-          ratio: isTile ? 1.28 : 1.42,
+          maxW: isTile ? 36 : 40,
+          minW: isTile ? 26 : 20,
+          minPeek: isTile ? 18 : 12,
+          ratio: isTile ? 1.45 : 1.42,
           gap: false,
         });
       }

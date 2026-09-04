@@ -1,0 +1,144 @@
+{
+  "cache": "play9g1d",
+  "viewport": [
+    414,
+    896
+  ],
+  "mj_idle": {
+    "tileCount": 13,
+    "selected": 0,
+    "btnCount": 0,
+    "btnTexts": [],
+    "btnWidths": [],
+    "btnHeights": [],
+    "actions": {
+      "top": 656,
+      "bottom": 662,
+      "left": 378,
+      "right": 388,
+      "w": 10,
+      "h": 6,
+      "pos": "absolute"
+    },
+    "hand": {
+      "top": 670,
+      "bottom": 722,
+      "left": 80,
+      "right": 386,
+      "w": 306,
+      "h": 52,
+      "pos": "relative"
+    },
+    "footer": {
+      "top": 848,
+      "bottom": 890,
+      "left": 8,
+      "right": 406,
+      "w": 398,
+      "h": 42,
+      "pos": "relative"
+    },
+    "actionsAboveHand": true,
+    "handAboveFooter": true,
+    "lastTileAboveFooter": true,
+    "maxTileBottomClearFooter": true,
+    "gapHandFooter": 126,
+    "gapMaxTileFooter": 126,
+    "feltProbe": "mg-row-hero"
+  },
+  "shots": {
+    "mj-414-play.png": 1039163,
+    "mj-414-select.png": 992987,
+    "mj-414-after-play.png": 1050859
+  },
+  "mj_selected": {
+    "tileCount": 14,
+    "selected": 1,
+    "btnCount": 1,
+    "btnTexts": [
+      "弃"
+    ],
+    "btnWidths": [
+      40
+    ],
+    "btnHeights": [
+      32
+    ],
+    "actions": {
+      "top": 622,
+      "bottom": 662,
+      "left": 336,
+      "right": 388,
+      "w": 52,
+      "h": 40,
+      "pos": "absolute"
+    },
+    "hand": {
+      "top": 670,
+      "bottom": 722,
+      "left": 80,
+      "right": 386,
+      "w": 306,
+      "h": 52,
+      "pos": "relative"
+    },
+    "footer": {
+      "top": 848,
+      "bottom": 890,
+      "left": 8,
+      "right": 406,
+      "w": 398,
+      "h": 42,
+      "pos": "relative"
+    },
+    "actionsAboveHand": true,
+    "handAboveFooter": true,
+    "lastTileAboveFooter": true,
+    "maxTileBottomClearFooter": true,
+    "gapHandFooter": 126,
+    "gapMaxTileFooter": 126,
+    "feltProbe": "mg-row-hero"
+  },
+  "mj_after_play": {
+    "tileCount": 13,
+    "selected": 0,
+    "btnCount": 0,
+    "btnTexts": [],
+    "btnWidths": [],
+    "btnHeights": [],
+    "actions": {
+      "top": 656,
+      "bottom": 662,
+      "left": 378,
+      "right": 388,
+      "w": 10,
+      "h": 6,
+      "pos": "absolute"
+    },
+    "hand": {
+      "top": 670,
+      "bottom": 722,
+      "left": 80,
+      "right": 386,
+      "w": 306,
+      "h": 52,
+      "pos": "relative"
+    },
+    "footer": {
+      "top": 848,
+      "bottom": 890,
+      "left": 8,
+      "right": 406,
+      "w": 398,
+      "h": 42,
+      "pos": "relative"
+    },
+    "actionsAboveHand": true,
+    "handAboveFooter": true,
+    "lastTileAboveFooter": true,
+    "maxTileBottomClearFooter": true,
+    "gapHandFooter": 126,
+    "gapMaxTileFooter": 126,
+    "feltProbe": "mg-row-hero"
+  }
+}
