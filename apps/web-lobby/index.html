@@ -103,8 +103,9 @@
                   <h1>经典三人 · 叫分</h1>
                   <p>经典叫分 · 超时 AI 补位</p>
                   <button class="p0-primary" type="button" data-lobby-action="quick-doudizhu">斗地主 · 快速开始</button>
+                  <button class="p0-secondary" type="button" data-lobby-action="local-doudizhu">人机畅玩</button>
                   <button class="p0-secondary" type="button" data-lobby-action="open-zhajinhua">炸金花</button>
-                  <p class="p0-hint">经典叫分 · 超时 AI 补位</p>
+                  <p class="p0-hint">联网匹配需从 Telegram 打开 · 也可人机畅玩</p>
                   <button class="p0-more" type="button" data-lobby-action="open-games">更多玩法</button>
                 </div>
               </div>
@@ -787,8 +788,9 @@
 
             <div class="start-strip p0-start-dock">
               <button class="friend-room-button" type="button" data-lobby-action="friend-room" hidden>好友房</button>
+              <button class="friend-room-button" type="button" id="ddzLocalPlay" data-lobby-action="local-doudizhu">人机畅玩</button>
               <button class="quick-start-button" type="button" id="ddzQuickStart" data-lobby-action="quick-doudizhu">快速开始</button>
-              <small class="p0-dock-hint">经典叫分 · 超时 AI 补位</small>
+              <small class="p0-dock-hint">快速开始=联网匹配 · 人机畅玩不经匹配</small>
             </div>
           </section>
 
@@ -1771,6 +1773,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9e3"></script>
+    <script type="module" src="./src/app.js?v=play9e4"></script>
   </body>
 </html>
