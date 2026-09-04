@@ -41,6 +41,19 @@ export async function claimInviteShareReward(token, payload = {}, options = {}) 
   }, options);
 }
 
+
+export async function fetchDailySupply(token, options = {}) {
+  return walletRequest('/wallet/daily-supply', token, { method: 'GET' }, options);
+}
+
+export async function claimDailySupply(token, payload = {}, options = {}) {
+  return walletRequest('/wallet/daily-supply/claim', token, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  }, options);
+}
+
 export async function claimWalletGrant(token, grantType, payload = {}, options = {}) {
   return walletRequest(`/wallet/grants/${encodeURIComponent(grantType)}`, token, {
     method: 'POST',

@@ -215,9 +215,43 @@ async function handleWalletRoute(req, res, pathname, user, walletService) {
     return sendJson(res, 200, walletSummary(walletService, userId));
   }
 
+  if (req.method === 'GET' && pathname === '/wallet/daily-supply') {
+    const status = walletService.getDailySupplyStatus({ userId });
+    return sendJson(res, 200, {
+      ...status,
+      summary: walletSummary(walletService, userId),
+      compliance: complianceCopy(),
+    });
+  }
+
+  if (req.method === 'POST' && pathname === '/wallet/daily-supply/claim') {
+    const body = await readJson(req);
+    const result = walletService.claimDailySupply({
+      userId,
+      idempotencyKey: body.idempotencyKey || body.idempotency_key,
+    });
+    return sendJson(res, result.ok ? 200 : 400, {
+      ...result,
+      summary: walletSummary(walletService, userId),
+      compliance: complianceCopy(),
+    });
+  }
+
   if (req.method === 'POST' && pathname.startsWith('/wallet/grants/')) {
     const grantType = sanitizeKey(pathname.slice('/wallet/grants/'.length) || 'daily');
     const body = await readJson(req);
+    // Bind legacy daily grant to the 4×/day Shanghai limiter — no unlimited backdoor.
+    if (grantType === 'daily' || grantType === 'daily_supply') {
+      const result = walletService.claimDailySupply({
+        userId,
+        idempotencyKey: body.idempotencyKey || body.idempotency_key,
+      });
+      return sendJson(res, result.ok ? 200 : 400, {
+        ...result,
+        summary: walletSummary(walletService, userId),
+        compliance: complianceCopy(),
+      });
+    }
     const amount = positiveAmount(body.amount ?? defaultGrantAmount(grantType));
     const idempotencyKey = body.idempotencyKey || defaultGrantKey(grantType, userId, body.referenceId);
     const unit = parseCurrency(body.currency);
@@ -292,6 +326,9 @@ async function handleWalletRoute(req, res, pathname, user, walletService) {
 function walletSummary(walletService, userId) {
   const shadow = walletService.getAccount(userId, Currency.SHADOW_POINTS);
   const season = walletService.getAccount(userId, Currency.USDT_SHADOW);
+  const dailySupply = typeof walletService.getDailySupplyStatus === 'function'
+    ? walletService.getDailySupplyStatus({ userId })
+    : null;
   return {
     ok: true,
     userId,
@@ -305,6 +342,7 @@ function walletSummary(walletService, userId) {
         withdrawable: false,
       },
     },
+    dailySupply,
     ledgerCount: walletService.queryLedger({ userId }).length,
     compliance: complianceCopy(),
   };
@@ -404,13 +442,21 @@ function getDeviceHash(req, body = {}) {
   );
 }
 
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+function todayKey(date = new Date()) {
+  return currentDateKey(date);
 }
 
 function currentDateKey(date = new Date()) {
-  if (date instanceof Date) return date.toISOString().slice(0, 10);
-  return String(date || new Date().toISOString()).slice(0, 10);
+  const value = date instanceof Date ? date : new Date(date || Date.now());
+  if (Number.isNaN(value.getTime())) {
+    return String(date || new Date().toISOString()).slice(0, 10);
+  }
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(value);
 }
 
 async function handleAvatarRoute(req, res, pathname, user, avatarRepository) {

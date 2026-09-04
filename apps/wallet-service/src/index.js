@@ -33,7 +33,14 @@ export const GoldLedgerType = {
   NEWBIE_ORGANIC: 'newbie_organic',
   RELIEF: 'relief',
   INVITE_MILESTONE: 'invite_milestone',
+  DAILY_SUPPLY: 'daily_supply',
 };
+
+export const DailySupplyPolicy = Object.freeze({
+  LIMIT: 4,
+  AMOUNT: 4000,
+  TIME_ZONE: 'Asia/Shanghai',
+});
 
 export const InviteGoldPolicy = Object.freeze({
   SHARE_DAILY_AMOUNT: 1000,
@@ -301,6 +308,85 @@ export class WalletService {
       return {
         ok: true,
         amount: InviteGoldPolicy.RELIEF_DAILY_AMOUNT,
+        account: credit.account,
+        ledgerEntry: credit.goldLedgerEntry,
+      };
+    });
+  }
+
+  getDailySupplyStatus({ userId } = {}) {
+    assertUserId(userId);
+    const date = currentDateKey(this.clock());
+    const user = this.#ensureUser(userId);
+    const claimed = user.dailySupplyDate === date
+      ? (Number(user.dailySupplyCount) || 0)
+      : 0;
+    const limit = DailySupplyPolicy.LIMIT;
+    const remaining = Math.max(0, limit - claimed);
+    return {
+      ok: true,
+      date,
+      claimed,
+      remaining,
+      limit,
+      amount: DailySupplyPolicy.AMOUNT,
+      account: this.getAccount(userId),
+    };
+  }
+
+  claimDailySupply({ userId, idempotencyKey } = {}) {
+    assertUserId(userId);
+    const date = currentDateKey(this.clock());
+    const user = this.#ensureUser(userId);
+    if (user.dailySupplyDate !== date) {
+      user.dailySupplyDate = date;
+      user.dailySupplyCount = 0;
+    }
+    const claimed = Number(user.dailySupplyCount) || 0;
+    if (claimed >= DailySupplyPolicy.LIMIT) {
+      return {
+        ...this.getDailySupplyStatus({ userId }),
+        ok: false,
+        reason: 'daily_supply_exhausted',
+      };
+    }
+    const nextIndex = claimed + 1;
+    const key = idempotencyKey || `gold:daily_supply:${userId}:${date}:${nextIndex}`;
+
+    return this.#idempotent(key, () => {
+      const fresh = this.#ensureUser(userId);
+      if (fresh.dailySupplyDate !== date) {
+        fresh.dailySupplyDate = date;
+        fresh.dailySupplyCount = 0;
+      }
+      const currentCount = Number(fresh.dailySupplyCount) || 0;
+      if (currentCount >= DailySupplyPolicy.LIMIT) {
+        return {
+          ...this.getDailySupplyStatus({ userId }),
+          ok: false,
+          reason: 'daily_supply_exhausted',
+        };
+      }
+      const claimIndex = currentCount + 1;
+      const credit = this.#creditGold({
+        userId,
+        amount: DailySupplyPolicy.AMOUNT,
+        type: GoldLedgerType.DAILY_SUPPLY,
+        idempotencyKey: `gold:daily_supply:${userId}:${date}:${claimIndex}`,
+        extraJson: {
+          date,
+          claimIndex,
+          policy: 'daily_supply_4x_shanghai_shadow_non_withdrawable',
+        },
+      });
+      fresh.dailySupplyCount = claimIndex;
+      fresh.dailySupplyDate = date;
+      const status = this.getDailySupplyStatus({ userId });
+      return {
+        ...status,
+        ok: true,
+        amount: DailySupplyPolicy.AMOUNT,
+        claimIndex,
         account: credit.account,
         ledgerEntry: credit.goldLedgerEntry,
       };
@@ -1212,6 +1298,8 @@ function normalizeUserRecord(user) {
     firstGameFinishedAt: user.firstGameFinishedAt || user.first_game_finished_at || null,
     inviteRiskStatus: user.inviteRiskStatus || user.invite_risk_status || 'normal',
     inviteRiskReason: user.inviteRiskReason || user.invite_risk_reason || null,
+    dailySupplyDate: user.dailySupplyDate || user.daily_supply_date || null,
+    dailySupplyCount: Number(user.dailySupplyCount ?? user.daily_supply_count ?? 0) || 0,
   };
 }
 
@@ -1233,6 +1321,10 @@ function snapshotUser(user) {
     invite_risk_status: user.inviteRiskStatus || 'normal',
     inviteRiskReason: user.inviteRiskReason || null,
     invite_risk_reason: user.inviteRiskReason || null,
+    dailySupplyDate: user.dailySupplyDate || null,
+    daily_supply_date: user.dailySupplyDate || null,
+    dailySupplyCount: Number(user.dailySupplyCount) || 0,
+    daily_supply_count: Number(user.dailySupplyCount) || 0,
   });
 }
 
@@ -1317,7 +1409,17 @@ function cloneJson(value) {
 }
 
 function currentDateKey(isoString) {
-  return String(isoString || new Date().toISOString()).slice(0, 10);
+  const raw = isoString || new Date().toISOString();
+  const date = raw instanceof Date ? raw : new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    return String(raw).slice(0, 10);
+  }
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: DailySupplyPolicy.TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
 }
 
 function sanitizeDate(value) {

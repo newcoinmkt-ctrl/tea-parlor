@@ -55,7 +55,22 @@ import {
   fetchChainAssets,
   reportOpsRevenue,
 } from './net/ops-client.js';
-import { loginWithTelegramInitData } from './net/wallet-client.js';
+import {
+  loginWithTelegramInitData,
+  fetchWalletSummary,
+  fetchDailySupply,
+  claimDailySupply as claimDailySupplyApi,
+} from './net/wallet-client.js';
+import {
+  DAILY_SUPPLY_AMOUNT,
+  DAILY_SUPPLY_LIMIT,
+  DAILY_SUPPLY_TG_PROMPT,
+  DAILY_SUPPLY_NON_CASH,
+  formatDailySupplyStatus,
+  formatDailySupplyClaimSuccess,
+  formatDailySupplyExhaustedReason,
+  claimButtonLabel,
+} from './net/daily-supply-copy.js';
 import {
   ddzMatchFailureCopy,
   ddzMatchFailureTitle,
@@ -112,8 +127,8 @@ import { CHARACTERS as CHARACTER_DEFS } from '/vendor/character-catalog/index.js
 import { clearGearOverlays, mountAvatarRenderer, mountGearOverlays } from './avatar/AvatarRenderer.js';
 
 const STORAGE_KEY = 'tea-parlor-h5-jj-v4';
-const DAILY_CLAIM_LIMIT = 4;
-const DAILY_CLAIM_AMOUNT = 4000;
+const DAILY_CLAIM_LIMIT = DAILY_SUPPLY_LIMIT;
+const DAILY_CLAIM_AMOUNT = DAILY_SUPPLY_AMOUNT;
 const HUMAN = 0;
 const PINUS_MODE_KEY = 'tea-parlor-play-mode'; // 'local' | 'colyseus' | 'pinus'
 
@@ -650,6 +665,13 @@ async function boot() {
     try { initTableOrientation(); } catch (e) { console.warn('[table-orient]', e); }
     try { initTexas(); } catch (e) { console.warn('[TeaParlor] initTexas', e); }
     renderAccount();
+    try {
+      if (typeof telegramLoginPromise !== 'undefined' && telegramLoginPromise) {
+        await telegramLoginPromise;
+      }
+      await syncDailySupplyFromServer();
+      renderAccount();
+    } catch (_) { /* non-TG / offline lobby */ }
     renderProfileUi();
     renderAvatarMounts();
     updatePinusModeLabel();
@@ -2936,7 +2958,7 @@ const RULES_PANELS = {
     '<p><b>大厅入口</b>：侧栏可选斗地主 / 德州 / 炸金花 / 麻将 / 掼蛋 / 二十一点 / 链游测试区 / 更多游戏。</p>'
     + '<p><b>货币</b>：金币 = 内部娱乐积分；赛季积分 = 链游测试区演示账本（不可转为现金或外部资产）。</p>'
     + '<p><b>链游测试区</b>：使用 赛季积分 入座各玩法（含二十一点），规则与金币场一致，仅结算币种不同。</p>'
-    + '<p><b>每日补给</b>：仅当金币输光（为 0）后可领，每天最多 4 次。</p>'
+    + '<p><b>每日补给</b>：每日最多 4 次 × 4,000 影子金币（不可提现），需从 Telegram 打开领取，次数由服务端记账。</p>'
     + '<p><b>操作通用</b>：点选手牌或按钮出牌、下注；默认同桌人机，可切换联网对局。</p>'
     + '<p class="muted">金币与 赛季积分 演示账本均不可转为现金或外部资产。</p>'
   ),
@@ -4114,26 +4136,82 @@ function updateHintFromSelection() {
 }
 
 // ─── 账户 ───────────────────────────────────────────
-function onClaim() {
-  refreshClaims();
-  // 仅当金币输光（<=0）才可领取每日补助
-  if (appState.ingots > 0) {
-    if (nodes.claimStatus) {
-      nodes.claimStatus.textContent = `金币未输光（当前 ${format(appState.ingots)}），输光后才可领每日补助`;
+function getLobbySessionToken() {
+  return String(window.__teaParlorSessionToken || '').trim();
+}
+
+function applyServerShadowBalance(summary) {
+  const available = Number(summary?.balances?.shadowPoints?.available);
+  if (Number.isFinite(available)) {
+    appState.ingots = Math.max(0, Math.round(available));
+  }
+  const season = Number(summary?.balances?.seasonPoints?.available);
+  if (Number.isFinite(season)) {
+    appState.usdt = Math.max(0, Math.round(season * 100) / 100);
+  }
+}
+
+function applyDailySupplyStatus(status) {
+  if (!status || typeof status !== 'object') return;
+  const date = status.date || todayKey();
+  const claimed = Number(status.claimed) || 0;
+  appState.claims = { date, count: claimed };
+  if (status.account && Number.isFinite(Number(status.account.available))) {
+    appState.ingots = Math.max(0, Math.round(Number(status.account.available)));
+  }
+}
+
+async function syncDailySupplyFromServer() {
+  const token = getLobbySessionToken();
+  const gateway = String(window.TEA_PARLOR_API_GATEWAY_URL || '').replace(/\/+$/, '');
+  if (!token || !gateway) return null;
+  try {
+    const status = await fetchDailySupply(token);
+    applyDailySupplyStatus(status);
+    if (status?.summary) applyServerShadowBalance(status.summary);
+    else if (status?.account) {
+      const available = Number(status.account.available);
+      if (Number.isFinite(available)) appState.ingots = Math.max(0, Math.round(available));
     }
+    saveState();
+    return status;
+  } catch (err) {
+    console.warn('[tea-parlor] daily supply sync failed', err?.message || err);
+    return null;
+  }
+}
+
+async function onClaim() {
+  refreshClaims();
+  const token = getLobbySessionToken();
+  if (!token) {
+    if (nodes.claimStatus) nodes.claimStatus.textContent = DAILY_SUPPLY_TG_PROMPT;
     renderAccount();
     return;
   }
-  if (appState.claims.count >= DAILY_CLAIM_LIMIT) {
-    if (nodes.claimStatus) nodes.claimStatus.textContent = '今日补助次数已用完';
-    renderAccount();
-    return;
-  }
-  appState.ingots += DAILY_CLAIM_AMOUNT;
-  appState.claims.count += 1;
-  saveState();
-  if (nodes.claimStatus) {
-    nodes.claimStatus.textContent = `已领取 ${format(DAILY_CLAIM_AMOUNT)} 金币 · 今日剩余 ${DAILY_CLAIM_LIMIT - appState.claims.count} 次`;
+  if (nodes.claimButton) nodes.claimButton.disabled = true;
+  if (nodes.claimStatus) nodes.claimStatus.textContent = '领取中…';
+  try {
+    const result = await claimDailySupplyApi(token);
+    applyDailySupplyStatus(result);
+    if (result?.summary) applyServerShadowBalance(result.summary);
+    saveState();
+    if (nodes.claimStatus) {
+      nodes.claimStatus.textContent = formatDailySupplyClaimSuccess({
+        amount: result.amount ?? DAILY_CLAIM_AMOUNT,
+        remaining: result.remaining,
+      });
+    }
+  } catch (err) {
+    const reason = err?.body?.reason || err?.message || '';
+    if (nodes.claimStatus) {
+      nodes.claimStatus.textContent = formatDailySupplyExhaustedReason(reason) === '今日补给次数已用完'
+        ? '今日补给次数已用完'
+        : (reason.includes('session') || err?.status === 401
+          ? DAILY_SUPPLY_TG_PROMPT
+          : formatDailySupplyExhaustedReason(reason));
+    }
+    if (err?.body) applyDailySupplyStatus(err.body);
   }
   renderAccount();
 }
@@ -4163,24 +4241,28 @@ function renderAccount() {
   const ru = document.getElementById('rechargeUsdtPreview');
   if (ru) ru.textContent = usdtVal;
 
-  const left = DAILY_CLAIM_LIMIT - appState.claims.count;
-  const broke = appState.ingots <= 0;
+  const left = Math.max(0, DAILY_CLAIM_LIMIT - (Number(appState.claims?.count) || 0));
+  const hasSession = Boolean(getLobbySessionToken());
   if (nodes.claimButton) {
-    if (!broke) {
-      nodes.claimButton.disabled = true;
-      nodes.claimButton.textContent = '输光后可领';
-      if (nodes.claimStatus) {
-        nodes.claimStatus.textContent = `金币未输光（${format(appState.ingots)}）· 输光后每天可领 ${left} 次补助`;
-      }
-    } else if (left <= 0) {
-      nodes.claimButton.disabled = true;
-      nodes.claimButton.textContent = '今日已领完';
-      if (nodes.claimStatus) nodes.claimStatus.textContent = '今日补助次数已用完 · 明日再来';
-    } else {
-      nodes.claimButton.disabled = false;
-      nodes.claimButton.textContent = `领取 ${format(DAILY_CLAIM_AMOUNT)}`;
-      if (nodes.claimStatus) {
-        nodes.claimStatus.textContent = `金币已输光 · 今日还可领 ${left} 次（每次 ${format(DAILY_CLAIM_AMOUNT)}）`;
+    nodes.claimButton.disabled = !hasSession || left <= 0;
+    nodes.claimButton.textContent = claimButtonLabel({
+      remaining: left,
+      amount: DAILY_CLAIM_AMOUNT,
+      hasSession,
+    });
+    if (nodes.claimStatus) {
+      // Keep last claim success/error unless empty / generic default
+      const current = String(nodes.claimStatus.textContent || '');
+      const keep = /已领取|领取失败|领取中|请从 Telegram|今日补给次数已用完/.test(current);
+      if (!keep) {
+        nodes.claimStatus.textContent = formatDailySupplyStatus({
+          remaining: left,
+          limit: DAILY_CLAIM_LIMIT,
+          amount: DAILY_CLAIM_AMOUNT,
+          hasSession,
+        });
+      } else if (!hasSession) {
+        nodes.claimStatus.textContent = DAILY_SUPPLY_TG_PROMPT;
       }
     }
   }
@@ -4214,10 +4296,26 @@ function initTelegramMiniApp() {
   const start = String(tg.initDataUnsafe?.start_param || new URLSearchParams(location.search).get('tgWebAppStartParam') || '');
   const initData = typeof tg.initData === 'string' ? tg.initData : '';
   if (initData) {
-    telegramLoginPromise = loginWithTelegramInitData(initData, { startParam: start }).then((body) => {
+    telegramLoginPromise = loginWithTelegramInitData(initData, { startParam: start }).then(async (body) => {
       if (body?.token) window.__teaParlorSessionToken = body.token;
       const uid = body?.user?.id != null ? String(body.user.id) : (user?.id != null ? String(user.id) : '');
       if (uid) window.__teaParlorSessionUserId = uid;
+      try {
+        if (body?.token) {
+          const summary = await fetchWalletSummary(body.token);
+          applyServerShadowBalance(summary);
+          applyDailySupplyStatus(summary?.dailySupply);
+          saveState();
+          renderAccount();
+        } else {
+          await syncDailySupplyFromServer();
+          renderAccount();
+        }
+      } catch (syncErr) {
+        console.warn('[tea-parlor] wallet sync after login failed', syncErr?.message || syncErr);
+        await syncDailySupplyFromServer();
+        renderAccount();
+      }
       return body;
     }).catch((err) => {
       console.warn('[tea-parlor] telegram login failed', err?.message || err);
@@ -4491,7 +4589,7 @@ function startRoom(roomId, options = {}) {
     if (nodes.claimStatus) {
       nodes.claimStatus.textContent = currency === 'crypto'
         ? `${room.name} 需要 ${formatCrypto(room.minEntry)} ${CRYPTO_SYMBOL}，请先补给`
-        : `${room.name} 需要 ${format(room.minEntry)} 金币入场${appState.ingots <= 0 ? '，可领每日补助' : ''}`;
+        : `${room.name} 需要 ${format(room.minEntry)} 金币入场${appState.ingots <= 0 ? '，可领每日补给（影子金币·不可提现）' : ''}`;
     }
     if (currency === 'crypto') setLobbyView('recharge');
     else if (appState.ingots <= 0) renderAccount();
@@ -6195,9 +6293,14 @@ function format(n) {
   return Number(n).toLocaleString('zh-CN');
 }
 
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function todayKey(date = new Date()) {
+  const value = date instanceof Date ? date : new Date(date);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(value);
 }
 
 function createDefaultWardrobeState() {
