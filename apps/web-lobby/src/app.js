@@ -206,12 +206,14 @@ const DDZ_VARIANTS = {
 let ddzVariant = 'classic';
 let ddzLane = 'gold';
 let ddzMatchTimer = 0;
+let ddzKeepOverlay = false;
+let ddzMatchAborted = false;
 
 const DDZ_TIER_IDS = {
   gold: ['novice', 'classic', 'high'],
   season: ['c_novice', 'c_classic', 'c_high'],
 };
-const DDZ_QUEUE = ['人机畅玩', '人机畅玩', '人机畅玩'];
+const DDZ_QUEUE = ['经典叫分 · 超时 AI 补位', '经典叫分 · 超时 AI 补位', '经典叫分 · 超时 AI 补位'];
 const DDZ_TIER_LABEL = ['新手', '经典', '高级'];
 let _txDealerSyncing = false;
 
@@ -2844,7 +2846,7 @@ function handleLobbyAction(action, opts = {}) {
   if (action === 'home') setLobbyView('home');
   else if (action === 'open-games' || action === 'games') setLobbyView('games');
   else if (action === 'quick-doudizhu') {
-    startDdzMatched('classic', { variant: 'classic' });
+    startDdzMatched('novice', { variant: 'classic' });
   }
   else if (action === 'quick-doudizhu-classic') {
     const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
@@ -3125,7 +3127,7 @@ function setLobbyView(view = 'home', gameType = null) {
     else if (gameType === 'real') nodes.claimStatus.textContent = `链游测试区：赛季积分 可入座 · 下方更多游戏快捷 · 演示账本`;
     else if (gameType === 'doudizhu') {
       renderDdzRooms(ddzVariant);
-      nodes.claimStatus.textContent = '斗地主 · 经典叫分 · 人机畅玩';
+      nodes.claimStatus.textContent = '斗地主 · 经典叫分 · 超时 AI 补位';
     }
     else nodes.claimStatus.textContent = '请选择斗地主场次（金币场）';
   }
@@ -4219,7 +4221,7 @@ function initTelegramMiniApp() {
       openFriendRoom(start.slice(2));
     });
   } else if (start === 'play') {
-    queueMicrotask(() => startDdzMatched('classic', { variant: 'classic' }));
+    queueMicrotask(() => startDdzMatched('novice', { variant: 'classic' }));
   }
 }
 
@@ -4231,9 +4233,12 @@ function mountP0Overlay(el) {
 function startDdzMatched(roomId, options = {}) {
   const mask = document.getElementById('ddzMatchMask');
   const copy = document.getElementById('ddzMatchCopy');
-  const room = ROOMS[roomId] || ROOMS.classic;
-  const shortName = String(room.name || '经典').replace(/^链游·/, '').replace(/场$/, '');
-  if (copy) copy.textContent = `${shortName} · 人机畅玩`;
+  const title = mask?.querySelector('h2');
+  const room = ROOMS[roomId] || ROOMS.novice;
+  if (title) title.textContent = '匹配中';
+  if (copy) copy.textContent = '匹配中，超时 AI 补位';
+  ddzKeepOverlay = true;
+  ddzMatchAborted = false;
   if (mask) {
     mountP0Overlay(mask);
     mask.hidden = false;
@@ -4241,20 +4246,31 @@ function startDdzMatched(roomId, options = {}) {
     mask.style.setProperty('display', 'grid', 'important');
   }
   clearTimeout(ddzMatchTimer);
-  ddzMatchTimer = window.setTimeout(() => {
-    hideDdzMatch();
-    startRoom(roomId, { variant: options.variant || ddzVariant || 'classic', currency: options.currency || room.currency || 'ingot' });
-  }, 900);
+  startRoom(roomId, {
+    variant: options.variant || 'classic',
+    currency: options.currency || room.currency || 'ingot',
+    online: true,
+    backend: 'colyseus',
+    keepMatchOverlay: true,
+  });
 }
 
 function hideDdzMatch() {
   clearTimeout(ddzMatchTimer);
+  ddzKeepOverlay = false;
   const mask = document.getElementById('ddzMatchMask');
   if (mask) {
     mask.hidden = true;
     mask.setAttribute('hidden', '');
     mask.style.setProperty('display', 'none', 'important');
   }
+}
+
+function cancelDdzMatch() {
+  ddzMatchAborted = true;
+  hideDdzMatch();
+  try { colyseusClient.leaveColyseus?.(); } catch (_) {}
+  onlineBackend = null;
 }
 
 function friendInviteUrl(roomId) {
@@ -4324,10 +4340,9 @@ function bindP0Lobby() {
   document.getElementById('ddzQuickStart')?.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
-    startDdzMatched(ids[1] || 'classic', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
+    startDdzMatched('novice', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
   });
-  document.getElementById('ddzMatchCancel')?.addEventListener('click', hideDdzMatch);
+  document.getElementById('ddzMatchCancel')?.addEventListener('click', cancelDdzMatch);
   document.getElementById('ddzFriendClose')?.addEventListener('click', closeFriendRoom);
   document.getElementById('ddzFriendLink')?.addEventListener('click', shareFriendRoom);
   document.getElementById('ddzFriendShare')?.addEventListener('click', shareFriendRoom);
@@ -4360,7 +4375,7 @@ function renderDdzRooms(variantId = ddzVariant) {
 
   const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
   const rooms = ids.map((id) => ROOMS[id]).filter(Boolean);
-  if (onlinePill) onlinePill.textContent = '人机畅玩';
+  if (onlinePill) onlinePill.textContent = '超时 AI 补位';
 
   if (!grid) return;
   const unit = ddzLane === 'season' ? '赛季积分' : '影子积分';
@@ -4378,10 +4393,10 @@ function renderDdzRooms(variantId = ddzVariant) {
   }).join('');
 
   const hint = document.querySelector('.p0-dock-hint');
-  if (hint) hint.textContent = '经典叫分 · 人机畅玩';
+  if (hint) hint.textContent = '经典叫分 · 超时 AI 补位';
   const quick = document.getElementById('ddzQuickStart');
   if (quick) {
-    quick.setAttribute('data-room', rooms[1]?.id || rooms[0]?.id || 'classic');
+    quick.setAttribute('data-room', 'novice');
     quick.setAttribute('data-ddz-mode', 'classic');
   }
 }
@@ -4462,22 +4477,30 @@ function startRoom(roomId, options = {}) {
 
   clearAi();
   hideDdzResultModal();
-  // 入场扣底分（金币/赛季积分）
-  if (currency === 'crypto') adjustUsdt(-room.stake);
-  else appState.ingots -= room.stake;
-  saveState();
-  renderAccount();
 
   const wantOnline = options.online ?? isOnlineMode(playMode);
+  // 本地人机仍扣底分；Colyseus 联网以服务器 scores 为准，不预扣以免和服不一致
+  if (!wantOnline) {
+    if (currency === 'crypto') adjustUsdt(-room.stake);
+    else appState.ingots -= room.stake;
+    saveState();
+    renderAccount();
+  }
+
   if (wantOnline) {
     const backend = options.backend || (playMode === 'pinus' ? 'pinus' : 'colyseus');
-    startRoomOnline(room, currency, variant, backend).catch((err) => {
+    startRoomOnline(room, currency, variant, backend, { keepMatchOverlay: !!options.keepMatchOverlay }).catch((err) => {
       console.warn(`[${backend}] fallback local`, err);
       if (nodes.claimStatus) {
         nodes.claimStatus.textContent =
           `联网失败，已回退人机畅玩`;
       }
+      hideDdzMatch();
       onlineBackend = null;
+      if (currency === 'crypto') adjustUsdt(-room.stake);
+      else appState.ingots -= room.stake;
+      saveState();
+      renderAccount();
       startRoomLocal(room, currency, variant);
     });
     return;
@@ -4553,18 +4576,20 @@ function startRoomLocal(room, currency, variant = 'classic') {
   scheduleAi();
 }
 
-async function startRoomOnline(room, currency, variant = 'classic', backend = 'colyseus') {
+async function startRoomOnline(room, currency, variant = 'classic', backend = 'colyseus', extra = {}) {
   const v = DDZ_VARIANTS[variant] || DDZ_VARIANTS.classic;
   const profile = getProfile();
   pinusUid = pinusUid || `h5_${profile.playerId || '830126'}_${Date.now()}`;
   const name = profile.name || NAMES[0];
+  const keepOverlay = extra.keepMatchOverlay || ddzKeepOverlay;
 
   onlineBackend = backend === 'pinus' ? 'pinus' : 'colyseus';
-  hintText = `正在开局 · ${v.label}…`;
-  showDdzTable();
+  hintText = keepOverlay ? '匹配中，超时 AI 补位' : `正在开局 · ${v.label}…`;
+  if (!keepOverlay) showDdzTable();
   if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
 
   try { await telegramLoginPromise; } catch (_) {}
+  if (ddzMatchAborted) throw new Error('match_cancelled');
   const sessionToken = window.__teaParlorSessionToken || '';
   if (window.__teaParlorSessionUserId) pinusUid = String(window.__teaParlorSessionUserId);
 
@@ -4581,13 +4606,17 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
       currency,
       token: sessionToken || undefined,
     });
-    // 持续同步房间推送
+    if (ddzMatchAborted) {
+      try { await colyseusClient.leaveColyseus?.(); } catch (_) {}
+      throw new Error('match_cancelled');
+    }
     colyseusClient.onRoomUpdate((st) => {
       if (!game?.online || onlineBackend !== 'colyseus') return;
       const meta = ROOMS[game.roomId] || room;
       applyPinusRoom(st, meta, currency);
+      syncMatchOverlay(st);
+      if (game.phase === 'match') return;
       if (game.phase === 'settle' && !game._settledWallet && game.score != null) {
-        // 结算入账走 pinusSync 同类逻辑
         pinusSync(async () => ({ room: st }));
       } else {
         renderGame();
@@ -4613,10 +4642,44 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
     game.variant = variant;
     game.variantLabel = v.label;
   }
-  hintText = `经典叫分 · 请叫分`;
   selected = new Set();
   trustee = false;
+  syncMatchOverlay(session.room);
+  if (game?.phase === 'match') {
+    hintText = session.room?.status || '匹配中，超时 AI 补位';
+    return;
+  }
+  hintText = session.room?.status || `经典叫分 · 请叫分`;
+  showDdzTable();
   renderGame();
+}
+
+function syncMatchOverlay(room) {
+  const copy = document.getElementById('ddzMatchCopy');
+  if (room?.phase === 'match') {
+    ddzKeepOverlay = true;
+    if (copy) copy.textContent = '匹配中，超时 AI 补位';
+    const mask = document.getElementById('ddzMatchMask');
+    if (mask) {
+      mountP0Overlay(mask);
+      mask.hidden = false;
+      mask.removeAttribute('hidden');
+      mask.style.setProperty('display', 'grid', 'important');
+    }
+    return;
+  }
+  if (ddzKeepOverlay || (document.getElementById('ddzMatchMask') && !document.getElementById('ddzMatchMask').hidden)) {
+    hideDdzMatch();
+    showDdzTable();
+  }
+}
+
+function applyOnlineDdzScores(g) {
+  const delta = Number(g.score) || 0;
+  applyDelta(g.currency || 'ingot', delta);
+  g.platformFee = 0;
+  g.platformFeeKind = null;
+  return { payout: delta, fee: 0, kind: null };
 }
 
 /** 将 Pinus room 快照映射为本地 game 结构供 renderGame 使用 */
@@ -4635,7 +4698,7 @@ function applyPinusRoom(room, roomMeta, currency) {
     online: true,
     onlineBackend: onlineBackend || room.backend || 'pinus',
     pinusRoomId: room.id,
-    phase: room.phase === 'bid' ? 'bid' : (room.phase === 'settle' ? 'settle' : 'play'),
+    phase: room.phase === 'match' ? 'match' : (room.phase === 'bid' ? 'bid' : (room.phase === 'settle' ? 'settle' : 'play')),
     hands,
     bottom: room.bottom || [null, null, null].map(() => ({ rank: 0, suit: 0, id: 'x' })),
     bidScores: room.bidScores || [null, null, null],
@@ -4663,8 +4726,11 @@ function applyPinusRoom(room, roomMeta, currency) {
     scores: room.scores || null,
     settled: room.phase === 'settle',
     playCounts: [0, 0, 0],
-    handsCount: room.handsCount || [17, 17, 17],
+    handsCount: room.phase === 'match' ? [0, 0, 0] : (room.handsCount || [17, 17, 17]),
     names: room.names || NAMES,
+    humanCount: room.humanCount,
+    matchEndsAt: room.matchEndsAt,
+    status: room.status || '',
   };
   // 底牌未揭晓时用占位
   if (!room.bottom) {
@@ -4707,7 +4773,7 @@ function showDdzTable() {
     el.style.removeProperty('pointer-events');
   });
   nodes.shell?.classList.add('table-active');
-  hideDdzMatch();
+  if (game?.phase !== 'match' && !ddzKeepOverlay) hideDdzMatch();
   closeFriendRoom();
   syncP0Tabbar();
   // 对局中彻底隐藏大厅舞台（含「选择区域」）
@@ -4737,15 +4803,7 @@ async function pinusSync(actionFn) {
       // 结算入账
       if (game.phase === 'settle' && !game._settledWallet && game.score != null) {
         game._settledWallet = true;
-        const settled = applyResultWithRevenue({
-          currency: game.currency || 'ingot',
-          resultDelta: game.score || 0,
-          baseScore: game.stake || 0,
-          game: 'doudizhu',
-          roomName: game.roomName,
-          refundBuyIn: game.currency === 'crypto' ? (game.stake || 0) : 0,
-          alreadyCollected: game.currency !== 'crypto',
-        });
+        const settled = applyOnlineDdzScores(game);
         game.platformFee = settled.fee;
         appState.records.unshift({
           roomName: game.roomName,
