@@ -76,7 +76,6 @@ export function layoutOverlapRow(area, items, opts = {}) {
   const left = (area.getBoundingClientRect && area.getBoundingClientRect().left) || 0;
   const maxRight = Math.max(0, window.innerWidth - 6);
   if (maxRight > left) available = Math.min(available, maxRight - left);
-  const landscape = false; // portrait Mini App: never size as landscape
   const pack = packOverlap(n, available, {
     maxW: opts.maxW ?? 40,
     minW: opts.minW ?? 22,
@@ -91,7 +90,13 @@ export function layoutOverlapRow(area, items, opts = {}) {
   area.style.setProperty("flex-direction", "row", "important");
   area.style.setProperty("flex-wrap", "nowrap", "important");
   area.style.setProperty("overflow-x", "hidden", "important");
+  area.style.setProperty("position", "relative", "important");
   applyOverlapItems(items, pack);
+  items.forEach((el) => {
+    el.style.removeProperty("position");
+    el.style.removeProperty("left");
+    el.style.removeProperty("top");
+  });
   const last = items[items.length - 1];
   const lastRight = last.getBoundingClientRect ? last.getBoundingClientRect().right : 0;
   const limit = window.innerWidth - 4;
@@ -106,35 +111,121 @@ export function layoutOverlapRow(area, items, opts = {}) {
   }
 }
 
-function ensureRowBreak(area, beforeEl) {
-  let br = area.querySelector(":scope > .gd-row-break");
-  if (!beforeEl) {
-    area.querySelectorAll(".gd-row-break").forEach((el) => el.remove());
-    return;
+/**
+ * Pure planner for Guandan hero hand rows.
+ * Always packs large hands into exactly two balanced overlapping rows (absolute coords).
+ * Never emits a lone single-card row when n >= 3.
+ */
+export function computeGuandanRows(n, available, opts = {}) {
+  const minPeek = opts.minPeek ?? 14;
+  const minW = opts.minW ?? 28;
+  const maxW = opts.maxW ?? 44;
+  const ratio = opts.ratio ?? 1.4;
+  const leftPad = opts.leftPad ?? 4;
+  const rowOverlapY = opts.rowOverlapY ?? 22;
+  const selectLift = opts.selectLift ?? 14;
+  const usable = Math.max(8, available - leftPad);
+
+  if (n <= 0) {
+    return {
+      rowCount: 0,
+      rows: [],
+      packs: [],
+      leftPad,
+      cardW: minW,
+      height: Math.round(minW * ratio),
+      areaHeight: 0,
+      positions: [],
+      lastRight: 0,
+    };
   }
-  const host = area;
-  if (!br || br.parentElement !== host) {
-    if (br) br.remove();
-    br = document.createElement("span");
-    br.className = "gd-row-break";
-    br.setAttribute("aria-hidden", "true");
-    host.insertBefore(br, beforeEl);
-  } else if (br.nextSibling !== beforeEl) {
-    host.insertBefore(br, beforeEl);
+
+  const packOpts = { minW, maxW, minPeek, ratio };
+  const onePack = packOverlap(n, usable, packOpts);
+  const oneFits = onePack.total <= usable + 0.5;
+
+  // Full Guandan deal (~27) and any hand that won't fit: exactly two rows.
+  // n < 4: keep a single row so we never create a length-1 second row.
+  let useTwo = n >= 20 || (n >= 4 && !oneFits);
+  if (n < 4) useTwo = false;
+
+  /** @type {number[][]} */
+  let rows;
+  /** @type {ReturnType<typeof packOverlap>[]} */
+  let packs;
+
+  if (!useTwo) {
+    rows = [Array.from({ length: n }, (_, i) => i)];
+    packs = [onePack];
+  } else {
+    let n1 = Math.ceil(n / 2);
+    let n2 = n - n1;
+    // Guard: never leave a lone card on its own row when n >= 3.
+    if (n2 === 1 && n1 >= 2) {
+      n1 -= 1;
+      n2 += 1;
+    }
+    if (n1 === 1 && n2 >= 2) {
+      n2 -= 1;
+      n1 += 1;
+    }
+    rows = [
+      Array.from({ length: n1 }, (_, i) => i),
+      Array.from({ length: n2 }, (_, i) => n1 + i),
+    ];
+    const p1 = packOverlap(n1, usable, packOpts);
+    const p2 = packOverlap(n2, usable, packOpts);
+    const cardW = Math.min(p1.cardW, p2.cardW);
+    const height = Math.round(cardW * ratio);
+    packs = [
+      { ...p1, cardW, height, overlap: Math.max(0, cardW - p1.peek), total: cardW + (n1 - 1) * p1.peek },
+      { ...p2, cardW, height, overlap: Math.max(0, cardW - p2.peek), total: cardW + (n2 - 1) * p2.peek },
+    ];
   }
-  br.style.setProperty("display", "block", "important");
-  br.style.setProperty("flex-basis", "100%", "important");
-  br.style.setProperty("width", "100%", "important");
-  br.style.setProperty("height", "0px", "important");
-  br.style.setProperty("margin", "0px", "important");
-  br.style.setProperty("padding", "0px", "important");
-  br.style.setProperty("border", "0", "important");
-  br.style.setProperty("overflow", "hidden", "important");
-  br.style.setProperty("pointer-events", "none", "important");
+
+  const cardW = packs[0].cardW;
+  const height = packs[0].height;
+  const positions = [];
+  let lastRight = leftPad;
+
+  rows.forEach((row, rowIdx) => {
+    const pack = packs[rowIdx];
+    const top = rowIdx === 0 ? selectLift : selectLift + Math.max(8, height - rowOverlapY);
+    row.forEach((cardIndex, i) => {
+      const left = leftPad + i * pack.peek;
+      positions.push({
+        index: cardIndex,
+        row: rowIdx,
+        left,
+        top,
+        z: 20 + rowIdx * 40 + i,
+        width: pack.cardW,
+        height: pack.height,
+      });
+      lastRight = Math.max(lastRight, left + pack.cardW);
+    });
+  });
+
+  const areaHeight = (rows.length === 1
+    ? selectLift + height
+    : selectLift + Math.max(8, height - rowOverlapY) + height) + 4;
+
+  return {
+    rowCount: rows.length,
+    rows,
+    packs,
+    leftPad,
+    cardW,
+    height,
+    areaHeight,
+    positions,
+    lastRight,
+    available: usable + leftPad,
+  };
 }
 
 export function layoutGuandanCols(area) {
-  // Only the hero hand. Opponent .gd-card live elsewhere (y~140) and must not be packed.
+  // Only the hero hand. Opponent .gd-card live elsewhere and must not be packed.
   const cards = [...area.querySelectorAll(".gd-card")];
   if (!cards.length) return;
 
@@ -146,18 +237,11 @@ export function layoutGuandanCols(area) {
 
   const { available, dock } = measureHandAvailable(area);
 
-  area.style.removeProperty("gap");
-  area.style.setProperty("display", "flex", "important");
-  area.style.setProperty("flex-direction", "row", "important");
-  area.style.setProperty("justify-content", "flex-start", "important");
-  area.style.setProperty("align-items", "flex-end", "important");
-  area.style.setProperty("align-content", "flex-end", "important");
-  area.classList.add("hand-fitted");
-
+  // Prefer CSS dock inset (~56px) over a tight 118px so 14+13 can breathe on 414.
   if (dock && dock.style) {
     dock.style.setProperty("top", "50%", "important");
     dock.style.setProperty("bottom", "calc(52px + env(safe-area-inset-bottom, 0px))", "important");
-    dock.style.setProperty("left", "118px", "important");
+    dock.style.setProperty("left", "56px", "important");
     dock.style.setProperty("right", "8px", "important");
     dock.style.setProperty("height", "auto", "important");
     dock.style.setProperty("max-height", "50%", "important");
@@ -168,53 +252,44 @@ export function layoutGuandanCols(area) {
     dock.style.setProperty("overflow-y", "visible", "important");
   }
 
-  const n = cards.length;
-  const minPeek = 24;
-  const minW = 28;
-  const maxW = 44;
-  const ratio = 1.4;
-  const probe = packOverlap(n, available, { minW, maxW, minPeek, ratio });
-  // Prefer 2 overlapping rows over a too-tight single row if n*peek + (cardW-peek) > dock.
-  const oneRowNeed = n * minPeek + (probe.cardW - minPeek);
-  const twoRows = n > 1 && oneRowNeed > available;
+  const plan = computeGuandanRows(cards.length, available, {
+    minPeek: 14,
+    minW: 28,
+    maxW: 44,
+    ratio: 1.4,
+    leftPad: 4,
+    rowOverlapY: 22,
+    selectLift: 14,
+  });
 
-  if (!twoRows) {
-    area.classList.remove("gd-hand-2row");
-    area.style.setProperty("flex-wrap", "nowrap", "important");
-    area.style.setProperty("overflow-x", "hidden", "important");
-    const br = area.querySelector(".gd-row-break");
-    if (br) br.remove();
-    applyOverlapItems(cards, probe);
-    return;
-  }
-
-  const n1 = Math.ceil(n / 2);
-  const n2 = Math.floor(n / 2);
-  const row1 = cards.slice(0, n1);
-  const row2 = cards.slice(n1);
-  const pack1 = packOverlap(n1, available, { minW, maxW, minPeek, ratio });
-  const pack2 = n2 ? packOverlap(n2, available, { minW, maxW, minPeek, ratio }) : pack1;
-  const cardW = Math.min(pack1.cardW, pack2.cardW);
-  const height = Math.round(cardW * ratio);
-  const p1 = { ...pack1, cardW, height, overlap: Math.max(0, cardW - pack1.peek) };
-  const p2 = { ...pack2, cardW, height, overlap: Math.max(0, cardW - pack2.peek) };
-
-  area.classList.add("gd-hand-2row");
-  area.style.setProperty("flex-wrap", "wrap", "important");
-  area.style.setProperty("align-content", "flex-end", "important");
-  area.style.setProperty("align-items", "flex-end", "important");
+  area.classList.add("hand-fitted");
+  area.classList.toggle("gd-hand-2row", plan.rowCount === 2);
+  area.style.removeProperty("gap");
+  area.style.setProperty("display", "block", "important");
+  area.style.setProperty("position", "relative", "important");
+  area.style.setProperty("flex-wrap", "nowrap", "important");
   area.style.setProperty("overflow-x", "hidden", "important");
   area.style.setProperty("overflow-y", "visible", "important");
-  area.style.setProperty("width", Math.min(available, Math.max(p1.total, p2.total)) + "px", "important");
+  area.style.setProperty("width", Math.min(available, Math.max(plan.lastRight + 2, 8)) + "px", "important");
   area.style.setProperty("max-width", available + "px", "important");
-  if (dock && dock.style) {
-    dock.style.setProperty("overflow-x", "hidden", "important");
-    dock.style.setProperty("overflow-y", "visible", "important");
-  }
+  area.style.setProperty("height", plan.areaHeight + "px", "important");
+  area.style.setProperty("min-height", plan.areaHeight + "px", "important");
 
-  applyOverlapItems(row1, p1, 20);
-  applyOverlapItems(row2, p2, 20 + n1);
-  ensureRowBreak(area, row2[0] || null);
+  // Absolute placement: selection translateY must not reflow / split rows.
+  plan.positions.forEach((pos) => {
+    const el = cards[pos.index];
+    if (!el) return;
+    el.style.setProperty("position", "absolute", "important");
+    el.style.setProperty("left", pos.left + "px", "important");
+    el.style.setProperty("top", pos.top + "px", "important");
+    el.style.setProperty("width", pos.width + "px", "important");
+    el.style.setProperty("min-width", pos.width + "px", "important");
+    el.style.setProperty("max-width", pos.width + "px", "important");
+    el.style.setProperty("height", pos.height + "px", "important");
+    el.style.setProperty("margin", "0px", "important");
+    el.style.setProperty("flex", "none", "important");
+    el.style.setProperty("z-index", String(pos.z), "important");
+  });
 }
 
 export function layoutTexasHero(area) {
