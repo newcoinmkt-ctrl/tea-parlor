@@ -81,6 +81,8 @@ export class DdzTable {
     await loadEngine();
     if (opts.humanUid && opts.match !== true && opts.autoDeal !== false) {
       this.occupy(opts.humanUid, opts.humanName || '茶馆');
+      // Immediate local/autoDeal path — not a wall-clock match wait.
+      this.matchEndsAt = 0;
       await this.completeMatch();
     }
   }
@@ -231,6 +233,11 @@ export class DdzTable {
 
   async completeMatch() {
     if (this.phase !== 'match') return this.phase;
+    const remaining = this.remainingMatchMs();
+    if (remaining > 0 && this.humanCount < 3) {
+      console.log('[ddz] deal blocked remaining=', remaining);
+      return this.phase;
+    }
     this._fillAi();
     await this.deal();
     return this.phase;

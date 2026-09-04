@@ -3009,6 +3009,36 @@ const RULES_PANELS = {
   ),
 };
 
+/** Short lobby toast (claim success/fail etc). Uses rules-toast styling. */
+function showLobbyToast(message, { ms = 3200 } = {}) {
+  const text = String(message || '').trim();
+  if (!text) return;
+  let tip = document.getElementById('lobbyToast');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'lobbyToast';
+    tip.className = 'rules-toast lobby-toast';
+    tip.setAttribute('role', 'status');
+    tip.setAttribute('aria-live', 'polite');
+    document.body.appendChild(tip);
+  }
+  tip.innerHTML = `<strong>提示</strong><p>${text.replace(/[<>&]/g, (c) => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</p>`;
+  tip.hidden = false;
+  tip.removeAttribute('hidden');
+  tip.classList.add('is-open');
+  tip.style.setProperty('display', 'flex', 'important');
+  tip.style.setProperty('visibility', 'visible', 'important');
+  tip.style.setProperty('opacity', '1', 'important');
+  tip.style.setProperty('pointer-events', 'auto', 'important');
+  clearTimeout(tip._hideTimer);
+  tip._hideTimer = setTimeout(() => {
+    tip.classList.remove('is-open');
+    tip.hidden = true;
+    tip.setAttribute('hidden', '');
+    tip.style.removeProperty('display');
+  }, ms);
+}
+
 /** 玩法说明弹层（分栏，与引擎规则一致） */
 function showRulesToast(initialTab = 'overview') {
   let tip = document.getElementById('rulesToast');
@@ -4141,13 +4171,35 @@ function getLobbySessionToken() {
 }
 
 function applyServerShadowBalance(summary) {
-  const available = Number(summary?.balances?.shadowPoints?.available);
-  if (Number.isFinite(available)) {
-    appState.ingots = Math.max(0, Math.round(available));
+  if (!summary || typeof summary !== 'object') return;
+  const shadowCandidates = [
+    summary?.balances?.shadowPoints?.available,
+    summary?.balances?.shadowPoints?.total,
+    summary?.shadowPoints?.available,
+    summary?.account?.available,
+    summary?.available,
+    // Some payloads nest the wallet summary again
+    summary?.summary?.balances?.shadowPoints?.available,
+    summary?.summary?.account?.available,
+  ];
+  for (const raw of shadowCandidates) {
+    const available = Number(raw);
+    if (Number.isFinite(available)) {
+      appState.ingots = Math.max(0, Math.round(available));
+      break;
+    }
   }
-  const season = Number(summary?.balances?.seasonPoints?.available);
-  if (Number.isFinite(season)) {
-    appState.usdt = Math.max(0, Math.round(season * 100) / 100);
+  const seasonCandidates = [
+    summary?.balances?.seasonPoints?.available,
+    summary?.seasonPoints?.available,
+    summary?.summary?.balances?.seasonPoints?.available,
+  ];
+  for (const raw of seasonCandidates) {
+    const season = Number(raw);
+    if (Number.isFinite(season)) {
+      appState.usdt = Math.max(0, Math.round(season * 100) / 100);
+      break;
+    }
   }
 }
 
@@ -4185,7 +4237,9 @@ async function onClaim() {
   refreshClaims();
   const token = getLobbySessionToken();
   if (!token) {
-    if (nodes.claimStatus) nodes.claimStatus.textContent = DAILY_SUPPLY_TG_PROMPT;
+    const msg = DAILY_SUPPLY_TG_PROMPT;
+    if (nodes.claimStatus) nodes.claimStatus.textContent = msg;
+    showLobbyToast(msg);
     renderAccount();
     return;
   }
@@ -4194,24 +4248,34 @@ async function onClaim() {
   try {
     const result = await claimDailySupplyApi(token);
     applyDailySupplyStatus(result);
+    // Prefer full wallet summary; also accept flat account / nested summary shapes.
     if (result?.summary) applyServerShadowBalance(result.summary);
-    saveState();
-    if (nodes.claimStatus) {
-      nodes.claimStatus.textContent = formatDailySupplyClaimSuccess({
-        amount: result.amount ?? DAILY_CLAIM_AMOUNT,
-        remaining: result.remaining,
-      });
+    applyServerShadowBalance(result);
+    if (result?.account && Number.isFinite(Number(result.account.available))) {
+      appState.ingots = Math.max(0, Math.round(Number(result.account.available)));
     }
+    saveState();
+    const okMsg = formatDailySupplyClaimSuccess({
+      amount: result.amount ?? DAILY_CLAIM_AMOUNT,
+      remaining: result.remaining,
+    });
+    if (nodes.claimStatus) nodes.claimStatus.textContent = okMsg;
+    showLobbyToast(okMsg);
   } catch (err) {
     const reason = err?.body?.reason || err?.message || '';
-    if (nodes.claimStatus) {
-      nodes.claimStatus.textContent = formatDailySupplyExhaustedReason(reason) === '今日补给次数已用完'
-        ? '今日补给次数已用完'
-        : (reason.includes('session') || err?.status === 401
-          ? DAILY_SUPPLY_TG_PROMPT
-          : formatDailySupplyExhaustedReason(reason));
+    const exhausted = formatDailySupplyExhaustedReason(reason) === '今日补给次数已用完';
+    const msg = exhausted
+      ? '今日补给次数已用完'
+      : (reason.includes('session') || err?.status === 401
+        ? DAILY_SUPPLY_TG_PROMPT
+        : formatDailySupplyExhaustedReason(reason));
+    if (nodes.claimStatus) nodes.claimStatus.textContent = msg;
+    showLobbyToast(msg);
+    if (err?.body) {
+      applyDailySupplyStatus(err.body);
+      if (err.body.summary) applyServerShadowBalance(err.body.summary);
+      applyServerShadowBalance(err.body);
     }
-    if (err?.body) applyDailySupplyStatus(err.body);
   }
   renderAccount();
 }

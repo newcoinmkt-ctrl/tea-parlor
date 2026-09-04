@@ -34,6 +34,8 @@ test('1 human join → injected 10s fills 2 AI, deal, 3 names', async () => {
   assert.equal(before.humanCount, 1);
   assert.equal(before.myHand.length, 0);
 
+  // Simulate wall-clock expiry (onMatchTimeout / completeMatch gate on remaining).
+  t.matchEndsAt = Date.now();
   await t.onMatchTimeout();
   assert.ok(['bid', 'play'].includes(t.phase));
   assert.equal(t.humanCount, 1);
@@ -250,21 +252,73 @@ test('every new human seat resets full MATCH_MS window', async () => {
 });
 
 test('deal only after timeout or 3 humans (not on first join)', async () => {
+  let now = 1_700_000_000_000;
   const t = new DdzTable({
     roomKey: 'novice',
     match: true,
     autoDeal: false,
+    now: () => now,
   });
   await t.ensureReady();
   t.occupy('u1', '甲');
   assert.equal(t.phase, 'match');
   assert.equal(t.humanCount, 1);
+  now += 3_000;
   t.occupy('u2', '乙');
   assert.equal(t.phase, 'match');
   assert.equal(t.humanCount, 2);
-  assert.ok(t.matchEndsAt - Date.now() > 0);
+  assert.ok(t.remainingMatchMs() > 0);
+  // Wall-clock gate: remaining > 0 + <3 humans → no-op
+  await t.completeMatch();
+  assert.equal(t.phase, 'match');
+  now = t.matchEndsAt;
   await t.completeMatch();
   assert.ok(['bid', 'play'].includes(t.phase));
+});
+
+test('wall-clock gate: completeMatch with remaining>0 and 1 human must no-op', async () => {
+  let now = 1_700_000_000_000;
+  const t = new DdzTable({
+    roomKey: 'novice',
+    match: true,
+    autoDeal: false,
+    now: () => now,
+    matchMs: MATCH_MS,
+  });
+  await t.ensureReady();
+  t.occupy('u1', '甲');
+  assert.equal(t.humanCount, 1);
+  assert.ok(t.remainingMatchMs() > 0);
+  const before = t.phase;
+  await t.completeMatch();
+  assert.equal(t.phase, before);
+  assert.equal(t.phase, 'match');
+  // After time passes / remaining<=0 → deals
+  now = t.matchEndsAt;
+  assert.ok(t.remainingMatchMs() <= 0);
+  await t.completeMatch();
+  assert.ok(['bid', 'play'].includes(t.phase));
+  assert.equal(t.humanCount, 1);
+});
+
+test('wall-clock gate: 3 humans still immediate deal even with remaining>0', async () => {
+  let now = 1_700_000_000_000;
+  const t = new DdzTable({
+    roomKey: 'novice',
+    match: true,
+    autoDeal: false,
+    now: () => now,
+    matchMs: MATCH_MS,
+  });
+  await t.ensureReady();
+  t.occupy('u1', '甲');
+  t.occupy('u2', '乙');
+  t.occupy('u3', '丙');
+  assert.equal(t.humanCount, 3);
+  assert.ok(t.remainingMatchMs() > 0);
+  await t.completeMatch();
+  assert.ok(['bid', 'play'].includes(t.phase));
+  assert.equal(t.humanCount, 3);
 });
 
 test('clearMatchWindow restores empty-room clock semantics', async () => {

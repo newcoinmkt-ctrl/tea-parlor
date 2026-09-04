@@ -63,6 +63,7 @@ export class DoudizhuRoom extends Room {
     await this.table.ensureReady();
     this._leaveTimers = new Map();
     this._dealt = false;
+    this.matchTimerHandle = null;
 
     // Empty rooms: dispose-only timer. Do NOT start the 10s match-to-deal countdown until first human.
     this._armEmptyRoomTimer(EMPTY_ROOM_MS);
@@ -131,9 +132,16 @@ export class DoudizhuRoom extends Room {
       if (seat < 0) {
         throw new Error('room_full');
       }
-      // Every new human: full MATCH_MS window + re-arm deal timer (occupy already resetEndsAt).
+      // Every new human: full MATCH_MS window + wall-clock arm to matchEndsAt (not blind MATCH_MS alone).
       this.table.resetMatchWindow();
-      this._armMatchTimer(MATCH_MS);
+      const remainMs = Math.max(0, this.table.matchEndsAt - Date.now());
+      console.log('[ddz] occupy', {
+        now: Date.now(),
+        matchEndsAt: this.table.matchEndsAt,
+        humanCount: this.table.humanCount,
+        deltaMs: remainMs,
+      });
+      this._armMatchTimer(remainMs);
       if (this.table.humanCount >= 3) {
         await this._dealNow();
       }
@@ -158,8 +166,7 @@ export class DoudizhuRoom extends Room {
       this.table.disconnect(uid);
       if (this.table.humanCount === 0) {
         this.table.clearMatchWindow();
-        if (this.matchTimer?.clear) this.matchTimer.clear();
-        this.matchTimer = null;
+        this._clearMatchTimer();
         try { this.unlock(); } catch (_) {}
         this._armEmptyRoomTimer(EMPTY_ROOM_MS);
       }
@@ -202,22 +209,40 @@ export class DoudizhuRoom extends Room {
     }
   }
 
-  /** Dispose empty matching rooms; MUST use milliseconds. Does not deal. */
-  _armEmptyRoomTimer(ms = EMPTY_ROOM_MS) {
+  /** Clear wall-clock match/empty timers (Node setTimeout — not Colyseus clock). */
+  _clearMatchTimer() {
+    if (this.matchTimerHandle != null) {
+      clearTimeout(this.matchTimerHandle);
+      this.matchTimerHandle = null;
+    }
     if (this.matchTimer?.clear) this.matchTimer.clear();
-    this.matchTimer = this.clock.setTimeout(() => {
+    this.matchTimer = null;
+  }
+
+  /** Dispose empty matching rooms via wall-clock Node setTimeout. Does not deal. */
+  _armEmptyRoomTimer(ms = EMPTY_ROOM_MS) {
+    this._clearMatchTimer();
+    const delay = Math.max(0, Number(ms) || 0);
+    this.matchTimerHandle = setTimeout(() => {
+      this.matchTimerHandle = null;
       if (!this.table || this.table.phase !== 'match') return;
       if (this.table.humanCount > 0) return;
       try { this.disconnect(); } catch (_) {}
-    }, ms);
+    }, delay);
   }
 
-  /** Match-to-deal countdown. Colyseus clock.setTimeout uses milliseconds — MATCH_MS=10000 is 10s. */
+  /**
+   * Match-to-deal countdown via wall-clock Node setTimeout.
+   * Prefer arming with Math.max(0, matchEndsAt - Date.now()) after each human occupy.
+   * (patchRate=null → Colyseus clock rarely ticks → @gamestdio/timer Delayed is unreliable.)
+   */
   _armMatchTimer(ms = MATCH_MS) {
-    if (this.matchTimer?.clear) this.matchTimer.clear();
-    this.matchTimer = this.clock.setTimeout(() => {
+    this._clearMatchTimer();
+    const delay = Math.max(0, Number(ms) || 0);
+    this.matchTimerHandle = setTimeout(() => {
+      this.matchTimerHandle = null;
       this._onMatchTimeout().catch((e) => console.warn('[colyseus] match timeout', e?.message || e));
-    }, ms);
+    }, delay);
   }
 
   async _onMatchTimeout() {
@@ -231,9 +256,32 @@ export class DoudizhuRoom extends Room {
 
   async _dealNow() {
     if (this._dealt) return;
-    if (this.matchTimer?.clear) this.matchTimer.clear();
-    this.matchTimer = null;
+    if (this.table?.phase === 'match') {
+      const remaining = this.table.remainingMatchMs();
+      if (remaining > 0 && this.table.humanCount < 3) {
+        console.log('[ddz] deal blocked remaining=', remaining);
+        this._armMatchTimer(remaining);
+        return;
+      }
+    }
+    this._clearMatchTimer();
+    console.log('[ddz] deal', {
+      now: Date.now(),
+      matchEndsAt: this.table?.matchEndsAt ?? 0,
+      humanCount: this.table?.humanCount ?? 0,
+      deltaMs: this.table ? (Date.now() - (this.table.matchEndsAt - (this.table.matchMs || MATCH_MS))) : 0,
+    });
     await this.table.completeMatch();
+    // completeMatch may no-op if still gated (defense in depth)
+    if (this.table.phase === 'match') {
+      const remaining = this.table.remainingMatchMs();
+      if (remaining > 0 && this.table.humanCount < 3) {
+        console.log('[ddz] deal blocked remaining=', remaining);
+        this._armMatchTimer(remaining);
+        return;
+      }
+      return;
+    }
     this._dealt = true;
     try { this.lock(); } catch (_) {}
     this._broadcast();
@@ -245,8 +293,7 @@ export class DoudizhuRoom extends Room {
       this.table.disconnect(uid);
       if (this.table.humanCount === 0) {
         this.table.clearMatchWindow();
-        if (this.matchTimer?.clear) this.matchTimer.clear();
-        this.matchTimer = null;
+        this._clearMatchTimer();
         try { this.unlock(); } catch (_) {}
         this._armEmptyRoomTimer(EMPTY_ROOM_MS);
       }
