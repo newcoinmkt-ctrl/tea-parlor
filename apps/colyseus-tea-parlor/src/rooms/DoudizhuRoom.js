@@ -4,7 +4,14 @@
  */
 import colyseus from 'colyseus';
 import { verifySessionToken } from '@tea-parlor/session-auth';
-import { DdzTable, MATCH_MS, TRUSTEE_MS, FORFEIT_MS } from '../ddzLogic.js';
+import {
+  DdzTable,
+  MATCH_MS,
+  EMPTY_ROOM_MS,
+  FRESH_JOIN_MIN_REMAIN_MS,
+  TRUSTEE_MS,
+  FORFEIT_MS,
+} from '../ddzLogic.js';
 
 const { Room } = colyseus;
 
@@ -58,8 +65,8 @@ export class DoudizhuRoom extends Room {
     this._leaveTimers = new Map();
     this._dealt = false;
 
-    // Armed on create so empty rooms dispose; re-armed on first human for a full 10s window.
-    this._armMatchTimer(MATCH_MS);
+    // Empty rooms: dispose-only timer. Do NOT start the 10s match-to-deal countdown until first human.
+    this._armEmptyRoomTimer(EMPTY_ROOM_MS);
 
     this.onMessage('hello', (client, msg) => {
       client.send('hello', { ok: true, uid: client.sessionId, echo: msg || null });
@@ -115,14 +122,27 @@ export class DoudizhuRoom extends Room {
       this._clearLeaveTimers(uid);
       this.table.reconnect(uid, name);
     } else if (this.table.phase === 'match') {
+      // Belt: reset before occupy when room is empty so matchEndsAt is never a stale empty clock.
+      if (this.table.humanCount === 0) {
+        this.table.resetMatchWindow();
+      }
+      // Refuse nearly-expired multi-human rooms so joinOrCreate opens a fresh room instead.
+      if (this.table.humanCount >= 1 && !this.table.canAcceptNewHuman()) {
+        try { this.lock(); } catch (_) {}
+        client.send('error', { msg: 'match_window_stale', detail: 'matching room nearly expired' });
+        throw new Error('match_window_stale');
+      }
       const seat = this.table.occupy(uid, name);
       if (seat < 0) {
         throw new Error('room_full');
       }
-      // joinOrCreate may land on a stale empty/matching room whose onCreate timer is almost up.
-      // occupy() resets matchEndsAt for the first human; re-arm Colyseus clock to the full window.
+      // First human: full MATCH_MS (ms) window + arm deal timer; lock after 1s so late joiners get a fresh room.
       if (this.table.humanCount === 1) {
+        this.table.resetMatchWindow();
         this._armMatchTimer(MATCH_MS);
+        this._armFreshJoinLock();
+      } else if (!this.table.canAcceptNewHuman()) {
+        try { this.lock(); } catch (_) {}
       }
       if (this.table.humanCount >= 3) {
         await this._dealNow();
@@ -146,6 +166,15 @@ export class DoudizhuRoom extends Room {
 
     if (this.table.phase === 'match') {
       this.table.disconnect(uid);
+      if (this.table.humanCount === 0) {
+        this.table.clearMatchWindow();
+        if (this.matchTimer?.clear) this.matchTimer.clear();
+        this.matchTimer = null;
+        if (this.freshLockTimer?.clear) this.freshLockTimer.clear();
+        this.freshLockTimer = null;
+        try { this.unlock(); } catch (_) {}
+        this._armEmptyRoomTimer(EMPTY_ROOM_MS);
+      }
       this._broadcast();
       return;
     }
@@ -185,11 +214,31 @@ export class DoudizhuRoom extends Room {
     }
   }
 
+  /** Dispose empty matching rooms; MUST use milliseconds. Does not deal. */
+  _armEmptyRoomTimer(ms = EMPTY_ROOM_MS) {
+    if (this.matchTimer?.clear) this.matchTimer.clear();
+    this.matchTimer = this.clock.setTimeout(() => {
+      if (!this.table || this.table.phase !== 'match') return;
+      if (this.table.humanCount > 0) return;
+      try { this.disconnect(); } catch (_) {}
+    }, ms);
+  }
+
+  /** Match-to-deal countdown. Colyseus clock.setTimeout uses milliseconds — MATCH_MS=10000 is 10s. */
   _armMatchTimer(ms = MATCH_MS) {
     if (this.matchTimer?.clear) this.matchTimer.clear();
     this.matchTimer = this.clock.setTimeout(() => {
       this._onMatchTimeout().catch((e) => console.warn('[colyseus] match timeout', e?.message || e));
     }, ms);
+  }
+
+  /** Lock before the window drops below FRESH_JOIN_MIN_REMAIN_MS so joinOrCreate opens a fresh room. */
+  _armFreshJoinLock() {
+    if (this.freshLockTimer?.clear) this.freshLockTimer.clear();
+    const delay = Math.max(0, MATCH_MS - FRESH_JOIN_MIN_REMAIN_MS);
+    this.freshLockTimer = this.clock.setTimeout(() => {
+      try { this.lock(); } catch (_) {}
+    }, delay);
   }
 
   async _onMatchTimeout() {
@@ -205,6 +254,8 @@ export class DoudizhuRoom extends Room {
     if (this._dealt) return;
     if (this.matchTimer?.clear) this.matchTimer.clear();
     this.matchTimer = null;
+    if (this.freshLockTimer?.clear) this.freshLockTimer.clear();
+    this.freshLockTimer = null;
     await this.table.completeMatch();
     this._dealt = true;
     try { this.lock(); } catch (_) {}
@@ -215,6 +266,15 @@ export class DoudizhuRoom extends Room {
     this._clearLeaveTimers(uid);
     if (this.table.phase === 'match') {
       this.table.disconnect(uid);
+      if (this.table.humanCount === 0) {
+        this.table.clearMatchWindow();
+        if (this.matchTimer?.clear) this.matchTimer.clear();
+        this.matchTimer = null;
+        if (this.freshLockTimer?.clear) this.freshLockTimer.clear();
+        this.freshLockTimer = null;
+        try { this.unlock(); } catch (_) {}
+        this._armEmptyRoomTimer(EMPTY_ROOM_MS);
+      }
       this._broadcast();
       return;
     }
