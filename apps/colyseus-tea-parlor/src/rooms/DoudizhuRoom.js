@@ -58,9 +58,8 @@ export class DoudizhuRoom extends Room {
     this._leaveTimers = new Map();
     this._dealt = false;
 
-    this.matchTimer = this.clock.setTimeout(() => {
-      this._onMatchTimeout().catch((e) => console.warn('[colyseus] match timeout', e?.message || e));
-    }, MATCH_MS);
+    // Armed on create so empty rooms dispose; re-armed on first human for a full 10s window.
+    this._armMatchTimer(MATCH_MS);
 
     this.onMessage('hello', (client, msg) => {
       client.send('hello', { ok: true, uid: client.sessionId, echo: msg || null });
@@ -119,6 +118,11 @@ export class DoudizhuRoom extends Room {
       const seat = this.table.occupy(uid, name);
       if (seat < 0) {
         throw new Error('room_full');
+      }
+      // joinOrCreate may land on a stale empty/matching room whose onCreate timer is almost up.
+      // occupy() resets matchEndsAt for the first human; re-arm Colyseus clock to the full window.
+      if (this.table.humanCount === 1) {
+        this._armMatchTimer(MATCH_MS);
       }
       if (this.table.humanCount >= 3) {
         await this._dealNow();
@@ -181,8 +185,19 @@ export class DoudizhuRoom extends Room {
     }
   }
 
+  _armMatchTimer(ms = MATCH_MS) {
+    if (this.matchTimer?.clear) this.matchTimer.clear();
+    this.matchTimer = this.clock.setTimeout(() => {
+      this._onMatchTimeout().catch((e) => console.warn('[colyseus] match timeout', e?.message || e));
+    }, ms);
+  }
+
   async _onMatchTimeout() {
     if (!this.table || this.table.phase !== 'match') return;
+    if (this.table.humanCount <= 0) {
+      try { this.disconnect(); } catch (_) {}
+      return;
+    }
     await this._dealNow();
   }
 

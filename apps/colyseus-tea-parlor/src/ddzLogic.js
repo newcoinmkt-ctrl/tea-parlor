@@ -101,6 +101,13 @@ export class DdzTable {
     return this.seats.findIndex((s) => s && s.kind === 'human' && String(s.uid) === id);
   }
 
+  /** Restart the 10s match window (empty matching room / first human). */
+  resetMatchWindow() {
+    if (this.phase !== 'match') return false;
+    this.matchEndsAt = this.now() + this.matchMs;
+    return true;
+  }
+
   occupy(uid, name) {
     const existing = this.seatOf(uid);
     if (existing >= 0) {
@@ -122,7 +129,11 @@ export class DdzTable {
       trustee: false,
       disconnectedAt: null,
     };
-    if (this.humanCount === 1) this.humanIndex = seat;
+    // First human into an empty matching room: full MATCH_MS from now (not stale onCreate clock).
+    if (this.humanCount === 1) {
+      this.humanIndex = seat;
+      this.resetMatchWindow();
+    }
     this._syncNames();
     return seat;
   }
