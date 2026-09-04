@@ -57,6 +57,12 @@ import {
 } from './net/ops-client.js';
 import { loginWithTelegramInitData } from './net/wallet-client.js';
 import {
+  ddzMatchFailureCopy,
+  ddzMatchFailureTitle,
+  DDZ_LOCAL_PLAY_HINT,
+  DDZ_LOCAL_PLAY_LABEL,
+} from './net/ddz-match-copy.js';
+import {
   createChainCenterController,
   normalizeChainCenterState,
 } from './features/assets/chain-center.js';
@@ -2698,7 +2704,7 @@ function bindUi() {
       if (!action) return;
       e.preventDefault();
       e.stopPropagation();
-      if (action === 'home' || action === 'profile' || action === 'records' || action === 'recharge' || action === 'wardrobe' || action === 'chain' || action === 'open-doudizhu-rooms' || action === 'friend-room' || action === 'quick-doudizhu' || action === 'quick-doudizhu-classic' || action === 'open-games' || action === 'rules') {
+      if (action === 'home' || action === 'profile' || action === 'records' || action === 'recharge' || action === 'wardrobe' || action === 'chain' || action === 'open-doudizhu-rooms' || action === 'friend-room' || action === 'quick-doudizhu' || action === 'quick-doudizhu-classic' || action === 'local-doudizhu' || action === 'open-games' || action === 'rules') {
         restoreLobbyChrome();
       }
       const focus = lobbyAct.getAttribute('data-recharge-focus') || undefined;
@@ -2851,6 +2857,9 @@ function handleLobbyAction(action, opts = {}) {
   else if (action === 'quick-doudizhu-classic') {
     const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
     startDdzMatched(ids[1] || 'classic', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
+  }
+  else if (action === 'local-doudizhu') {
+    startDdzLocalPlay('novice', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
   }
   else if (action === 'open-doudizhu-rooms') {
     setLobbyView('rooms', 'doudizhu');
@@ -4255,6 +4264,22 @@ function startDdzMatched(roomId, options = {}) {
   });
 }
 
+/** Non-TG QA / offline: honest local AI table — copy must not say 匹配. */
+function startDdzLocalPlay(roomId = 'novice', options = {}) {
+  hideDdzMatch();
+  ddzKeepOverlay = false;
+  ddzMatchAborted = false;
+  const room = ROOMS[roomId] || ROOMS.novice;
+  if (nodes.claimStatus) {
+    nodes.claimStatus.textContent = `斗地主 · ${DDZ_LOCAL_PLAY_LABEL}`;
+  }
+  startRoom(roomId, {
+    variant: options.variant || 'classic',
+    currency: options.currency || room.currency || 'ingot',
+    online: false,
+  });
+}
+
 function hideDdzMatch() {
   clearTimeout(ddzMatchTimer);
   ddzKeepOverlay = false;
@@ -4342,6 +4367,11 @@ function bindP0Lobby() {
     e.stopPropagation();
     startDdzMatched('novice', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
   });
+  document.getElementById('ddzLocalPlay')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startDdzLocalPlay('novice', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
+  });
   document.getElementById('ddzMatchCancel')?.addEventListener('click', cancelDdzMatch);
   document.getElementById('ddzFriendClose')?.addEventListener('click', closeFriendRoom);
   document.getElementById('ddzFriendLink')?.addEventListener('click', shareFriendRoom);
@@ -4393,7 +4423,7 @@ function renderDdzRooms(variantId = ddzVariant) {
   }).join('');
 
   const hint = document.querySelector('.p0-dock-hint');
-  if (hint) hint.textContent = '经典叫分 · 超时 AI 补位';
+  if (hint) hint.textContent = '快速开始=联网匹配 · 人机畅玩不经匹配';
   const quick = document.getElementById('ddzQuickStart');
   if (quick) {
     quick.setAttribute('data-room', 'novice');
@@ -4506,17 +4536,13 @@ function startRoom(roomId, options = {}) {
           mask.removeAttribute('hidden');
           mask.style.setProperty('display', 'grid', 'important');
         }
-        if (title) title.textContent = msg === 'match_cancelled' ? '已取消' : '匹配失败';
+        if (title) title.textContent = ddzMatchFailureTitle(msg);
         if (copy) {
-          copy.textContent = msg === 'match_cancelled'
-            ? '已取消匹配'
-            : (authFail
-              ? '登录校验失败，请重开小程序后再试'
-              : '联网匹配失败，请重试（未开人机局）');
+          copy.textContent = ddzMatchFailureCopy(msg);
         }
         if (nodes.claimStatus) {
           nodes.claimStatus.textContent = authFail
-            ? '斗地主联网鉴权失败'
+            ? '登录校验失败，请从 Telegram 打开'
             : '斗地主联网匹配失败';
         }
         onlineBackend = null;
@@ -4622,6 +4648,11 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
   if (ddzMatchAborted) throw new Error('match_cancelled');
   const sessionToken = window.__teaParlorSessionToken || '';
   if (window.__teaParlorSessionUserId) pinusUid = String(window.__teaParlorSessionUserId);
+  // Matching is online-only: without a gateway session, fail honestly (no local fallback).
+  // Production Colyseus keeps verifyRoomJoin secret-required — do not enable trust mode.
+  if (keepOverlay && !sessionToken) {
+    throw new Error('auth_failed');
+  }
 
   let session;
   if (onlineBackend === 'colyseus') {
