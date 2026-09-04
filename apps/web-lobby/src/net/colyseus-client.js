@@ -65,6 +65,8 @@ export async function startColyseusDdzSession({
   roomId = 'novice',
   currency = 'ingot',
   token,
+  /** Quick-match must not resume a prior dealt/AI table via reconnection token. */
+  fresh = false,
 } = {}) {
   await connectColyseus(endpoint);
   const options = {
@@ -75,7 +77,11 @@ export async function startColyseusDdzSession({
   };
   if (token) options.token = token;
 
-  const storedTok = (() => {
+  if (fresh) {
+    try { sessionStorage.removeItem('tea-parlor-ddz-reconnect'); } catch (_) {}
+  }
+
+  const storedTok = fresh ? null : (() => {
     try {
       const raw = sessionStorage.getItem('tea-parlor-ddz-reconnect');
       const parsed = raw ? JSON.parse(raw) : null;

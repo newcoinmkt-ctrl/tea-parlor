@@ -4489,11 +4489,41 @@ function startRoom(roomId, options = {}) {
 
   if (wantOnline) {
     const backend = options.backend || (playMode === 'pinus' ? 'pinus' : 'colyseus');
-    startRoomOnline(room, currency, variant, backend, { keepMatchOverlay: !!options.keepMatchOverlay }).catch((err) => {
-      console.warn(`[${backend}] fallback local`, err);
+    const keepOverlay = !!options.keepMatchOverlay || ddzKeepOverlay;
+    startRoomOnline(room, currency, variant, backend, { keepMatchOverlay: keepOverlay }).catch((err) => {
+      console.warn(`[${backend}] online match failed`, err);
+      const msg = String(err?.message || err || '');
+      const authFail = /auth/i.test(msg);
+      // Quick-match overlay: never pretend local AI was a successful online match.
+      if (keepOverlay || ddzKeepOverlay) {
+        ddzKeepOverlay = true;
+        const mask = document.getElementById('ddzMatchMask');
+        const copy = document.getElementById('ddzMatchCopy');
+        const title = mask?.querySelector('h2');
+        if (mask) {
+          mountP0Overlay(mask);
+          mask.hidden = false;
+          mask.removeAttribute('hidden');
+          mask.style.setProperty('display', 'grid', 'important');
+        }
+        if (title) title.textContent = msg === 'match_cancelled' ? '已取消' : '匹配失败';
+        if (copy) {
+          copy.textContent = msg === 'match_cancelled'
+            ? '已取消匹配'
+            : (authFail
+              ? '登录校验失败，请重开小程序后再试'
+              : '联网匹配失败，请重试（未开人机局）');
+        }
+        if (nodes.claimStatus) {
+          nodes.claimStatus.textContent = authFail
+            ? '斗地主联网鉴权失败'
+            : '斗地主联网匹配失败';
+        }
+        onlineBackend = null;
+        return;
+      }
       if (nodes.claimStatus) {
-        nodes.claimStatus.textContent =
-          `联网失败，已回退人机畅玩`;
+        nodes.claimStatus.textContent = '联网失败，已回退人机畅玩';
       }
       hideDdzMatch();
       onlineBackend = null;
@@ -4605,6 +4635,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
       roomId: room.id,
       currency,
       token: sessionToken || undefined,
+      fresh: !!keepOverlay,
     });
     if (ddzMatchAborted) {
       try { await colyseusClient.leaveColyseus?.(); } catch (_) {}
@@ -4649,6 +4680,15 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
     hintText = session.room?.status || '匹配中，超时 AI 补位';
     return;
   }
+  // Quick-match expected phase=match first. Non-match with <3 humans = stale/AI deal without waiting — abort.
+  if (keepOverlay) {
+    const humans = Number(session.room?.humanCount) || 0;
+    if (humans < 3) {
+      try { await colyseusClient.leaveColyseus?.(); } catch (_) {}
+      onlineBackend = null;
+      throw new Error('match_window_skipped');
+    }
+  }
   hintText = session.room?.status || `经典叫分 · 请叫分`;
   showDdzTable();
   renderGame();
@@ -4658,7 +4698,6 @@ function syncMatchOverlay(room) {
   const copy = document.getElementById('ddzMatchCopy');
   if (room?.phase === 'match') {
     ddzKeepOverlay = true;
-    if (copy) copy.textContent = '匹配中，超时 AI 补位';
     const mask = document.getElementById('ddzMatchMask');
     if (mask) {
       mountP0Overlay(mask);
@@ -4666,8 +4705,26 @@ function syncMatchOverlay(room) {
       mask.removeAttribute('hidden');
       mask.style.setProperty('display', 'grid', 'important');
     }
+    const ends = Number(room.matchEndsAt) || 0;
+    const leftMs = ends ? Math.max(0, ends - Date.now()) : 0;
+    const leftSec = Math.max(0, Math.ceil(leftMs / 1000));
+    if (copy) {
+      copy.textContent = leftSec > 0
+        ? `匹配中，超时 AI 补位（${leftSec}s）`
+        : '匹配中，超时 AI 补位';
+    }
+    clearTimeout(ddzMatchTimer);
+    // Tick overlay from server matchEndsAt; never hide while phase === match.
+    if (leftMs > 0) {
+      ddzMatchTimer = setTimeout(() => {
+        if (game?.phase === 'match' && game.matchEndsAt === ends) {
+          syncMatchOverlay({ phase: 'match', matchEndsAt: ends, status: room.status });
+        }
+      }, Math.min(500, leftMs));
+    }
     return;
   }
+  // Hide only after server leaves match (deal / AI fill started).
   if (ddzKeepOverlay || (document.getElementById('ddzMatchMask') && !document.getElementById('ddzMatchMask').hidden)) {
     hideDdzMatch();
     showDdzTable();
