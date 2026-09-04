@@ -11,8 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const MATCH_MS = 10_000;
 /** Empty matching rooms dispose after this (not the 10s match-to-deal clock). */
 export const EMPTY_ROOM_MS = 45_000;
-/** New humans need ≥ this much match window left; else lock/reject so joinOrCreate opens fresh. */
-export const FRESH_JOIN_MIN_REMAIN_MS = 9_000;
+/** New humans need ≥ this much match window left; else reject so joinOrCreate opens fresh (only near expiry). */
+export const FRESH_JOIN_MIN_REMAIN_MS = 2_000;
 export const TRUSTEE_MS = 30_000;
 export const FORFEIT_MS = 60_000;
 
@@ -106,7 +106,7 @@ export class DdzTable {
     return this.seats.findIndex((s) => s && s.kind === 'human' && String(s.uid) === id);
   }
 
-  /** Restart the 10s match window (empty matching room / first human). */
+  /** Restart the 10s match window (any new human seat during match). */
   resetMatchWindow() {
     if (this.phase !== 'match') return false;
     this.matchEndsAt = this.now() + this.matchMs;
@@ -146,7 +146,6 @@ export class DdzTable {
     if (this.phase !== 'match') return -1;
     const seat = this.seats.findIndex((s) => !s);
     if (seat < 0) return -1;
-    const wasEmpty = this.humanCount === 0;
     this.seats[seat] = {
       uid: String(uid),
       name: name || '茶馆',
@@ -155,11 +154,9 @@ export class DdzTable {
       trustee: false,
       disconnectedAt: null,
     };
-    // First human into empty matching room (or humanCount was 0): full MATCH_MS from now.
-    if (wasEmpty || this.humanCount === 1) {
-      this.humanIndex = seat;
-      this.resetMatchWindow();
-    }
+    // Every new human seat during match: full MATCH_MS from now (reconnect path above skips this).
+    if (this.humanCount === 1) this.humanIndex = seat;
+    this.resetMatchWindow();
     this._syncNames();
     return seat;
   }
