@@ -28,6 +28,7 @@ const READONLY_METHODS = new Set([
   'queryNotifications',
   'queryInviteRiskLogs',
   'getInviteSummary',
+  'getDailySupplyStatus',
   'exportSnapshot',
 ]);
 
