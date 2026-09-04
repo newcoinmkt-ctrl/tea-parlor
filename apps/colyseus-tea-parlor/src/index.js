@@ -53,7 +53,7 @@ const gameServer = new Server({
   }),
 });
 
-gameServer.define('doudizhu', DoudizhuRoom).enableRealtimeListing();
+gameServer.define('doudizhu', DoudizhuRoom).filterBy(['roomKey']).enableRealtimeListing();
 
 httpServer.listen(PORT, HOST, () => {
   console.log(`[colyseus] Tea Parlor game server listening on http://${HOST}:${PORT}`);

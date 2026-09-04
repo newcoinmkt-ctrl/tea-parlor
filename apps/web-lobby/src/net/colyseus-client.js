@@ -52,6 +52,7 @@ export async function leaveColyseus() {
   room = null;
   lastRoomState = null;
   client = null;
+  try { sessionStorage.removeItem('tea-parlor-ddz-reconnect'); } catch (_) {}
 }
 
 /**
@@ -74,7 +75,32 @@ export async function startColyseusDdzSession({
   };
   if (token) options.token = token;
 
-  room = await client.joinOrCreate('doudizhu', options);
+  const storedTok = (() => {
+    try {
+      const raw = sessionStorage.getItem('tea-parlor-ddz-reconnect');
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed?.uid === options.uid && parsed?.token) return parsed.token;
+    } catch (_) {}
+    return null;
+  })();
+  let joined = null;
+  if (storedTok) {
+    try {
+      joined = await client.reconnect(storedTok);
+    } catch (_) {
+      joined = null;
+    }
+  }
+  if (!joined) {
+    joined = await client.joinOrCreate('doudizhu', options);
+  }
+  room = joined;
+  try {
+    sessionStorage.setItem('tea-parlor-ddz-reconnect', JSON.stringify({
+      uid: options.uid,
+      token: room.reconnectionToken || null,
+    }));
+  } catch (_) {}
 
   room.onMessage('room', (msg) => {
     if (msg?.room) emitRoom(msg.room);
@@ -87,15 +113,14 @@ export async function startColyseusDdzSession({
   room.onMessage('hint', () => {});
   room.onMessage('joined', () => {});
 
-  // 等待首个 room 快照
+  // First snapshot may be phase=match — that is success, not a timeout.
   const first = await new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('colyseus room state timeout')), 8000);
+    const t = setTimeout(() => reject(new Error('colyseus room state timeout')), 12000);
     const off = onRoomUpdate((st) => {
       clearTimeout(t);
       off();
       resolve(st);
     });
-    // 主动拉一次
     try { room.send('state', {}); } catch (_) {}
   });
 
