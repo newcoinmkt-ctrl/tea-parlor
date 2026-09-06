@@ -1,0 +1,99 @@
+/* ── tp-bridge: map shared controls to --tp-* (low blast radius) ── */
+
+/* Gold pills / stake / timer */
+.mg-hud-pill,
+.stake-pill.mg-hud-pill,
+#mgSub.stake-pill,
+.qq-mult-pill,
+.qq-timer,
+.qq-timer-above,
+.gd-tool-restore,
+.p0-points,
+.home-hero-gold:not(.is-season),
+#tableView #playControls .qq-timer-above,
+#tableView #playControls #turnTimer.qq-timer,
+#tableView #playControls #turnTimer,
+.table-active .qq-timer.is-active:not([hidden]),
+.table-active .qq-center-actions > .qq-timer.is-active:not([hidden]),
+.lobby-shell.p0-tg.table-active #playControls #turnTimer,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls #turnTimer,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #playControls .qq-timer {
+  background: var(--tp-grad-gold) !important;
+  color: var(--tp-gold-ink) !important;
+  text-shadow: none !important;
+  border-color: rgba(61, 46, 0, 0.28) !important;
+}
+
+/* Primary / play */
+.qq-btn-play,
+.p0-primary,
+.gd-act-play,
+.gold-button:not(:disabled),
+#tableView #playControls .qq-btn-play {
+  background: var(--tp-grad-action) !important;
+  color: var(--tp-ink-inverse) !important;
+}
+
+/* Pass / secondary blue */
+.qq-btn-pass,
+.qq-btn-blue,
+.gd-act-pass,
+.gd-tool-sort,
+.mj-btn-qi,
+#tableView #playControls .qq-btn-pass,
+.multi-game-view.mj-4p .mj-btn-qi,
+.multi-game-view.mj-2p .mj-btn-qi,
+.multi-game-view.mj-4p #mgActions .mj-btn-qi,
+.multi-game-view.mj-2p #mgActions .mj-btn-qi,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgActions .mj-btn-qi,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgActions .mj-btn-qi {
+  background: var(--tp-grad-pass) !important;
+  color: var(--tp-ink-inverse) !important;
+  text-shadow: none !important;
+}
+
+/* Hint / gold text buttons */
+.qq-btn-hint,
+.qq-btn-gold:not(.qq-btn-play):not(.mj-btn-hu),
+#tableView #playControls .qq-btn-hint {
+  background: var(--tp-grad-gold) !important;
+  color: var(--tp-gold-ink) !important;
+}
+
+/* Hu stays gold with dark ink */
+.mj-btn-hu,
+.multi-game-view.mj-4p .mj-btn-hu,
+.multi-game-view.mj-2p .mj-btn-hu,
+.multi-game-view.mj-4p #mgActions .mj-btn-hu,
+.multi-game-view.mj-2p #mgActions .mj-btn-hu,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgActions .mj-btn-hu,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgActions .mj-btn-hu {
+  background: var(--tp-grad-gold) !important;
+  color: var(--tp-gold-ink) !important;
+  text-shadow: none !important;
+}
+
+/* Disabled */
+.qq-btn:disabled,
+.qq-btn[aria-disabled="true"],
+.gd-act:disabled,
+.gold-button:disabled {
+  opacity: 0.4 !important;
+  filter: grayscale(0.2);
+  cursor: not-allowed !important;
+}
+
+/* Felt shared (DDZ table oval already close — gentle nudge) */
+html.table-landscape .lobby-shell.table-active #tableView.harbor-table::after {
+  background:
+    radial-gradient(ellipse 54% 36% at 50% 48%, rgba(255, 242, 180, 0.16), transparent 72%),
+    var(--tp-grad-felt) !important;
+}
+
+/* Bottom tab active */
+.home-tab.is-active,
+.home-tab[aria-current="page"],
+.lobby-shell.p0-tg .home-tab.is-active,
+.lobby-shell .home-tabbar .home-tab.is-active {
+  color: var(--tp-gold) !important;
+}
