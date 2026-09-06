@@ -1,0 +1,172 @@
+{
+  "cache": "play9k1",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5173/index.html?v=play9k1",
+  "shots": {
+    "lobby-414.png": 235944,
+    "gd-414-thumb.png": 274933,
+    "gd-414-card-tap.png": 274933,
+    "gd-414-toolbar-hand.png": 274933,
+    "mj-smoke-414.png": 724742,
+    "ddz-smoke-414.png": 401780
+  },
+  "checks": {
+    "lobby": {
+      "hasGold": true,
+      "foundGames": [
+        "斗地主",
+        "德州",
+        "炸金花",
+        "麻将",
+        "掼蛋",
+        "二十一点"
+      ],
+      "gameCount": 6
+    },
+    "guandan": {
+      "mgClass": "table-view multi-game-view gd-active gd-4p gd-yard",
+      "gdYard": true,
+      "barInDock": true,
+      "barBeforeHand": true,
+      "barParentClass": "mg-hand-dock",
+      "toolbar": {
+        "top": 662,
+        "bottom": 714,
+        "left": 56,
+        "right": 406,
+        "w": 350,
+        "h": 52
+      },
+      "hand": {
+        "top": 722,
+        "bottom": 842,
+        "left": 68,
+        "right": 406,
+        "w": 338,
+        "h": 120
+      },
+      "dock": {
+        "top": 448,
+        "bottom": 844,
+        "left": 56,
+        "right": 406,
+        "w": 350,
+        "h": 396
+      },
+      "seat0": {
+        "rect": {
+          "top": 801,
+          "bottom": 888,
+          "left": 8,
+          "right": 64,
+          "w": 56,
+          "h": 87
+        },
+        "widthCss": "56px",
+        "maxWidthCss": "56px",
+        "zIndex": "8",
+        "pointerEvents": "none"
+      },
+      "wrap": {
+        "rect": {
+          "top": 803,
+          "bottom": 855,
+          "left": 10,
+          "right": 62,
+          "w": 52,
+          "h": 52
+        },
+        "widthCss": "52px",
+        "heightCss": "52px",
+        "transform": "none"
+      },
+      "restore": {
+        "text": "恢复",
+        "rect": {
+          "top": 668,
+          "bottom": 708,
+          "left": 236,
+          "right": 292,
+          "w": 56,
+          "h": 40
+        },
+        "present": true
+      },
+      "sort": {
+        "text": "一键理牌",
+        "rect": {
+          "top": 668,
+          "bottom": 708,
+          "left": 300,
+          "right": 384,
+          "w": 84,
+          "h": 40
+        },
+        "present": true
+      },
+      "suitCount": 4,
+      "cardCount": 27,
+      "firstCard": {
+        "top": 736,
+        "bottom": 798,
+        "left": 72,
+        "right": 116,
+        "w": 44,
+        "h": 62
+      },
+      "overlapSeat0FirstCard": 0,
+      "seat0W_le_56": true,
+      "toolbarAboveHand": true,
+      "cardTapOk": true,
+      "listenersKept": {
+        "restore": true,
+        "sort": true,
+        "suits": true
+      },
+      "dockZ": "22",
+      "dockLeft": "56px"
+    },
+    "cardClick": {
+      "ok": true,
+      "before": "gd-card is-red is-joker is-big",
+      "after": "gd-card is-red is-joker is-big",
+      "selected": false
+    }
+  },
+  "deviations": [
+    "hand-layout.js keeps inline left:56px on GD dock (untouched per hand-layout minW scope); CSS left:64 overridden; seat0≤56 still clears first card",
+    "raised dock selector specificity (html.table-landscape … gd-yard) so z-index:22 beats earlier rules"
+  ],
+  "untouched": {
+    "mj_smoke": {
+      "className": "table-view multi-game-view mj-4p mj-opening",
+      "hasMj": true
+    },
+    "ddz_smoke": {
+      "tableVisible": false,
+      "bodyHasDdz": true,
+      "clicked": true,
+      "startedClick": true
+    }
+  },
+  "pass": {
+    "barInDock": true,
+    "toolbarAboveHand": true,
+    "seat0W_le_56": true,
+    "listenersKept": true,
+    "lobbyGold": true,
+    "cardTapOk": true
+  },
+  "allPass": true,
+  "files": [
+    "apps/web-lobby/src/games/guandan/ui.js",
+    "apps/web-lobby/src/table-play.css",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/src/app.js",
+    "docs/qa/play9k1.md",
+    "docs/qa/play9k1/*"
+  ]
+}

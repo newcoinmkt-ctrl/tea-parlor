@@ -3844,3 +3844,119 @@ html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-seat.is-turn .mg-me
   font-weight: 900 !important;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55) !important;
 }
+
+/* ── gd-thumb-patch: toolbar above hand + seat0 no occlusion ── */
+
+/* 工具条：在 dock 内、手牌之上 */
+.gd-yard .mg-hand-dock .gd-toolbar,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock .gd-toolbar,
+.multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock .gd-toolbar {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  order: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 0 8px !important;
+  padding: 0 4px !important;
+  z-index: 24 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+.gd-yard .mg-hand-dock #mgHand,
+.gd-yard .mg-hand-dock #mgHand.gd-hand-cols,
+.gd-yard .mg-hand-dock #mgHand.gd-hand-2row {
+  order: 1 !important;
+  position: relative !important;
+  z-index: 23 !important;
+}
+
+/* dock 整体高于自家立绘 — beat play9c/landscape 7-class left:56 */
+html.table-landscape .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+html.table-portrait-dock .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+html body .lobby-shell.multi-active .multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock,
+html body .gd-yard .mg-hand-dock,
+html body .lobby-shell.multi-active .gd-yard .mg-hand-dock,
+.gd-yard .mg-hand-dock,
+.lobby-shell.multi-active .gd-yard .mg-hand-dock,
+.multi-game-view.gd-active.gd-4p.gd-yard .mg-hand-dock {
+  z-index: 22 !important;
+  left: 64px !important; /* 给左下头像留槽，牌不从头像底下穿过 */
+  right: 8px !important;
+}
+
+.gd-yard .gd-tool-restore {
+  background: linear-gradient(180deg, #fde68a, #e8c547) !important;
+  color: #3d2e00 !important; /* 金底深字 */
+  font-weight: 800 !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  border-radius: 14px !important;
+  border: 0 !important;
+}
+.gd-yard .gd-tool-sort {
+  background: linear-gradient(180deg, #60a5fa, #3b82f6) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  border-radius: 14px !important;
+  border: 0 !important;
+}
+
+/* 自家头像：缩小、不溢出、不挡牌 */
+html body .gd-yard [data-mg-seat="0"],
+html body .multi-game-view.gd-active.gd-4p.gd-yard [data-mg-seat="0"],
+html body .gd-active [data-mg-seat="0"],
+.gd-yard [data-mg-seat="0"],
+.multi-game-view.gd-active.gd-4p.gd-yard [data-mg-seat="0"],
+.gd-active [data-mg-seat="0"] {
+  left: 8px !important;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  width: 56px !important;
+  max-width: 56px !important;
+  z-index: 8 !important;
+  overflow: visible !important;
+  pointer-events: none !important; /* 牌优先可点；需要点头像再单独开 info */
+}
+
+html body .gd-yard [data-mg-seat="0"] .char-figure-wrap,
+html body .multi-game-view.gd-active.gd-4p.gd-yard [data-mg-seat="0"] .char-figure-wrap,
+.gd-yard [data-mg-seat="0"] .char-figure-wrap,
+.multi-game-view.gd-active.gd-4p.gd-yard [data-mg-seat="0"] .char-figure-wrap,
+.gd-yard [data-mg-seat="0"] .mg-seat .char-figure-wrap {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  min-height: 52px !important;
+  max-width: 52px !important;
+  max-height: 52px !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+}
+
+html body .gd-yard [data-mg-seat="0"] .char-figure,
+html body .multi-game-view.gd-active.gd-4p.gd-yard [data-mg-seat="0"] .char-figure,
+.gd-yard [data-mg-seat="0"] .char-figure,
+.multi-game-view.gd-active.gd-4p.gd-yard [data-mg-seat="0"] .char-figure {
+  width: 100% !important;
+  height: 100% !important;
+  margin-left: 0 !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  transform: none !important;
+}
+
+.gd-yard [data-mg-seat="0"] .mg-seat-info {
+  max-width: 56px !important;
+  pointer-events: auto !important;
+}

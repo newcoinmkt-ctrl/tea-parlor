@@ -125,8 +125,9 @@ export function createGuanDanUI(options = {}) {
         <button type="button" class="gd-tool-restore" data-gd-restore>恢复</button>
         <button type="button" class="gd-tool-sort" data-gd-sort>一键理牌</button>
       `;
-      const dock = root.querySelector('.mg-hand-dock');
-      (dock || root).appendChild(bar);
+      const dockCreate = root.querySelector('.mg-hand-dock');
+      if (dockCreate) dockCreate.insertBefore(bar, dockCreate.firstChild);
+      else root.appendChild(bar);
       bar.querySelectorAll('[data-gd-suit]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const s = Number(btn.getAttribute('data-gd-suit'));
@@ -154,6 +155,12 @@ export function createGuanDanUI(options = {}) {
         startNext();
       });
       root.appendChild(pill);
+    }
+    // 拇指区：理牌/恢复贴手牌上方，不要挂在顶栏
+    const dock = root.querySelector('.mg-hand-dock');
+    const bar = root.querySelector('.gd-toolbar');
+    if (dock && bar && bar.parentElement !== dock) {
+      dock.insertBefore(bar, dock.firstChild);
     }
   }
 
