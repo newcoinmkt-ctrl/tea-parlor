@@ -65,7 +65,7 @@ export class DoudizhuRoom extends Room {
     this._dealt = false;
     this.matchTimerHandle = null;
 
-    // Empty rooms: dispose-only timer. Do NOT start the 10s match-to-deal countdown until first human.
+    // Empty rooms: dispose-only timer. Do NOT start the 3s match-to-deal countdown until first human.
     this._armEmptyRoomTimer(EMPTY_ROOM_MS);
 
     this.onMessage('hello', (client, msg) => {

@@ -1,6 +1,6 @@
 /**
  * 斗地主房间逻辑（权威服）
- * 3 座：匹配 →（满 3 真人立刻 / 10s AI 补位）→ 叫分/出牌
+ * 3 座：匹配 →（满 3 真人立刻 / 3s AI 补位）→ 叫分/出牌
  * 复用 packages/doudizhu-engine；AI/托管座走现有 AI helpers
  */
 import path from 'path';
@@ -8,11 +8,11 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const MATCH_MS = 10_000;
-/** Empty matching rooms dispose after this (not the 10s match-to-deal clock). */
+export const MATCH_MS = 3_000;
+/** Empty matching rooms dispose after this (not the 3s match-to-deal clock). */
 export const EMPTY_ROOM_MS = 45_000;
 /** New humans need ≥ this much match window left; else reject so joinOrCreate opens fresh (only near expiry). */
-export const FRESH_JOIN_MIN_REMAIN_MS = 2_000;
+export const FRESH_JOIN_MIN_REMAIN_MS = 1_000;
 export const TRUSTEE_MS = 30_000;
 export const FORFEIT_MS = 60_000;
 
@@ -66,7 +66,7 @@ export class DdzTable {
     this.baseRoomScore = meta.baseRoomScore;
     this.engine = null;
     this.phase = 'match';
-    // Do not start the 10s match-to-deal clock on empty create — clients must not see a dying empty-room clock.
+    // Do not start the 3s match-to-deal clock on empty create — clients must not see a dying empty-room clock.
     this.matchEndsAt = 0;
     this.seats = [null, null, null];
     this.names = ['空位', '空位', '空位'];
@@ -108,7 +108,7 @@ export class DdzTable {
     return this.seats.findIndex((s) => s && s.kind === 'human' && String(s.uid) === id);
   }
 
-  /** Restart the 10s match window (any new human seat during match). */
+  /** Restart the 3s match window (any new human seat during match). */
   resetMatchWindow() {
     if (this.phase !== 'match') return false;
     this.matchEndsAt = this.now() + this.matchMs;
