@@ -15,24 +15,24 @@
       "sha1": "9aa6e3aa6b1d"
     },
     "ddz-414-fan.png": {
-      "bytes": 573238,
-      "sha1": "e86ebcdb34b1"
+      "bytes": 571673,
+      "sha1": "2fbc9acbdb0d"
     },
     "ddz-414-selected.png": {
-      "bytes": 578943,
-      "sha1": "9d5f045a81f5"
+      "bytes": 578310,
+      "sha1": "c2d9118f9272"
     },
     "ddz-414-after-play.png": {
-      "bytes": 573409,
-      "sha1": "b5cf72f9b0f8"
+      "bytes": 579502,
+      "sha1": "ecea87c29ff3"
     },
     "mj-414-hand.png": {
-      "bytes": 978571,
-      "sha1": "c27646eb9fae"
+      "bytes": 977145,
+      "sha1": "8af88b7244bb"
     },
     "gd-414-hand.png": {
-      "bytes": 272237,
-      "sha1": "95748b904308"
+      "bytes": 274816,
+      "sha1": "aeed9500ab36"
     }
   },
   "checks": {
@@ -59,7 +59,7 @@
       "text": "匹配中\n\n匹配中…\n\n取消匹配 匹配中…",
       "hasAi": false,
       "hasCountdown": false,
-      "fakeEndsAt": 1788688344110
+      "silentDefault": true
     },
     "ddz_start": {
       "via": "click-local",
@@ -84,28 +84,28 @@
       "before": {
         "phase": "bid",
         "current": 0,
-        "landlord": 2
+        "landlord": -1
       },
       "phase": "play",
       "currentPlayer": 0,
       "landlord": 0,
-      "handN": 17
+      "handN": 20
     },
     "ddz_phase": {
       "phase": "play",
       "current": 0,
       "landlord": 0,
-      "n": 17
+      "n": 20
     },
     "ddz": {
       "label": "ddz",
-      "n": 17,
-      "minW": 48,
-      "maxW": 48,
+      "n": 20,
+      "minW": 53,
+      "maxW": 53,
       "minH": 64,
       "maxH": 64,
-      "overlapCount": 31,
-      "maxOverlapArea": 2048,
+      "overlapCount": 54,
+      "maxOverlapArea": 2368,
       "isGrid": false,
       "isFan2": false,
       "layoutMode": "overlap/fan",
@@ -113,27 +113,27 @@
       "areaId": "handArea",
       "sample": [
         {
-          "w": 48,
+          "w": 53,
           "h": 64,
           "left": 118,
           "top": 798,
-          "right": 166,
+          "right": 171,
           "bottom": 862
         },
         {
-          "w": 48,
+          "w": 53,
           "h": 64,
           "left": 134,
           "top": 798,
-          "right": 182,
+          "right": 187,
           "bottom": 862
         },
         {
-          "w": 48,
+          "w": 53,
           "h": 64,
           "left": 150,
           "top": 798,
-          "right": 198,
+          "right": 203,
           "bottom": 862
         }
       ]
@@ -146,7 +146,7 @@
     "ddz_selected": {
       "ok": true,
       "selected": 1,
-      "n": 17,
+      "n": 20,
       "playDisabled": false,
       "phase": "play",
       "current": 0,
@@ -163,12 +163,12 @@
     },
     "ddz_after": {
       "label": "ddz_after",
-      "n": 16,
+      "n": 19,
       "minW": 48,
       "maxW": 48,
       "minH": 64,
       "maxH": 64,
-      "overlapCount": 29,
+      "overlapCount": 35,
       "maxOverlapArea": 2048,
       "isGrid": false,
       "isFan2": false,
@@ -201,13 +201,14 @@
           "bottom": 862
         }
       ],
-      "before": 17,
-      "after": 16,
+      "before": 20,
+      "after": 19,
       "decreased": true
     },
     "ddz_play": {
-      "before": 17,
-      "clicked": true
+      "before": 20,
+      "clicked": true,
+      "selected": 0
     },
     "mj": {
       "label": "mj",
@@ -312,6 +313,8 @@
     "gd_toolbar_above": true,
     "match_no_ai": true,
     "match_no_countdown": true,
+    "match_silent_default": true,
+    "ddz_has_overlap": true,
     "shots_distinct": true
   },
   "ok": true,

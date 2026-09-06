@@ -248,22 +248,34 @@ function scoreLeadPlay(hand, play, _role, _ctx) {
     score -= 100;
   }
 
-  // 别拆掉即将成型的炸弹（出单/对用掉炸弹里的牌）
+  // 别拆掉即将成型的炸弹 / 王炸
   if (breaksBomb(hand, play)) {
-    score -= 25;
+    score -= 40;
+  }
+
+  // 手牌仍多时，避免首出裸 2 / 单王（自杀走张）
+  if (hand.length > 8 && play.type === HandType.SINGLE && play.weight >= 15) {
+    score -= 18;
   }
 
   return score;
 }
 
-/** 出牌是否拆散手中的四张炸弹 */
+/** 出牌是否拆散手中的四张炸弹 / 王炸 */
 function breaksBomb(hand, play) {
+  if (isControlHand(play)) return false;
   const g = groupByRank(hand);
   for (const c of play.cards) {
     const arr = g.get(c.rank) || [];
-    if (arr.length === 4 && play.type !== HandType.BOMB && play.type !== HandType.FOUR_TWO && play.type !== HandType.FOUR_PAIR) {
+    if (arr.length === 4 && play.type !== HandType.FOUR_TWO && play.type !== HandType.FOUR_PAIR) {
       return true;
     }
+  }
+  // 拆王炸：手中双王却只出其中一张
+  const jokers = hand.filter((c) => c.rank >= 16);
+  if (jokers.length >= 2) {
+    const used = play.cards.filter((c) => c.rank >= 16);
+    if (used.length === 1) return true;
   }
   return false;
 }
@@ -446,7 +458,10 @@ function shouldUseBomb(hand, prev, role, ctx) {
     return true;
   }
 
-  // 敌方剩牌很少
+  // 强制
+  if (ctx.forceBeat) return true;
+
+  // 敌方即将出完（≤2）才值得动炸；否则保留炸弹/王炸
   if (Array.isArray(ctx.handCounts)) {
     const enemies = enemyIndices(role, ctx);
     for (const i of enemies) {
@@ -454,11 +469,8 @@ function shouldUseBomb(hand, prev, role, ctx) {
     }
   }
 
-  // 自己牌不多，抢收
-  if (hand.length <= 6) return true;
-
-  // 强制
-  if (ctx.forceBeat) return true;
+  // 自己也快收尾时才炸（更严：≤4，避免中盘自杀拆炸）
+  if (hand.length <= 4) return true;
 
   return false;
 }
