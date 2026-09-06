@@ -154,28 +154,25 @@ with sync_playwright() as p:
     const mask = document.getElementById('ddzMatchMask');
     const copy = document.getElementById('ddzMatchCopy');
     if (!mask) return {ok:false, reason:'no-mask'};
-    // Apply the same silent copy startDdzMatched / syncMatchOverlay use
-    if (copy) copy.textContent = '匹配中…';
     const h2 = mask.querySelector('h2');
-    if (h2) h2.textContent = '匹配中';
+    // Reveal default HTML copy WITHOUT rewriting (prove index + runtime silent)
     mask.hidden = false;
     mask.removeAttribute('hidden');
     mask.style.setProperty('display', 'grid', 'important');
-    // Simulate what syncMatchOverlay would write with a fake endsAt (must NOT show seconds)
-    const fakeEnds = Date.now() + 8000;
-    // Call through page: re-read copy after forcing via DOM only (overlay sync is module-private)
-    const text = ((mask.innerText || '') + ' ' + (copy?.textContent || '')).trim();
-    const hasAi = /AI\s*替补|AI\s*补位/.test(text);
-    const hasCountdown = /\d+\s*s|\d+\s*秒|（\d+s）|\(\d+s\)/i.test(text);
+    const copyText = ((copy && copy.textContent) || '').trim();
+    const titleText = ((h2 && h2.textContent) || '').trim();
+    const blob = ((mask.innerText || '') + ' ' + copyText).trim();
+    const hasAi = /AI\s*替补|AI\s*补位|超时\s*AI/.test(blob);
+    const hasCountdown = /\d+\s*s|\d+\s*秒|（\d+s）|\(\d+s\)/i.test(blob);
     return {
       ok: true,
       visible: getComputedStyle(mask).display !== 'none',
-      copy: copy?.textContent || '',
-      title: h2?.textContent || '',
-      text: text.slice(0, 180),
+      copy: copyText,
+      title: titleText,
+      text: blob.slice(0, 180),
       hasAi,
       hasCountdown,
-      fakeEndsAt: fakeEnds,
+      silentDefault: (copyText === '匹配中…' || copyText === '匹配中') && !hasAi && !hasCountdown,
     };
   }""")
   REPORT['checks']['match_mask'] = match_ui
@@ -356,34 +353,42 @@ with sync_playwright() as p:
   page.wait_for_timeout(350)
   shot(page, 'ddz-414-selected.png')
 
-  # Play
+  # Play — hint first (legal combo) then 出牌 so hand count drops
   play_res = page.evaluate("""() => {
     const before = document.querySelectorAll('#handArea .playing-card').length;
+    const g = window.__teaParlor && window.__teaParlor.state && window.__teaParlor.state();
+    if (g && g.game) { g.game.phase = 'play'; g.game.currentPlayer = 0; g.game.lastPlay = null; g.game.passCount = 0; }
+    const hint = document.querySelector('#hintButton');
+    if (hint) { hint.disabled = false; hint.removeAttribute('disabled'); hint.click(); }
     const play = document.querySelector('#playButton');
     if (play) {
       play.disabled = false;
       play.removeAttribute('disabled');
+      play.setAttribute('aria-disabled', 'false');
       play.click();
     }
-    // Also try hint then play if still same count
-    return {before, clicked: !!play};
+    return {
+      before,
+      clicked: !!play,
+      selected: document.querySelectorAll('#handArea .playing-card.selected').length,
+    };
   }""")
-  page.wait_for_timeout(900)
-  # If count unchanged, use hint button then play
+  page.wait_for_timeout(1100)
   after_n = page.evaluate("() => document.querySelectorAll('#handArea .playing-card').length")
   if after_n >= before_n:
     page.evaluate("""() => {
-      const g = window.__teaParlor?.state?.()?.game;
+      const st = window.__teaParlor && window.__teaParlor.state && window.__teaParlor.state();
+      const g = st && st.game;
       if (g) { g.phase = 'play'; g.currentPlayer = 0; g.lastPlay = null; }
       const hint = document.querySelector('#hintButton');
       if (hint) { hint.disabled = false; hint.click(); }
     }""")
-    page.wait_for_timeout(300)
+    page.wait_for_timeout(400)
     page.evaluate("""() => {
       const play = document.querySelector('#playButton');
       if (play) { play.disabled = false; play.click(); }
     }""")
-    page.wait_for_timeout(900)
+    page.wait_for_timeout(1100)
     after_n = page.evaluate("() => document.querySelectorAll('#handArea .playing-card').length")
 
   ddz_after = measure_hand(page, '#handArea .playing-card', 'ddz_after')
@@ -469,6 +474,8 @@ with sync_playwright() as p:
     'gd_toolbar_above': bool(gd.get('toolbarAboveHand')),
     'match_no_ai': bool(match_ui.get('ok')) and not bool(match_ui.get('hasAi')),
     'match_no_countdown': bool(match_ui.get('ok')) and not bool(match_ui.get('hasCountdown')),
+    'match_silent_default': bool(match_ui.get('silentDefault')),
+    'ddz_has_overlap': (ddz.get('overlapCount') or 0) > 0,
     'shots_distinct': REPORT['checks']['shot_distinct'],
   }
   REPORT['ok'] = all(REPORT['pass'].values())
