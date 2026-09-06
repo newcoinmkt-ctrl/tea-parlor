@@ -1,0 +1,98 @@
+{
+  "cache": "play9i1",
+  "viewport": {
+    "width": 414,
+    "height": 896
+  },
+  "url": "http://127.0.0.1:5173/index.html?v=play9i1",
+  "ok": true,
+  "checks": {
+    "no_quick_dock": true,
+    "no_pack_row": true,
+    "gold_label": true,
+    "no_season_on_home": true,
+    "six_game_icons": true,
+    "expected_games": true,
+    "cta_plus_grid": true,
+    "grid_on_first_screen": true,
+    "lobby_ia_css": true,
+    "cache_play9i1": true,
+    "tabbar_visible": true,
+    "supply_reachable": true,
+    "table_tabbar_hidden": true,
+    "hud_play_controls": true,
+    "hud_more_present": true,
+    "hud_timer_above": true,
+    "hud_more_menu_shot": true
+  },
+  "shots": {
+    "lobby-home-414.png": {
+      "path": "docs/qa/play9i1/lobby-home-414.png",
+      "bytes": 235944
+    },
+    "lobby-supply-414.png": {
+      "path": "docs/qa/play9i1/lobby-supply-414.png",
+      "bytes": 692158
+    },
+    "ddz-table-414.png": {
+      "path": "docs/qa/play9i1/ddz-table-414.png",
+      "bytes": 571991
+    },
+    "ddz-more-menu-414.png": {
+      "path": "docs/qa/play9i1/ddz-more-menu-414.png",
+      "bytes": 576209
+    }
+  },
+  "notes": [],
+  "home": {
+    "title": "茶馆",
+    "dockShown": false,
+    "packShown": false,
+    "gridShown": true,
+    "gridLabels": [
+      "斗地主",
+      "麻将",
+      "德州",
+      "掼蛋",
+      "炸金花",
+      "二十一点"
+    ],
+    "gridCount": 6,
+    "hasChain": false,
+    "hasMoreGames": false,
+    "pointsShown": true,
+    "pointsLabel": "金币",
+    "seasonShown": false,
+    "tabbarShown": true,
+    "supplyTabShown": true,
+    "ctaShown": true,
+    "chromeShown": true,
+    "legacyShown": false,
+    "cssLink": [
+      "./src/styles.css?v=play9d1",
+      "./src/themes/tokens.css?v=play9d1",
+      "./src/themes/classic-green.css?v=play9d1",
+      "./src/hand-fit.css?v=play9i1",
+      "./src/table-landscape.css?v=play9i1",
+      "./src/table-play.css?v=play9i1",
+      "./src/lobby-ia.css?v=play9i1"
+    ],
+    "gridOnFirstScreen": true,
+    "chromeHtmlHasGrid": true
+  },
+  "supply": {
+    "className": "lobby-shell p0-tg lobby-view-recharge",
+    "hasSupplyCopy": true,
+    "hasChainOrSeason": true
+  },
+  "hud": {
+    "tableActive": true,
+    "tabbarShown": false,
+    "playShown": true,
+    "timerShown": true,
+    "moreBtnShown": true,
+    "moreMenuExists": true,
+    "timerAbove": true
+  },
+  "failed_required": []
+}
