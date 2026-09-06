@@ -1,0 +1,365 @@
+{
+  "cache": "play9v3",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5193/index.html?v=play9v3",
+  "shots": {
+    "lobby-414-home.png": {
+      "bytes": 222597,
+      "sha1": "056e25f570de"
+    },
+    "ddz-414-match-mask.png": {
+      "bytes": 184190,
+      "sha1": "9aa6e3aa6b1d"
+    },
+    "ddz-414-fan.png": {
+      "bytes": 571949,
+      "sha1": "dd40e76f2818"
+    },
+    "ddz-414-hand-closeup.png": {
+      "bytes": 31204,
+      "sha1": "eea20db5f4bc"
+    },
+    "ddz-414-selected.png": {
+      "bytes": 577692,
+      "sha1": "f1551461569a"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 579639,
+      "sha1": "85d9e4a8742f"
+    },
+    "mj-414-hand.png": {
+      "bytes": 980123,
+      "sha1": "36ad27b4fa0b"
+    },
+    "gd-414-hand.png": {
+      "bytes": 277396,
+      "sha1": "fa55b3f8e6b6"
+    }
+  },
+  "checks": {
+    "lobby": {
+      "games": [
+        "斗地主",
+        "麻将",
+        "德州",
+        "掼蛋",
+        "炸金花",
+        "二十一点",
+        "链游中心"
+      ],
+      "gameCount": 7,
+      "hasChain": true,
+      "cta_visible": false,
+      "hasGold": true
+    },
+    "match_mask": {
+      "ok": true,
+      "visible": true,
+      "copy": "匹配中…",
+      "title": "匹配中",
+      "text": "匹配中\n\n匹配中…\n\n取消匹配 匹配中…",
+      "hasAi": false,
+      "hasCountdown": false,
+      "silentDefault": true
+    },
+    "ddz_start": {
+      "via": "click-local",
+      "keys": [
+        "state",
+        "start",
+        "startTexas",
+        "startGuanDan",
+        "startZhajinhua",
+        "startMahjong",
+        "startBlackjack",
+        "leaveMulti",
+        "lobby",
+        "brand",
+        "setPlayMode",
+        "forceDdzPlay",
+        "toggleCard"
+      ]
+    },
+    "ddz_force_play": {
+      "ok": true,
+      "before": {
+        "phase": "bid",
+        "current": 0,
+        "landlord": -1
+      },
+      "phase": "play",
+      "currentPlayer": 0,
+      "landlord": 0,
+      "handN": 20
+    },
+    "ddz_phase": {
+      "phase": "play",
+      "current": 0,
+      "landlord": 0,
+      "n": 20
+    },
+    "ddz": {
+      "label": "ddz",
+      "n": 20,
+      "minW": 42,
+      "maxW": 42,
+      "minH": 60,
+      "maxH": 60,
+      "minPeek": 18,
+      "overlapCount": 37,
+      "maxOverlapArea": 1440,
+      "isGrid": false,
+      "isFan2": false,
+      "layoutMode": "overlap/fan",
+      "display": "flex",
+      "pointerEvents": "auto",
+      "overflowX": "auto",
+      "zIndex": "50",
+      "areaId": "handArea",
+      "sample": [
+        {
+          "w": 42,
+          "h": 60,
+          "left": 118,
+          "top": 802,
+          "right": 160,
+          "bottom": 862
+        },
+        {
+          "w": 42,
+          "h": 60,
+          "left": 136,
+          "top": 802,
+          "right": 178,
+          "bottom": 862
+        },
+        {
+          "w": 42,
+          "h": 60,
+          "left": 154,
+          "top": 802,
+          "right": 196,
+          "bottom": 862
+        }
+      ]
+    },
+    "ddz_play_none": {
+      "selected": 0,
+      "playDisabled": true,
+      "playAria": "true"
+    },
+    "ddz_hand_box": {
+      "x": 62,
+      "y": 790,
+      "w": 338,
+      "h": 76,
+      "top": 790,
+      "bottom": 866
+    },
+    "ddz_first_card": {
+      "x": 128,
+      "y": 839.2,
+      "id": "17_4_53",
+      "pe": "auto"
+    },
+    "ddz_selected": {
+      "ok": true,
+      "selected": 1,
+      "n": 20,
+      "playDisabled": false,
+      "playEnabled": true,
+      "phase": "play",
+      "current": 0,
+      "selectedIds": [
+        "17_4_53"
+      ],
+      "lifted": [
+        {
+          "id": "17_4_53",
+          "transform": "matrix(1, 0, 0, 1, 0, -14)",
+          "top": 788
+        }
+      ],
+      "viaTouchOrApi": true
+    },
+    "ddz_after": {
+      "label": "ddz_after",
+      "n": 19,
+      "minW": 42,
+      "maxW": 42,
+      "minH": 60,
+      "maxH": 60,
+      "minPeek": 18,
+      "overlapCount": 35,
+      "maxOverlapArea": 1440,
+      "isGrid": false,
+      "isFan2": false,
+      "layoutMode": "overlap/fan",
+      "display": "flex",
+      "pointerEvents": "auto",
+      "overflowX": "auto",
+      "zIndex": "50",
+      "areaId": "handArea",
+      "sample": [
+        {
+          "w": 42,
+          "h": 60,
+          "left": 118,
+          "top": 802,
+          "right": 160,
+          "bottom": 862
+        },
+        {
+          "w": 42,
+          "h": 60,
+          "left": 136,
+          "top": 802,
+          "right": 178,
+          "bottom": 862
+        },
+        {
+          "w": 42,
+          "h": 60,
+          "left": 154,
+          "top": 802,
+          "right": 196,
+          "bottom": 862
+        }
+      ],
+      "before": 20,
+      "after": 19,
+      "decreased": true
+    },
+    "ddz_play": {
+      "before": 20,
+      "clicked": true,
+      "selected": 0
+    },
+    "mj": {
+      "label": "mj",
+      "n": 13,
+      "minW": 36,
+      "maxW": 36,
+      "minH": 52,
+      "maxH": 52,
+      "minPeek": 23,
+      "overlapCount": 12,
+      "maxOverlapArea": 676,
+      "isGrid": false,
+      "isFan2": false,
+      "layoutMode": "overlap/fan",
+      "display": "flex",
+      "pointerEvents": "auto",
+      "overflowX": "auto",
+      "zIndex": "50",
+      "areaId": "mgHand",
+      "sample": [
+        {
+          "w": 36,
+          "h": 52,
+          "left": 82,
+          "top": 760,
+          "right": 118,
+          "bottom": 812
+        },
+        {
+          "w": 36,
+          "h": 52,
+          "left": 105,
+          "top": 760,
+          "right": 141,
+          "bottom": 812
+        },
+        {
+          "w": 36,
+          "h": 52,
+          "left": 128,
+          "top": 760,
+          "right": 164,
+          "bottom": 812
+        }
+      ]
+    },
+    "gd": {
+      "label": "gd",
+      "n": 27,
+      "minW": 44,
+      "maxW": 44,
+      "minH": 62,
+      "maxH": 62,
+      "minPeek": 0,
+      "overlapCount": 72,
+      "maxOverlapArea": 1364,
+      "isGrid": false,
+      "isFan2": true,
+      "layoutMode": "fan-2row",
+      "display": "block",
+      "pointerEvents": "auto",
+      "overflowX": "hidden",
+      "zIndex": "23",
+      "areaId": "mgHand",
+      "sample": [
+        {
+          "w": 44,
+          "h": 62,
+          "left": 72,
+          "top": 736,
+          "right": 116,
+          "bottom": 798
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 94,
+          "top": 736,
+          "right": 138,
+          "bottom": 798
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 116,
+          "top": 736,
+          "right": 160,
+          "bottom": 798
+        }
+      ],
+      "toolbarAboveHand": true
+    },
+    "shot_distinct": true
+  },
+  "pass": {
+    "lobby_no_cta": true,
+    "lobby_grid": true,
+    "lobby_has_chain": true,
+    "ddz_not_grid": true,
+    "ddz_fan_layout": true,
+    "ddz_count": true,
+    "ddz_minW_ge36": true,
+    "ddz_minPeek_ge14": true,
+    "ddz_selected_gt0": true,
+    "ddz_play_enabled_when_selected": true,
+    "ddz_play_disabled_when_empty": true,
+    "ddz_after_decreased": true,
+    "mj_not_grid": true,
+    "mj_count": true,
+    "gd_not_grid": true,
+    "gd_fan2_or_overlap": true,
+    "gd_count": true,
+    "gd_toolbar_above": true,
+    "match_no_ai": true,
+    "match_no_countdown": true,
+    "match_silent_default": true,
+    "ddz_has_overlap": true,
+    "shots_distinct": true
+  },
+  "ok": true,
+  "rootCause": {
+    "selectPlay": "TG Mini App: packOverlap inflated cardW>maxW + overflow-x:hidden clipped fan; floorPeek blocked shrink. Fixed pack + scroll + fanCardAtPoint + hand z-index/touch sync.",
+    "fanReadable": "minW>=36 / minPeek>=14 on ~430px; light horizontal scroll instead of crushing peeks.",
+    "matchUi": "ddzMatchMask copy is matching silently without AI/countdown text."
+  }
+}

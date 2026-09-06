@@ -25,34 +25,89 @@ function measureHandAvailable(area) {
 
 /**
  * Pack n overlapping cards into `available` px.
- * total = (n-1)*peek + cardW <= available; peek stays >= minPeek when possible.
+ * Never inflate cardW above maxW. Prefer minPeek; if mins won't fit → needsScroll.
  */
-function packOverlap(n, available, opts = {}) {
+export function packOverlap(n, available, opts = {}) {
   const minW = opts.minW ?? 22;
-  const maxW = opts.maxW ?? 52;
+  const maxW = Math.max(minW, opts.maxW ?? 52);
   const minPeek = opts.minPeek ?? 12;
   const ratio = opts.ratio ?? 1.45;
-  if (n <= 0) return { cardW: minW, peek: minPeek, overlap: 0, height: Math.round(minW * ratio), total: 0 };
+  const avail = Math.max(0, Number(available) || 0);
+  const heightOf = (w) => Math.round(w * ratio);
+
+  if (n <= 0) {
+    return { cardW: minW, peek: minPeek, overlap: 0, height: heightOf(minW), total: 0, needsScroll: false };
+  }
   if (n === 1) {
-    const cardW = Math.min(maxW, Math.max(minW, Math.floor(available)));
-    return { cardW, peek: cardW, overlap: 0, height: Math.round(cardW * ratio), total: cardW };
+    const cardW = Math.min(maxW, Math.max(minW, Math.floor(avail) || minW));
+    return {
+      cardW,
+      peek: cardW,
+      overlap: 0,
+      height: heightOf(cardW),
+      total: cardW,
+      needsScroll: avail > 0 && cardW > avail,
+    };
   }
+
   const slots = n - 1;
-  let cardW = Math.min(maxW, Math.max(minW, Math.floor(available - slots * minPeek)));
-  let peek = Math.max(minPeek, Math.floor((available - cardW) / slots));
-  peek = Math.min(peek, Math.max(minPeek, cardW - 2));
-  if (cardW + slots * peek > available) {
-    peek = Math.max(minPeek, Math.floor((available - minW) / slots));
-    cardW = Math.max(minW, available - slots * peek);
+
+  // 1) Try maxW with peek >= minPeek
+  {
+    const cardW = maxW;
+    let peek = Math.floor((avail - cardW) / slots);
+    if (avail > 0 && peek >= minPeek) {
+      peek = Math.min(Math.max(minPeek, peek), Math.max(minPeek, cardW - 2));
+      const total = cardW + slots * peek;
+      return {
+        cardW,
+        peek,
+        overlap: Math.max(0, cardW - peek),
+        height: heightOf(cardW),
+        total,
+        needsScroll: false,
+      };
+    }
   }
-  if (cardW + slots * peek > available) {
-    peek = Math.max(1, Math.floor((available - minW) / slots));
-    cardW = Math.max(minW, available - slots * peek);
+
+  // 2) Shrink cardW at minPeek (never above maxW)
+  {
+    const peek = minPeek;
+    let cardW = Math.floor(avail - slots * peek);
+    if (cardW >= minW) {
+      cardW = Math.min(maxW, Math.max(minW, cardW));
+      let peek2 = peek;
+      const leftover = avail - (cardW + slots * peek2);
+      if (leftover > 0) {
+        peek2 = Math.min(cardW - 2, peek2 + Math.floor(leftover / slots));
+        peek2 = Math.max(minPeek, peek2);
+      }
+      const total = cardW + slots * peek2;
+      return {
+        cardW,
+        peek: peek2,
+        overlap: Math.max(0, cardW - peek2),
+        height: heightOf(cardW),
+        total,
+        needsScroll: total > avail + 0.5,
+      };
+    }
   }
+
+  // 3) Readable floor — scroll instead of crushing to half a digit
+  const cardW = minW;
+  const peek = minPeek;
   const total = cardW + slots * peek;
-  const overlap = Math.max(0, Math.round(cardW - peek));
-  return { cardW, peek, overlap, height: Math.round(cardW * ratio), total };
+  return {
+    cardW,
+    peek,
+    overlap: Math.max(0, cardW - peek),
+    height: heightOf(cardW),
+    total,
+    needsScroll: true,
+  };
 }
+
 
 function applyOverlapItems(items, pack, zBase = 20) {
   items.forEach((el, i) => {
@@ -79,21 +134,51 @@ export function layoutOverlapRow(area, items, opts = {}) {
   const left = (area.getBoundingClientRect && area.getBoundingClientRect().left) || 0;
   const maxRight = Math.max(0, window.innerWidth - 6);
   if (maxRight > left) available = Math.min(available, maxRight - left);
-  const pack = packOverlap(n, available, {
+  const minW = opts.minW ?? 22;
+  const minPeek = opts.minPeek ?? 12;
+  const allowScroll = opts.allowScroll !== false;
+  // play9v3: prefer readable minW/minPeek; light horizontal scroll OK when fan won't fit.
+  let pack = packOverlap(n, available, {
     maxW: opts.maxW ?? 40,
-    minW: opts.minW ?? 22,
-    minPeek: opts.minPeek ?? 12,
+    minW,
+    minPeek,
     ratio: opts.ratio ?? 1.45,
   });
+  if (allowScroll && n > 1) {
+    const floorPeek = Math.max(minPeek, 14);
+    const floorW = Math.max(minW, 36);
+    const crushed = pack.peek < floorPeek || pack.cardW < floorW || pack.needsScroll || pack.total > available + 0.5;
+    if (crushed) {
+      const cardW = Math.min(opts.maxW ?? 48, Math.max(floorW, Math.min(pack.cardW || floorW, opts.maxW ?? 48)));
+      const peek = floorPeek;
+      const overlap = Math.max(0, cardW - peek);
+      const total = cardW + (n - 1) * peek;
+      pack = {
+        cardW,
+        peek,
+        overlap,
+        height: Math.round(cardW * (opts.ratio ?? 1.45)),
+        total,
+        needsScroll: total > available + 0.5,
+      };
+    }
+  }
 
   area.style.removeProperty("gap");
   area.classList.add("hand-fitted");
   area.classList.remove("gd-hand-2row", "hand-grid");
+  area.classList.toggle("hand-scroll", Boolean(allowScroll && (pack.needsScroll || pack.total > available + 0.5)));
   area.style.setProperty("display", "flex", "important");
   area.style.setProperty("flex-direction", "row", "important");
   area.style.setProperty("flex-wrap", "nowrap", "important");
-  area.style.setProperty("overflow-x", "hidden", "important");
+  // play9v3: never clip unreadably — light horizontal scroll when fan exceeds width
+  area.style.setProperty("overflow-x", allowScroll ? "auto" : "hidden", "important");
+  area.style.setProperty("overflow-y", "visible", "important");
   area.style.setProperty("position", "relative", "important");
+  area.style.setProperty("pointer-events", "auto", "important");
+  area.style.setProperty("touch-action", allowScroll ? "pan-x" : "manipulation", "important");
+  area.style.setProperty("z-index", "50", "important");
+  area.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
   area.style.removeProperty("grid-template-columns");
   area.style.removeProperty("grid-auto-rows");
   applyOverlapItems(items, pack);
@@ -102,18 +187,28 @@ export function layoutOverlapRow(area, items, opts = {}) {
     el.style.removeProperty("left");
     el.style.removeProperty("top");
   });
-  const last = items[items.length - 1];
-  const lastRight = last.getBoundingClientRect ? last.getBoundingClientRect().right : 0;
-  const limit = window.innerWidth - 4;
-  if (lastRight > limit && n > 1) {
-    const overflow = lastRight - limit;
-    const floorPeek = Math.max(opts.minPeek ?? 12, 8);
-    const peek = Math.max(floorPeek, pack.peek - Math.ceil(overflow / (n - 1)));
-    const overlap = Math.max(0, pack.cardW - peek);
-    items.forEach((el, i) => {
-      if (i === 0) return;
-      el.style.setProperty("margin-left", "-" + overlap + "px", "important");
-    });
+
+  // Only crush peek when scroll is disabled; otherwise keep readable strip.
+  if (!allowScroll) {
+    const last = items[items.length - 1];
+    const lastRight = last.getBoundingClientRect ? last.getBoundingClientRect().right : 0;
+    const limit = window.innerWidth - 4;
+    if (lastRight > limit && n > 1) {
+      const overflow = lastRight - limit;
+      const floorPeek = Math.max(opts.minPeek ?? 12, 8);
+      const peek = Math.max(floorPeek, pack.peek - Math.ceil(overflow / (n - 1)));
+      const overlap = Math.max(0, pack.cardW - peek);
+      items.forEach((el, i) => {
+        if (i === 0) return;
+        el.style.setProperty("margin-left", "-" + overlap + "px", "important");
+      });
+    }
+  }
+
+  const wrap = area.closest(".hand-wrap, .mg-hand-dock");
+  if (wrap && wrap.style) {
+    wrap.style.setProperty("overflow-x", "visible", "important");
+    wrap.style.setProperty("overflow-y", "visible", "important");
   }
 }
 
@@ -396,12 +491,13 @@ export function fitAllHands(root = document) {
   const handArea = root.querySelector("#handArea");
   if (handArea) {
     const wide = (handArea.clientWidth || 360) > 520;
-    // play9v2 / JJ: Dou Dizhu single-row fan — negative-margin peek, selected lifts
+    // play9v3 / JJ: readable rank+suit on TG mobile; scroll > crush below mins
     layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
       maxW: wide ? 56 : 48,
-      minW: 40,
-      minPeek: 16,
+      minW: 42,
+      minPeek: 18,
       ratio: 1.42,
+      allowScroll: true,
     });
   }
 
@@ -416,9 +512,10 @@ export function fitAllHands(root = document) {
         // play9v2: mahjong / multi hands use JJ-style overlap fan (not 九宫格)
         layoutOverlapRow(mg, items, {
           maxW: isTile ? 36 : 40,
-          minW: isTile ? 26 : 20,
-          minPeek: isTile ? 18 : 12,
+          minW: isTile ? 28 : 24,
+          minPeek: isTile ? 16 : 12,
           ratio: isTile ? 1.45 : 1.42,
+          allowScroll: true,
         });
       }
     }

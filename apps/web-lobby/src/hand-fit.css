@@ -107,7 +107,8 @@
 .lobby-shell.table-active #tableView #handArea {
   padding-left: 56px !important;
   padding-right: 8px !important;
-  overflow-x: hidden !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
   box-sizing: border-box !important;
 }
 .gd-yard .mg-hand-dock {
@@ -342,4 +343,55 @@ html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
 .lobby-shell.table-active #tableView .self-slot .card-face-ad-hand {
   pointer-events: none !important;
   z-index: 5 !important;
+}
+
+
+/* ── play9v3: TG mobile hand readable + tappable (P0) ── */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea {
+  pointer-events: auto !important;
+  touch-action: pan-x !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  z-index: 70 !important;
+  position: relative !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .hand-wrap {
+  pointer-events: auto !important;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  z-index: 65 !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  min-width: 36px !important;
+  cursor: pointer !important;
+}
+/* HUD / timer / ads must not cover hand hit targets */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-hud,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-room-line,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .table-center-ad,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .mg-ad-bar,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .card-face-ad-hand {
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions {
+  pointer-events: none !important;
+  z-index: 55 !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions .qq-btn,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls:not([hidden]),
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls:not([hidden]),
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #doubleControls:not([hidden]) {
+  pointer-events: auto !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls #turnTimer,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls .qq-timer {
+  pointer-events: none !important;
+  z-index: 2 !important;
 }
