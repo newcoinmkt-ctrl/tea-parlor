@@ -3453,3 +3453,100 @@ html body .lobby-shell.multi-active #multiGameView.mj-2p:not([hidden]) {
     font-size: 12px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   play9h1 P0: unlock Dou Dizhu ~28px card lock; restore mahjong visibility
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Dou Dizhu: beat every 28×42 lock — tappable size on 414 */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot .playing-card,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea .playing-card,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card {
+  width: 40px !important;
+  min-width: 36px !important;
+  max-width: 48px !important;
+  height: 56px !important;
+  min-height: 52px !important;
+  max-height: 64px !important;
+  flex: 0 0 40px !important;
+  margin-left: -16px !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  z-index: 50 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  cursor: pointer !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card:first-child,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea .playing-card:first-child {
+  margin-left: 0 !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card.selected,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea .playing-card.selected {
+  transform: translateY(-14px) !important;
+  z-index: 60 !important;
+  filter: brightness(1.08) !important;
+}
+
+/* Ensure hand row + play controls are hittable above bottom chrome */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot .hand-wrap,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot .hand-area {
+  pointer-events: auto !important;
+  overflow: visible !important;
+  z-index: 45 !important;
+  min-height: 56px !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #doubleControls:not([hidden]) {
+  pointer-events: auto !important;
+  z-index: 80 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Mahjong: pull back extreme -96px raise that can hide hand; force visible tiles */
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-row-hero,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
+  transform: translateY(-28px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 55 !important;
+  pointer-events: auto !important;
+}
+@media (max-width: 430px) {
+  html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-row-hero,
+  html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
+    bottom: 16px !important;
+    transform: translateY(-28px) !important;
+  }
+}
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgHand,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgHand,
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-hand-dock,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-hand-dock {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  z-index: 56 !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-hand-tile,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-hand-tile,
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mj-tile.mg-hand-tile,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mj-tile.mg-hand-tile {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  z-index: 57 !important;
+  /* keep readable size; beat any crushed 26–28px */
+  min-width: 30px !important;
+  width: 32px !important;
+  height: 46px !important;
+  filter: none !important;
+}

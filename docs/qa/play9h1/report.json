@@ -1,0 +1,40 @@
+{
+  "ddz": {
+    "n": 0,
+    "sizes": [],
+    "shell": "lobby-shell p0-tg lobby-view-rooms"
+  },
+  "mj": {
+    "n": 13,
+    "sizes": [
+      {
+        "w": 32,
+        "h": 46,
+        "op": "1",
+        "vis": "visible",
+        "top": 746,
+        "bottom": 792
+      },
+      {
+        "w": 32,
+        "h": 46,
+        "op": "1",
+        "vis": "visible",
+        "top": 746,
+        "bottom": 792
+      },
+      {
+        "w": 32,
+        "h": 46,
+        "op": "1",
+        "vis": "visible",
+        "top": 746,
+        "bottom": 792
+      }
+    ],
+    "handOp": "1",
+    "handVis": "visible",
+    "heroTransform": "matrix(1, 0, 0, 1, 0, -28)",
+    "vh": 896
+  }
+}
