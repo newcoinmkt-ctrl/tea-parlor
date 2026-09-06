@@ -1,36 +1,82 @@
 {
   "cache": "play9i2",
-  "open": {
+  "viewport": {
+    "width": 414,
+    "height": 896
+  },
+  "url": "http://127.0.0.1:5173/index.html?v=play9i2",
+  "ok": true,
+  "checks": {
+    "table_visible": true,
+    "more_opens": true,
+    "has_gift": true,
+    "has_trustee": true,
+    "hud_overflow_visible": true,
+    "menu_z_high": true,
+    "hit_menu": true,
+    "close_toggle": true,
+    "close_outside": true,
+    "cache_play9i2": true
+  },
+  "steps": [
+    {
+      "name": "loaded",
+      "title": "茶馆"
+    },
+    {
+      "name": "clicked_local"
+    },
+    {
+      "name": "table_visible",
+      "ok": true
+    },
+    {
+      "name": "more_open",
+      "hidden": false,
+      "aria": "true",
+      "items": [
+        "🎁 礼包",
+        "托管"
+      ],
+      "hudOverflow": "visible",
+      "hudZ": "60",
+      "menuZ": "80",
+      "menuDisplay": "flex",
+      "hit": "hudMoreMenu",
+      "menuVisible": true
+    },
+    {
+      "name": "closed_by_toggle",
+      "hidden": true,
+      "aria": "false",
+      "display": "none"
+    },
+    {
+      "name": "closed_by_outside",
+      "hidden": true,
+      "aria": "false",
+      "display": "none"
+    }
+  ],
+  "more_open": {
     "hidden": false,
-    "hasAttr": false,
-    "display": "flex",
-    "h": 106,
-    "w": 120,
-    "top": 43,
     "aria": "true",
-    "openCls": true,
     "items": [
-      {
-        "text": "🎁 礼包",
-        "vis": true,
-        "r": 44
-      },
-      {
-        "text": "托管",
-        "vis": true,
-        "r": 44
-      }
+      "🎁 礼包",
+      "托管"
     ],
     "hudOverflow": "visible",
     "hudZ": "60",
-    "menuZ": "80"
+    "menuZ": "80",
+    "menuDisplay": "flex",
+    "hit": "hudMoreMenu",
+    "menuVisible": true
   },
-  "closed": {
-    "hidden": true,
-    "hasAttr": true,
-    "display": "none",
-    "aria": "false"
+  "shots": {
+    "ddz-414-more-open.png": {
+      "path": "docs/qa/play9i2/ddz-414-more-open.png",
+      "bytes": 186393
+    }
   },
-  "ok": true,
-  "rootCause": "qq-hud overflow:hidden clipped absolute more menu"
+  "failed_required": []
 }

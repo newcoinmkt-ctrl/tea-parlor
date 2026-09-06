@@ -1,11 +1,24 @@
-# play9i2 — 斗地主「更多」菜单可展开
+# play9i2 — Dou Dizhu more menu open/close
 
-## 根因
-牌桌 `.qq-hud` 在横屏/harbor 规则里 `overflow: hidden` + 固定高度，绝对定位的 `#hudMoreMenu` 被裁切，看起来像点不开。
+Cache: `play9i2` · `#hudMoreToggle` ↔ `#hudMoreMenu`
 
-## 修复
-- `table-play.css`：HUD / tools / more-wrap `overflow: visible`，菜单 z-index 抬高
-- `app.js`：toggle 用 capture + `hidden`/`aria-expanded`/`is-open`；牌桌内允许 `#hudMoreMenu [data-lobby-action]`（礼包）
-- cache `play9i2`
+## Root cause
+Landscape HUD used `overflow: hidden` + fixed height on `.qq-hud`, so the dropdown opened in the DOM (`hidden` cleared) but was clipped and not hittable under the felt.
 
-不动牌宽 / 出牌逻辑。不接链。
+## Fix
+- CSS: `overflow: visible` on `.qq-hud` / `.qq-hud-tools` / `.qq-more-wrap`; menu `z-index: 80+`; HUD `z-index: 60`
+- JS: idempotent bind, capture toggle + stopPropagation, outside click closes
+- Cache bump `play9i2` (index CSS/JS + hand-layout stamp)
+
+## 414 self-test (人机畅玩)
+| Check | Result |
+|---|---|
+| more opens (礼包+托管) | PASS |
+| hud overflow visible | PASS |
+| menu hittable | PASS |
+| close via toggle | PASS |
+| close via outside | PASS |
+
+Shot: `docs/qa/play9i2/ddz-414-more-open.png`
+
+Overall: PASS
