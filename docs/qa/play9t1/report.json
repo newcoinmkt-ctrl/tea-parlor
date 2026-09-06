@@ -1,0 +1,474 @@
+{
+  "cache": "play9t1",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5191/index.html?v=play9t1",
+  "shots": {
+    "lobby-414.png": 235118,
+    "gd-414-tokens.png": 263658,
+    "mj-414-tokens.png": 1003131,
+    "ddz-414-tokens.png": 578463,
+    "ddz-414-more-menu.png": 578567
+  },
+  "checks": {
+    "tokens": {
+      "gold": "#e8c547",
+      "goldInk": "#3d2e00",
+      "action": "#f59e0b",
+      "pass": "#3b82f6",
+      "bridgeHref": [
+        "http://127.0.0.1:5191/src/themes/tokens.css?v=play9t1",
+        "http://127.0.0.1:5191/src/themes/tp-bridge.css?v=play9t1"
+      ]
+    },
+    "lobby": {
+      "goldChip": {
+        "text": "金币128,600",
+        "color": "rgb(61, 46, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "rect": {
+          "w": 115.8,
+          "h": 40
+        }
+      },
+      "primary": {
+        "text": "斗地主 · 快速开始",
+        "color": "rgb(248, 250, 252)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(251, 146, 60), rgb(245, 158, 11))",
+        "rect": {
+          "w": 348,
+          "h": 52
+        }
+      },
+      "tab": {
+        "text": "大厅",
+        "color": "rgb(232, 197, 71)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgba(255, 225, 124, 0.24), rgba(40, 125, 76, 0.4))",
+        "rect": {
+          "w": 78,
+          "h": 52
+        }
+      },
+      "games": [
+        "斗地主",
+        "德州",
+        "炸金花",
+        "麻将",
+        "掼蛋",
+        "二十一点"
+      ],
+      "hasGoldWord": true
+    },
+    "guandan": {
+      "barInDock": true,
+      "toolbarAboveHand": true,
+      "seat0W": 56,
+      "seat0W_le_56": true,
+      "restore": {
+        "text": "恢复",
+        "color": "rgb(61, 46, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "rect": {
+          "t": 668,
+          "b": 708,
+          "l": 236,
+          "r": 292,
+          "w": 56,
+          "h": 40
+        }
+      },
+      "sort": {
+        "text": "一键理牌",
+        "color": "rgb(255, 255, 255)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(96, 165, 250), rgb(59, 130, 246))",
+        "rect": {
+          "t": 668,
+          "b": 708,
+          "l": 300,
+          "r": 384,
+          "w": 84,
+          "h": 40
+        }
+      },
+      "cardCount": 27,
+      "mgClass": "table-view multi-game-view gd-active gd-4p gd-yard"
+    },
+    "mahjong": {
+      "mgClass": "table-view multi-game-view mj-4p",
+      "pill": {
+        "text": "血战到底 · 底分 100",
+        "color": "rgb(61, 46, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "rect": {
+          "t": 18,
+          "b": 53,
+          "w": 136.1,
+          "h": 35
+        }
+      },
+      "qi": {
+        "text": "弃",
+        "color": "rgb(248, 250, 252)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(96, 165, 250), rgb(59, 130, 246))",
+        "rect": {
+          "t": 597,
+          "b": 653,
+          "w": 56,
+          "h": 56
+        }
+      },
+      "hu": {
+        "text": "胡",
+        "color": "rgb(61, 46, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "rect": {
+          "t": 597,
+          "b": 653,
+          "w": 56,
+          "h": 56
+        }
+      },
+      "actionsAboveHand": false,
+      "tileCount": 0
+    },
+    "ddz": {
+      "tableActive": true,
+      "play": {
+        "text": "出牌",
+        "color": "rgb(248, 250, 252)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(251, 146, 60), rgb(245, 158, 11))",
+        "rect": {
+          "t": 0,
+          "b": 0,
+          "w": 0,
+          "h": 0
+        },
+        "disabled": true
+      },
+      "pass": {
+        "text": "不出",
+        "color": "rgb(248, 250, 252)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(96, 165, 250), rgb(59, 130, 246))",
+        "rect": {
+          "t": 0,
+          "b": 0,
+          "w": 0,
+          "h": 0
+        },
+        "disabled": true
+      },
+      "hint": {
+        "text": "提示",
+        "color": "rgb(61, 46, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "rect": {
+          "t": 0,
+          "b": 0,
+          "w": 0,
+          "h": 0
+        },
+        "disabled": true
+      },
+      "timer": {
+        "text": "20",
+        "color": "rgb(61, 46, 0)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "rect": {
+          "t": 0,
+          "b": 0,
+          "w": 0,
+          "h": 0
+        },
+        "disabled": false
+      },
+      "moreToggleFound": true,
+      "moreOpen": true,
+      "start": {
+        "via": "start(novice)",
+        "keys": [
+          "state",
+          "start",
+          "startTexas",
+          "startGuanDan",
+          "startZhajinhua",
+          "startMahjong",
+          "startBlackjack",
+          "leaveMulti",
+          "lobby",
+          "brand",
+          "setPlayMode"
+        ]
+      },
+      "vis": {
+        "tableHidden": false,
+        "tableActive": true,
+        "hasPlay": true,
+        "hasPass": true,
+        "hasHint": true,
+        "hasTimer": true,
+        "body": "← 更多 17 2 分 17 不叫 不叫 1 分 2 分 3 分 2 ♣ 2 ♠ A ♥ K ♦ K ♥ K ♠ Q ♥ J ♦ J ♠ 10 ♠ 8 ♦ 8 ♥ 7 ♥ 6 ♣ 6 ♥ 4 ♣ 3 ♥"
+      }
+    }
+  },
+  "deviations": [
+    "tp-bridge.css loaded after lobby-ia.css (not only beside tokens) so higher-specificity !important mappings win cascade vs styles/table-play",
+    "Bridge selectors extended beyond patch 02 for #turnTimer / mj-4p|#mgActions hu|qi so token fills beat legacy gradients; color intent unchanged",
+    "MJ tileCount=0 / actionsAboveHand false in smoke (opening/injected act buttons for color sample only); GD thumb dock layout still PASS"
+  ],
+  "pass": {
+    "tokens_loaded": true,
+    "lobby_gold_chip_dark_ink": true,
+    "lobby_p0_primary_action": true,
+    "lobby_tab_active_gold": true,
+    "ddz_play_orange": true,
+    "ddz_pass_blue": true,
+    "ddz_hint_gold_dark": true,
+    "ddz_timer_gold_dark": true,
+    "ddz_more_opens": true,
+    "mj_pill_gold_ink": true,
+    "mj_qi_blue": true,
+    "mj_hu_gold_ink": true,
+    "gd_restore_gold_ink": true,
+    "gd_sort_blue": true,
+    "gd_toolbar_in_dock": true,
+    "gd_toolbar_above_hand": true,
+    "gd_seat0_le_56": true,
+    "no_white_on_yellow_samples": true
+  },
+  "samples": {
+    "lobby_goldChip": {
+      "color": "rgb(61, 46, 0)",
+      "rgb": [
+        61,
+        46,
+        0
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+      "text": "金币128,600"
+    },
+    "lobby_primary": {
+      "color": "rgb(248, 250, 252)",
+      "rgb": [
+        248,
+        250,
+        252
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(251, 146, 60), rgb(245, 158, 11))",
+      "text": "斗地主 · 快速开始"
+    },
+    "lobby_tab": {
+      "color": "rgb(232, 197, 71)",
+      "rgb": [
+        232,
+        197,
+        71
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": false,
+      "bgImage": "linear-gradient(rgba(255, 225, 124, 0.24), rgba(40, 125, 76, 0.4))",
+      "text": "大厅"
+    },
+    "ddz_play": {
+      "color": "rgb(248, 250, 252)",
+      "rgb": [
+        248,
+        250,
+        252
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(251, 146, 60), rgb(245, 158, 11))",
+      "text": "出牌"
+    },
+    "ddz_pass": {
+      "color": "rgb(248, 250, 252)",
+      "rgb": [
+        248,
+        250,
+        252
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(96, 165, 250), rgb(59, 130, 246))",
+      "text": "不出"
+    },
+    "ddz_hint": {
+      "color": "rgb(61, 46, 0)",
+      "rgb": [
+        61,
+        46,
+        0
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+      "text": "提示"
+    },
+    "ddz_timer": {
+      "color": "rgb(61, 46, 0)",
+      "rgb": [
+        61,
+        46,
+        0
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+      "text": "20"
+    },
+    "mj_pill": {
+      "color": "rgb(61, 46, 0)",
+      "rgb": [
+        61,
+        46,
+        0
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+      "text": "血战到底 · 底分 100"
+    },
+    "mj_qi": {
+      "color": "rgb(248, 250, 252)",
+      "rgb": [
+        248,
+        250,
+        252
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(96, 165, 250), rgb(59, 130, 246))",
+      "text": "弃"
+    },
+    "mj_hu": {
+      "color": "rgb(61, 46, 0)",
+      "rgb": [
+        61,
+        46,
+        0
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+      "text": "胡"
+    },
+    "gd_restore": {
+      "color": "rgb(61, 46, 0)",
+      "rgb": [
+        61,
+        46,
+        0
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+      "text": "恢复"
+    },
+    "gd_sort": {
+      "color": "rgb(255, 255, 255)",
+      "rgb": [
+        255,
+        255,
+        255
+      ],
+      "bg": "rgba(0, 0, 0, 0)",
+      "bgRgb": [
+        0,
+        0,
+        0
+      ],
+      "hasGoldGrad": true,
+      "bgImage": "linear-gradient(rgb(96, 165, 250), rgb(59, 130, 246))",
+      "text": "一键理牌"
+    }
+  },
+  "allPass": true,
+  "files": [
+    "apps/web-lobby/src/themes/tokens.css",
+    "apps/web-lobby/src/themes/tp-bridge.css",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/src/app.js",
+    "docs/qa/play9t1.md",
+    "docs/qa/play9t1/*"
+  ],
+  "layout_not_regressed": {
+    "gd_toolbar_in_dock": true,
+    "gd_toolbar_above_hand": true,
+    "gd_seat0_le_56": true,
+    "ddz_more_menu_opens": true,
+    "lobby_ia_games_present": true
+  }
+}
