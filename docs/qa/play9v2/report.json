@@ -10,25 +10,29 @@
       "bytes": 222597,
       "sha1": "056e25f570de"
     },
+    "ddz-414-match-mask.png": {
+      "bytes": 184190,
+      "sha1": "9aa6e3aa6b1d"
+    },
     "ddz-414-fan.png": {
-      "bytes": 572540,
-      "sha1": "074743de4654"
+      "bytes": 573238,
+      "sha1": "e86ebcdb34b1"
     },
     "ddz-414-selected.png": {
-      "bytes": 579397,
-      "sha1": "3251a5d3f865"
+      "bytes": 578943,
+      "sha1": "9d5f045a81f5"
     },
     "ddz-414-after-play.png": {
-      "bytes": 572748,
-      "sha1": "23fa46a15bdc"
+      "bytes": 573409,
+      "sha1": "b5cf72f9b0f8"
     },
     "mj-414-hand.png": {
-      "bytes": 979500,
-      "sha1": "bea2d36f0d46"
+      "bytes": 978571,
+      "sha1": "c27646eb9fae"
     },
     "gd-414-hand.png": {
-      "bytes": 278177,
-      "sha1": "5d643b871813"
+      "bytes": 272237,
+      "sha1": "95748b904308"
     }
   },
   "checks": {
@@ -46,6 +50,16 @@
       "hasChain": true,
       "cta_visible": false,
       "hasGold": true
+    },
+    "match_mask": {
+      "ok": true,
+      "visible": true,
+      "copy": "匹配中…",
+      "title": "匹配中",
+      "text": "匹配中\n\n匹配中…\n\n取消匹配 匹配中…",
+      "hasAi": false,
+      "hasCountdown": false,
+      "fakeEndsAt": 1788688344110
     },
     "ddz_start": {
       "via": "click-local",
@@ -296,7 +310,13 @@
     "gd_fan2_or_overlap": true,
     "gd_count": true,
     "gd_toolbar_above": true,
+    "match_no_ai": true,
+    "match_no_countdown": true,
     "shots_distinct": true
   },
-  "ok": true
+  "ok": true,
+  "rootCause": {
+    "selectPlay": "canSelectHand requires phase=play; play9v1 QA clicked during bid. Also toggleHandCard did not enable #playButton — fixed via syncPlayButtonFromSelection + forceDdzPlay + pointer-events on fan/HUD.",
+    "matchUi": "ddzMatchMask copy is 匹配中… only; syncMatchOverlay ticks silently without AI/countdown text."
+  }
 }
