@@ -1,0 +1,255 @@
+{
+  "cache": "play9v1",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5193/index.html?v=play9v1",
+  "shots": {
+    "lobby-414-home.png": {
+      "bytes": 222597,
+      "sha1": "056e25f570de"
+    },
+    "ddz-414-hand.png": {
+      "bytes": 589460,
+      "sha1": "5be18ea77bd2"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 589594,
+      "sha1": "d28e9bb2e015"
+    },
+    "mj-414-hand.png": {
+      "bytes": 971340,
+      "sha1": "5fe73019c83b"
+    },
+    "gd-414-hand.png": {
+      "bytes": 293457,
+      "sha1": "cbbaabee4b08"
+    }
+  },
+  "checks": {
+    "lobby": {
+      "games": [
+        "斗地主",
+        "麻将",
+        "德州",
+        "掼蛋",
+        "炸金花",
+        "二十一点",
+        "链游中心"
+      ],
+      "gameCount": 7,
+      "hasChain": true,
+      "cta_visible": false,
+      "hasGold": true
+    },
+    "ddz_start": {
+      "via": "click-local",
+      "keys": [
+        "state",
+        "start",
+        "startTexas",
+        "startGuanDan",
+        "startZhajinhua",
+        "startMahjong",
+        "startBlackjack",
+        "leaveMulti",
+        "lobby",
+        "brand",
+        "setPlayMode"
+      ]
+    },
+    "ddz": {
+      "label": "ddz",
+      "n": 17,
+      "minW": 44,
+      "maxW": 44,
+      "minH": 62,
+      "maxH": 62,
+      "sizeOk": true,
+      "overlapCount": 0,
+      "maxOverlapArea": 0,
+      "facesFull": true,
+      "isGrid": true,
+      "display": "grid",
+      "areaId": "handArea",
+      "sample": [
+        {
+          "w": 44,
+          "h": 62,
+          "left": 118,
+          "top": 668,
+          "right": 162,
+          "bottom": 730
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 164.3,
+          "top": 668,
+          "right": 208.3,
+          "bottom": 730
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 210.7,
+          "top": 668,
+          "right": 254.7,
+          "bottom": 730
+        }
+      ]
+    },
+    "ddz_selected": {
+      "ok": true,
+      "selected": 0,
+      "n": 17
+    },
+    "ddz_after": {
+      "label": "ddz_after",
+      "n": 17,
+      "minW": 44,
+      "maxW": 44,
+      "minH": 62,
+      "maxH": 62,
+      "sizeOk": true,
+      "overlapCount": 0,
+      "maxOverlapArea": 0,
+      "facesFull": true,
+      "isGrid": true,
+      "display": "grid",
+      "areaId": "handArea",
+      "sample": [
+        {
+          "w": 44,
+          "h": 62,
+          "left": 118,
+          "top": 668,
+          "right": 162,
+          "bottom": 730
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 164.3,
+          "top": 668,
+          "right": 208.3,
+          "bottom": 730
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 210.7,
+          "top": 668,
+          "right": 254.7,
+          "bottom": 730
+        }
+      ]
+    },
+    "mj": {
+      "label": "mj",
+      "n": 13,
+      "minW": 35,
+      "maxW": 35,
+      "minH": 51,
+      "maxH": 51,
+      "sizeOk": true,
+      "overlapCount": 0,
+      "maxOverlapArea": 0,
+      "facesFull": true,
+      "isGrid": true,
+      "display": "grid",
+      "areaId": "mgHand",
+      "sample": [
+        {
+          "w": 35,
+          "h": 51,
+          "left": 84,
+          "top": 707,
+          "right": 119,
+          "bottom": 758
+        },
+        {
+          "w": 35,
+          "h": 51,
+          "left": 120.9,
+          "top": 707,
+          "right": 155.9,
+          "bottom": 758
+        },
+        {
+          "w": 35,
+          "h": 51,
+          "left": 157.8,
+          "top": 707,
+          "right": 192.8,
+          "bottom": 758
+        }
+      ]
+    },
+    "gd": {
+      "label": "gd",
+      "n": 27,
+      "minW": 46,
+      "maxW": 46,
+      "minH": 64,
+      "maxH": 64,
+      "sizeOk": true,
+      "overlapCount": 0,
+      "maxOverlapArea": 0,
+      "facesFull": true,
+      "isGrid": true,
+      "display": "grid",
+      "areaId": "mgHand",
+      "sample": [
+        {
+          "w": 46,
+          "h": 64,
+          "left": 62,
+          "top": 574,
+          "right": 108,
+          "bottom": 638
+        },
+        {
+          "w": 46,
+          "h": 64,
+          "left": 111.4,
+          "top": 574,
+          "right": 157.4,
+          "bottom": 638
+        },
+        {
+          "w": 46,
+          "h": 64,
+          "left": 160.8,
+          "top": 574,
+          "right": 206.8,
+          "bottom": 638
+        }
+      ],
+      "toolbarAboveHand": true
+    },
+    "shot_distinct": true
+  },
+  "pass": {
+    "lobby_no_cta": true,
+    "lobby_grid": true,
+    "lobby_has_chain": true,
+    "ddz_grid": true,
+    "ddz_size": true,
+    "ddz_faces": true,
+    "ddz_count": true,
+    "ddz_after_size": true,
+    "mj_grid": true,
+    "mj_size": true,
+    "mj_faces": true,
+    "mj_count": true,
+    "gd_grid": true,
+    "gd_size": true,
+    "gd_faces": true,
+    "gd_count": true,
+    "gd_toolbar_above": true,
+    "shots_distinct": true
+  },
+  "ok": true
+}

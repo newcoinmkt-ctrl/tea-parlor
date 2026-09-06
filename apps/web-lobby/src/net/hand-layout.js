@@ -85,12 +85,14 @@ export function layoutOverlapRow(area, items, opts = {}) {
 
   area.style.removeProperty("gap");
   area.classList.add("hand-fitted");
-  area.classList.remove("gd-hand-2row");
+  area.classList.remove("gd-hand-2row", "hand-grid");
   area.style.setProperty("display", "flex", "important");
   area.style.setProperty("flex-direction", "row", "important");
   area.style.setProperty("flex-wrap", "nowrap", "important");
   area.style.setProperty("overflow-x", "hidden", "important");
   area.style.setProperty("position", "relative", "important");
+  area.style.removeProperty("grid-template-columns");
+  area.style.removeProperty("grid-auto-rows");
   applyOverlapItems(items, pack);
   items.forEach((el) => {
     el.style.removeProperty("position");
@@ -113,7 +115,83 @@ export function layoutOverlapRow(area, items, opts = {}) {
 }
 
 /**
- * Pure planner for Guandan hero hand rows.
+ * play9v1: full-face grid — no negative-margin peek packing.
+ * Cards stay fully visible & tappable; selected lift uses CSS translateY (does not reflow grid).
+ */
+export function layoutGridRow(area, items, opts = {}) {
+  const n = items.length;
+  if (!area || n === 0) return;
+
+  const minW = opts.minW ?? 40;
+  const maxW = opts.maxW ?? 48;
+  const ratio = opts.ratio ?? 1.42;
+  const gap = opts.gap ?? 4;
+  const colsHint = opts.cols ?? 0;
+  const measured = measureHandAvailable(area);
+  let available = Math.max(8, measured.available);
+  const left = (area.getBoundingClientRect && area.getBoundingClientRect().left) || 0;
+  const maxRight = Math.max(0, window.innerWidth - 6);
+  if (maxRight > left) available = Math.min(available, Math.max(8, maxRight - left));
+
+  // Prefer readable face size; shrink only if a single row of ~colsHint would overflow badly.
+  let cardW = Math.min(maxW, Math.max(minW, maxW));
+  const preferCols = colsHint > 0
+    ? colsHint
+    : Math.max(4, Math.min(9, Math.floor((available + gap) / (minW + gap))));
+  // Fit as many columns as available allows at minW, then grow card toward maxW.
+  const maxCols = Math.max(1, Math.floor((available + gap) / (minW + gap)));
+  const cols = Math.min(preferCols, maxCols, n);
+  const cell = Math.floor((available - gap * Math.max(0, cols - 1)) / Math.max(1, cols));
+  cardW = Math.min(maxW, Math.max(minW, cell));
+  const height = Math.round(cardW * ratio);
+
+  area.classList.add("hand-fitted", "hand-grid");
+  area.classList.remove("gd-hand-2row");
+  area.style.setProperty("display", "grid", "important");
+  area.style.setProperty(
+    "grid-template-columns",
+    `repeat(auto-fill, minmax(${minW}px, 1fr))`,
+    "important",
+  );
+  area.style.setProperty("grid-auto-rows", height + "px", "important");
+  area.style.setProperty("gap", gap + "px", "important");
+  area.style.setProperty("justify-content", "center", "important");
+  area.style.setProperty("align-content", "end", "important");
+  area.style.setProperty("align-items", "end", "important");
+  area.style.setProperty("flex-wrap", "wrap", "important");
+  area.style.setProperty("flex-direction", "row", "important");
+  area.style.setProperty("overflow-x", "auto", "important");
+  area.style.setProperty("overflow-y", "auto", "important");
+  area.style.setProperty("position", "relative", "important");
+  area.style.setProperty("width", "100%", "important");
+  area.style.setProperty("max-width", available + "px", "important");
+  area.style.setProperty("box-sizing", "border-box", "important");
+  // Let grid grow vertically; clear absolute-fan height locks from Guandan.
+  area.style.removeProperty("height");
+  area.style.removeProperty("min-height");
+
+  items.forEach((el, i) => {
+    el.style.removeProperty("position");
+    el.style.removeProperty("left");
+    el.style.removeProperty("top");
+    el.style.setProperty("margin", "0px", "important");
+    el.style.setProperty("margin-left", "0px", "important");
+    el.style.setProperty("margin-top", "0px", "important");
+    el.style.setProperty("width", cardW + "px", "important");
+    el.style.setProperty("min-width", cardW + "px", "important");
+    el.style.setProperty("max-width", cardW + "px", "important");
+    el.style.setProperty("height", height + "px", "important");
+    el.style.setProperty("min-height", height + "px", "important");
+    el.style.setProperty("flex", "none", "important");
+    el.style.setProperty("z-index", String(20 + i), "important");
+    el.style.setProperty("box-sizing", "border-box", "important");
+  });
+
+  return { cardW, height, cols, available, gap };
+}
+
+/**
+ * Pure planner for Guandan hero hand rows (legacy fan). Kept for unit tests / fallback.
  * Always packs large hands into exactly two balanced overlapping rows (absolute coords).
  * Never emits a lone single-card row when n >= 3.
  */
@@ -225,6 +303,7 @@ export function computeGuandanRows(n, available, opts = {}) {
   };
 }
 
+/** play9v1: Guandan hero hand uses full-face grid (toolbar stays above via CSS). */
 export function layoutGuandanCols(area) {
   // Only the hero hand. Opponent .gd-card live elsewhere and must not be packed.
   const cards = [...area.querySelectorAll(".gd-card")];
@@ -236,9 +315,9 @@ export function layoutGuandanCols(area) {
   area.querySelectorAll(".gd-col, .gd-bomb-tag").forEach((el) => el.remove());
   area.querySelectorAll(":scope > .gd-row-break").forEach((el) => el.remove());
 
-  const { available, dock } = measureHandAvailable(area);
+  const { dock } = measureHandAvailable(area);
 
-  // Prefer CSS dock inset (~56px) over a tight 118px so 14+13 can breathe on 414.
+  // Prefer CSS dock inset so toolbar + grid breathe on 414.
   if (dock && dock.style) {
     dock.style.setProperty("top", "50%", "important");
     dock.style.setProperty("bottom", "calc(52px + env(safe-area-inset-bottom, 0px))", "important");
@@ -250,46 +329,15 @@ export function layoutGuandanCols(area) {
     dock.style.setProperty("flex-direction", "column", "important");
     dock.style.setProperty("justify-content", "flex-end", "important");
     dock.style.setProperty("overflow-x", "hidden", "important");
-    dock.style.setProperty("overflow-y", "visible", "important");
+    dock.style.setProperty("overflow-y", "auto", "important");
   }
 
-  const plan = computeGuandanRows(cards.length, available, {
-    minPeek: 14,
-    minW: 28,
-    maxW: 44,
+  layoutGridRow(area, cards, {
+    minW: 40,
+    maxW: 48,
     ratio: 1.4,
-    leftPad: 4,
-    rowOverlapY: 22,
-    selectLift: 14,
-  });
-
-  area.classList.add("hand-fitted");
-  area.classList.toggle("gd-hand-2row", plan.rowCount === 2);
-  area.style.removeProperty("gap");
-  area.style.setProperty("display", "block", "important");
-  area.style.setProperty("position", "relative", "important");
-  area.style.setProperty("flex-wrap", "nowrap", "important");
-  area.style.setProperty("overflow-x", "hidden", "important");
-  area.style.setProperty("overflow-y", "visible", "important");
-  area.style.setProperty("width", Math.min(available, Math.max(plan.lastRight + 2, 8)) + "px", "important");
-  area.style.setProperty("max-width", available + "px", "important");
-  area.style.setProperty("height", plan.areaHeight + "px", "important");
-  area.style.setProperty("min-height", plan.areaHeight + "px", "important");
-
-  // Absolute placement: selection translateY must not reflow / split rows.
-  plan.positions.forEach((pos) => {
-    const el = cards[pos.index];
-    if (!el) return;
-    el.style.setProperty("position", "absolute", "important");
-    el.style.setProperty("left", pos.left + "px", "important");
-    el.style.setProperty("top", pos.top + "px", "important");
-    el.style.setProperty("width", pos.width + "px", "important");
-    el.style.setProperty("min-width", pos.width + "px", "important");
-    el.style.setProperty("max-width", pos.width + "px", "important");
-    el.style.setProperty("height", pos.height + "px", "important");
-    el.style.setProperty("margin", "0px", "important");
-    el.style.setProperty("flex", "none", "important");
-    el.style.setProperty("z-index", String(pos.z), "important");
+    gap: 4,
+    cols: 8,
   });
 }
 
@@ -310,31 +358,31 @@ export function layoutTexasHero(area) {
 export function fitAllHands(root = document) {
   const handArea = root.querySelector("#handArea");
   if (handArea) {
-    const wide = (handArea.clientWidth || 360) > 520;
-    // play9h1: Dou Dizhu must stay tappable — never shrink below 40/16
-    layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
-      maxW: wide ? 56 : 48,
+    // play9v1: Dou Dizhu full-face grid — never overlap/hide faces
+    layoutGridRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
+      maxW: 48,
       minW: 40,
-      minPeek: 16,
       ratio: 1.42,
-      gap: false,
+      gap: 4,
+      cols: 9,
     });
   }
 
   const mg = root.querySelector("#mgHand");
   if (mg) {
-    if (mg.classList.contains("gd-hand-cols") || mg.querySelector(".gd-col")) {
+    if (mg.classList.contains("gd-hand-cols") || mg.querySelector(".gd-col") || mg.querySelector(".gd-card")) {
       layoutGuandanCols(mg);
     } else {
       const items = [...mg.querySelectorAll(".mg-hand-tile, .mj-tile, .mg-hand-card, .bj-card, .mg-card")];
       if (items.length) {
         const isTile = items.some((el) => el.classList.contains("mg-hand-tile") || el.classList.contains("mj-tile"));
-        layoutOverlapRow(mg, items, {
-          maxW: isTile ? 36 : 40,
-          minW: isTile ? 26 : 20,
-          minPeek: isTile ? 18 : 12,
+        // play9v1: mahjong / other multi hands use full-face grid
+        layoutGridRow(mg, items, {
+          maxW: isTile ? 40 : 48,
+          minW: isTile ? 32 : 40,
           ratio: isTile ? 1.45 : 1.42,
-          gap: false,
+          gap: isTile ? 3 : 4,
+          cols: isTile ? 8 : 9,
         });
       }
     }

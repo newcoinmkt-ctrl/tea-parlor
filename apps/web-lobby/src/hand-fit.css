@@ -270,3 +270,77 @@ html.table-landscape .lobby-shell.texas-active #handArea,
   pointer-events: auto !important;
   touch-action: manipulation !important;
 }
+
+
+/* ── play9v1: full-face hand grid (DDZ / MJ / GD) ── */
+.hand-area.hand-fitted.hand-grid,
+#handArea.hand-fitted.hand-grid,
+#mgHand.hand-fitted.hand-grid,
+.bj-hand-wrap.hand-fitted.hand-grid {
+  display: grid !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-content: end !important;
+  align-items: end !important;
+  gap: 4px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hand-grid > .playing-card,
+.hand-grid > .mg-hand-tile,
+.hand-grid > .mj-tile,
+.hand-grid > .mg-hand-card,
+.hand-grid > .gd-card,
+.hand-grid > .mg-card,
+#handArea.hand-grid .playing-card,
+#mgHand.hand-grid .mg-hand-tile,
+#mgHand.hand-grid .mj-tile,
+#mgHand.hand-grid .gd-card {
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  flex: none !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+/* Selected lift must not break grid flow */
+#handArea.hand-grid .playing-card.selected,
+.hand-grid .playing-card.selected,
+.hand-grid .mg-hand-tile.selected,
+.hand-grid .mj-tile.mg-hand-tile.selected,
+.hand-grid .mg-hand-card.selected,
+.hand-grid .gd-card.is-on {
+  transform: translateY(-12px);
+  z-index: 60 !important;
+}
+
+/* Guandan: allow hand dock to scroll grid rows; keep toolbar above */
+.gd-yard .mg-hand-dock #mgHand.hand-grid,
+#mgHand.gd-hand-cols.hand-grid,
+.gd-yard #mgHand.hand-grid {
+  display: grid !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+/* Soften MJ hero lift so grid stays on-screen */
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-row-hero,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
+  transform: translateY(-12px) !important;
+}
+@media (max-width: 430px) {
+  html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-row-hero,
+  html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
+    transform: translateY(-12px) !important;
+  }
+}
