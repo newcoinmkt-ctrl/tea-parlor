@@ -39,7 +39,7 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v2';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3';
 import { initTableOrientation } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -4116,6 +4116,25 @@ function renderRecordsPage() {
   }).join('');
 }
 
+/** JJ fan: resolve card by visible left-peek strip (not topmost z under center). */
+function fanCardAtPoint(area, x, y) {
+  if (!area) return null;
+  const cards = [...area.querySelectorAll('.playing-card')];
+  if (!cards.length) return null;
+  let best = null;
+  for (let i = 0; i < cards.length; i++) {
+    const r = cards[i].getBoundingClientRect();
+    if (y < r.top - 16 || y > r.bottom + 8) continue;
+    const nextLeft = i + 1 < cards.length ? cards[i + 1].getBoundingClientRect().left : r.right;
+    const right = i === cards.length - 1 ? r.right : Math.max(nextLeft, r.left + 1);
+    if (x >= r.left - 1 && x < right + 0.5) best = cards[i];
+  }
+  if (best) return best;
+  const el = document.elementFromPoint(x, y);
+  const btn = el?.closest?.('.playing-card');
+  return btn && area.contains(btn) ? btn : null;
+}
+
 /** 鼠标按住划过手牌选中区间（QQ/JJ 常见交互） */
 function bindDragSelect() {
   const area = nodes.handArea;
@@ -4148,26 +4167,30 @@ function bindDragSelect() {
 
   area.addEventListener('touchstart', (e) => {
     if (!canSelectHand()) return;
-    const t = e.touches[0];
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    const btn = el?.closest?.('.playing-card');
-    if (!btn) return;
+    // Prefer event target (TG WebView elementFromPoint can hit HUD/ads above cards)
+    let btn = e.target?.closest?.('.playing-card');
+    if (!btn) {
+      const touch = e.touches[0];
+      btn = fanCardAtPoint(area, touch.clientX, touch.clientY);
+    }
+    if (!btn || !area.contains(btn)) return;
     dragActive = true;
     dragMoved = false;
     dragStartIndex = Number(btn.dataset.index);
     dragBaseSelected = new Set(selected);
-    suppressNextHandClick = true;
-    toggleHandCard(btn);
+    // Only suppress synthetic click after a real toggle — keeps 出牌 in sync on touch
+    const toggled = toggleHandCard(btn);
+    suppressNextHandClick = Boolean(toggled);
   }, { passive: true });
 
   area.addEventListener('touchmove', (e) => {
     if (!dragActive || !canSelectHand()) return;
-    const t = e.touches[0];
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    const btn = el?.closest?.('.playing-card');
+    const touch = e.touches[0];
+    const btn = fanCardAtPoint(area, touch.clientX, touch.clientY);
     if (!btn) return;
     dragMoved = true;
     applyDragRange(dragStartIndex, Number(btn.dataset.index));
+    syncPlayButtonFromSelection();
   }, { passive: true });
 
   const endDrag = () => {
@@ -4186,6 +4209,7 @@ function bindDragSelect() {
   };
   window.addEventListener('mouseup', endDrag);
   window.addEventListener('touchend', endDrag);
+  window.addEventListener('touchcancel', endDrag);
   area.addEventListener('dragstart', (e) => e.preventDefault());
 }
 
@@ -6359,11 +6383,18 @@ function renderHand() {
   if (!nodes.handArea || !game) return;
   nodes.handArea.innerHTML = '';
   nodes.handArea.style.pointerEvents = 'auto';
-  nodes.handArea.style.zIndex = '30';
+  nodes.handArea.style.zIndex = '60';
+  nodes.handArea.style.touchAction = 'pan-x';
   const wrap = nodes.handArea.closest('.hand-wrap');
   if (wrap) {
     wrap.style.pointerEvents = 'auto';
-    wrap.style.zIndex = '30';
+    wrap.style.zIndex = '60';
+    wrap.style.overflow = 'visible';
+  }
+  const slot = nodes.handArea.closest('.self-slot');
+  if (slot) {
+    slot.style.pointerEvents = 'auto';
+    slot.style.overflow = 'visible';
   }
   const canSelect = canSelectHand();
   // 展示：按斗地主规则大→小从左到右（大王、小王、2、A...3）
@@ -6395,14 +6426,21 @@ function renderHand() {
       if (dragActive || dragMoved) return;
       if (suppressNextHandClick) {
         suppressNextHandClick = false;
+        syncPlayButtonFromSelection();
         return;
       }
       // 兜底：部分 H5/WebView 只派发 click，不稳定派发 mousedown。
       toggleHandCard(btn);
     });
     btn.addEventListener('pointerup', (e) => {
-      // 触摸结束时若未划动，保证选中态
+      // TG Mini App: if touchstart missed (overlay hit-test) but pointer lands on card, toggle once
       if (!canSelect || dragMoved) return;
+      if (e.pointerType === 'touch' && !suppressNextHandClick && !btn.classList.contains('selected') && selected.size === 0) {
+        toggleHandCard(btn);
+        suppressNextHandClick = true;
+      } else {
+        syncPlayButtonFromSelection();
+      }
     });
     btn.tabIndex = canSelect ? 0 : -1;
     btn.setAttribute('aria-pressed', (selected.has(String(card.id)) || selected.has(card.id)) ? 'true' : 'false');
