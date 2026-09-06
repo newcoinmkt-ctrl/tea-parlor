@@ -3698,3 +3698,149 @@ html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #table
 #tableView .qq-more-toggle.is-open {
   box-shadow: 0 0 0 2px rgba(232, 197, 71, 0.7);
 }
+
+/* ── mj-readability-patch: contrast + discard dock + turn meta ── */
+
+/* 1) 底分 pill：金底深字 */
+.multi-game-view.mj-2p .mg-hud-pill,
+.multi-game-view.mj-4p .mg-hud-pill,
+.multi-game-view.mj-2p #mgSub.stake-pill,
+.multi-game-view.mj-4p #mgSub.stake-pill,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgSub,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgSub,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-hud-pill,
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-hud-pill {
+  background: linear-gradient(180deg, #fde68a, #e8c547) !important;
+  color: #3d2e00 !important;
+  border: 1px solid rgba(61, 46, 0, 0.28) !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+
+/* 顶栏状态：说明用浅字，标题保持可辨 */
+.multi-game-view.mj-2p .mg-hud-status,
+.multi-game-view.mj-4p .mg-hud-status {
+  color: #fef3c7 !important;
+  font-weight: 700 !important;
+}
+
+/* 2) 操作条贴手牌 */
+.multi-game-view.mj-2p #mgActions,
+.multi-game-view.mj-4p #mgActions,
+.lobby-shell.multi-active .multi-game-view.mj-2p #mgActions,
+.lobby-shell.multi-active .multi-game-view.mj-4p #mgActions,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgActions,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgActions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0 auto 8px !important;
+  padding: 6px 10px !important;
+  max-width: 100% !important;
+  z-index: 80 !important;
+}
+
+.multi-game-view.mj-2p .mg-hand-dock,
+.multi-game-view.mj-4p .mg-hand-dock {
+  margin-top: 0 !important;
+}
+
+/* 弃/胡：56 热区（压过 play9g1 紧凑 pill 的更高特异性规则） */
+.multi-game-view.mj-2p .mj-btn-qi,
+.multi-game-view.mj-4p .mj-btn-qi,
+.multi-game-view.mj-2p #mgActions .mj-btn-qi,
+.multi-game-view.mj-4p #mgActions .mj-btn-qi,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgActions .mj-btn-qi,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgActions .mj-btn-qi,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgActions .qq-btn.mj-btn-qi,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgActions .qq-btn.mj-btn-qi {
+  flex: 0 0 auto !important;
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+  max-width: 56px !important;
+  max-height: 56px !important;
+  font-size: 22px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+}
+.multi-game-view.mj-2p .mj-btn-hu,
+.multi-game-view.mj-4p .mj-btn-hu,
+.multi-game-view.mj-2p #mgActions .mj-btn-hu,
+.multi-game-view.mj-4p #mgActions .mj-btn-hu,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgActions .mj-btn-hu,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgActions .mj-btn-hu {
+  flex: 0 0 auto !important;
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+  max-width: 56px !important;
+  max-height: 56px !important;
+  font-size: 22px !important;
+  color: #3d2e00 !important; /* 金底深字 */
+  text-shadow: none !important;
+  padding: 0 !important;
+}
+.multi-game-view.mj-2p .mj-btn-side,
+.multi-game-view.mj-4p .mj-btn-side,
+html body .lobby-shell.multi-active #multiGameView.mj-2p #mgActions .mj-btn-side,
+html body .lobby-shell.multi-active #multiGameView.mj-4p #mgActions .mj-btn-side {
+  min-width: 48px !important;
+  min-height: 48px !important;
+  color: #3d2e00 !important;
+}
+
+/* 3) 座位状态：当前行家更醒目；压缩 meta */
+.multi-game-view.mj-2p .mg-meta,
+.multi-game-view.mj-4p .mg-meta,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-meta,
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-meta {
+  padding: 4px 8px !important;
+  border-radius: 10px !important;
+  background: rgba(8, 16, 28, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  max-width: 9.5em !important;
+}
+.multi-game-view.mj-2p .mg-seat.is-turn .mg-meta,
+.multi-game-view.mj-4p .mg-seat.is-turn .mg-meta,
+.multi-game-view.mj-2p .mg-meta.is-turn-meta,
+.multi-game-view.mj-4p .mg-meta.is-turn-meta,
+html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-seat.is-turn .mg-meta,
+html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-seat.is-turn .mg-meta {
+  border-color: #e8c547 !important;
+  box-shadow: 0 0 0 1px rgba(232, 197, 71, 0.55) !important;
+  background: rgba(20, 40, 24, 0.88) !important;
+}
+
+/* 「出牌中」一类高亮 span（若 JS 已输出） */
+.multi-game-view.mj-2p .mg-meta .is-acting,
+.multi-game-view.mj-4p .mg-meta .is-acting,
+.multi-game-view.mj-2p .mg-meta span[data-mj-turn],
+.multi-game-view.mj-4p .mg-meta span[data-mj-turn],
+.multi-game-view.mj-2p .mg-meta .mg-meta-turn.is-acting,
+.multi-game-view.mj-4p .mg-meta .mg-meta-turn.is-acting {
+  color: #fde68a !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+}
+
+/* 对局中弱化座位广告 chip，减挡牌/挡状态 */
+.multi-game-view.mj-2p .mg-seat .costume-chip,
+.multi-game-view.mj-4p .mg-seat .costume-chip {
+  opacity: 0.35 !important;
+  transform: scale(0.85);
+  pointer-events: none !important;
+}
+
+/* 罗盘中央数字可读性 */
+.multi-game-view.mj-2p .mj-wall-count,
+.multi-game-view.mj-4p .mj-wall-count {
+  color: #fff !important;
+  font-size: clamp(22px, 6vw, 32px) !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55) !important;
+}

@@ -762,7 +762,7 @@ export function createMahjongUI(options = {}) {
         ];
         if (badge) lines.push(`<span class="mg-meta-line mg-meta-status">${badge}</span>`);
         if (melds) lines.push(`<span class="mg-meta-line">副露${melds}</span>`);
-        if (isTurn) lines.push(`<span class="mg-meta-line mg-meta-turn">出牌中</span>`);
+        if (isTurn) lines.push(`<span class="mg-meta-line mg-meta-turn is-acting">出牌中</span>`);
         lines.push(`<span class="mg-meta-score">积分 ${scTxt}</span>`);
         s.meta.innerHTML = lines.join('');
       }
