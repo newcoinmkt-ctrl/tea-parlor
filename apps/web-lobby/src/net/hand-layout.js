@@ -102,7 +102,8 @@ export function layoutOverlapRow(area, items, opts = {}) {
   const limit = window.innerWidth - 4;
   if (lastRight > limit && n > 1) {
     const overflow = lastRight - limit;
-    const peek = Math.max(8, pack.peek - Math.ceil(overflow / (n - 1)));
+    const floorPeek = Math.max(opts.minPeek ?? 12, 8);
+    const peek = Math.max(floorPeek, pack.peek - Math.ceil(overflow / (n - 1)));
     const overlap = Math.max(0, pack.cardW - peek);
     items.forEach((el, i) => {
       if (i === 0) return;
@@ -310,10 +311,11 @@ export function fitAllHands(root = document) {
   const handArea = root.querySelector("#handArea");
   if (handArea) {
     const wide = (handArea.clientWidth || 360) > 520;
+    // play9h1: Dou Dizhu must stay tappable — never shrink below 40/16
     layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
-      maxW: wide ? 52 : 40,
-      minW: 24,
-      minPeek: wide ? 18 : 12,
+      maxW: wide ? 56 : 48,
+      minW: 40,
+      minPeek: 16,
       ratio: 1.42,
       gap: false,
     });

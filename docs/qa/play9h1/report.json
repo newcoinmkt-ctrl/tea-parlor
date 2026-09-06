@@ -1,0 +1,35 @@
+{
+  "cache": "play9h1",
+  "ddz_idle": {
+    "n": 17,
+    "minW": 48,
+    "maxW": 48,
+    "minPeek": 16,
+    "avgPeek": 16,
+    "inlineW": "48px",
+    "selected": 0,
+    "status": "经典出牌 · 轮到你",
+    "last": "压 茶友B：♦10 ♣10 ♦J ♣J ♦Q ♣Q ♣K ♠K（连对）"
+  },
+  "ddz_after_play": {
+    "n": 15,
+    "minW": 47.5,
+    "maxW": 47.5,
+    "minPeek": 17,
+    "avgPeek": 17,
+    "inlineW": "48px",
+    "selected": 0,
+    "status": "经典出牌 · 轮到你 · 2倍",
+    "last": "压 茶友B：大王 小王（火箭）"
+  },
+  "handBefore": 17,
+  "handAfter": 15,
+  "handReduced": true,
+  "sizePass": true,
+  "mj": {
+    "n": 14,
+    "op": "1",
+    "vis": "visible",
+    "w": 32
+  }
+}
