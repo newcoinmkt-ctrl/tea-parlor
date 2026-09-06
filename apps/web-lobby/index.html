@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="./src/styles.css?v=play9d1" />
     <link rel="stylesheet" href="./src/themes/tokens.css?v=play9d1" />
     <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9d1" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9h1" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9h1" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9h1" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9h2" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9h2" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9h2" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -1276,10 +1276,14 @@
             <span class="qq-meter-item" data-rank="3"><b>3</b><i>4</i></span>
           </div>
           <div class="qq-mult-pill" id="multBadge" hidden>1倍</div>
-          <div class="qq-hud-tools">
-            <button type="button" class="qq-tool-btn" data-lobby-action="claim" title="礼包">🎁 礼包</button>
-            <button type="button" class="qq-tool-btn" id="trusteeButton" title="托管">托管</button>
-            <button type="button" class="qq-tool-btn" data-lobby-action="support" title="更多">更多</button>
+          <div class="qq-hud-tools" id="hudTools">
+            <div class="qq-more-wrap">
+              <button type="button" class="qq-tool-btn qq-more-toggle" id="hudMoreToggle" aria-expanded="false" aria-controls="hudMoreMenu" title="更多">更多</button>
+              <div class="qq-more-menu" id="hudMoreMenu" hidden role="menu">
+                <button type="button" class="qq-more-item" role="menuitem" data-lobby-action="claim" title="礼包">🎁 礼包</button>
+                <button type="button" class="qq-more-item" role="menuitem" id="trusteeButton" title="托管">托管</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1382,11 +1386,13 @@
                 <button data-double="2" type="button" class="qq-btn qq-btn-gold">加倍</button>
                 <button data-double="4" type="button" class="qq-btn qq-btn-gold" id="superDoubleBtn">超级加倍</button>
               </div>
-              <div id="playControls" class="action-row qq-action-row" hidden>
-                <button id="passButton" type="button" class="qq-btn qq-btn-gold muted-button">不出</button>
-                <div class="qq-timer" id="turnTimer" aria-hidden="true" hidden>20</div>
-                <button id="hintButton" type="button" class="qq-btn qq-btn-gold">提示</button>
-                <button id="playButton" type="button" class="qq-btn qq-btn-play">出牌</button>
+              <div id="playControls" class="action-row qq-action-row play-controls-stack" hidden>
+                <div class="qq-timer qq-timer-above" id="turnTimer" aria-hidden="true" hidden>20</div>
+                <div class="qq-action-btns">
+                  <button id="passButton" type="button" class="qq-btn qq-btn-pass muted-button">不出</button>
+                  <button id="hintButton" type="button" class="qq-btn qq-btn-hint">提示</button>
+                  <button id="playButton" type="button" class="qq-btn qq-btn-play">出牌</button>
+                </div>
               </div>
               <div id="settleControls" class="action-row qq-action-row qq-settle-row" hidden>
                 <button id="againButton" type="button" class="qq-btn qq-btn-gold">继续游戏</button>
@@ -1777,6 +1783,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9h1"></script>
+    <script type="module" src="./src/app.js?v=play9h2"></script>
   </body>
 </html>

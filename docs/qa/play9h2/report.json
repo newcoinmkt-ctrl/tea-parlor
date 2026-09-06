@@ -1,0 +1,130 @@
+{
+  "cache": "play9h2",
+  "viewport": {
+    "width": 414,
+    "height": 896
+  },
+  "ok": true,
+  "steps": [
+    {
+      "name": "loaded",
+      "title": "茶馆"
+    },
+    {
+      "name": "clicked_home_ddz"
+    },
+    {
+      "name": "clicked_local",
+      "info": {
+        "id": "ddzLocalPlay",
+        "text": "人机畅玩"
+      }
+    },
+    {
+      "name": "table_visible"
+    },
+    {
+      "name": "advance",
+      "i": 0,
+      "acted": "bid"
+    },
+    {
+      "name": "play_phase"
+    },
+    {
+      "name": "layout",
+      "timerAboveBtns": true,
+      "playDisabled": true,
+      "moreVisible": true
+    },
+    {
+      "name": "play_disabled_no_sel",
+      "disabled": true,
+      "aria": "true",
+      "selected": 0
+    },
+    {
+      "name": "more_menu",
+      "hidden": false,
+      "items": [
+        "🎁 礼包",
+        "托管"
+      ],
+      "aria": "true"
+    }
+  ],
+  "play_layout": {
+    "playControlsClass": "action-row qq-action-row play-controls-stack",
+    "timer": {
+      "top": 706,
+      "bottom": 742,
+      "left": 187,
+      "right": 223,
+      "w": 36,
+      "h": 36,
+      "hidden": false
+    },
+    "timerText": "20",
+    "btns": {
+      "top": 738,
+      "bottom": 772,
+      "left": 10,
+      "right": 399,
+      "w": 389,
+      "h": 34,
+      "hidden": false
+    },
+    "pass": {
+      "top": 738,
+      "bottom": 772,
+      "left": 77,
+      "right": 157,
+      "w": 80,
+      "h": 34,
+      "hidden": false
+    },
+    "hint": {
+      "top": 738,
+      "bottom": 772,
+      "left": 165,
+      "right": 245,
+      "w": 80,
+      "h": 34,
+      "hidden": false
+    },
+    "play": {
+      "top": 738,
+      "bottom": 772,
+      "left": 253,
+      "right": 333,
+      "w": 80,
+      "h": 34,
+      "hidden": false
+    },
+    "timerAboveBtns": true,
+    "timerCenteredish": true,
+    "playDisabled": true,
+    "playAria": "true",
+    "selected": 0,
+    "moreVisible": true,
+    "giftDirectInTools": false,
+    "trusteeDirectInTools": false
+  },
+  "play_disabled_no_selection": {
+    "disabled": true,
+    "aria": "true",
+    "selected": 0
+  },
+  "more_menu": {
+    "hidden": false,
+    "items": [
+      "🎁 礼包",
+      "托管"
+    ],
+    "aria": "true"
+  },
+  "shots": [
+    "ddz-414-play-timer-above.png",
+    "ddz-414-more-menu.png"
+  ]
+}
