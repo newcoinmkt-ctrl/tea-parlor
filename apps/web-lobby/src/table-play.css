@@ -3671,3 +3671,30 @@ html.table-landscape .lobby-shell.table-active #tableView #playControls #turnTim
   inset: auto !important;
   margin: 0 auto !important;
 }
+
+/* ── play9i2: more menu escapes HUD clip ── */
+html.table-landscape .lobby-shell.table-active #tableView .qq-hud,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-hud,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-hud {
+  overflow: visible !important;
+  z-index: 60 !important;
+}
+.lobby-shell.table-active #tableView .qq-hud-tools,
+#tableView .qq-hud-tools,
+#tableView .qq-more-wrap {
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 70 !important;
+}
+#tableView .qq-more-menu {
+  z-index: 80 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: calc(100% + 6px) !important;
+}
+#tableView .qq-more-menu:not([hidden]) {
+  display: flex !important;
+}
+#tableView .qq-more-toggle.is-open {
+  box-shadow: 0 0 0 2px rgba(232, 197, 71, 0.7);
+}

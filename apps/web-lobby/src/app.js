@@ -39,7 +39,7 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9i1';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9i2';
 import { initTableOrientation } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -2713,6 +2713,19 @@ function bindUi() {
       return;
     }
 
+    // 牌桌 HUD「更多」里的礼包等仍走大厅 action（capture 勿整桌吞掉）
+    const hudLobbyAct = t.closest('#hudMoreMenu [data-lobby-action], #hudTools [data-lobby-action]');
+    if (hudLobbyAct) {
+      const action = hudLobbyAct.getAttribute('data-lobby-action');
+      if (action) {
+        e.preventDefault();
+        e.stopPropagation();
+        const focus = hudLobbyAct.getAttribute('data-recharge-focus') || undefined;
+        handleLobbyAction(action, { focus });
+        return;
+      }
+    }
+
     // 牌桌内其它点击不走大厅导航（出牌/弃牌/跟注由各自按钮监听处理）
     const tableRoot = t.closest('#tableView, #texasTableView, #multiGameView, #texasResultModal, #mgResultModal, #ddzResultModal');
     if (tableRoot && !tableRoot.hidden) return;
@@ -2847,24 +2860,34 @@ function bindUi() {
 
   const moreToggle = document.getElementById('hudMoreToggle');
   const moreMenu = document.getElementById('hudMoreMenu');
-  if (moreToggle && moreMenu) {
-    moreToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const open = moreMenu.hasAttribute('hidden');
-      if (open) moreMenu.removeAttribute('hidden');
-      else moreMenu.setAttribute('hidden', '');
+  if (moreToggle && moreMenu && !moreToggle.dataset.boundMore) {
+    moreToggle.dataset.boundMore = '1';
+    const setMoreOpen = (open) => {
+      if (open) {
+        moreMenu.removeAttribute('hidden');
+        moreMenu.hidden = false;
+      } else {
+        moreMenu.setAttribute('hidden', '');
+        moreMenu.hidden = true;
+      }
       moreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
+      moreToggle.classList.toggle('is-open', open);
+    };
+    moreToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const willOpen = moreMenu.hasAttribute('hidden') || moreMenu.hidden;
+      setMoreOpen(willOpen);
+    }, true);
     document.addEventListener('click', (e) => {
-      if (moreMenu.hasAttribute('hidden')) return;
-      if (e.target.closest('#hudTools')) return;
-      moreMenu.setAttribute('hidden', '');
-      moreToggle.setAttribute('aria-expanded', 'false');
+      if (moreMenu.hasAttribute('hidden') || moreMenu.hidden) return;
+      const t = e.target instanceof Element ? e.target : null;
+      if (t && t.closest('#hudTools')) return;
+      setMoreOpen(false);
     });
     // 点菜单项后收起（礼包/托管各自原逻辑继续跑）
     moreMenu.addEventListener('click', () => {
-      moreMenu.setAttribute('hidden', '');
-      moreToggle.setAttribute('aria-expanded', 'false');
+      setTimeout(() => setMoreOpen(false), 0);
     });
   }
 
