@@ -12,9 +12,10 @@
     <link rel="stylesheet" href="./src/styles.css?v=play9d1" />
     <link rel="stylesheet" href="./src/themes/tokens.css?v=play9d1" />
     <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9d1" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9h2" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9h2" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9h2" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9i1" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9i1" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9i1" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9i1" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -29,7 +30,7 @@
             </div>
           </div>
         </div>
-        <nav class="quick-dock topbar-center" aria-label="快捷入口">
+        <nav class="quick-dock topbar-center" aria-label="快捷入口" hidden>
           <button type="button" class="quick-dock-btn" data-lobby-action="home" aria-label="大厅">
             <span class="qd-icon" aria-hidden="true">🏠</span>
             <span class="qd-label">大厅</span>
@@ -93,8 +94,8 @@
               <div class="p0-home-user">
                 <button type="button" class="p0-ava" data-lobby-action="profile" aria-label="个人中心"></button>
                 <div class="p0-who"><small>Telegram</small><b id="p0PlayerName">茶馆</b></div>
-                <button type="button" class="p0-points" data-lobby-action="recharge" data-recharge-focus="ingot" aria-label="影子积分，点按领取每日补给">
-                  <i></i><span><small>影子积分</small><b id="p0IngotBalance">128,600</b></span>
+                <button type="button" class="p0-points" data-lobby-action="recharge" data-recharge-focus="ingot" aria-label="金币，点按进入补给">
+                  <i></i><span><small>金币</small><b id="p0IngotBalance">128,600</b></span>
                 </button>
               </div>
               <div class="p0-home-stage">
@@ -109,29 +110,6 @@
                   <button class="p0-more" type="button" data-lobby-action="open-games">更多玩法</button>
                 </div>
               </div>
-            </div>
-
-            <div class="p0-legacy" hidden>
-            <header class="home-hero">
-              <img class="home-hero-art" src="./public/assets/home/hero.jpg" alt="" />
-              <div class="home-hero-fade" aria-hidden="true"></div>
-              <div class="home-hero-user">
-                <button type="button" class="home-hero-avatar" data-lobby-action="profile" aria-label="个人中心">
-                  <span id="homeHeroAvatar" class="home-hero-avatar-frame"></span>
-                </button>
-                <div class="home-hero-wallets" aria-label="测试资产展示">
-                  <button type="button" class="home-hero-gold" data-lobby-action="recharge" data-recharge-focus="ingot" aria-label="影子积分">
-                    <span class="gold-coin-icon" aria-hidden="true"></span>
-                    <span><small>影子积分</small><b id="homeIngotBalance">128,600</b></span>
-                  </button>
-                  <button type="button" class="home-hero-gold is-season" data-lobby-action="recharge" data-recharge-focus="usdt" aria-label="赛季积分">
-                    <span class="asset-season-gem" aria-hidden="true">◆</span>
-                    <span><small>赛季积分</small><b id="homeSeasonBalance">100.00</b></span>
-                  </button>
-                </div>
-              </div>
-            </header>
-
             <section class="home-icon-grid" aria-label="游戏入口">
               <button class="home-icon-btn" type="button" data-side-game="doudizhu">
                 <img src="./public/assets/home/icon-ddz.png?v=island3" alt="" />
@@ -157,17 +135,32 @@
                 <img src="./public/assets/home/icon-blackjack.png" alt="" />
                 <strong>二十一点</strong>
               </button>
-              <button class="home-icon-btn" type="button" data-lobby-action="chain" hidden>
-                <img src="./public/assets/home/icon-real.png" alt="" />
-                <strong>链游中心</strong>
-              </button>
-              <button class="home-icon-btn" type="button" data-lobby-action="open-games">
-                <img src="./public/assets/home/icon-gift.png" alt="" />
-                <strong>更多游戏</strong>
-              </button>
             </section>
 
-            <section class="home-pack-grid" aria-label="合集入口">
+            </div>
+
+            <div class="p0-legacy" hidden>
+            <header class="home-hero">
+              <img class="home-hero-art" src="./public/assets/home/hero.jpg" alt="" />
+              <div class="home-hero-fade" aria-hidden="true"></div>
+              <div class="home-hero-user">
+                <button type="button" class="home-hero-avatar" data-lobby-action="profile" aria-label="个人中心">
+                  <span id="homeHeroAvatar" class="home-hero-avatar-frame"></span>
+                </button>
+                <div class="home-hero-wallets" aria-label="测试资产展示">
+                  <button type="button" class="home-hero-gold" data-lobby-action="recharge" data-recharge-focus="ingot" aria-label="金币">
+                    <span class="gold-coin-icon" aria-hidden="true"></span>
+                    <span><small>金币</small><b id="homeIngotBalance">128,600</b></span>
+                  </button>
+                  <button type="button" class="home-hero-gold is-season" data-lobby-action="recharge" data-recharge-focus="usdt" aria-label="赛季积分" hidden>
+                    <span class="asset-season-gem" aria-hidden="true">◆</span>
+                    <span><small>赛季积分</small><b id="homeSeasonBalance">100.00</b></span>
+                  </button>
+                </div>
+              </div>
+            </header>
+
+            <section class="home-pack-grid" aria-label="合集入口" hidden>
               <button class="home-pack" type="button" data-lobby-action="open-games">
                 <span class="home-pack-art" aria-hidden="true">
                   <img src="./public/assets/home/icon-ddz.png?v=island3" alt="" />
@@ -1783,6 +1776,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9h2"></script>
+    <script type="module" src="./src/app.js?v=play9i1"></script>
   </body>
 </html>

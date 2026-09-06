@@ -1,0 +1,105 @@
+/* lobby-ia-patch: single nav + denser home + gold-only chip */
+
+/* Plan A: show CTA chrome + 6-grid; keep legacy off on home */
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .p0-home-chrome {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .p0-legacy,
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .p0-legacy[hidden] {
+  display: none !important;
+}
+
+/* 顶栏快捷与底栏重复：大厅态彻底藏起 */
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .quick-dock,
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .topbar .quick-dock,
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .quick-dock.topbar-center,
+.lobby-shell .quick-dock[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 合集行与底栏重复 */
+.lobby-shell .home-pack-grid {
+  display: none !important;
+}
+
+/* 首页货币 chip：单一主数字；覆盖 classic-green 在窄屏隐藏 .p0-points */
+.lobby-shell .p0-points,
+.lobby-shell.p0-tg .p0-points {
+  display: inline-flex !important;
+}
+.lobby-shell .p0-points small,
+.lobby-shell .home-hero-gold small {
+  letter-spacing: 0.02em;
+}
+.lobby-shell .home-hero-gold.is-season {
+  display: none !important; /* 赛季积分离开首页 */
+}
+
+/* 宫格：6 格更紧凑，减少中部空洞 */
+.lobby-shell .home-icon-grid,
+.lobby-shell.p0-tg .p0-home-chrome .home-icon-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px 10px !important;
+  padding: 8px 16px 12px !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+.lobby-shell .p0-home-chrome .home-icon-btn img {
+  width: 72px !important;
+  height: 72px !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+.lobby-shell .p0-home-chrome .home-icon-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #f7f2e6 !important;
+  cursor: pointer !important;
+}
+.lobby-shell .p0-home-chrome .home-icon-btn strong {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+@media (min-width: 390px) {
+  .lobby-shell .home-icon-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* CTA 与宫格间距收紧；避免 stage 把宫格顶出首屏 */
+.lobby-shell .p0-home-chrome {
+  margin-bottom: 4px !important;
+}
+.lobby-shell .p0-home-stage {
+  flex: 0 0 auto !important;
+  justify-content: flex-start !important;
+  padding: 4px 16px 0 !important;
+}
+.lobby-shell .p0-cta-card {
+  margin-bottom: 8px !important;
+  padding: 18px 16px 14px !important;
+}
+.lobby-shell .p0-primary {
+  min-height: 52px !important;
+  font-size: 18px !important;
+}
+
+/* 底栏为唯一主导航时，保证在最上层 */
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
+  z-index: 40 !important;
+}
