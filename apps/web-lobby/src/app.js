@@ -39,7 +39,7 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9h1';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9h2';
 import { initTableOrientation } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -2844,6 +2844,30 @@ function bindUi() {
     }
   }, true);
 
+
+  const moreToggle = document.getElementById('hudMoreToggle');
+  const moreMenu = document.getElementById('hudMoreMenu');
+  if (moreToggle && moreMenu) {
+    moreToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = moreMenu.hasAttribute('hidden');
+      if (open) moreMenu.removeAttribute('hidden');
+      else moreMenu.setAttribute('hidden', '');
+      moreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (moreMenu.hasAttribute('hidden')) return;
+      if (e.target.closest('#hudTools')) return;
+      moreMenu.setAttribute('hidden', '');
+      moreToggle.setAttribute('aria-expanded', 'false');
+    });
+    // 点菜单项后收起（礼包/托管各自原逻辑继续跑）
+    moreMenu.addEventListener('click', () => {
+      moreMenu.setAttribute('hidden', '');
+      moreToggle.setAttribute('aria-expanded', 'false');
+    });
+  }
+
   bindDdzVariantTabs();
   renderDdzRooms(ddzVariant);
   setLobbyView('home');
@@ -5555,7 +5579,12 @@ function toggleCardSelect(cardId) {
   if (nodes.tableStatus) nodes.tableStatus.textContent = statusLine();
   // 选中后刷新出牌按钮可用态
   const myPlay = game.phase === 'play' && game.currentPlayer === HUMAN;
-  if (nodes.playButton) nodes.playButton.disabled = !myPlay;
+  if (nodes.playButton) {
+    const allowPlay = Boolean(myPlay && selected.size > 0);
+    nodes.playButton.disabled = !allowPlay;
+    nodes.playButton.setAttribute('aria-disabled', allowPlay ? 'false' : 'true');
+    nodes.playButton.classList.toggle('is-recommended', allowPlay);
+  }
 }
 
 function onToggleTrustee() {
@@ -6068,8 +6097,12 @@ function renderGame() {
     nodes.passButton.classList.toggle('is-recommended', canPass && !selected.size);
   }
   if (nodes.playButton) {
-    nodes.playButton.disabled = !myPlay;
-    nodes.playButton.classList.toggle('is-recommended', myPlay && selected.size > 0);
+    // 保守：没选牌不能出；有选牌时仍允许点击，由 onPlay 校验（避免误伤现有提示流）
+    // 若已有 parseSelection / canBeat 之类，改为：const allowPlay = myPlay && selectionLegal;
+    const allowPlay = Boolean(myPlay && selected.size > 0);
+    nodes.playButton.disabled = !allowPlay;
+    nodes.playButton.setAttribute('aria-disabled', allowPlay ? 'false' : 'true');
+    nodes.playButton.classList.toggle('is-recommended', allowPlay);
   }
   if (nodes.hintButton) nodes.hintButton.disabled = !myPlay;
   if (nodes.trusteeButton) nodes.trusteeButton.textContent = trustee ? '取消托管' : '托管';
