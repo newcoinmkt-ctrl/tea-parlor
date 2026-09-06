@@ -3963,81 +3963,92 @@ html body .multi-game-view.gd-active.gd-4p.gd-yard [data-mg-seat="0"] .char-figu
 
 
 /* ═══════════════════════════════════════════════════════════════
-   play9v1 P0: full-face grid hands — kill fan/stack overlap locks
+   play9v2: revert table hand-grid force — JJ fan / Guandan 2-row
    ═══════════════════════════════════════════════════════════════ */
 
-/* DDZ: no negative-margin fan when grid is active */
-html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-grid,
-html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea.hand-grid,
-html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-grid {
-  display: grid !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  align-content: end !important;
-  gap: 4px !important;
-  overflow-x: auto !important;
-  overflow-y: auto !important;
-  max-height: 42vh !important;
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot .hand-wrap,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot .hand-area,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea {
+  pointer-events: auto !important;
+  z-index: 30 !important;
 }
 
-html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-grid .playing-card,
-html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot #handArea.hand-grid .playing-card,
-html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-grid .playing-card {
-  width: 44px !important;
-  min-width: 40px !important;
-  max-width: 48px !important;
-  height: 62px !important;
-  min-height: 56px !important;
-  max-height: 68px !important;
-  margin-left: 0 !important;
-  flex: none !important;
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot #handArea .playing-card,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
   position: relative !important;
-  left: auto !important;
-  top: auto !important;
 }
 
-html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-grid .playing-card:first-child {
-  margin-left: 0 !important;
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card.selected,
+html.table-landscape .lobby-shell.table-active #tableView #handArea .playing-card.selected {
+  transform: translateY(-14px) !important;
+  z-index: 80 !important;
 }
 
-html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-grid .playing-card.selected {
+/* Action row above hand must not swallow card taps outside buttons */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions {
+  pointer-events: none !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions .qq-btn,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions .action-row:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #doubleControls:not([hidden]) {
+  pointer-events: auto !important;
+}
+
+html body .gd-yard #mgHand.gd-hand-2row,
+html body .gd-yard #mgHand.gd-hand-cols.gd-hand-2row,
+html body .lobby-shell.multi-active .gd-yard #mgHand.gd-hand-2row {
+  display: block !important;
+  position: relative !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+html body .gd-yard #mgHand .gd-card,
+html body .lobby-shell.multi-active .gd-yard #mgHand .gd-card {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+
+html body .gd-yard #mgHand .gd-card.is-on,
+html body .lobby-shell.multi-active #mgHand .gd-card.is-on {
   transform: translateY(-12px) !important;
-  z-index: 60 !important;
+  z-index: 80 !important;
 }
 
-/* Mahjong: grid tiles fully visible */
-html body .lobby-shell.multi-active #multiGameView.mj-4p #mgHand.hand-grid,
-html body .lobby-shell.multi-active #multiGameView.mj-2p #mgHand.hand-grid,
-html body .lobby-shell.multi-active #mgHand.hand-grid:not(.gd-hand-cols) {
-  display: grid !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  align-content: end !important;
-  gap: 3px !important;
-  overflow-x: auto !important;
-  overflow-y: auto !important;
-  max-height: 36vh !important;
+html body .gd-yard .mg-hand-dock,
+html body .lobby-shell.multi-active .gd-yard .mg-hand-dock {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  z-index: 22 !important;
+  left: 64px !important;
+  right: 8px !important;
+  pointer-events: none !important;
 }
-
-html body .lobby-shell.multi-active #multiGameView.mj-4p #mgHand.hand-grid .mg-hand-tile,
-html body .lobby-shell.multi-active #multiGameView.mj-2p #mgHand.hand-grid .mg-hand-tile,
-html body .lobby-shell.multi-active #multiGameView.mj-4p #mgHand.hand-grid .mj-tile.mg-hand-tile,
-html body .lobby-shell.multi-active #multiGameView.mj-2p #mgHand.hand-grid .mj-tile.mg-hand-tile,
-html body .lobby-shell.multi-active #mgHand.hand-grid .mg-hand-tile,
-html body .lobby-shell.multi-active #mgHand.hand-grid .mj-tile {
-  width: 36px !important;
-  min-width: 32px !important;
-  max-width: 40px !important;
-  height: 52px !important;
-  margin: 0 !important;
-  margin-left: 0 !important;
-  flex: none !important;
+html body .gd-yard .mg-hand-dock .gd-toolbar,
+html body .gd-yard .mg-hand-dock #mgHand,
+html body .gd-yard .mg-hand-dock #mgHand .gd-card {
+  pointer-events: auto !important;
+}
+html body .gd-yard .mg-hand-dock .gd-toolbar {
+  order: 0 !important;
   position: relative !important;
-  left: auto !important;
-  top: auto !important;
+  z-index: 24 !important;
+  margin-bottom: 8px !important;
+}
+html body .gd-yard .mg-hand-dock #mgHand {
+  order: 1 !important;
+  z-index: 23 !important;
 }
 
-/* Kill excessive MJ hero raise that can push grid off-screen */
 html body .lobby-shell.multi-active #multiGameView.mj-4p .mg-row-hero,
 html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
   transform: translateY(-12px) !important;
@@ -4050,62 +4061,58 @@ html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
   }
 }
 
-/* Guandan: grid instead of absolute fan / 2-row peek */
-html body .gd-yard #mgHand.hand-grid,
-html body .gd-yard #mgHand.gd-hand-cols.hand-grid,
-html body .lobby-shell.multi-active .gd-yard #mgHand.hand-grid,
-html body .lobby-shell.multi-active #mgHand.gd-hand-cols.hand-grid {
-  display: grid !important;
-  position: relative !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
-  width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: auto !important;
-  gap: 4px !important;
-}
 
-html body .gd-yard #mgHand.hand-grid .gd-card,
-html body .lobby-shell.multi-active .gd-yard #mgHand.hand-grid .gd-card,
-html body .lobby-shell.multi-active #mgHand.hand-grid .gd-card {
-  width: 44px !important;
-  min-width: 40px !important;
-  max-width: 48px !important;
-  height: 62px !important;
-  margin: 0 !important;
-  margin-left: 0 !important;
+/* ── play9v2 hit-target harden: fan cards must receive Mini App taps ── */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .hand-wrap,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  z-index: 40 !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: rgba(255, 220, 100, 0.25);
+  /* Enlarge effective tap without changing face: padding hits layout; use min size instead */
+  min-width: 28px !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .qq-center-actions {
+  pointer-events: none !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .qq-center-actions .qq-btn,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .qq-center-actions #playControls:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .qq-center-actions #bidControls:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .qq-center-actions #doubleControls:not([hidden]),
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .self-slot > .qq-center-actions .action-row:not([hidden]) {
+  pointer-events: auto !important;
+}
+/* Ads / brand overlays above hand never steal taps */
+html body .lobby-shell.table-active #tableView .card-face-ad-hand,
+html body .lobby-shell.table-active #tableView .hand-wrap .card-face-ad,
+html body .lobby-shell.table-active #tableView .self-slot .brand-hand-ad {
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+/* Selected always above neighbors in fan */
+html body .lobby-shell.table-active #tableView #handArea .playing-card.selected {
+  z-index: 90 !important;
+  transform: translateY(-14px) !important;
+}
+/* Guandan absolute fan: never fall back to flex-wrap grid */
+html body .gd-yard #mgHand.gd-hand-2row,
+html body .gd-yard #mgHand.gd-hand-cols.gd-hand-2row {
+  display: block !important;
   position: relative !important;
-  left: auto !important;
-  top: auto !important;
-  flex: none !important;
 }
-
-html body .gd-yard #mgHand.hand-grid .gd-card.is-on,
-html body .lobby-shell.multi-active #mgHand.hand-grid .gd-card.is-on {
-  transform: translateY(-12px) !important;
-  z-index: 60 !important;
+html body .gd-yard #mgHand .gd-card {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  cursor: pointer !important;
 }
-
-/* Keep Guandan toolbar above hand grid; seat0 does not block taps */
-html body .gd-yard .mg-hand-dock,
-html body .lobby-shell.multi-active .gd-yard .mg-hand-dock {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-end !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  z-index: 22 !important;
-  left: 64px !important;
-  right: 8px !important;
-}
-html body .gd-yard .mg-hand-dock .gd-toolbar {
-  order: 0 !important;
-  position: relative !important;
-  z-index: 24 !important;
-  margin-bottom: 8px !important;
-}
-html body .gd-yard .mg-hand-dock #mgHand.hand-grid {
-  order: 1 !important;
-  z-index: 23 !important;
+html body .lobby-shell.multi-active #mgHand.hand-fitted:not(.gd-hand-2row) .mg-hand-tile,
+html body .lobby-shell.multi-active #mgHand.hand-fitted:not(.gd-hand-2row) .mj-tile {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
 }

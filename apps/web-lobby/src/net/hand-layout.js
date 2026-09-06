@@ -64,7 +64,10 @@ function applyOverlapItems(items, pack, zBase = 20) {
     el.style.setProperty("margin-bottom", "0px", "important");
     el.style.setProperty("margin-left", i === 0 ? "0px" : "-" + pack.overlap + "px", "important");
     el.style.setProperty("flex", "0 0 " + pack.cardW + "px", "important");
-    el.style.setProperty("z-index", String(zBase + i), "important");
+    const lifted = el.classList.contains("selected") || el.classList.contains("is-on");
+    el.style.setProperty("z-index", String(lifted ? 80 + i : zBase + i), "important");
+    el.style.setProperty("pointer-events", "auto", "important");
+    el.style.setProperty("touch-action", "manipulation", "important");
   });
 }
 
@@ -114,9 +117,10 @@ export function layoutOverlapRow(area, items, opts = {}) {
   }
 }
 
+
 /**
- * play9v1: full-face grid — no negative-margin peek packing.
- * Cards stay fully visible & tappable; selected lift uses CSS translateY (does not reflow grid).
+ * Full-face CSS grid helper (lobby / legacy). Table hands use layoutOverlapRow / Guandan fan.
+ * Selected lift uses CSS translateY (does not reflow grid).
  */
 export function layoutGridRow(area, items, opts = {}) {
   const n = items.length;
@@ -133,12 +137,10 @@ export function layoutGridRow(area, items, opts = {}) {
   const maxRight = Math.max(0, window.innerWidth - 6);
   if (maxRight > left) available = Math.min(available, Math.max(8, maxRight - left));
 
-  // Prefer readable face size; shrink only if a single row of ~colsHint would overflow badly.
   let cardW = Math.min(maxW, Math.max(minW, maxW));
   const preferCols = colsHint > 0
     ? colsHint
     : Math.max(4, Math.min(9, Math.floor((available + gap) / (minW + gap))));
-  // Fit as many columns as available allows at minW, then grow card toward maxW.
   const maxCols = Math.max(1, Math.floor((available + gap) / (minW + gap)));
   const cols = Math.min(preferCols, maxCols, n);
   const cell = Math.floor((available - gap * Math.max(0, cols - 1)) / Math.max(1, cols));
@@ -166,7 +168,6 @@ export function layoutGridRow(area, items, opts = {}) {
   area.style.setProperty("width", "100%", "important");
   area.style.setProperty("max-width", available + "px", "important");
   area.style.setProperty("box-sizing", "border-box", "important");
-  // Let grid grow vertically; clear absolute-fan height locks from Guandan.
   area.style.removeProperty("height");
   area.style.removeProperty("min-height");
 
@@ -185,13 +186,14 @@ export function layoutGridRow(area, items, opts = {}) {
     el.style.setProperty("flex", "none", "important");
     el.style.setProperty("z-index", String(20 + i), "important");
     el.style.setProperty("box-sizing", "border-box", "important");
+    el.style.setProperty("pointer-events", "auto", "important");
   });
 
   return { cardW, height, cols, available, gap };
 }
 
 /**
- * Pure planner for Guandan hero hand rows (legacy fan). Kept for unit tests / fallback.
+ * Pure planner for Guandan hero hand rows.
  * Always packs large hands into exactly two balanced overlapping rows (absolute coords).
  * Never emits a lone single-card row when n >= 3.
  */
@@ -303,7 +305,6 @@ export function computeGuandanRows(n, available, opts = {}) {
   };
 }
 
-/** play9v1: Guandan hero hand uses full-face grid (toolbar stays above via CSS). */
 export function layoutGuandanCols(area) {
   // Only the hero hand. Opponent .gd-card live elsewhere and must not be packed.
   const cards = [...area.querySelectorAll(".gd-card")];
@@ -315,9 +316,9 @@ export function layoutGuandanCols(area) {
   area.querySelectorAll(".gd-col, .gd-bomb-tag").forEach((el) => el.remove());
   area.querySelectorAll(":scope > .gd-row-break").forEach((el) => el.remove());
 
-  const { dock } = measureHandAvailable(area);
+  const { available, dock } = measureHandAvailable(area);
 
-  // Prefer CSS dock inset so toolbar + grid breathe on 414.
+  // Prefer CSS dock inset (~56px) over a tight 118px so 14+13 can breathe on 414.
   if (dock && dock.style) {
     dock.style.setProperty("top", "50%", "important");
     dock.style.setProperty("bottom", "calc(52px + env(safe-area-inset-bottom, 0px))", "important");
@@ -329,15 +330,51 @@ export function layoutGuandanCols(area) {
     dock.style.setProperty("flex-direction", "column", "important");
     dock.style.setProperty("justify-content", "flex-end", "important");
     dock.style.setProperty("overflow-x", "hidden", "important");
-    dock.style.setProperty("overflow-y", "auto", "important");
+    dock.style.setProperty("overflow-y", "visible", "important");
   }
 
-  layoutGridRow(area, cards, {
-    minW: 40,
-    maxW: 48,
+  const plan = computeGuandanRows(cards.length, available, {
+    minPeek: 14,
+    minW: 28,
+    maxW: 44,
     ratio: 1.4,
-    gap: 4,
-    cols: 8,
+    leftPad: 4,
+    rowOverlapY: 22,
+    selectLift: 14,
+  });
+
+  area.classList.add("hand-fitted");
+  area.classList.remove("hand-grid");
+  area.classList.toggle("gd-hand-2row", plan.rowCount === 2);
+  area.style.removeProperty("grid-template-columns");
+  area.style.removeProperty("grid-auto-rows");
+  area.style.removeProperty("gap");
+  area.style.setProperty("display", "block", "important");
+  area.style.setProperty("position", "relative", "important");
+  area.style.setProperty("flex-wrap", "nowrap", "important");
+  area.style.setProperty("overflow-x", "hidden", "important");
+  area.style.setProperty("overflow-y", "visible", "important");
+  area.style.setProperty("width", Math.min(available, Math.max(plan.lastRight + 2, 8)) + "px", "important");
+  area.style.setProperty("max-width", available + "px", "important");
+  area.style.setProperty("height", plan.areaHeight + "px", "important");
+  area.style.setProperty("min-height", plan.areaHeight + "px", "important");
+
+  // Absolute placement: selection translateY must not reflow / split rows.
+  plan.positions.forEach((pos) => {
+    const el = cards[pos.index];
+    if (!el) return;
+    el.style.setProperty("position", "absolute", "important");
+    el.style.setProperty("left", pos.left + "px", "important");
+    el.style.setProperty("top", pos.top + "px", "important");
+    el.style.setProperty("width", pos.width + "px", "important");
+    el.style.setProperty("min-width", pos.width + "px", "important");
+    el.style.setProperty("max-width", pos.width + "px", "important");
+    el.style.setProperty("height", pos.height + "px", "important");
+    el.style.setProperty("margin", "0px", "important");
+    el.style.setProperty("flex", "none", "important");
+    el.style.setProperty("z-index", String(pos.z), "important");
+    el.style.setProperty("pointer-events", "auto", "important");
+    el.style.setProperty("touch-action", "manipulation", "important");
   });
 }
 
@@ -358,13 +395,13 @@ export function layoutTexasHero(area) {
 export function fitAllHands(root = document) {
   const handArea = root.querySelector("#handArea");
   if (handArea) {
-    // play9v1: Dou Dizhu full-face grid — never overlap/hide faces
-    layoutGridRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
-      maxW: 48,
+    const wide = (handArea.clientWidth || 360) > 520;
+    // play9v2 / JJ: Dou Dizhu single-row fan — negative-margin peek, selected lifts
+    layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
+      maxW: wide ? 56 : 48,
       minW: 40,
+      minPeek: 16,
       ratio: 1.42,
-      gap: 4,
-      cols: 9,
     });
   }
 
@@ -376,13 +413,12 @@ export function fitAllHands(root = document) {
       const items = [...mg.querySelectorAll(".mg-hand-tile, .mj-tile, .mg-hand-card, .bj-card, .mg-card")];
       if (items.length) {
         const isTile = items.some((el) => el.classList.contains("mg-hand-tile") || el.classList.contains("mj-tile"));
-        // play9v1: mahjong / other multi hands use full-face grid
-        layoutGridRow(mg, items, {
-          maxW: isTile ? 40 : 48,
-          minW: isTile ? 32 : 40,
+        // play9v2: mahjong / multi hands use JJ-style overlap fan (not 九宫格)
+        layoutOverlapRow(mg, items, {
+          maxW: isTile ? 36 : 40,
+          minW: isTile ? 26 : 20,
+          minPeek: isTile ? 18 : 12,
           ratio: isTile ? 1.45 : 1.42,
-          gap: isTile ? 3 : 4,
-          cols: isTile ? 8 : 9,
         });
       }
     }
