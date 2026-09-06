@@ -149,3 +149,27 @@
 .lobby-shell .home-pack[data-lobby-action="records"] {
   display: none !important;
 }
+
+/* play9u2: hide home CTA; show game grid directly */
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .p0-home-stage,
+.lobby-shell .p0-cta-card,
+.lobby-shell .p0-kicker {
+  display: none !important;
+}
+
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .p0-home-chrome {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.lobby-shell .p0-home-user {
+  flex: 0 0 auto !important;
+}
+
+.lobby-shell .home-icon-grid {
+  flex: 1 1 auto !important;
+  align-content: start !important;
+  padding-top: 12px !important;
+}
+

@@ -1,0 +1,110 @@
+{
+  "cache": "play9u2",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5192/index.html?v=play9u2",
+  "checks": {
+    "stage": {
+      "present": true,
+      "display": "none",
+      "visibility": "visible",
+      "hiddenAttr": true,
+      "text": "Tea Parlor\n                \n                  经典三人 · 叫分\n                  经典叫分 ·",
+      "w": 0,
+      "h": 0
+    },
+    "cta": {
+      "present": true,
+      "display": "none",
+      "visibility": "visible",
+      "hiddenAttr": false,
+      "text": "经典三人 · 叫分\n                  经典叫分 · 超时 AI 补位\n                  斗地主 · 快速开始\n       ",
+      "w": 0,
+      "h": 0
+    },
+    "kicker": {
+      "present": true,
+      "display": "none",
+      "visibility": "visible",
+      "hiddenAttr": false,
+      "text": "Tea Parlor",
+      "w": 0,
+      "h": 0
+    },
+    "user": {
+      "present": true,
+      "display": "flex",
+      "visibility": "visible",
+      "hiddenAttr": false,
+      "text": "Telegram\n茶馆\n金币\n128,600",
+      "w": 382,
+      "h": 68
+    },
+    "grid": {
+      "present": true,
+      "display": "grid",
+      "visibility": "visible",
+      "hiddenAttr": false,
+      "text": "斗地主\n麻将\n德州\n掼蛋\n炸金花\n二十一点\n链游中心",
+      "w": 382,
+      "h": 324.8
+    },
+    "chain": {
+      "present": true,
+      "display": "flex",
+      "visibility": "visible",
+      "hiddenAttr": false,
+      "text": "链游中心",
+      "w": 110,
+      "h": 93.6
+    },
+    "pack": {
+      "present": true,
+      "display": "none",
+      "visibility": "visible",
+      "hiddenAttr": true,
+      "text": "牌类合集\n              \n              \n                \n                  \n         ",
+      "w": 0,
+      "h": 0
+    },
+    "tabbar": {
+      "present": true,
+      "display": "grid",
+      "visibility": "visible",
+      "hiddenAttr": false,
+      "text": "大厅\n战绩\n补给\n说明\n我",
+      "w": 414,
+      "h": 61
+    },
+    "games": [
+      "斗地主",
+      "麻将",
+      "德州",
+      "掼蛋",
+      "炸金花",
+      "二十一点",
+      "链游中心"
+    ],
+    "cta_visible": false,
+    "chain_page": {
+      "title": true,
+      "hasReal": true
+    },
+    "ddz": {
+      "hasRooms": true
+    }
+  },
+  "pass": {
+    "no_cta_card": true,
+    "user_visible": true,
+    "grid_has_games": true,
+    "has_chain": true,
+    "pack_hidden": true,
+    "tabbar_present": true,
+    "chain_reachable": true,
+    "ddz_reachable": true
+  },
+  "ok": true
+}
