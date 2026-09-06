@@ -1,0 +1,228 @@
+{
+  "cache": "play9j1",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5179/index.html?v=play9j1b",
+  "shots": {
+    "lobby-414.png": 235944,
+    "mj2p-414.png": 1013169,
+    "mj4p-414.png": 989470,
+    "mj4p-turn-meta-414.png": 989470,
+    "ddz-more-414.png": 164577
+  },
+  "checks": {
+    "lobby": {
+      "hasGold": true,
+      "cardApprox": 0,
+      "foundGames": [
+        "斗地主",
+        "德州",
+        "炸金花",
+        "麻将",
+        "掼蛋",
+        "二十一点"
+      ],
+      "gameCount": 6
+    },
+    "mj2p": {
+      "mgClass": "table-view multi-game-view mj-2p",
+      "is2p": true,
+      "is4p": false,
+      "pill": {
+        "color": "rgb(61, 46, 0)",
+        "bg": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "text": "二人麻将 · 底分 100",
+        "rect": {
+          "top": 30,
+          "bottom": 65,
+          "left": 260.9,
+          "right": 397,
+          "w": 136.1,
+          "h": 35
+        }
+      },
+      "actions": {
+        "top": 658,
+        "bottom": 728,
+        "left": 316,
+        "right": 394,
+        "w": 78,
+        "h": 70
+      },
+      "hand": {
+        "top": 744,
+        "bottom": 796,
+        "left": 74,
+        "right": 392,
+        "w": 318,
+        "h": 52
+      },
+      "gapActsHand": 16,
+      "actionsAboveHand": true,
+      "qi": {
+        "rect": {
+          "top": 665,
+          "bottom": 721,
+          "left": 327,
+          "right": 383,
+          "w": 56,
+          "h": 56
+        },
+        "text": "弃",
+        "w": "56px",
+        "h": "56px",
+        "display": "block",
+        "visibility": true
+      },
+      "turnSeat": true,
+      "turnMeta": {
+        "border": "rgb(232, 197, 71)",
+        "boxShadow": "rgba(232, 197, 71, 0.55) 0px 0px 0px 1px",
+        "bg": "rgba(20, 40, 24, 0.88)",
+        "text": "庄茶馆（我）14张出牌中积分 +0"
+      },
+      "acting": {
+        "text": "出牌中",
+        "color": "rgb(253, 230, 138)",
+        "className": "mg-meta-line mg-meta-turn is-acting"
+      },
+      "tileCount": 14,
+      "dataMjAct": 1,
+      "hudStatusColor": "rgb(254, 243, 199)"
+    },
+    "mj4p": {
+      "mgClass": "table-view multi-game-view mj-4p",
+      "is2p": false,
+      "is4p": true,
+      "pill": {
+        "color": "rgb(61, 46, 0)",
+        "bg": "linear-gradient(rgb(253, 230, 138), rgb(232, 197, 71))",
+        "text": "四人麻将 · 底分 100",
+        "rect": {
+          "top": 30,
+          "bottom": 65,
+          "left": 260.9,
+          "right": 397,
+          "w": 136.1,
+          "h": 35
+        }
+      },
+      "actions": {
+        "top": 658,
+        "bottom": 728,
+        "left": 310,
+        "right": 388,
+        "w": 78,
+        "h": 70
+      },
+      "hand": {
+        "top": 744,
+        "bottom": 796,
+        "left": 80,
+        "right": 386,
+        "w": 306,
+        "h": 52
+      },
+      "gapActsHand": 16,
+      "actionsAboveHand": true,
+      "qi": {
+        "rect": {
+          "top": 665,
+          "bottom": 721,
+          "left": 321,
+          "right": 377,
+          "w": 56,
+          "h": 56
+        },
+        "text": "弃",
+        "w": "56px",
+        "h": "56px",
+        "display": "block",
+        "visibility": true
+      },
+      "turnSeat": true,
+      "turnMeta": {
+        "border": "rgb(232, 197, 71)",
+        "boxShadow": "rgba(232, 197, 71, 0.55) 0px 0px 0px 1px",
+        "bg": "rgba(20, 40, 24, 0.88)",
+        "text": "茶馆（我）14张出牌中积分 +0"
+      },
+      "acting": {
+        "text": "出牌中",
+        "color": "rgb(253, 230, 138)",
+        "className": "mg-meta-line mg-meta-turn is-acting"
+      },
+      "tileCount": 14,
+      "dataMjAct": 1,
+      "hudStatusColor": "rgb(254, 243, 199)"
+    },
+    "ddz": {
+      "start": "click:斗地主 · 快速开始",
+      "more": {
+        "found": true,
+        "open": true,
+        "display": "flex"
+      }
+    }
+  },
+  "deviations": [
+    "Appended CSS specificity boosted (html body .lobby-shell.multi-active #multiGameView…) so 56px 弃/胡 wins over play9g1 compact 36–40px pill rules; visual tokens otherwise match 01-mj-readability.css.",
+    "gapActsHand measured ~16px (patch margin 8px + actions padding); still actionsAboveHand=true and docked near hand."
+  ],
+  "summary": {
+    "mj2p": {
+      "pill_dark_on_gold": true,
+      "pill_color": "rgb(61, 46, 0)",
+      "qi_wh": [
+        56,
+        56
+      ],
+      "qi_size_ok": true,
+      "actions_above_hand": true,
+      "gap_acts_hand": 16,
+      "turn_meta": true,
+      "acting": {
+        "text": "出牌中",
+        "color": "rgb(253, 230, 138)",
+        "className": "mg-meta-line mg-meta-turn is-acting"
+      },
+      "data_mj_act": 1,
+      "mode": {
+        "2p": true,
+        "4p": false
+      }
+    },
+    "mj4p": {
+      "pill_dark_on_gold": true,
+      "pill_color": "rgb(61, 46, 0)",
+      "qi_wh": [
+        56,
+        56
+      ],
+      "qi_size_ok": true,
+      "actions_above_hand": true,
+      "gap_acts_hand": 16,
+      "turn_meta": true,
+      "acting": {
+        "text": "出牌中",
+        "color": "rgb(253, 230, 138)",
+        "className": "mg-meta-line mg-meta-turn is-acting"
+      },
+      "data_mj_act": 1,
+      "mode": {
+        "2p": false,
+        "4p": true
+      }
+    }
+  },
+  "lobby_ok": true,
+  "ddz_more_ok": true,
+  "untouched": {
+    "ddz_play9h2_hud": "no qq-hud / more-menu CSS edits; ddz more menu still opens in self-test",
+    "lobby_play9i1": "lobby-ia.css untouched (cache stamp only); lobby still shows 金币 + 6 games",
+    "hand_layout_minW": "hand-layout.js stamp only, no floor changes",
+    "gameplay": "no discard/engine logic changes; data-mj-act attrs kept"
+  }
+}
