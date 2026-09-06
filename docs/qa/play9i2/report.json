@@ -1,0 +1,36 @@
+{
+  "cache": "play9i2",
+  "open": {
+    "hidden": false,
+    "hasAttr": false,
+    "display": "flex",
+    "h": 106,
+    "w": 120,
+    "top": 43,
+    "aria": "true",
+    "openCls": true,
+    "items": [
+      {
+        "text": "🎁 礼包",
+        "vis": true,
+        "r": 44
+      },
+      {
+        "text": "托管",
+        "vis": true,
+        "r": 44
+      }
+    ],
+    "hudOverflow": "visible",
+    "hudZ": "60",
+    "menuZ": "80"
+  },
+  "closed": {
+    "hidden": true,
+    "hasAttr": true,
+    "display": "none",
+    "aria": "false"
+  },
+  "ok": true,
+  "rootCause": "qq-hud overflow:hidden clipped absolute more menu"
+}
