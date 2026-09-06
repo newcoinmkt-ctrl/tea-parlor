@@ -1,0 +1,302 @@
+{
+  "cache": "play9v2",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5193/index.html?v=play9v2",
+  "shots": {
+    "lobby-414-home.png": {
+      "bytes": 222597,
+      "sha1": "056e25f570de"
+    },
+    "ddz-414-fan.png": {
+      "bytes": 572540,
+      "sha1": "074743de4654"
+    },
+    "ddz-414-selected.png": {
+      "bytes": 579397,
+      "sha1": "3251a5d3f865"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 572748,
+      "sha1": "23fa46a15bdc"
+    },
+    "mj-414-hand.png": {
+      "bytes": 979500,
+      "sha1": "bea2d36f0d46"
+    },
+    "gd-414-hand.png": {
+      "bytes": 278177,
+      "sha1": "5d643b871813"
+    }
+  },
+  "checks": {
+    "lobby": {
+      "games": [
+        "斗地主",
+        "麻将",
+        "德州",
+        "掼蛋",
+        "炸金花",
+        "二十一点",
+        "链游中心"
+      ],
+      "gameCount": 7,
+      "hasChain": true,
+      "cta_visible": false,
+      "hasGold": true
+    },
+    "ddz_start": {
+      "via": "click-local",
+      "keys": [
+        "state",
+        "start",
+        "startTexas",
+        "startGuanDan",
+        "startZhajinhua",
+        "startMahjong",
+        "startBlackjack",
+        "leaveMulti",
+        "lobby",
+        "brand",
+        "setPlayMode",
+        "forceDdzPlay",
+        "toggleCard"
+      ]
+    },
+    "ddz_force_play": {
+      "ok": true,
+      "before": {
+        "phase": "bid",
+        "current": 0,
+        "landlord": 2
+      },
+      "phase": "play",
+      "currentPlayer": 0,
+      "landlord": 0,
+      "handN": 17
+    },
+    "ddz_phase": {
+      "phase": "play",
+      "current": 0,
+      "landlord": 0,
+      "n": 17
+    },
+    "ddz": {
+      "label": "ddz",
+      "n": 17,
+      "minW": 48,
+      "maxW": 48,
+      "minH": 64,
+      "maxH": 64,
+      "overlapCount": 31,
+      "maxOverlapArea": 2048,
+      "isGrid": false,
+      "isFan2": false,
+      "layoutMode": "overlap/fan",
+      "display": "flex",
+      "areaId": "handArea",
+      "sample": [
+        {
+          "w": 48,
+          "h": 64,
+          "left": 118,
+          "top": 798,
+          "right": 166,
+          "bottom": 862
+        },
+        {
+          "w": 48,
+          "h": 64,
+          "left": 134,
+          "top": 798,
+          "right": 182,
+          "bottom": 862
+        },
+        {
+          "w": 48,
+          "h": 64,
+          "left": 150,
+          "top": 798,
+          "right": 198,
+          "bottom": 862
+        }
+      ]
+    },
+    "ddz_play_none": {
+      "selected": 0,
+      "playDisabled": true,
+      "playAria": "true"
+    },
+    "ddz_selected": {
+      "ok": true,
+      "selected": 1,
+      "n": 17,
+      "playDisabled": false,
+      "phase": "play",
+      "current": 0,
+      "selectedIds": [
+        "17_4_53"
+      ],
+      "lifted": [
+        {
+          "id": "17_4_53",
+          "transform": "matrix(1, 0, 0, 1, 0, -14)",
+          "top": 784
+        }
+      ]
+    },
+    "ddz_after": {
+      "label": "ddz_after",
+      "n": 16,
+      "minW": 48,
+      "maxW": 48,
+      "minH": 64,
+      "maxH": 64,
+      "overlapCount": 29,
+      "maxOverlapArea": 2048,
+      "isGrid": false,
+      "isFan2": false,
+      "layoutMode": "overlap/fan",
+      "display": "flex",
+      "areaId": "handArea",
+      "sample": [
+        {
+          "w": 48,
+          "h": 64,
+          "left": 118,
+          "top": 798,
+          "right": 166,
+          "bottom": 862
+        },
+        {
+          "w": 48,
+          "h": 64,
+          "left": 134,
+          "top": 798,
+          "right": 182,
+          "bottom": 862
+        },
+        {
+          "w": 48,
+          "h": 64,
+          "left": 150,
+          "top": 798,
+          "right": 198,
+          "bottom": 862
+        }
+      ],
+      "before": 17,
+      "after": 16,
+      "decreased": true
+    },
+    "ddz_play": {
+      "before": 17,
+      "clicked": true
+    },
+    "mj": {
+      "label": "mj",
+      "n": 13,
+      "minW": 36,
+      "maxW": 36,
+      "minH": 52,
+      "maxH": 52,
+      "overlapCount": 12,
+      "maxOverlapArea": 676,
+      "isGrid": false,
+      "isFan2": false,
+      "layoutMode": "overlap/fan",
+      "display": "flex",
+      "areaId": "mgHand",
+      "sample": [
+        {
+          "w": 36,
+          "h": 52,
+          "left": 82,
+          "top": 760,
+          "right": 118,
+          "bottom": 812
+        },
+        {
+          "w": 36,
+          "h": 52,
+          "left": 105,
+          "top": 760,
+          "right": 141,
+          "bottom": 812
+        },
+        {
+          "w": 36,
+          "h": 52,
+          "left": 128,
+          "top": 760,
+          "right": 164,
+          "bottom": 812
+        }
+      ]
+    },
+    "gd": {
+      "label": "gd",
+      "n": 27,
+      "minW": 44,
+      "maxW": 44,
+      "minH": 62,
+      "maxH": 62,
+      "overlapCount": 72,
+      "maxOverlapArea": 1364,
+      "isGrid": false,
+      "isFan2": true,
+      "layoutMode": "fan-2row",
+      "display": "block",
+      "areaId": "mgHand",
+      "sample": [
+        {
+          "w": 44,
+          "h": 62,
+          "left": 72,
+          "top": 736,
+          "right": 116,
+          "bottom": 798
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 94,
+          "top": 736,
+          "right": 138,
+          "bottom": 798
+        },
+        {
+          "w": 44,
+          "h": 62,
+          "left": 116,
+          "top": 736,
+          "right": 160,
+          "bottom": 798
+        }
+      ],
+      "toolbarAboveHand": true
+    },
+    "shot_distinct": true
+  },
+  "pass": {
+    "lobby_no_cta": true,
+    "lobby_grid": true,
+    "lobby_has_chain": true,
+    "ddz_not_grid": true,
+    "ddz_fan_layout": true,
+    "ddz_count": true,
+    "ddz_selected_gt0": true,
+    "ddz_play_disabled_when_empty": true,
+    "ddz_after_decreased": true,
+    "mj_not_grid": true,
+    "mj_count": true,
+    "gd_not_grid": true,
+    "gd_fan2_or_overlap": true,
+    "gd_count": true,
+    "gd_toolbar_above": true,
+    "shots_distinct": true
+  },
+  "ok": true
+}

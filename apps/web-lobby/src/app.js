@@ -39,7 +39,7 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v1';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v2';
 import { initTableOrientation } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -234,7 +234,7 @@ const DDZ_TIER_IDS = {
   gold: ['novice', 'classic', 'high'],
   season: ['c_novice', 'c_classic', 'c_high'],
 };
-const DDZ_QUEUE = ['经典叫分 · 超时 AI 补位', '经典叫分 · 超时 AI 补位', '经典叫分 · 超时 AI 补位'];
+const DDZ_QUEUE = ['经典叫分 · 联网匹配', '经典叫分 · 联网匹配', '经典叫分 · 联网匹配'];
 const DDZ_TIER_LABEL = ['新手', '经典', '高级'];
 let _txDealerSyncing = false;
 
@@ -693,6 +693,35 @@ async function boot() {
         playMode = savePlayMode(m);
         updatePinusModeLabel();
       },
+      /** QA/dev: skip bid/double into local play so select+出牌 can be tested */
+      forceDdzPlay: () => {
+        if (!game || game.online) return false;
+        // Ensure hero is landlord so select+出牌 is immediately testable
+        const prevLandlord = game.landlord;
+        if (prevLandlord < 0) {
+          game.landlord = HUMAN;
+          game.currentBid = Math.max(1, game.currentBid || 1);
+          game.hands[HUMAN] = sortCards([
+            ...game.hands[HUMAN],
+            ...(game.bottom || []),
+          ]);
+          game.bottom = [];
+        } else if (prevLandlord !== HUMAN && Array.isArray(game.bottom) && game.bottom.length) {
+          // bottom already merged into prev landlord during bid end — leave hands as-is
+          game.landlord = HUMAN;
+        } else if (prevLandlord !== HUMAN) {
+          game.landlord = HUMAN;
+        }
+        game.enableDouble = false;
+        beginPlayPhase();
+        game.currentPlayer = HUMAN;
+        game.lastPlay = null;
+        game.passCount = 0;
+        selected = new Set();
+        renderGame();
+        return true;
+      },
+      toggleCard: (cardId) => toggleCardSelect(cardId),
     };
     console.log('[TeaParlor] 全玩法已就绪 · 品牌', ACTIVE_BRAND.name, '· 模式', playMode);
   } catch (e) {
@@ -3244,7 +3273,7 @@ function setLobbyView(view = 'home', gameType = null) {
     else if (gameType === 'real') nodes.claimStatus.textContent = `链游测试区：赛季积分 可入座 · 下方更多游戏快捷 · 演示账本`;
     else if (gameType === 'doudizhu') {
       renderDdzRooms(ddzVariant);
-      nodes.claimStatus.textContent = '斗地主 · 经典叫分 · 超时 AI 补位';
+      nodes.claimStatus.textContent = '斗地主 · 经典叫分 · 联网匹配';
     }
     else nodes.claimStatus.textContent = '请选择斗地主场次（金币场）';
   }
@@ -4147,6 +4176,7 @@ function bindDragSelect() {
     dragStartIndex = -1;
     dragBaseSelected = null;
     updateHintFromSelection();
+    syncPlayButtonFromSelection();
     if (nodes.tableStatus) nodes.tableStatus.textContent = statusLine();
     // 短延迟后清 dragMoved，避免 mouseup 后的 click 再 toggle
     setTimeout(() => {
@@ -4163,14 +4193,31 @@ function canSelectHand() {
   return Boolean(game && game.phase === 'play' && game.currentPlayer === HUMAN);
 }
 
+function syncPlayButtonFromSelection() {
+  const myPlay = Boolean(game && game.phase === 'play' && game.currentPlayer === HUMAN);
+  if (nodes.playButton) {
+    const allowPlay = Boolean(myPlay && selected.size > 0);
+    nodes.playButton.disabled = !allowPlay;
+    nodes.playButton.setAttribute('aria-disabled', allowPlay ? 'false' : 'true');
+    nodes.playButton.classList.toggle('is-recommended', allowPlay);
+  }
+  if (nodes.passButton) {
+    const canPass = Boolean(myPlay && game.lastPlay && game.lastPlay.player !== HUMAN);
+    nodes.passButton.disabled = !canPass;
+    nodes.passButton.classList.toggle('is-recommended', canPass && !selected.size);
+  }
+  if (nodes.hintButton) nodes.hintButton.disabled = !myPlay;
+}
+
 function toggleHandCard(btn) {
   if (!btn || !canSelectHand()) return false;
-  const id = btn.dataset.id;
+  const id = String(btn.dataset.id || '');
   if (!id) return false;
   if (selected.has(id)) selected.delete(id);
   else selected.add(id);
   paintHandSelection();
   updateHintFromSelection();
+  syncPlayButtonFromSelection();
   if (nodes.tableStatus) nodes.tableStatus.textContent = statusLine();
   return true;
 }
@@ -4181,23 +4228,29 @@ function applyDragRange(from, to) {
   const hand = game.hands[HUMAN];
   const a = Math.min(from, to);
   const b = Math.max(from, to);
-  const startWasOn = Boolean(dragBaseSelected?.has(hand[from]?.id));
-  selected = new Set(dragBaseSelected || []);
+  const startId = hand[from] != null ? String(hand[from].id) : '';
+  const startWasOn = Boolean(startId && (dragBaseSelected?.has(startId) || dragBaseSelected?.has(hand[from]?.id)));
+  selected = new Set([...(dragBaseSelected || [])].map(String));
   for (let i = a; i <= b; i++) {
     const card = hand[i];
     if (!card) continue;
-    if (startWasOn) selected.delete(card.id);
-    else selected.add(card.id);
+    const cid = String(card.id);
+    if (startWasOn) selected.delete(cid);
+    else selected.add(cid);
   }
   paintHandSelection();
   updateHintFromSelection();
+  syncPlayButtonFromSelection();
 }
 
 function paintHandSelection() {
   if (!nodes.handArea) return;
-  nodes.handArea.querySelectorAll('.playing-card').forEach((btn) => {
-    const id = btn.dataset.id;
-    btn.classList.toggle('selected', selected.has(id));
+  nodes.handArea.querySelectorAll('.playing-card').forEach((btn, i) => {
+    const id = String(btn.dataset.id || '');
+    const on = selected.has(id) || selected.has(btn.dataset.id);
+    btn.classList.toggle('selected', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on) btn.style.setProperty('z-index', String(90 + i), 'important');
   });
 }
 
@@ -4463,7 +4516,7 @@ function startDdzMatched(roomId, options = {}) {
   const title = mask?.querySelector('h2');
   const room = ROOMS[roomId] || ROOMS.novice;
   if (title) title.textContent = '匹配中';
-  if (copy) copy.textContent = '匹配中，超时 AI 补位';
+  if (copy) copy.textContent = '匹配中…';
   ddzKeepOverlay = true;
   ddzMatchAborted = false;
   if (mask) {
@@ -4623,7 +4676,7 @@ function renderDdzRooms(variantId = ddzVariant) {
 
   const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
   const rooms = ids.map((id) => ROOMS[id]).filter(Boolean);
-  if (onlinePill) onlinePill.textContent = '超时 AI 补位';
+  if (onlinePill) onlinePill.textContent = '联网匹配';
 
   if (!grid) return;
   const unit = ddzLane === 'season' ? '赛季积分' : '影子积分';
@@ -4858,7 +4911,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
   const keepOverlay = extra.keepMatchOverlay || ddzKeepOverlay;
 
   onlineBackend = backend === 'pinus' ? 'pinus' : 'colyseus';
-  hintText = keepOverlay ? '匹配中，超时 AI 补位' : `正在开局 · ${v.label}…`;
+  hintText = keepOverlay ? '匹配中…' : `正在开局 · ${v.label}…`;
   if (!keepOverlay) showDdzTable();
   if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
 
@@ -4926,7 +4979,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
   trustee = false;
   syncMatchOverlay(session.room);
   if (game?.phase === 'match') {
-    hintText = session.room?.status || '匹配中，超时 AI 补位';
+    hintText = '匹配中…';
     return;
   }
   // Quick-match expected phase=match first. Non-match with <3 humans = stale/AI deal without waiting — abort.
@@ -4956,12 +5009,10 @@ function syncMatchOverlay(room) {
     }
     const ends = Number(room.matchEndsAt) || 0;
     const leftMs = ends ? Math.max(0, ends - Date.now()) : 0;
-    const leftSec = Math.max(0, Math.ceil(leftMs / 1000));
-    if (copy) {
-      copy.textContent = leftSec > 0
-        ? `匹配中，超时 AI 补位（${leftSec}s）`
-        : '匹配中，超时 AI 补位';
-    }
+    // play9v2: silent match UI — no AI 替补 / countdown seconds in copy
+    if (copy) copy.textContent = '匹配中…';
+    const titleEl = document.querySelector('#ddzMatchMask h2');
+    if (titleEl) titleEl.textContent = '匹配中';
     clearTimeout(ddzMatchTimer);
     // Tick overlay from server matchEndsAt; never hide while phase === match.
     if (leftMs > 0) {
@@ -5104,7 +5155,7 @@ async function pinusSync(actionFn) {
       const meta = ROOMS[game.roomId] || { id: game.roomId, name: game.roomName, stake: game.stake, unit: game.unit };
       applyPinusRoom(data.room, meta, game.currency);
       if (data.cards) {
-        selected = new Set((data.cards || []).map((c) => c.id));
+        selected = new Set((data.cards || []).map((c) => String(c.id)));
       }
       // 结算入账
       if (game.phase === 'settle' && !game._settledWallet && game.score != null) {
@@ -5478,7 +5529,7 @@ function onPlay() {
         const net = getOnlineNet();
         const h = await net.ddzHint();
         if (h?.cards?.length) {
-          selected = new Set(h.cards.map((c) => c.id));
+          selected = new Set(h.cards.map((c) => String(c.id)));
           return net.ddzPlay([...selected]);
         }
         if (game.lastPlay && game.lastPlay.player !== HUMAN) {
@@ -5491,7 +5542,7 @@ function onPlay() {
     const hint = getPlayHint(game.hands[HUMAN], prev);
     if (hint?.cards?.length) {
       cards = hint.cards;
-      selected = new Set(cards.map((c) => c.id));
+      selected = new Set(cards.map((c) => String(c.id)));
       paintHandSelection();
     } else if (prev) {
       hintText = '没有能压的牌，已为你点「不出」';
@@ -5522,7 +5573,7 @@ function onPlay() {
     // 选了压不住的牌：尝试提示合法压牌，否则引导不出
     const hint = getPlayHint(game.hands[HUMAN], prev);
     if (hint?.cards?.length) {
-      selected = new Set(hint.cards.map((c) => c.id));
+      selected = new Set(hint.cards.map((c) => String(c.id)));
       hintText = `压不过上一手 · 已改选提示：${typeLabel(hint.type, hint)} ${hint.cards.map(cardText).join(' ')} · 再点「出牌」`;
       renderGame();
       return;
@@ -5563,7 +5614,7 @@ function onHint() {
     pinusSync(async () => {
       const data = await getOnlineNet().ddzHint();
       if (data?.cards?.length) {
-        selected = new Set(data.cards.map((c) => c.id));
+        selected = new Set(data.cards.map((c) => String(c.id)));
         hintText = `提示：已选 ${data.cards.length} 张 · 再点「出牌」`;
       } else {
         selected = new Set();
@@ -5585,7 +5636,7 @@ function onHint() {
     setTimeout(() => nodes.passButton?.classList.remove('pulse-hint'), 1200);
     return;
   }
-  selected = new Set(hint.cards.map((c) => c.id));
+  selected = new Set(hint.cards.map((c) => String(c.id)));
   hintText = `提示：${typeLabel(hint.type, hint)} ${hint.cards.map(cardText).join(' ')} · 再点「出牌」`;
   renderGame();
   nodes.playButton?.classList.add('pulse-hint');
@@ -5595,19 +5646,13 @@ function onHint() {
 /** 点选手牌（单击切换） */
 function toggleCardSelect(cardId) {
   if (!canSelectHand() || !cardId) return;
-  if (selected.has(cardId)) selected.delete(cardId);
-  else selected.add(cardId);
+  const id = String(cardId);
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
   paintHandSelection();
   updateHintFromSelection();
+  syncPlayButtonFromSelection();
   if (nodes.tableStatus) nodes.tableStatus.textContent = statusLine();
-  // 选中后刷新出牌按钮可用态
-  const myPlay = game.phase === 'play' && game.currentPlayer === HUMAN;
-  if (nodes.playButton) {
-    const allowPlay = Boolean(myPlay && selected.size > 0);
-    nodes.playButton.disabled = !allowPlay;
-    nodes.playButton.setAttribute('aria-disabled', allowPlay ? 'false' : 'true');
-    nodes.playButton.classList.toggle('is-recommended', allowPlay);
-  }
 }
 
 function onToggleTrustee() {
@@ -5980,7 +6025,7 @@ function autoHuman() {
       if (prev) onPass(true);
       return;
     }
-    selected = new Set(hint.cards.map((c) => c.id));
+    selected = new Set(hint.cards.map((c) => String(c.id)));
     onPlay();
   }
 }
@@ -6313,6 +6358,13 @@ function renderPlayZones() {
 function renderHand() {
   if (!nodes.handArea || !game) return;
   nodes.handArea.innerHTML = '';
+  nodes.handArea.style.pointerEvents = 'auto';
+  nodes.handArea.style.zIndex = '30';
+  const wrap = nodes.handArea.closest('.hand-wrap');
+  if (wrap) {
+    wrap.style.pointerEvents = 'auto';
+    wrap.style.zIndex = '30';
+  }
   const canSelect = canSelectHand();
   // 展示：按斗地主规则大→小从左到右（大王、小王、2、A...3）
   const hand = sortCards(game.hands[HUMAN], false);
@@ -6325,7 +6377,7 @@ function renderHand() {
     const isWild = game?.variant === 'laizi' && isWildCard(card, game.wildRank);
     btn.className = 'playing-card'
       + (isRed(card) ? ' red-card' : '')
-      + (selected.has(card.id) ? ' selected' : '')
+      + ((selected.has(String(card.id)) || selected.has(card.id)) ? ' selected' : '')
       + (isWild ? ' is-wild' : '');
     btn.dataset.id = card.id;
     btn.dataset.index = String(index);
@@ -6353,7 +6405,7 @@ function renderHand() {
       if (!canSelect || dragMoved) return;
     });
     btn.tabIndex = canSelect ? 0 : -1;
-    btn.setAttribute('aria-pressed', selected.has(card.id) ? 'true' : 'false');
+    btn.setAttribute('aria-pressed', (selected.has(String(card.id)) || selected.has(card.id)) ? 'true' : 'false');
     nodes.handArea.appendChild(btn);
   });
   try { fitAllHands(); } catch (_) {}
