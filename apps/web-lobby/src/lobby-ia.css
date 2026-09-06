@@ -81,6 +81,19 @@
   }
 }
 
+
+.lobby-shell .home-chain-hint {
+  margin: 4px 16px 12px;
+  font-size: 12px;
+  color: rgba(247, 242, 230, 0.72);
+  text-align: center;
+}
+
+/* 链游格可略强调 */
+.lobby-shell .home-icon-btn.home-icon-chain strong {
+  color: var(--tp-gold, #e8c547);
+}
+
 /* CTA 与宫格间距收紧；避免 stage 把宫格顶出首屏 */
 .lobby-shell .p0-home-chrome {
   margin-bottom: 4px !important;
@@ -102,4 +115,37 @@
 /* 底栏为唯一主导航时，保证在最上层 */
 .lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
   z-index: 40 !important;
+}
+
+/* play9u1: restore 链游中心 tile (undo table-play P1 hide) */
+.lobby-shell.p0-tg .p0-home-chrome .home-icon-grid .home-icon-btn.home-icon-chain,
+.lobby-shell.p0-tg .p0-home-chrome .home-icon-grid .home-icon-btn[data-lobby-action="chain"],
+.lobby-shell .p0-home-chrome .home-icon-grid .home-icon-btn.home-icon-chain,
+.lobby-shell .p0-home-chrome .home-icon-grid .home-icon-btn[data-lobby-action="chain"] {
+  display: flex !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #f7f2e6 !important;
+  cursor: pointer !important;
+}
+.lobby-shell .p0-home-chrome .home-icon-btn.home-icon-chain img {
+  width: 72px !important;
+  height: 72px !important;
+  display: block !important;
+}
+/* keep pack-row supply/records/chain packs hidden */
+.lobby-shell .home-pack-grid,
+.lobby-shell .home-pack[data-lobby-action="recharge"],
+.lobby-shell .home-pack[data-lobby-action="records"] {
+  display: none !important;
 }

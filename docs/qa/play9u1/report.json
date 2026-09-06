@@ -1,0 +1,28 @@
+{
+  "cache": "play9u1",
+  "home": {
+    "disp": "flex",
+    "vis": "visible",
+    "h": 92.4,
+    "w": 130,
+    "games": [
+      "斗地主",
+      "麻将",
+      "德州",
+      "掼蛋",
+      "炸金花",
+      "二十一点",
+      "链游中心"
+    ],
+    "pack": "none",
+    "supplyTop": 0
+  },
+  "chain": {
+    "hidden": false,
+    "title": "链游中心",
+    "hasReal": true,
+    "hasCrypto": true
+  },
+  "ok": true,
+  "note": "override table-play P1 hide of chain tile"
+}
