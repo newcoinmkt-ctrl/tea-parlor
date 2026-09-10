@@ -496,3 +496,70 @@ html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-act
   pointer-events: none !important;
   cursor: not-allowed !important;
 }
+
+/* ── play9v3g: real Mini App tap — action bar above hand; cards manipulation ── */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions {
+  pointer-events: none !important;
+  z-index: 220 !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions .qq-btn,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls:not([hidden]),
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls:not([hidden]),
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #doubleControls:not([hidden]) {
+  pointer-events: auto !important;
+  z-index: 221 !important;
+  position: relative !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card * {
+  touch-action: manipulation !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls .qq-btn,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls .qq-btn-play:not(:disabled):not([aria-disabled="true"]) {
+  min-width: 72px !important;
+  min-height: 44px !important;
+  touch-action: manipulation !important;
+  pointer-events: auto !important;
+}
+
+/* Portrait Mini App → rotate only #tableView (content container), not html/body */
+html.table-stage-land,
+html.table-stage-land body {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+html.table-stage-land #tableView.table-stage-land-target,
+html.table-stage-land #tableView.harbor-table.table-stage-land-target {
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  /* geometry set inline by table-orient.syncTableStageLandscape */
+}
+
+/* P1: strengthen wood remain chip + seat pass bubble placement */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips {
+  background:
+    linear-gradient(180deg, rgba(92, 58, 28, 0.95), rgba(48, 28, 12, 0.98)) !important;
+  border: 1px solid rgba(255, 210, 120, 0.45) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.2), 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .play-zone .pass-bubble,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .seat-pass-bubble,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .pass-pill {
+  position: relative !important;
+  z-index: 30 !important;
+}
+
+/* P1: top hole-card strip slightly larger when landscape stage */
+html.table-stage-land #tableView .landlord-cards-wrap,
+html.table-stage-land #tableView #bottomCards {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+html.table-stage-land #tableView #bottomCards .table-card,
+html.table-stage-land #tableView #bottomCards .playing-card,
+html.table-stage-land #tableView .bottom-cards .table-card {
+  width: 36px !important;
+  height: 50px !important;
+  min-width: 36px !important;
+}
