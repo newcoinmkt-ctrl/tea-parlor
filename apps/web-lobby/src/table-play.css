@@ -2,6 +2,7 @@
   --tg-vh: 100dvh;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tg-keyboard-clearance: 0px;
   --ui-btn-h: clamp(32px, 5vw, 44px);
   --ui-btn-r: clamp(10px, 2vw, 16px);
   --ui-fs: clamp(12px, 3.2vw, 15px);
@@ -4203,4 +4204,34 @@ html body .lobby-shell.p0-tg.table-active #tableView #handArea .playing-card .pc
 }
 html body .lobby-shell.table-active #tableView #handArea .playing-card .pc-joker {
   font-size: clamp(11px, 2.8vw, 14px) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   play9v3c: TG Bot reply-keyboard + chat bar clearance (P0)
+   --safe-bottom already folds Bot keyboard clearance (table-orient).
+   Extra padding keeps hand/bid/play clear of TG chrome.
+   ═══════════════════════════════════════════════════════════════ */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot {
+  padding-bottom: calc(12px + var(--safe-bottom, 0px)) !important;
+  box-sizing: border-box !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView .qq-center-actions {
+  padding-bottom: 4px !important;
+}
+html body .lobby-shell.table-active #tableView #bidControls:not([hidden]),
+html body .lobby-shell.table-active #tableView #playControls:not([hidden]),
+html body .lobby-shell.table-active #tableView #doubleControls:not([hidden]) {
+  margin-bottom: 4px !important;
+}
+
+
+/* play9v3c: rails must not steal taps / navigate Mini App (white screen) */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .table-rail-ad,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .table-center-ad,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .table-skin-ad,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .card-face-ad {
+  pointer-events: none !important;
 }

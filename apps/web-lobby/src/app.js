@@ -39,8 +39,8 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3';
-import { initTableOrientation } from './net/table-orient.js';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3c';
+import { initTableOrientation, expandTelegramTable } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -4481,6 +4481,44 @@ function initTelegramMiniApp() {
   if (!tg) return;
   try { tg.ready(); } catch (_) {}
   try { tg.expand(); } catch (_) {}
+  try { tg.disableVerticalSwipes?.(); } catch (_) {}
+  try { tg.MainButton?.hide?.(); } catch (_) {}
+  try { applyTelegramSafeArea(); } catch (_) {}
+  try { expandTelegramTable(); } catch (_) {}
+  if (!window.__teaParlorErrorGuard) {
+    window.__teaParlorErrorGuard = true;
+    window.addEventListener('error', (ev) => {
+      console.error('[TeaParlor] window error', ev?.error || ev?.message || ev);
+    });
+    window.addEventListener('unhandledrejection', (ev) => {
+      console.error('[TeaParlor] unhandledrejection', ev?.reason || ev);
+    });
+  }
+  // Brand <a target=_blank> inside table can navigate Mini App WebView → blank white
+  if (!window.__teaParlorAdNavGuard) {
+    window.__teaParlorAdNavGuard = true;
+    document.addEventListener('click', (e) => {
+      const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
+      if (!a) return;
+      if (!a.closest('#tableView, #texasTableView, #multiGameView')) return;
+      const href = a.getAttribute('href') || '';
+      if (!href || href === '#' || href.startsWith('javascript:')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (/^https?:/i.test(href) || a.target === '_blank' || a.classList.contains('brand-slot')) {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          if (tg.openLink) tg.openLink(href, { try_instant_view: false });
+          else window.open(href, '_blank', 'noopener,noreferrer');
+        } catch (err) {
+          console.warn('[TeaParlor] openLink failed', err);
+        }
+      }
+    }, true);
+  }
   const user = tg.initDataUnsafe?.user;
   if (user?.first_name) {
     const name = user.first_name;
@@ -5063,13 +5101,30 @@ function applyOnlineDdzScores(g) {
   return { payout: delta, fee: 0, kind: null };
 }
 
-/** 将 Pinus room 快照映射为本地 game 结构供 renderGame 使用 */
+/** 将 Pinus/Colyseus room 快照映射为本地 game 结构供 renderGame 使用 */
 function applyPinusRoom(room, roomMeta, currency) {
   if (!room) throw new Error('empty room');
   const hi = room.humanIndex ?? 0;
   const hands = [[], [], []];
-  hands[hi] = (room.myHand || []).slice();
+  const rawHand = Array.isArray(room.myHand) ? room.myHand : [];
+  hands[hi] = rawHand.filter(Boolean).map((c) => ({ ...c }));
   const prevPlayed = Array.isArray(game?.playedCards) ? game.playedCards.slice() : [];
+  const prevVariant = game?.variant;
+  const prevVariantLabel = game?.variantLabel;
+  const prevEnableDouble = game?.enableDouble;
+  const prevAllowSuper = game?.allowSuperDouble;
+  const prevDoubleDecided = Array.isArray(game?.doubleDecided) ? game.doubleDecided.slice() : [false, false, false];
+  const prevDoubleFactors = Array.isArray(game?.doubleFactors) ? game.doubleFactors.slice() : [1, 1, 1];
+  const mappedPhase = room.phase === 'match'
+    ? 'match'
+    : (room.phase === 'bid'
+      ? 'bid'
+      : (room.phase === 'double'
+        ? 'double'
+        : (room.phase === 'settle' ? 'settle' : 'play')));
+  const safeLastCards = Array.isArray(room.lastPlay?.cards)
+    ? room.lastPlay.cards.filter(Boolean)
+    : [];
   game = {
     roomId: roomMeta?.id || room.roomKey || 'novice',
     roomName: roomMeta?.name || room.roomKey || '联网桌',
@@ -5079,26 +5134,28 @@ function applyPinusRoom(room, roomMeta, currency) {
     online: true,
     onlineBackend: onlineBackend || room.backend || 'pinus',
     pinusRoomId: room.id,
-    phase: room.phase === 'match' ? 'match' : (room.phase === 'bid' ? 'bid' : (room.phase === 'settle' ? 'settle' : 'play')),
+    phase: mappedPhase,
     hands,
-    bottom: room.bottom || [null, null, null].map(() => ({ rank: 0, suit: 0, id: 'x' })),
-    bidScores: room.bidScores || [null, null, null],
+    bottom: Array.isArray(room.bottom) && room.bottom.length
+      ? room.bottom.filter(Boolean)
+      : [{ id: 'b0' }, { id: 'b1' }, { id: 'b2' }],
+    bidScores: Array.isArray(room.bidScores) ? room.bidScores : [null, null, null],
     currentBid: room.currentBid || 0,
-    bidTurn: room.bidTurn ?? 0,
+    bidTurn: Number.isInteger(room.bidTurn) ? room.bidTurn : 0,
     bidCount: 0,
-    landlord: room.landlord ?? -1,
-    currentPlayer: room.currentPlayer ?? 0,
+    landlord: Number.isInteger(room.landlord) ? room.landlord : -1,
+    currentPlayer: Number.isInteger(room.currentPlayer) ? room.currentPlayer : 0,
     lastPlay: room.lastPlay
       ? {
           player: room.lastPlay.player,
-          cards: room.lastPlay.cards || [],
+          cards: safeLastCards,
           parsed: room.lastPlay.type
-            ? { type: room.lastPlay.type, cards: room.lastPlay.cards || [] }
+            ? { type: room.lastPlay.type, cards: safeLastCards }
             : null,
         }
       : null,
     tableActs: [null, null, null],
-    playedCards: Array.isArray(room.playedCards) ? room.playedCards.slice() : prevPlayed,
+    playedCards: Array.isArray(room.playedCards) ? room.playedCards.filter(Boolean) : prevPlayed,
     passCount: 0,
     multiplier: room.multiplier || 1,
     bombCount: room.bombCount || 0,
@@ -5108,10 +5165,17 @@ function applyPinusRoom(room, roomMeta, currency) {
     settled: room.phase === 'settle',
     playCounts: [0, 0, 0],
     handsCount: room.phase === 'match' ? [0, 0, 0] : (room.handsCount || [17, 17, 17]),
-    names: room.names || NAMES,
+    names: Array.isArray(room.names) && room.names.length ? room.names : NAMES,
     humanCount: room.humanCount,
     matchEndsAt: room.matchEndsAt,
     status: room.status || '',
+    // Preserve client-only fields across online snapshots (bid→play must not wipe these).
+    variant: prevVariant || 'classic',
+    variantLabel: prevVariantLabel || '',
+    enableDouble: !!prevEnableDouble,
+    allowSuperDouble: !!prevAllowSuper,
+    doubleDecided: prevDoubleDecided,
+    doubleFactors: prevDoubleFactors,
   };
   // 底牌未揭晓时用占位
   if (!room.bottom) {
@@ -5154,6 +5218,8 @@ function showDdzTable() {
     el.style.removeProperty('pointer-events');
   });
   nodes.shell?.classList.add('table-active');
+  try { expandTelegramTable(); } catch (_) {}
+  try { applyTelegramSafeArea(); } catch (_) {}
   if (game?.phase !== 'match' && !ddzKeepOverlay) hideDdzMatch();
   closeFriendRoom();
   syncP0Tabbar();
@@ -5411,13 +5477,19 @@ function showLobby() {
 // ─── 叫分（JJ：只能叫更高分或放弃；3 分直接当地主） ───
 function onBid(score) {
   if (!game || game.phase !== 'bid' || game.bidTurn !== HUMAN) return;
-  if (game.online) {
-    pinusSync(() => getOnlineNet().ddzBid(Number(score) || 0));
-    return;
+  try {
+    if (game.online) {
+      pinusSync(() => getOnlineNet().ddzBid(Number(score) || 0));
+      return;
+    }
+    applyBid(HUMAN, score);
+    renderGame();
+    scheduleAi();
+  } catch (err) {
+    console.error('[TeaParlor] onBid failed', err);
+    hintText = `叫分异常：${err?.message || err}`;
+    try { renderGame(); } catch (e2) { console.error('[TeaParlor] render after onBid', e2); }
   }
-  applyBid(HUMAN, score);
-  renderGame();
-  scheduleAi();
 }
 
 function applyBid(player, score) {
@@ -6057,6 +6129,29 @@ function autoHuman() {
 // ─── 渲染 ───────────────────────────────────────────
 function renderGame() {
   if (!game) return;
+  try {
+    _renderGameBody();
+  } catch (err) {
+    console.error('[tea-parlor] renderGame failed', err);
+    try { applyTelegramSafeArea(); } catch (_) {}
+    try {
+      if (nodes.tableView) {
+        nodes.tableView.hidden = false;
+        nodes.tableView.removeAttribute('hidden');
+        nodes.tableView.style.setProperty('display', 'flex', 'important');
+        nodes.tableView.style.setProperty('visibility', 'visible', 'important');
+      }
+      nodes.shell?.classList.add('table-active');
+    } catch (_) {}
+  }
+}
+
+function _renderGameBody() {
+  if (!game) return;
+  if (!Array.isArray(game.doubleDecided)) game.doubleDecided = [false, false, false];
+  if (!Array.isArray(game.doubleFactors)) game.doubleFactors = [1, 1, 1];
+  if (!Array.isArray(game.hands)) game.hands = [[], [], []];
+  if (!Array.isArray(game.hands[HUMAN])) game.hands[HUMAN] = [];
 
   nodes.tableView?.classList.toggle('is-bidding', game.phase === 'bid');
   if (nodes.roomName) nodes.roomName.textContent = game.roomName;
@@ -6132,7 +6227,7 @@ function renderGame() {
     const idx = Number(panel.getAttribute('data-char'));
     const isTurn =
       (game.phase === 'bid' && game.bidTurn === idx)
-      || (game.phase === 'double' && !game.doubleDecided[idx])
+      || (game.phase === 'double' && !(game.doubleDecided || [])[idx])
       || (game.phase === 'play' && game.currentPlayer === idx);
     panel.classList.toggle('is-turn', isTurn);
   });
@@ -6145,7 +6240,7 @@ function renderGame() {
   renderDeckMeter();
 
   const myBid = game.phase === 'bid' && game.bidTurn === HUMAN;
-  const myDouble = game.phase === 'double' && !game.doubleDecided[HUMAN];
+  const myDouble = game.phase === 'double' && !(game.doubleDecided || [])[HUMAN];
   const myPlay = game.phase === 'play' && game.currentPlayer === HUMAN;
   setHidden(nodes.bidControls, !myBid);
   setHidden(nodes.doubleControls, !myDouble);
@@ -6224,8 +6319,10 @@ function renderGame() {
     else btn.disabled = s <= (game.currentBid || 0);
   });
 
-  nodes.tableView.hidden = false;
-  nodes.tableView.removeAttribute('hidden');
+  if (nodes.tableView) {
+    nodes.tableView.hidden = false;
+    nodes.tableView.removeAttribute('hidden');
+  }
 }
 
 /**
@@ -6303,7 +6400,7 @@ function renderSeat(node, player) {
     : (game.landlord >= 0 ? '农民' : '待定');
   const isCurrent =
     (game.phase === 'bid' && game.bidTurn === player)
-    || (game.phase === 'double' && !game.doubleDecided[player])
+    || (game.phase === 'double' && !(game.doubleDecided || [])[player])
     || (game.phase === 'play' && game.currentPlayer === player);
   node.classList.toggle('current-turn', isCurrent);
   // 整卡高亮：信息卡本体（避免 player-seat 自己再画大椭圆描边）
@@ -6316,8 +6413,9 @@ function renderSeat(node, player) {
   if (game.phase === 'bid') {
     line3 = bid === null ? (isCurrent ? '思考中…' : '未叫') : (bid === 0 ? '不叫' : `叫 ${bid} 分`);
   } else if (game.phase === 'double') {
-    if (game.doubleDecided[player]) {
-      const f = game.doubleFactors[player];
+    const decided = game.doubleDecided || [];
+    if (decided[player]) {
+      const f = (game.doubleFactors || [1, 1, 1])[player];
       line3 = f === 4 ? '超级加倍' : (f === 2 ? (player === game.landlord ? '反加倍' : '加倍') : '不加倍');
     } else {
       line3 = isCurrent ? '加倍中…' : '等待';
@@ -6398,7 +6496,8 @@ function renderHand() {
   }
   const canSelect = canSelectHand();
   // 展示：按斗地主规则大→小从左到右（大王、小王、2、A...3）
-  const hand = sortCards(game.hands[HUMAN], false);
+  const rawHand = Array.isArray(game.hands?.[HUMAN]) ? game.hands[HUMAN] : [];
+  const hand = sortCards(rawHand, false);
   // 同步 hands[HUMAN] 顺序为展示序，便于 index 划选
   game.hands[HUMAN] = hand;
 
@@ -6457,7 +6556,8 @@ function statusLine() {
     return `${mode}叫分 · 轮到${who} · 当前${game.currentBid || 0}分`;
   }
   if (game.phase === 'double') {
-    if (!game.doubleDecided[HUMAN]) {
+    const decided = game.doubleDecided || [];
+    if (!decided[HUMAN]) {
       return game.landlord === HUMAN
         ? `${mode}加倍 · 你是地主，请选择反加倍`
         : `${mode}加倍 · 请选择是否加倍`;
@@ -6486,12 +6586,13 @@ function lastPlayLine() {
     return `等待 ${NAMES[game.bidTurn]} 叫分…`;
   }
   if (game.phase === 'double') {
-    if (!game.doubleDecided[HUMAN]) {
+    const decided = game.doubleDecided || [];
+    if (!decided[HUMAN]) {
       return game.landlord === HUMAN
         ? '请选择：不加倍 / 反加倍'
         : (game.allowSuperDouble ? '请选择：不加倍 / 加倍 / 超级加倍' : '请选择：不加倍 / 加倍');
     }
-    const pending = [0, 1, 2].filter((i) => !game.doubleDecided[i]).map((i) => NAMES[i]);
+    const pending = [0, 1, 2].filter((i) => !decided[i]).map((i) => NAMES[i]);
     return pending.length ? `等待 ${pending.join('、')} 加倍…` : '加倍完成';
   }
   if (!game.lastPlay) {
@@ -6632,20 +6733,34 @@ function applyTelegramSafeArea() {
   const root = document.documentElement;
   const tg = window.Telegram && window.Telegram.WebApp;
   const vv = window.visualViewport;
-  let h = window.innerHeight || 0;
+  const MIN_TG_VH = 240;
+  const TG_BOT_KEYBOARD_CLEARANCE_PX = 168;
+  let h = window.innerHeight || document.documentElement?.clientHeight || 0;
   try {
     if (tg) {
       tg.ready();
       tg.expand();
-      const inset = tg.safeAreaInset || tg.contentSafeAreaInset || {};
-      if (inset.top != null) root.style.setProperty('--safe-top', inset.top + 'px');
-      if (inset.bottom != null) root.style.setProperty('--safe-bottom', inset.bottom + 'px');
-      if (tg.viewportStableHeight) h = tg.viewportStableHeight;
+      try { tg.disableVerticalSwipes?.(); } catch (_) {}
+      try { tg.MainButton?.hide?.(); } catch (_) {}
+      const safe = tg.safeAreaInset || {};
+      const content = tg.contentSafeAreaInset || {};
+      const top = Math.max(Number(safe.top) || 0, Number(content.top) || 0);
+      const bottomInset = Math.max(Number(safe.bottom) || 0, Number(content.bottom) || 0);
+      const playing = document.querySelector('.lobby-shell')?.classList.contains('table-active');
+      const bottom = Math.max(bottomInset, playing ? TG_BOT_KEYBOARD_CLEARANCE_PX : bottomInset);
+      root.style.setProperty('--safe-top', top + 'px');
+      root.style.setProperty('--safe-bottom', bottom + 'px');
+      root.style.setProperty('--tg-chrome-bottom', (playing ? TG_BOT_KEYBOARD_CLEARANCE_PX : 0) + 'px');
+      root.style.setProperty('--tg-keyboard-clearance', TG_BOT_KEYBOARD_CLEARANCE_PX + 'px');
+      const stable = Number(tg.viewportStableHeight) || 0;
+      const unstable = Number(tg.viewportHeight) || 0;
+      h = Math.max(h, stable, unstable, MIN_TG_VH);
     } else if (vv && vv.height) {
-      h = vv.height;
+      h = Math.max(h, vv.height);
     }
   } catch (_) {}
-  if (h > 0) root.style.setProperty('--tg-vh', Math.round(h) + 'px');
+  // Never set --tg-vh to 0 (bid→play TG viewport flicker → blank white Mini App).
+  root.style.setProperty('--tg-vh', Math.max(MIN_TG_VH, Math.round(h || MIN_TG_VH)) + 'px');
 }
 applyTelegramSafeArea();
 try { window.Telegram?.WebApp?.onEvent?.('viewportChanged', applyTelegramSafeArea); } catch (_) {}

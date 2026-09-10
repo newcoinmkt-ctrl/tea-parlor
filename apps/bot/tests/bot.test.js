@@ -5,6 +5,7 @@ import {
   buildBalanceText,
   buildHelpText,
   buildMainKeyboard,
+  buildRemoveKeyboard,
   buildRecordsText,
   buildStartText,
   createBotConfig,
@@ -23,6 +24,17 @@ test('/start message presents H5 lobby entry and not in-bot table controls', () 
   assert.match(text, /实时牌桌.*H5/);
   assert.doesNotMatch(text, /\/play/);
   assert.doesNotMatch(text, /出牌按钮|叫分按钮/);
+});
+
+
+test('start clears legacy reply keyboard so Mini App hand is not covered', async () => {
+  assert.deepEqual(buildRemoveKeyboard(), { remove_keyboard: true });
+  const config = createBotConfig({ miniAppUrl: 'https://example.test/lobby' });
+  const ctx = createFakeContext();
+  await handleStart(ctx, { config });
+  assert.ok(ctx.replies.length >= 2);
+  assert.deepEqual(ctx.replies[0].options.reply_markup, { remove_keyboard: true });
+  assert.match(JSON.stringify(ctx.replies[1].options.reply_markup), /web_app/);
 });
 
 test('main keyboard exposes Mini App, balance, records, invite, and support', () => {
@@ -91,6 +103,8 @@ test('registerBotHandlers keeps /start and command surface for lobby operations'
   assert.equal(typeof bot.handlers.command.get('invite'), 'function');
   assert.equal(typeof bot.handlers.command.get('support'), 'function');
   assert.equal(typeof bot.handlers.action.get(BotCallback.BALANCE), 'function');
+  assert.equal(typeof bot.handlers.hears.get(String(/^开始打牌$/)), 'function');
+  assert.equal(typeof bot.handlers.hears.get(String(/^查询积分$/)), 'function');
 });
 
 test('text builders do not describe real-money or crypto capability', () => {
@@ -132,6 +146,7 @@ function createFakeBot() {
     handlers: {
       command: new Map(),
       action: new Map(),
+      hears: new Map(),
       start: null,
     },
     start(fn) {
@@ -142,6 +157,9 @@ function createFakeBot() {
     },
     action(name, fn) {
       this.handlers.action.set(name, fn);
+    },
+    hears(pattern, fn) {
+      this.handlers.hears.set(String(pattern), fn);
     },
   };
 }
