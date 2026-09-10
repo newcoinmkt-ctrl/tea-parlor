@@ -1,0 +1,146 @@
+{
+  "cache": "play9v3g",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5225/index.html?v=play9v3g",
+  "ed_repro": {
+    "path": "TG Mini App portrait → 人机畅玩/local-doudizhu → force play → REAL TOUCH tap one hand card (must stay raised) →「出牌」→ hand 17→16; landscape stage if portrait",
+    "cache": "?v=play9v3g",
+    "fail_on": "play9v3f: touchstart selected then compat mousedown undid raise; QA only used __teaParlor.play() API so live TG still could not play"
+  },
+  "shots": {
+    "lobby-414-home.png": {
+      "bytes": 217875,
+      "sha1": "44acdc4c0586"
+    },
+    "ddz-414-landscape-stage.png": {
+      "bytes": 991783,
+      "sha1": "279005d966d7"
+    },
+    "ddz-414-touch-selected.png": {
+      "bytes": 988691,
+      "sha1": "aa99894df55f"
+    },
+    "ddz-414-illegal-play-disabled.png": {
+      "bytes": 983127,
+      "sha1": "4e737d0404b6"
+    },
+    "ddz-414-after-legal-play.png": {
+      "bytes": 999125,
+      "sha1": "eed2dea21d89"
+    },
+    "ddz-414-seat-cardbacks.png": {
+      "bytes": 989670,
+      "sha1": "2d8ddee8fcbd"
+    }
+  },
+  "checks": {
+    "ddz_start": {
+      "via": "click-local"
+    },
+    "ddz_hand_n_deal": 17,
+    "ddz_hand_n": 17,
+    "landscape_stage": {
+      "stageLand": true,
+      "tableLandscape": true,
+      "target": true,
+      "transform": "matrix(0, 1, -1, 0, -448, -207)",
+      "stageW": "896px",
+      "stageH": "414px",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "usableLandscape": true,
+      "vw": 414,
+      "vh": 896
+    },
+    "touch_select": {
+      "selectedDom": 1,
+      "selectedIds": [
+        "16_4_52"
+      ],
+      "allowPlay": true,
+      "reason": "ok",
+      "disabled": false,
+      "aria": "false",
+      "pe": "auto",
+      "log": [
+        {
+          "t": "touchstart",
+          "n": 0,
+          "fires": true
+        },
+        {
+          "t": "mousedown",
+          "n": 1,
+          "fires": true
+        },
+        {
+          "t": "mouseup",
+          "n": 1,
+          "fires": true
+        },
+        {
+          "t": "click",
+          "n": 1,
+          "fires": true
+        }
+      ],
+      "mousedownAfterTouch": true,
+      "stayedSelected": true
+    },
+    "illegal_play": {
+      "ok": true,
+      "ranks": [
+        14,
+        10
+      ],
+      "allowPlay": false,
+      "reason": "illegal_pattern",
+      "disabled": true,
+      "aria": "true"
+    },
+    "pre_play": {
+      "selected": 1,
+      "allowPlay": true,
+      "disabled": false,
+      "reason": "ok"
+    },
+    "legal_touch_play": {
+      "before": 17,
+      "after": 16,
+      "played": true,
+      "centerOrLast": 1,
+      "phase": "play",
+      "pre": {
+        "selected": 1,
+        "allowPlay": true,
+        "disabled": false,
+        "reason": "ok"
+      }
+    },
+    "seat_cardbacks": {
+      "r1backs": 3,
+      "r2backs": 3,
+      "r1html": "<span class=\"remain-stack\" aria-hidden=\"true\"><i class=\"remain-back\" aria-hidden=\"true\"></i><i class=\"remain-back\" aria-hidden=\"true\"></i><i class=\"remain-back\""
+    }
+  },
+  "pass": {
+    "touch_select_stays": true,
+    "illegal_play_disabled": true,
+    "touch_play_17_to_16": true,
+    "landscape_stage": true,
+    "seat_cardbacks": true
+  },
+  "ok": true,
+  "root_causes": [
+    "Compat mouse events after touchstart called toggleHandCard again and cleared selection before click",
+    "Play controls z-index buried under hand (raised cards could swallow「出牌」)",
+    "Portrait Mini App cramped bottom actions under Bot/TG — force landscape via #tableView content rotate (not whole-page)"
+  ]
+}

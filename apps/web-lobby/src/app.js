@@ -39,10 +39,11 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3f';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3f';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9v3f';
-import { initTableOrientation, expandTelegramTable } from './net/table-orient.js';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3g';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3g';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9v3g';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9v3g';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9v3g';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -564,6 +565,8 @@ let dragMoved = false;
 let dragStartIndex = -1;
 let dragBaseSelected = null; // Set snapshot at drag start
 let suppressNextHandClick = false;
+/** play9v3g: stamp last real touch select so compat mouse cannot undo it */
+let lastTouchSelectAt = 0;
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -4185,8 +4188,12 @@ function fanCardAtPoint(area, x, y) {
 function bindDragSelect() {
   const area = nodes.handArea;
   if (!area) return;
+  let touchOrigin = null; // {x,y} for tap-vs-pan
 
   area.addEventListener('mousedown', (e) => {
+    // play9v3g ROOT CAUSE FIX: TG/Chromium emits compat mousedown after touchstart.
+    // That second toggle undid the raise — touch appeared to "do nothing".
+    if (shouldIgnoreMouseAfterTouch(e, lastTouchSelectAt)) return;
     if (!canSelectHand()) return;
     const btn = e.target.closest('.playing-card');
     if (!btn) return;
@@ -4203,6 +4210,7 @@ function bindDragSelect() {
 
   area.addEventListener('mouseover', (e) => {
     if (!dragActive || !canSelectHand()) return;
+    if (shouldIgnoreMouseAfterTouch(e, lastTouchSelectAt)) return;
     const btn = e.target.closest('.playing-card');
     if (!btn) return;
     const end = Number(btn.dataset.index);
@@ -4215,11 +4223,13 @@ function bindDragSelect() {
     if (!canSelectHand()) return;
     // Prefer event target (TG WebView elementFromPoint can hit HUD/ads above cards)
     let btn = e.target?.closest?.('.playing-card');
-    if (!btn) {
-      const touch = e.touches[0];
+    const touch = e.touches?.[0];
+    if (!btn && touch) {
       btn = fanCardAtPoint(area, touch.clientX, touch.clientY);
     }
     if (!btn || !area.contains(btn)) return;
+    lastTouchSelectAt = Date.now();
+    touchOrigin = touch ? { x: touch.clientX, y: touch.clientY } : null;
     dragActive = true;
     dragMoved = false;
     dragStartIndex = Number(btn.dataset.index);
@@ -4231,7 +4241,14 @@ function bindDragSelect() {
 
   area.addEventListener('touchmove', (e) => {
     if (!dragActive || !canSelectHand()) return;
-    const touch = e.touches[0];
+    const touch = e.touches?.[0];
+    if (!touch) return;
+    if (touchOrigin && !dragMoved) {
+      const dx = touch.clientX - touchOrigin.x;
+      const dy = touch.clientY - touchOrigin.y;
+      // Keep tiny finger jitter as tap; only range-select once it becomes a pan
+      if (isTapGesture(dx, dy, 12)) return;
+    }
     const btn = fanCardAtPoint(area, touch.clientX, touch.clientY);
     if (!btn) return;
     dragMoved = true;
@@ -4244,14 +4261,15 @@ function bindDragSelect() {
     dragActive = false;
     dragStartIndex = -1;
     dragBaseSelected = null;
+    touchOrigin = null;
     updateHintFromSelection();
     syncPlayButtonFromSelection();
     if (nodes.tableStatus) nodes.tableStatus.textContent = statusLine();
-    // 短延迟后清 dragMoved，避免 mouseup 后的 click 再 toggle
+    // Keep suppress long enough to cover compat mouse+click after touchend
     setTimeout(() => {
       dragMoved = false;
       suppressNextHandClick = false;
-    }, 350);
+    }, 500);
   };
   window.addEventListener('mouseup', endDrag);
   window.addEventListener('touchend', endDrag);
@@ -5374,7 +5392,8 @@ function pinP0ActionBar(el) {
   el.style.setProperty('flex-wrap', 'wrap', 'important');
   el.style.setProperty('grid-template-columns', 'none', 'important');
   el.style.setProperty('box-sizing', 'border-box', 'important');
-  el.style.setProperty('z-index', '6', 'important');
+  // play9v3g: action bar must outrank hand cards (z~90) or raised cards swallow「出牌」taps
+  el.style.setProperty('z-index', '220', 'important');
 }
 
 function hideTableActionBars() {
@@ -5411,14 +5430,17 @@ function syncP0Tabbar() {
     if (!el) return;
     const open = playing || tableOpen;
     if (open && !el.hidden && el.getAttribute('hidden') == null) {
-      el.style.setProperty('position', 'fixed', 'important');
-      el.style.setProperty('top', '0', 'important');
-      el.style.setProperty('left', '0', 'important');
-      el.style.setProperty('right', '0', 'important');
-      el.style.setProperty('bottom', '0', 'important');
-      el.style.setProperty('width', '100%', 'important');
-      el.style.setProperty('height', 'var(--tg-vh, 100dvh)', 'important');
-      el.style.setProperty('z-index', '400', 'important');
+      const stageLand = el.id === 'tableView' && document.documentElement.classList.contains('table-stage-land');
+      if (!stageLand) {
+        el.style.setProperty('position', 'fixed', 'important');
+        el.style.setProperty('top', '0', 'important');
+        el.style.setProperty('left', '0', 'important');
+        el.style.setProperty('right', '0', 'important');
+        el.style.setProperty('bottom', '0', 'important');
+        el.style.setProperty('width', '100%', 'important');
+        el.style.setProperty('height', 'var(--tg-vh, 100dvh)', 'important');
+        el.style.setProperty('z-index', '400', 'important');
+      }
       if (el.id === 'tableView') {
         const slot = el.querySelector('.self-slot');
         if (slot) {
@@ -5430,6 +5452,8 @@ function syncP0Tabbar() {
           slot.style.setProperty('width', '100%', 'important');
           slot.style.setProperty('z-index', '12', 'important');
         }
+        // Re-assert landscape stage after tabbar sync (owns rotate geometry)
+        try { syncTableStageLandscape(); } catch (_) {}
       }
     } else if (!open) {
       pin.forEach((k) => el.style.removeProperty(k));
@@ -6372,8 +6396,8 @@ function _renderGameBody() {
   }
   // 确保当前可见操作区可点
   if (nodes.playControls && !nodes.playControls.hidden) {
-    nodes.playControls.style.pointerEvents = 'auto';
-    nodes.playControls.style.zIndex = '120';
+    nodes.playControls.style.setProperty('pointer-events', 'auto', 'important');
+    nodes.playControls.style.setProperty('z-index', '220', 'important');
   }
   if (nodes.bidControls && !nodes.bidControls.hidden) {
     nodes.bidControls.style.pointerEvents = 'auto';
@@ -6620,7 +6644,8 @@ function renderHand() {
   nodes.handArea.innerHTML = '';
   nodes.handArea.style.pointerEvents = 'auto';
   nodes.handArea.style.zIndex = '60';
-  nodes.handArea.style.touchAction = 'pan-x';
+  // pan-y blocked; cards use manipulation — horizontal scroll still works on the strip
+  nodes.handArea.style.touchAction = 'pan-x manipulation';
   const wrap = nodes.handArea.closest('.hand-wrap');
   if (wrap) {
     wrap.style.pointerEvents = 'auto';
@@ -6656,12 +6681,13 @@ function renderHand() {
       wild: isWild,
       brandBadgeHtml: brandCardBadgeHtml(),
     });
+    btn.style.touchAction = 'manipulation';
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       // 划选结束后的 click 忽略（避免与 mousedown 重复切换）
       if (dragActive || dragMoved) return;
-      if (suppressNextHandClick) {
+      if (suppressNextHandClick || shouldIgnoreMouseAfterTouch(e, lastTouchSelectAt)) {
         suppressNextHandClick = false;
         syncPlayButtonFromSelection();
         return;
@@ -6670,9 +6696,14 @@ function renderHand() {
       toggleHandCard(btn);
     });
     btn.addEventListener('pointerup', (e) => {
-      // TG Mini App: if touchstart missed (overlay hit-test) but pointer lands on card, toggle once
+      // Recover only when touchstart missed (no suppress / still empty). Never re-toggle
+      // after a successful touchstart — that raced with compat mouse and cleared the raise.
       if (!canSelect || dragMoved) return;
-      if (e.pointerType === 'touch' && !suppressNextHandClick && !btn.classList.contains('selected') && selected.size === 0) {
+      if (e.pointerType === 'touch'
+        && !suppressNextHandClick
+        && selected.size === 0
+        && !btn.classList.contains('selected')) {
+        lastTouchSelectAt = Date.now();
         toggleHandCard(btn);
         suppressNextHandClick = true;
       } else {
