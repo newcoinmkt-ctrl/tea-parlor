@@ -495,10 +495,44 @@ export function layoutTexasHero(area) {
   });
 }
 
+
+/**
+ * Adaptive left gutter so self avatar clears the first card without a fixed 100px waste.
+ * Clamped so the fan is not squeezed/clipped on the right (prefer scroll over huge pad).
+ */
+export function computeHandAvatarGutter(handArea, opts = {}) {
+  const minG = opts.min ?? 52;
+  const maxG = opts.max ?? 68;
+  const clearance = opts.clearance ?? 8;
+  if (!handArea || typeof document === "undefined") return minG;
+  const avatar =
+    document.querySelector("#tableView .qq-bottom-bar .char-figure")
+    || document.querySelector("#tableView .qq-self-char .char-figure")
+    || document.querySelector("#tableView .char-figure-self .char-figure")
+    || document.querySelector("#tableView .qq-bottom-bar");
+  const ar = handArea.getBoundingClientRect?.();
+  if (!ar) return minG;
+  if (!avatar) return minG;
+  const av = avatar.getBoundingClientRect();
+  const need = Math.ceil(av.right - ar.left + clearance);
+  if (!Number.isFinite(need) || need <= minG) return minG;
+  return Math.max(minG, Math.min(maxG, need));
+}
+
 export function fitAllHands(root = document) {
   const handArea = root.querySelector("#handArea");
   if (handArea) {
     const wide = (handArea.clientWidth || 360) > 520;
+    // play9v3f: adaptive avatar gutter BEFORE pack so available width is correct
+    const gutter = computeHandAvatarGutter(handArea, { min: 52, max: 68, clearance: 8 });
+    handArea.style.setProperty("--hand-avatar-gutter", gutter + "px");
+    handArea.style.setProperty("padding-left", gutter + "px", "important");
+    handArea.style.setProperty("padding-right", "12px", "important");
+    handArea.style.setProperty("padding-bottom", "14px", "important");
+    handArea.style.setProperty("padding-top", "18px", "important");
+    handArea.style.setProperty("justify-content", "flex-start", "important");
+    handArea.style.setProperty("z-index", "90", "important");
+    handArea.style.setProperty("overflow-x", "auto", "important");
     // play9v3 / JJ: readable rank+suit on TG mobile; scroll > crush below mins
     layoutOverlapRow(handArea, [...handArea.querySelectorAll(".playing-card")], {
       maxW: wide ? 56 : 48,
@@ -507,12 +541,11 @@ export function fitAllHands(root = document) {
       ratio: 1.42,
       allowScroll: true,
     });
-    // play9v3e: wider avatar gutter; cards above self avatar
-    handArea.style.setProperty("padding-left", "100px", "important");
-    handArea.style.setProperty("padding-bottom", "14px", "important");
-    handArea.style.setProperty("padding-top", "18px", "important");
-    handArea.style.setProperty("justify-content", "flex-start", "important");
-    handArea.style.setProperty("z-index", "90", "important");
+    // Extra right pad when scrolling so last card is not clipped by the scrollport edge
+    if (handArea.classList.contains("hand-scroll")) {
+      handArea.style.setProperty("padding-right", "18px", "important");
+    }
+    handArea.style.setProperty("overflow-x", "auto", "important");
     try { handArea.scrollLeft = 0; } catch (_) {}
   }
 
