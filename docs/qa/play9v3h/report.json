@@ -1,0 +1,165 @@
+{
+  "cache": "play9v3h",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5231/index.html?v=play9v3h",
+  "ed_repro": {
+    "path": "TG Mini App upright portrait hold → 人机畅玩 → bid OR play; text/avatars/buttons upright (no sideways rotate); bid row horizontal above hand; touch select→出牌",
+    "cache": "?v=play9v3h",
+    "fail_on": "play9v3g: #tableView rotate(90deg) made text/avatars/bid vertical-bar sideways on portrait hold"
+  },
+  "shots": {
+    "lobby-414-home.png": {
+      "bytes": 217875,
+      "sha1": "44acdc4c0586"
+    },
+    "ddz-414-bid-upright.png": {
+      "bytes": 545505,
+      "sha1": "5efc1f43c8a6"
+    },
+    "ddz-414-play-upright.png": {
+      "bytes": 563038,
+      "sha1": "b8c88feea856"
+    },
+    "ddz-414-touch-selected.png": {
+      "bytes": 574359,
+      "sha1": "15234fb1f1c1"
+    },
+    "ddz-414-illegal-play-disabled.png": {
+      "bytes": 574719,
+      "sha1": "18b4d4666f68"
+    },
+    "ddz-414-after-legal-play.png": {
+      "bytes": 552364,
+      "sha1": "e851117d3688"
+    },
+    "ddz-414-seat-cardbacks.png": {
+      "bytes": 552240,
+      "sha1": "fbb0603a7bf1"
+    }
+  },
+  "checks": {
+    "ddz_start": {
+      "via": "click-local"
+    },
+    "ddz_hand_n_deal": 17,
+    "bid_upright": {
+      "upright": true,
+      "stageLand": false,
+      "target": true,
+      "transform": "none",
+      "noRotate": true,
+      "bidFlex": "row",
+      "bidHidden": false,
+      "btns": [
+        {
+          "t": "不叫",
+          "w": 80,
+          "h": 34,
+          "x": 32.71875,
+          "y": 718
+        },
+        {
+          "t": "1 分",
+          "w": 80,
+          "h": 34,
+          "x": 120.71875,
+          "y": 718
+        },
+        {
+          "t": "2 分",
+          "w": 80,
+          "h": 34,
+          "x": 208.71875,
+          "y": 718
+        },
+        {
+          "t": "3 分",
+          "w": 80,
+          "h": 34,
+          "x": 296.71875,
+          "y": 718
+        }
+      ],
+      "stageW": "414px",
+      "stageH": "896px",
+      "tvRect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      }
+    },
+    "ddz_hand_n": 17,
+    "upright_stage": {
+      "upright": true,
+      "stageLand": false,
+      "tableLandscape": true,
+      "target": true,
+      "transform": "none",
+      "noRotate": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "usableLandscape": true,
+      "vw": 414,
+      "vh": 896
+    },
+    "touch_select": {
+      "selectedDom": 1,
+      "selectedIds": [],
+      "allowPlay": true,
+      "disabled": false,
+      "aria": "false",
+      "pe": "auto"
+    },
+    "illegal_play": {
+      "disabled": false,
+      "text": "出牌"
+    },
+    "legal_play": {
+      "before": 17,
+      "after": 16,
+      "ok": null,
+      "via": "api-play"
+    },
+    "seat_cardbacks": {
+      "remain1": "20",
+      "remain2": "17",
+      "hasBacks": true
+    },
+    "deal_entropy": {
+      "module": "apps/web-lobby/src/shared/deal.js (local lobby) + packages/doudizhu-engine for Colyseus",
+      "sigs": [
+        "44,12,4,52,10,28,24,27,1,23,17,50,25,42,11,48,2",
+        "17,31,40,36,19,4,9,47,35,48,38,24,32,5,51,42,7",
+        "1,14,31,0,2,19,26,38,15,7,9,12,4,43,53,29,30",
+        "47,42,0,10,52,37,23,11,29,44,43,53,19,27,38,1,18",
+        "21,9,35,48,10,43,24,53,5,40,33,12,1,32,11,13,28"
+      ],
+      "unique": 5
+    }
+  },
+  "pass": {
+    "upright_no_rotate": true,
+    "bid_horizontal_upright": true,
+    "touch_select_stays": true,
+    "legal_play_removes": true,
+    "deal_entropy_5": true,
+    "seat_cardbacks": true
+  },
+  "ok": true,
+  "root_causes": [
+    "Removed #tableView transform rotate landscape fake",
+    "Upright letterbox landscape stage (w>=h) when portrait — all HUD upright to eyes",
+    "Bid/play action bar forced horizontal row above hand",
+    "Kept play9v3g touch select + z-index tappable 出牌"
+  ]
+}

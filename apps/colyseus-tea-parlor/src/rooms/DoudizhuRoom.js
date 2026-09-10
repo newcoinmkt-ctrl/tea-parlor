@@ -7,6 +7,8 @@ import { verifySessionToken } from '@tea-parlor/session-auth';
 import {
   DdzTable,
   MATCH_MS,
+  aiThinkDelayMs,
+  AI_THINK_MS_MIN,
   EMPTY_ROOM_MS,
   TRUSTEE_MS,
   FORFEIT_MS,
@@ -59,6 +61,7 @@ export class DoudizhuRoom extends Room {
       match: true,
       autoDeal: false,
       matchMs: MATCH_MS,
+      aiThinkMs: AI_THINK_MS_MIN,
     });
     await this.table.ensureReady();
     this._leaveTimers = new Map();
@@ -285,6 +288,7 @@ export class DoudizhuRoom extends Room {
     this._dealt = true;
     try { this.lock(); } catch (_) {}
     this._broadcast();
+    this._pumpAi();
   }
 
   async _explicitQuit(uid) {
@@ -333,10 +337,36 @@ export class DoudizhuRoom extends Room {
         await this._settleWallet();
       }
       this._broadcast();
+      this._pumpAi();
     } catch (e) {
       client.send('error', { msg: e.message || String(e) });
       this._push(client);
     }
+  }
+
+  /** Human-like AI think: schedule next AI seat after 0.8–2s when driveAi deferred. */
+  _pumpAi() {
+    if (this._aiPumpHandle) {
+      clearTimeout(this._aiPumpHandle);
+      this._aiPumpHandle = null;
+    }
+    if (!this.table || this.table.phase === 'match' || this.table.phase === 'settle') return;
+    if (!this.table._aiNeedsContinue && !this.table.needsAiAct?.()) return;
+    const delay = aiThinkDelayMs();
+    this._aiPumpHandle = setTimeout(() => {
+      this._aiPumpHandle = null;
+      if (!this.table || this.table.phase === 'settle') return;
+      try {
+        this.table.driveAi();
+        if (this.table.phase === 'settle') {
+          this._settleWallet().catch(() => {});
+        }
+        this._broadcast();
+        this._pumpAi();
+      } catch (e) {
+        console.warn('[colyseus] ai pump', e?.message || e);
+      }
+    }, delay);
   }
 
   _broadcast() {

@@ -522,17 +522,23 @@ html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-act
   pointer-events: auto !important;
 }
 
-/* Portrait Mini App → rotate only #tableView (content container), not html/body */
-html.table-stage-land,
-html.table-stage-land body {
+/* play9v3h: upright letterbox stage — NEVER rotate #tableView */
+html.table-stage-upright,
+html.table-stage-upright body {
   overflow: hidden !important;
   overscroll-behavior: none !important;
 }
-html.table-stage-land #tableView.table-stage-land-target,
-html.table-stage-land #tableView.harbor-table.table-stage-land-target {
+html.table-stage-upright #tableView.table-stage-upright-target,
+html.table-stage-upright #tableView.harbor-table.table-stage-upright-target {
   overflow: hidden !important;
   box-sizing: border-box !important;
-  /* geometry set inline by table-orient.syncTableStageLandscape */
+  transform: none !important;
+  /* geometry set inline by table-orient.syncTableStageLandscape (letterbox, no rotate) */
+}
+/* Kill any leftover play9v3g rotate target */
+html.table-stage-land #tableView.table-stage-land-target,
+#tableView.table-stage-land-target {
+  transform: none !important;
 }
 
 /* P1: strengthen wood remain chip + seat pass bubble placement */
@@ -549,17 +555,60 @@ html.table-stage-land #tableView.harbor-table.table-stage-land-target {
   z-index: 30 !important;
 }
 
-/* P1: top hole-card strip slightly larger when landscape stage */
-html.table-stage-land #tableView .landlord-cards-wrap,
-html.table-stage-land #tableView #bottomCards {
+/* Top hole-card strip when upright letterbox stage */
+html.table-stage-upright #tableView .landlord-cards-wrap,
+html.table-stage-upright #tableView #bottomCards {
   display: flex !important;
   justify-content: center !important;
   gap: 4px !important;
 }
-html.table-stage-land #tableView #bottomCards .table-card,
-html.table-stage-land #tableView #bottomCards .playing-card,
-html.table-stage-land #tableView .bottom-cards .table-card {
+html.table-stage-upright #tableView #bottomCards .table-card,
+html.table-stage-upright #tableView #bottomCards .playing-card,
+html.table-stage-upright #tableView .bottom-cards .table-card {
   width: 36px !important;
   height: 50px !important;
   min-width: 36px !important;
+}
+
+/* play9v3h: bid/play action bars always horizontal row above hand */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls:not([hidden]),
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls:not([hidden]),
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #doubleControls:not([hidden]) {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  transform: none !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls .qq-action-btns {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #bidControls .qq-btn,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls .qq-btn {
+  transform: none !important;
+  writing-mode: horizontal-tb !important;
+}
+
+/* play9v3h-no-stray: clip character overflow; keep self avatar in gutter */
+html.table-stage-upright #tableView.table-stage-upright-target,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table {
+  overflow: hidden !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-bottom-bar {
+  overflow: visible !important;
+  max-width: 64px !important;
+  z-index: 8 !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-self-char .char-figure,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-self-char .char-figure-wrap {
+  max-height: 86px !important;
+  overflow: hidden !important;
 }

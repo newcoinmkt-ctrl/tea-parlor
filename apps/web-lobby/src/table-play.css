@@ -4481,3 +4481,89 @@ html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #table
   z-index: 30 !important;
   pointer-events: none !important;
 }
+
+
+/* ===== play9v3h-upright-zones: portrait upright JJ zones (no rotate) ===== */
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .side-slot.left-slot,
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .side-slot.right-slot,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .side-slot.left-slot,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .side-slot.right-slot {
+  top: 18% !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-hud,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-hud {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 6px 8px !important;
+  z-index: 40 !important;
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .landlord-cards-wrap,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .landlord-cards-wrap {
+  position: absolute !important;
+  left: 50% !important;
+  top: 8px !important;
+  transform: translateX(-50%) !important;
+  z-index: 35 !important;
+}
+/* Self avatar: contained chip in gutter — full figure visible, no stray crop */
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar {
+  position: absolute !important;
+  left: 6px !important;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  width: 56px !important;
+  height: 70px !important;
+  overflow: hidden !important;
+  z-index: 14 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar .qq-self-info,
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar .qq-bottom-right,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar .qq-self-info,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar .qq-bottom-right {
+  display: none !important;
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char {
+  width: 56px !important;
+  height: 70px !important;
+  overflow: hidden !important;
+  border-radius: 10px !important;
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char .char-figure-wrap,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char .char-figure-wrap {
+  width: 56px !important;
+  height: 70px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char .char-figure,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char .char-figure {
+  width: 52px !important;
+  height: 68px !important;
+  max-width: 52px !important;
+  max-height: 68px !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+  transform: none !important;
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #tableSelfAvatarRenderer,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #tableSelfAvatarRenderer {
+  display: none !important; /* avoid double/stray avatar mount */
+}
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea {
+  padding-left: 58px !important;
+}
+/* Hide deck meter strip in portrait upright to reduce top clutter (static shell OK deferred) */
+html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #deckMeter {
+  display: none !important;
+}

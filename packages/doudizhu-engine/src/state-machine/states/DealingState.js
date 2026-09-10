@@ -1,6 +1,6 @@
 import { BaseState } from '../BaseState.js';
 import { GamePhase } from '../GamePhase.js';
-import { createDeck, riffleShuffle, dealRoundRobin, sortCards } from '../../card.js';
+import { createDeck, riffleShuffle, dealRoundRobin, sortCards, randomFloat } from '../../card.js';
 
 /**
  * Dealing — 洗牌发牌，预留 3 张底牌
@@ -22,13 +22,13 @@ export class DealingState extends BaseState {
       return;
     }
 
-    const dealStart = payload.dealStart ?? (customDeck ? 0 : Math.floor(Math.random() * 3));
+    const dealStart = payload.dealStart ?? (customDeck ? 0 : Math.floor(randomFloat() * 3));
     const dealt = dealRoundRobin(deck, 3, 17, dealStart);
     ctx.hands = dealt.hands.map((h) => sortCards(h, false));
     ctx.bottomCards = dealt.rest.slice(0, 3);
 
     // 叫分从随机或指定 starter 开始
-    ctx.bidStarter = payload.bidStarter ?? Math.floor(Math.random() * 3);
+    ctx.bidStarter = payload.bidStarter ?? Math.floor(randomFloat() * 3);
     ctx.bidTurn = ctx.bidStarter;
 
     machine.emit('dealt', {

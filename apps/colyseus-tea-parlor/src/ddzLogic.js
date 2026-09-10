@@ -9,6 +9,14 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const MATCH_MS = 3_000;
+/** Human-like AI think window (play9v3h). Room enables; unit tests keep 0 = sync. */
+export const AI_THINK_MS_MIN = 800;
+export const AI_THINK_MS_MAX = 2000;
+export function aiThinkDelayMs(random = Math.random) {
+  const span = AI_THINK_MS_MAX - AI_THINK_MS_MIN;
+  return AI_THINK_MS_MIN + Math.floor(random() * (span + 1));
+}
+
 /** Empty matching rooms dispose after this (not the 3s match-to-deal clock). */
 export const EMPTY_ROOM_MS = 45_000;
 /** New humans need ≥ this much match window left; else reject so joinOrCreate opens fresh (only near expiry). */
@@ -61,6 +69,10 @@ export class DdzTable {
     this.currency = opts.currency || 'ingot';
     this.now = typeof opts.now === 'function' ? opts.now : () => Date.now();
     this.matchMs = opts.matchMs ?? MATCH_MS;
+    /** 0 = sync driveAi (tests); >0 = one PLAY action then room schedules continue */
+    this.aiThinkMs = opts.aiThinkMs ?? 0;
+    this._aiNeedsContinue = false;
+    this.onAiContinue = typeof opts.onAiContinue === 'function' ? opts.onAiContinue : null;
     const meta = ROOMS_META[this.roomKey] || ROOMS_META.novice;
     this.stake = meta.stake;
     this.baseRoomScore = meta.baseRoomScore;
@@ -275,9 +287,18 @@ export class DdzTable {
     return (engineScores || [0, 0, 0]).map((s) => (Number(s) || 0) / br * this.stake);
   }
 
+  needsAiAct() {
+    const eng = this.engine;
+    if (!eng || this.forfeitScores) return false;
+    if (eng.phase === engineMod.Phase.BID) return !this.isWaitingHuman(eng.bidTurn);
+    if (eng.phase === engineMod.Phase.PLAY) return !this.isWaitingHuman(eng.currentPlayer);
+    return false;
+  }
+
   driveAi() {
     const eng = this.engine;
     if (!eng || !aiMod || this.forfeitScores) return;
+    this._aiNeedsContinue = false;
     let guard = 0;
     while (guard++ < 200) {
       if (eng.phase === engineMod.Phase.SETTLE) {
@@ -288,6 +309,12 @@ export class DdzTable {
         if (this.isWaitingHuman(eng.bidTurn)) return;
         const score = aiMod.decideBid(eng.hands[eng.bidTurn], eng.currentBid);
         eng.bid(eng.bidTurn, score);
+        // Human-like: if think enabled, pause between AI bids too
+        if (this.aiThinkMs > 0 && !this.isWaitingHuman(eng.bidTurn) && eng.phase === engineMod.Phase.BID) {
+          this._aiNeedsContinue = true;
+          this._syncPhase();
+          return;
+        }
         continue;
       }
       if (eng.phase === engineMod.Phase.PLAY) {
@@ -312,6 +339,12 @@ export class DdzTable {
           }
         } else {
           eng.play(seat, decision.cards);
+        }
+        // One PLAY action then defer when human-like think is on
+        if (this.aiThinkMs > 0) {
+          this._syncPhase();
+          if (this.needsAiAct()) this._aiNeedsContinue = true;
+          return;
         }
         continue;
       }
