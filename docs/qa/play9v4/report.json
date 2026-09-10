@@ -1,0 +1,173 @@
+{
+  "cache": "play9v4",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5196/index.html?v=play9v4",
+  "checks": {
+    "metrics": {
+      "user": {
+        "x": 0,
+        "y": 0,
+        "w": 414,
+        "h": 64,
+        "top": 0,
+        "bottom": 64,
+        "left": 0,
+        "right": 414,
+        "display": "flex",
+        "visibility": "visible",
+        "position": "relative",
+        "marginTop": "0px",
+        "gridColumn": "auto"
+      },
+      "grid": {
+        "x": 0,
+        "y": 86,
+        "w": 414,
+        "h": 342.8,
+        "top": 86,
+        "bottom": 428.8,
+        "left": 0,
+        "right": 414,
+        "display": "grid",
+        "visibility": "visible",
+        "position": "relative",
+        "marginTop": "0px",
+        "gridColumn": "auto"
+      },
+      "points": {
+        "x": 282.2,
+        "y": 14,
+        "w": 115.8,
+        "h": 40,
+        "top": 14,
+        "bottom": 54,
+        "left": 282.2,
+        "right": 398,
+        "display": "flex",
+        "visibility": "visible",
+        "position": "relative",
+        "marginTop": "0px",
+        "gridColumn": "auto"
+      },
+      "texas": {
+        "x": 277.3,
+        "y": 106,
+        "w": 120.7,
+        "h": 92.4,
+        "top": 106,
+        "bottom": 198.4,
+        "left": 277.3,
+        "right": 398,
+        "display": "flex",
+        "visibility": "visible",
+        "position": "relative",
+        "marginTop": "0px",
+        "gridColumn": "auto"
+      },
+      "chain": {
+        "x": 16,
+        "y": 322.8,
+        "w": 382,
+        "h": 94,
+        "top": 322.8,
+        "bottom": 416.8,
+        "left": 16,
+        "right": 398,
+        "display": "flex",
+        "visibility": "visible",
+        "position": "relative",
+        "marginTop": "4px",
+        "gridColumn": "1 / -1"
+      },
+      "hint": {
+        "x": 16,
+        "y": 448.8,
+        "w": 382,
+        "h": 16.2,
+        "top": 448.8,
+        "bottom": 465,
+        "left": 16,
+        "right": 398,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "marginTop": "2px",
+        "gridColumn": "auto"
+      },
+      "cta": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "display": "none",
+        "visibility": "visible",
+        "position": "static",
+        "marginTop": "0px",
+        "gridColumn": "auto"
+      },
+      "tabbar": {
+        "x": 0,
+        "y": 829,
+        "w": 414,
+        "h": 67,
+        "top": 829,
+        "bottom": 896,
+        "left": 0,
+        "right": 414,
+        "display": "grid",
+        "visibility": "visible",
+        "position": "fixed",
+        "marginTop": "0px",
+        "gridColumn": "auto"
+      },
+      "games": [
+        "斗地主",
+        "麻将",
+        "德州",
+        "掼蛋",
+        "炸金花",
+        "二十一点",
+        "链游中心"
+      ],
+      "hintText": "USDT 专用 · 与金币场分开",
+      "gapUserGrid": 22,
+      "overlapUserGrid": false,
+      "overlapPointsTexas": false,
+      "overlapUserTexas": false
+    },
+    "tabs": {
+      "n": 5,
+      "display": "grid",
+      "labels": [
+        "大厅",
+        "战绩",
+        "补给",
+        "说明",
+        "我"
+      ]
+    },
+    "cta_visible": false,
+    "hint_ok": true,
+    "no_dup_title_in_hint": true,
+    "chain_full_width": true
+  },
+  "pass": {
+    "no_overlap_user_grid": true,
+    "no_overlap_points_texas": true,
+    "no_overlap_user_texas": true,
+    "gap_user_grid_positive": true,
+    "hint_subtitle_only": true,
+    "chain_full_width_row": true,
+    "six_plus_chain": true,
+    "no_cta": true,
+    "five_tabs": true
+  },
+  "ok": true
+}
