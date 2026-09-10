@@ -409,3 +409,28 @@ html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
   margin-right: 0 !important;
   overflow-x: auto !important;
 }
+
+
+/* play9v3e: first card clear of self avatar (金佬); cards above avatar */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-fitted,
+.lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea {
+  padding-left: 100px !important;
+  padding-right: 8px !important;
+  z-index: 90 !important;
+  position: relative !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card {
+  position: relative !important;
+  z-index: 92 !important;
+}
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-bottom-bar,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-self-char,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-bottom-bar,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-self-char,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-self-char .char-figure-wrap,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .qq-self-char .char-figure,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .char-figure-self {
+  z-index: 18 !important;
+  pointer-events: none !important;
+}

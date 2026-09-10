@@ -39,8 +39,8 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3d';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3d';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3e';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3e';
 import { initTableOrientation, expandTelegramTable } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -730,20 +730,31 @@ async function boot() {
         if (!game) return false;
         const cards = Array.isArray(payload.cards) ? payload.cards.filter(Boolean) : [];
         const player = Number.isInteger(payload.player) ? payload.player : 1;
+        const passSignal = payload.pass === true
+          || payload.kind === 'pass'
+          || payload.type === 'pass'
+          || payload.action === 'pass';
+        const lastPlayRoom = cards.length
+          ? { player, type: payload.type || 'pair', cards }
+          : (passSignal
+            ? { player, type: 'pass', cards: [], pass: true }
+            : (Array.isArray(payload.cards) ? { player, cards: [], type: payload.type } : null));
         const roomLike = {
           phase: 'play',
           currentPlayer: Number.isInteger(payload.currentPlayer) ? payload.currentPlayer : HUMAN,
           passCount: Number(payload.passCount) || 0,
-          lastPlay: cards.length ? { player, type: payload.type || 'pair', cards } : null,
+          lastPlay: lastPlayRoom,
         };
         game.phase = 'play';
         game.online = true; // exercise online rebuild path without network
         game.currentPlayer = roomLike.currentPlayer;
         game.passCount = roomLike.passCount;
-        game.lastPlay = roomLike.lastPlay
+        game.lastPlay = cards.length
           ? { player, cards: cards.slice(), parsed: { type: payload.type || 'pair', cards: cards.slice() } }
-          : null;
-        game.tableActs = tableActsFromOnlineRoom(roomLike, game.tableActs || [null, null, null]);
+          : (passSignal ? { player, cards: [], parsed: null } : game.lastPlay);
+        // Keep prior play faces in tableActs when injecting a pure pass.
+        const prevActs = game.tableActs || [null, null, null];
+        game.tableActs = tableActsFromOnlineRoom(roomLike, prevActs);
         game.online = false; // keep local controls usable in QA
         selected = new Set();
         renderGame();
@@ -751,6 +762,7 @@ async function boot() {
           tableActs: (game.tableActs || []).map((a) => (a ? { kind: a.kind, n: a.cards?.length || 0 } : null)),
           centerN: document.querySelectorAll('#lastPlayFan .table-card').length,
           zoneN: [0, 1, 2].map((i) => document.querySelectorAll(`#playZone${i} .table-card, #playZone${i} .pass-bubble`).length),
+          passBubbles: document.querySelectorAll('.pass-bubble').length,
         };
       },
     };
