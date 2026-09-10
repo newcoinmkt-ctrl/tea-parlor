@@ -507,11 +507,12 @@ export function fitAllHands(root = document) {
       ratio: 1.42,
       allowScroll: true,
     });
-    // play9v3d: keep avatar gutter + first card on-screen
-    handArea.style.setProperty("padding-left", "72px", "important");
+    // play9v3e: wider avatar gutter; cards above self avatar
+    handArea.style.setProperty("padding-left", "100px", "important");
     handArea.style.setProperty("padding-bottom", "14px", "important");
     handArea.style.setProperty("padding-top", "18px", "important");
     handArea.style.setProperty("justify-content", "flex-start", "important");
+    handArea.style.setProperty("z-index", "90", "important");
     try { handArea.scrollLeft = 0; } catch (_) {}
   }
 

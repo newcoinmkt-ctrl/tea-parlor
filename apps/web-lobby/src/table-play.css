@@ -4419,3 +4419,65 @@ html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #table
   z-index: 40 !important;
   pointer-events: none !important;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   play9v3e: hand leftmost clear of self avatar + pass seat bubble (P0)
+   - 72px gutter still left first card under 金佬/old-man avatar overflow
+   - avatar z-index could paint above fan cards
+   Keep play9v3c Bot/TG clearance + play9v3d lastPlay center visibility.
+   ═══════════════════════════════════════════════════════════════ */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot #handArea.hand-fitted {
+  padding-left: 100px !important;
+  padding-right: 8px !important;
+  padding-top: 18px !important;
+  padding-bottom: 14px !important;
+  z-index: 90 !important;
+  position: relative !important;
+  justify-content: flex-start !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea .playing-card {
+  position: relative !important;
+  z-index: 92 !important;
+}
+
+html.table-landscape body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+html.table-landscape body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+html.table-portrait-dock body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar,
+html.table-landscape .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar {
+  z-index: 18 !important;
+  pointer-events: none !important;
+  width: 48px !important;
+  max-width: 48px !important;
+  left: 2px !important;
+  bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar .char-figure-wrap,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char .char-figure-wrap,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar .char-figure,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-self-char img.char-figure,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .char-figure-self {
+  width: 44px !important;
+  max-width: 44px !important;
+  height: 66px !important;
+  max-height: 66px !important;
+  z-index: 18 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+/* Seat pass bubble stays visible near opponent seats */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .pass-bubble {
+  display: inline-flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 30 !important;
+  pointer-events: none !important;
+}
