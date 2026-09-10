@@ -4235,3 +4235,187 @@ html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #table
 html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .card-face-ad {
   pointer-events: none !important;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   play9v3d: hand first-card visible + lastPlay seats/center (P0)
+   Root causes:
+   - .hand-area { width:max-content; justify-content:center } centered a
+     wider-than-viewport fan → leftmost cards clipped off-screen.
+   - Online applyPinusRoom wiped tableActs every snapshot → empty play-zones.
+   - play9v3c safe-bottom pad lifted chrome but hand rank bottoms still ate
+     into safe area when overflow scrollport clipped y.
+   ═══════════════════════════════════════════════════════════════ */
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  align-items: stretch !important;
+  /* Avatar gutter once via #handArea padding — do not also inset the whole slot. */
+  padding-left: 0 !important;
+  padding-right: 4px !important;
+  /* Keep Bot/TG clearance from v3c, but don't let it crush card height. */
+  padding-bottom: calc(10px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))) !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .hand-wrap,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot > .hand-wrap {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: flex-end !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot .hand-area,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: flex-end !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  /* Avatar column (~56–64px) + room for selected lift + rank bottoms. */
+  padding: 18px 8px 14px 72px !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
+  z-index: 90 !important;
+  position: relative !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea.hand-scroll,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea.hand-fitted {
+  justify-content: flex-start !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea .playing-card:first-child,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea .playing-card:first-child {
+  margin-left: 0 !important;
+}
+
+/* Seat + center lastPlay above felt oval / ads */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone-left,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone-right,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone-self {
+  z-index: 28 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  overflow: visible !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .side-slot.left-slot,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .side-slot.right-slot {
+  overflow: visible !important;
+  z-index: 12 !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone-left,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone-right {
+  position: absolute !important;
+  top: 42% !important;
+  bottom: auto !important;
+  width: min(200px, 42vw) !important;
+  min-height: 64px !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone-left {
+  left: 72px !important;
+  right: auto !important;
+  justify-content: flex-start !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .play-zone-right {
+  right: 72px !important;
+  left: auto !important;
+  justify-content: flex-end !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .center-pot.qq-center {
+  top: 36% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 24 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: min(420px, 88vw) !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #lastPlayFan,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .last-play-fan {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: flex-end !important;
+  min-height: 56px !important;
+  max-width: min(360px, 84vw) !important;
+  margin: 0 auto !important;
+  z-index: 25 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #lastPlayFan[hidden],
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .last-play-fan[hidden] {
+  display: none !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #lastPlayText {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  z-index: 26 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #fff8e6 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55) !important;
+  font-weight: 700 !important;
+}
+
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .pass-bubble,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .bid-bubble,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .table-card {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+
+/* play9v3d-gutter-bump: avatar (~56–84px) must not cover first rank */
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+html body .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea,
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .self-slot #handArea.hand-fitted {
+  padding-left: 72px !important;
+  padding-right: 8px !important;
+  padding-top: 18px !important;
+  padding-bottom: 14px !important;
+}
+html body .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table .qq-bottom-bar {
+  z-index: 40 !important;
+  pointer-events: none !important;
+}

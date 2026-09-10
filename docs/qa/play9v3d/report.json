@@ -1,0 +1,160 @@
+{
+  "cache": "play9v3d",
+  "viewport": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5194/index.html?v=play9v3d",
+  "shots": {
+    "lobby-414-home.png": {
+      "bytes": 222597,
+      "sha1": "056e25f570de"
+    },
+    "ddz-414-fan-fullwidth.png": {
+      "bytes": 576040,
+      "sha1": "177fd5000e9e"
+    },
+    "ddz-414-hand-closeup.png": {
+      "bytes": 31625,
+      "sha1": "85a5ac522427"
+    },
+    "ddz-414-lastplay-table.png": {
+      "bytes": 585896,
+      "sha1": "513f708851c2"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 563310,
+      "sha1": "cb8495c54333"
+    }
+  },
+  "checks": {
+    "ddz_start": {
+      "via": "click-local"
+    },
+    "ddz_hand_n": 17,
+    "hand_edges": {
+      "n": 17,
+      "scrollLeft": 0,
+      "justify": "flex-start",
+      "width": "338px",
+      "maxWidth": "100%",
+      "overflowX": "auto",
+      "overflowY": "hidden",
+      "padL": "72px",
+      "padB": "14px",
+      "area": {
+        "left": 62,
+        "right": 400,
+        "top": 774,
+        "bottom": 866,
+        "w": 338,
+        "h": 92
+      },
+      "first": {
+        "left": 134,
+        "right": 176,
+        "top": 792,
+        "bottom": 852,
+        "w": 42,
+        "h": 60
+      },
+      "last": {
+        "left": 422,
+        "right": 464,
+        "top": 792,
+        "bottom": 852,
+        "w": 42,
+        "h": 60
+      },
+      "firstFullyOnScreen": true,
+      "lastFullyOnScreenOrScrollable": true,
+      "bottomAboveSafe": true,
+      "sample": [
+        {
+          "left": 134,
+          "right": 176,
+          "top": 792,
+          "bottom": 852,
+          "w": 42,
+          "h": 60
+        },
+        {
+          "left": 152,
+          "right": 194,
+          "top": 792,
+          "bottom": 852,
+          "w": 42,
+          "h": 60
+        },
+        {
+          "left": 170,
+          "right": 212,
+          "top": 792,
+          "bottom": 852,
+          "w": 42,
+          "h": 60
+        }
+      ]
+    },
+    "lastPlay_apply": {
+      "tableActs": [
+        null,
+        {
+          "kind": "play",
+          "n": 2
+        },
+        {
+          "kind": "pass",
+          "n": 0
+        }
+      ],
+      "centerN": 2,
+      "zoneN": [
+        0,
+        2,
+        1
+      ]
+    },
+    "lastPlay_dom": {
+      "centerCards": 2,
+      "zone0": 0,
+      "zone1": 2,
+      "zone2": 1,
+      "passBubbles": 1,
+      "lastPlayText": "压 茶友A：♠2 ♦A（对子）",
+      "fanHidden": false,
+      "fanVisible": true,
+      "zone1Visible": true,
+      "zone1Opacity": "1",
+      "zone1Z": "28"
+    },
+    "after_play": {
+      "ok": true,
+      "zone0": 1,
+      "center": 1,
+      "handN": 16
+    },
+    "white_guard": {
+      "tableActive": true,
+      "tvDisplay": "flex",
+      "tvVisibility": "visible",
+      "handN": 16,
+      "bodyBg": "rgba(0, 0, 0, 0)"
+    }
+  },
+  "pass": {
+    "hand_first_on_screen": true,
+    "hand_justify_start": true,
+    "hand_not_max_content_clip": true,
+    "lastPlay_center_or_seat": true,
+    "pass_bubble": true,
+    "no_white_screen": true,
+    "shots_distinct": true
+  },
+  "ok": true,
+  "root_causes": [
+    "handArea width:max-content + justify-content:center clipped leftmost cards off-screen",
+    "applyPinusRoom wiped tableActs every online snapshot → empty play-zones",
+    "safe-bottom clearance lifted chrome but y-scrollport still ate rank bottoms"
+  ]
+}
