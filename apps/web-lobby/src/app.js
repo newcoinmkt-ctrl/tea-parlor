@@ -5389,10 +5389,14 @@ function pinP0ActionBar(el) {
   el.style.setProperty('width', '100%', 'important');
   el.style.setProperty('min-width', '0', 'important');
   el.style.setProperty('max-width', '100%', 'important');
-  el.style.setProperty('flex-wrap', 'wrap', 'important');
+  el.style.setProperty('flex-direction', 'row', 'important');
+  el.style.setProperty('flex-wrap', 'nowrap', 'important');
+  el.style.setProperty('justify-content', 'center', 'important');
+  el.style.setProperty('align-items', 'center', 'important');
+  el.style.setProperty('gap', '8px', 'important');
   el.style.setProperty('grid-template-columns', 'none', 'important');
   el.style.setProperty('box-sizing', 'border-box', 'important');
-  // play9v3g: action bar must outrank hand cards (z~90) or raised cards swallow「出牌」taps
+  // play9v3g/h: action bar must outrank hand cards (z~90) or raised cards swallow「出牌」taps
   el.style.setProperty('z-index', '220', 'important');
 }
 
@@ -5430,8 +5434,8 @@ function syncP0Tabbar() {
     if (!el) return;
     const open = playing || tableOpen;
     if (open && !el.hidden && el.getAttribute('hidden') == null) {
-      const stageLand = el.id === 'tableView' && document.documentElement.classList.contains('table-stage-land');
-      if (!stageLand) {
+      const upright = el.id === 'tableView' && document.documentElement.classList.contains('table-stage-upright');
+      if (!upright) {
         el.style.setProperty('position', 'fixed', 'important');
         el.style.setProperty('top', '0', 'important');
         el.style.setProperty('left', '0', 'important');
@@ -5452,7 +5456,7 @@ function syncP0Tabbar() {
           slot.style.setProperty('width', '100%', 'important');
           slot.style.setProperty('z-index', '12', 'important');
         }
-        // Re-assert landscape stage after tabbar sync (owns rotate geometry)
+        // Re-assert upright letterbox stage (never rotates)
         try { syncTableStageLandscape(); } catch (_) {}
       }
     } else if (!open) {
@@ -6094,6 +6098,16 @@ function prevFor(player) {
 }
 
 // ─── AI（JJ 规则引擎） ───────────────────────────────
+/** Human-like think delay 0.8–2.0s (play9v3h / play9v2b feel). */
+function aiThinkMs() {
+  try {
+    if (typeof cryptoRandom === 'function') {
+      return 800 + Math.floor(cryptoRandom() * 1200);
+    }
+  } catch (_) {}
+  return 800 + Math.floor(Math.random() * 1200);
+}
+
 function scheduleAi() {
   clearAi();
   if (!game || game.phase === 'settle') return;
@@ -6111,7 +6125,7 @@ function scheduleAi() {
     if (trustee) aiTimer = setTimeout(autoHuman, 320);
     return;
   }
-  aiTimer = setTimeout(runAi, 380);
+  aiTimer = setTimeout(runAi, aiThinkMs());
 }
 
 function clearAi() {
@@ -6160,9 +6174,9 @@ function runAi() {
   if ((game.phase === 'bid' && game.bidTurn !== HUMAN)
     || (game.phase === 'double' && game.doubleDecided.some((d, i) => !d && i !== HUMAN))
     || (game.phase === 'play' && game.currentPlayer !== HUMAN)) {
-    aiTimer = setTimeout(runAi, 300);
+    aiTimer = setTimeout(runAi, aiThinkMs());
   } else if (trustee) {
-    aiTimer = setTimeout(autoHuman, 300);
+    aiTimer = setTimeout(autoHuman, aiThinkMs());
   }
 }
 

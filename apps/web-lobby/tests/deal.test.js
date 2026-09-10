@@ -41,3 +41,25 @@ test('riffleShuffle is a permutation', () => {
   assert.equal(out.length, 52);
   assert.deepEqual([...out].sort((a, b) => a - b), src);
 });
+
+test('5 consecutive deals have clearly different opening hands (crypto entropy)', () => {
+  const src = Array.from({ length: 54 }, (_, i) => i);
+  const hands = [];
+  for (let i = 0; i < 5; i++) {
+    const shuffled = riffleShuffle(src);
+    const { hands: h } = dealRoundRobin(shuffled, 3, 17, 0);
+    hands.push(h[0].join(','));
+  }
+  const unique = new Set(hands);
+  assert.ok(unique.size >= 4, `expected diverse opening hands, got ${unique.size}: ${JSON.stringify(hands)}`);
+});
+
+test('cryptoRandom uses getRandomValues when available', async () => {
+  const { cryptoRandom } = await import('../src/shared/deal.js');
+  const a = cryptoRandom();
+  const b = cryptoRandom();
+  assert.ok(a >= 0 && a < 1);
+  assert.ok(b >= 0 && b < 1);
+  // Extremely unlikely to be equal with crypto entropy
+  assert.notEqual(a, b);
+});

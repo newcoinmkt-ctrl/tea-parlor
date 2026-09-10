@@ -40,7 +40,8 @@ export function createDeck() {
   return deck;
 }
 
-function randomFloat() {
+/** crypto.getRandomValues entropy; Math.random fallback only if crypto missing */
+export function randomFloat() {
   if (typeof globalThis.crypto?.getRandomValues === 'function') {
     const buf = new Uint32Array(1);
     globalThis.crypto.getRandomValues(buf);
@@ -48,6 +49,8 @@ function randomFloat() {
   }
   return Math.random();
 }
+
+export const cryptoRandom = randomFloat;
 
 export function shuffle(arr, random = randomFloat) {
   const a = arr.slice();

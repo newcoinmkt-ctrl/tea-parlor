@@ -5,6 +5,9 @@ import { createSessionToken } from '@tea-parlor/session-auth';
 import {
   DdzTable,
   MATCH_MS,
+  aiThinkDelayMs,
+  AI_THINK_MS_MIN,
+  AI_THINK_MS_MAX,
   EMPTY_ROOM_MS,
   FRESH_JOIN_MIN_REMAIN_MS,
 } from '../src/ddzLogic.js';
@@ -340,4 +343,13 @@ test('clearMatchWindow restores empty-room clock semantics', async () => {
   now += 20_000;
   t.occupy('u2', '乙');
   assert.equal(t.matchEndsAt, now + MATCH_MS);
+});
+
+test('aiThinkDelayMs is within 800–2000', () => {
+  assert.equal(AI_THINK_MS_MIN, 800);
+  assert.equal(AI_THINK_MS_MAX, 2000);
+  for (let i = 0; i < 20; i++) {
+    const ms = aiThinkDelayMs(() => i / 20);
+    assert.ok(ms >= 800 && ms <= 2000, `ms=${ms}`);
+  }
 });

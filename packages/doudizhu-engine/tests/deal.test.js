@@ -57,3 +57,21 @@ test('engine startGame deals 17/17/17 + 3 without duplicate cards', () => {
   assert.equal(new Set(keys).size, 54);
   engine.destroy();
 });
+
+test('5 consecutive engine deals differ (crypto riffle + dealStart)', () => {
+  const sigs = [];
+  for (let i = 0; i < 5; i++) {
+    const eng = new DoudizhuEngine({ playerNames: ['A', 'B', 'C'], humanIndex: 0 });
+    eng.startGame();
+    sigs.push(eng.hands[0].map((c) => `${c.rank}_${c.suit}`).join(','));
+  }
+  assert.ok(new Set(sigs).size >= 4, `diverse deals expected: ${sigs}`);
+});
+
+test('randomFloat / cryptoRandom exported', async () => {
+  const { randomFloat, cryptoRandom } = await import('../src/card.js');
+  assert.equal(typeof randomFloat, 'function');
+  assert.equal(cryptoRandom, randomFloat);
+  const x = randomFloat();
+  assert.ok(x >= 0 && x < 1);
+});

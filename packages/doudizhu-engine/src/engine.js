@@ -2,7 +2,7 @@
  * JJ 经典斗地主对局引擎（本地三人：1 人 + 2 AI）
  */
 
-import { createDeck, riffleShuffle, dealRoundRobin, sortCards } from './card.js';
+import { createDeck, riffleShuffle, dealRoundRobin, sortCards, randomFloat } from './card.js';
 import {
   applyBid,
   createBiddingState,
@@ -128,11 +128,11 @@ export class DoudizhuEngine {
     if (deck.length !== 54) {
       throw new Error('doudizhu_deck_must_have_54_cards');
     }
-    const dealStart = options.dealStart ?? (customDeck ? 0 : Math.floor(Math.random() * 3));
+    const dealStart = options.dealStart ?? (customDeck ? 0 : Math.floor(randomFloat() * 3));
     const dealt = dealRoundRobin(deck, 3, 17, dealStart);
     this.hands = dealt.hands.map((h) => sortCards(h));
     this.bottomCards = dealt.rest.slice(0, 3);
-    this.bidStarter = options.bidStarter ?? Math.floor(Math.random() * 3);
+    this.bidStarter = options.bidStarter ?? Math.floor(randomFloat() * 3);
     if (!Number.isInteger(this.bidStarter) || this.bidStarter < 0 || this.bidStarter > 2) {
       throw new Error('invalid_bid_starter');
     }
