@@ -173,3 +173,120 @@
   padding-top: 12px !important;
 }
 
+
+/* play9v4: lobby grid + topbar clearance + chain hint */
+/* Beat legacy .home-app:has(.home-hero) negative margin that pulls grid under p0 user bar */
+.lobby-shell.p0-tg.lobby-view-home:not(.table-active):not(.texas-active):not(.multi-active) .home-app .p0-home-chrome .home-icon-grid,
+.lobby-shell.lobby-view-home:not(.table-active):not(.texas-active):not(.multi-active) .home-app:has(.home-hero) .p0-home-chrome .home-icon-grid,
+.lobby-shell.p0-tg .p0-home-chrome .home-icon-grid,
+.lobby-shell .p0-home-chrome .home-icon-grid {
+  position: relative !important;
+  z-index: 1 !important;
+  margin: 0 !important;
+  margin-top: 0 !important;
+  padding: 20px 16px 12px !important;
+  gap: 14px 10px !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-content: start !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Top user bar: document flow only — zero overlap with grid */
+.lobby-shell.p0-tg .p0-home-chrome .p0-home-user,
+.lobby-shell .p0-home-chrome .p0-home-user,
+.lobby-shell .p0-home-user {
+  position: relative !important;
+  z-index: 5 !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  inset: auto !important;
+  float: none !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: max(12px, env(safe-area-inset-top, 0px)) 16px 8px !important;
+  min-height: 56px !important;
+  margin-bottom: 4px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+.lobby-shell.p0-tg .p0-home-chrome .p0-points,
+.lobby-shell .p0-home-user .p0-points {
+  position: relative !important;
+  z-index: 6 !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .p0-home-chrome {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  min-height: 0 !important;
+}
+
+/* Chain tile: full-width row — no lonely left cell / empty gaps */
+.lobby-shell.p0-tg .p0-home-chrome .home-icon-grid .home-icon-btn.home-icon-chain,
+.lobby-shell.p0-tg .p0-home-chrome .home-icon-grid .home-icon-btn[data-lobby-action="chain"],
+.lobby-shell .p0-home-chrome .home-icon-grid .home-icon-btn.home-icon-chain,
+.lobby-shell .p0-home-chrome .home-icon-grid .home-icon-btn[data-lobby-action="chain"] {
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 64px !important;
+  margin: 4px 0 0 !important;
+  padding: 10px 16px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(232, 195, 106, 0.28) !important;
+  background: rgba(10, 24, 18, 0.55) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+
+.lobby-shell .p0-home-chrome .home-icon-btn.home-icon-chain img {
+  width: 52px !important;
+  height: 52px !important;
+  margin: 0 !important;
+}
+
+.lobby-shell .p0-home-chrome .home-icon-btn.home-icon-chain strong {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: var(--tp-gold, #e8c547) !important;
+}
+
+/* Hint: subtitle only (title lives on the tile) */
+.lobby-shell .home-chain-hint,
+.lobby-shell.p0-tg .p0-home-chrome .home-chain-hint {
+  margin: 2px 16px 16px !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  color: rgba(247, 242, 230, 0.68) !important;
+  text-align: center !important;
+}
+
+/* Keep CTA hidden (play9u2) + 5-tab bar */
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .p0-home-stage,
+.lobby-shell .p0-cta-card,
+.lobby-shell .p0-kicker {
+  display: none !important;
+}
+
+/* play9v4: hide home-kicker under p0 chrome */
+.lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .home-kicker {
+  display: none !important;
+}
