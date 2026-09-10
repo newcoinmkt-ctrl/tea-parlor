@@ -171,9 +171,16 @@ export function layoutOverlapRow(area, items, opts = {}) {
   area.style.setProperty("display", "flex", "important");
   area.style.setProperty("flex-direction", "row", "important");
   area.style.setProperty("flex-wrap", "nowrap", "important");
+  // play9v3d: flex-start so overflow does not clip the first card (center + max-content did).
+  area.style.setProperty("justify-content", "flex-start", "important");
+  area.style.setProperty("width", "100%", "important");
+  area.style.setProperty("max-width", "100%", "important");
+  area.style.setProperty("margin-left", "0px", "important");
+  area.style.setProperty("margin-right", "0px", "important");
   // play9v3: never clip unreadably — light horizontal scroll when fan exceeds width
   area.style.setProperty("overflow-x", allowScroll ? "auto" : "hidden", "important");
-  area.style.setProperty("overflow-y", "visible", "important");
+  // Keep top/bottom padding for select-lift + rank clearance; avoid y-clip from scrollport.
+  area.style.setProperty("overflow-y", "hidden", "important");
   area.style.setProperty("position", "relative", "important");
   area.style.setProperty("pointer-events", "auto", "important");
   area.style.setProperty("touch-action", allowScroll ? "pan-x" : "manipulation", "important");
@@ -187,6 +194,7 @@ export function layoutOverlapRow(area, items, opts = {}) {
     el.style.removeProperty("left");
     el.style.removeProperty("top");
   });
+  try { area.scrollLeft = 0; } catch (_) {}
 
   // Only crush peek when scroll is disabled; otherwise keep readable strip.
   if (!allowScroll) {
@@ -499,6 +507,12 @@ export function fitAllHands(root = document) {
       ratio: 1.42,
       allowScroll: true,
     });
+    // play9v3d: keep avatar gutter + first card on-screen
+    handArea.style.setProperty("padding-left", "72px", "important");
+    handArea.style.setProperty("padding-bottom", "14px", "important");
+    handArea.style.setProperty("padding-top", "18px", "important");
+    handArea.style.setProperty("justify-content", "flex-start", "important");
+    try { handArea.scrollLeft = 0; } catch (_) {}
   }
 
   const mg = root.querySelector("#mgHand");

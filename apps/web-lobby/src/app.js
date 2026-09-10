@@ -39,7 +39,8 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3c';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3d';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3d';
 import { initTableOrientation, expandTelegramTable } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -722,6 +723,36 @@ async function boot() {
         return true;
       },
       toggleCard: (cardId) => toggleCardSelect(cardId),
+      /** QA: re-paint current local/online game state */
+      render: () => { try { renderGame(); return true; } catch (e) { console.warn(e); return false; } },
+      /** QA: simulate online snapshot lastPlay → seat/center zones */
+      qaApplyLastPlay: (payload = {}) => {
+        if (!game) return false;
+        const cards = Array.isArray(payload.cards) ? payload.cards.filter(Boolean) : [];
+        const player = Number.isInteger(payload.player) ? payload.player : 1;
+        const roomLike = {
+          phase: 'play',
+          currentPlayer: Number.isInteger(payload.currentPlayer) ? payload.currentPlayer : HUMAN,
+          passCount: Number(payload.passCount) || 0,
+          lastPlay: cards.length ? { player, type: payload.type || 'pair', cards } : null,
+        };
+        game.phase = 'play';
+        game.online = true; // exercise online rebuild path without network
+        game.currentPlayer = roomLike.currentPlayer;
+        game.passCount = roomLike.passCount;
+        game.lastPlay = roomLike.lastPlay
+          ? { player, cards: cards.slice(), parsed: { type: payload.type || 'pair', cards: cards.slice() } }
+          : null;
+        game.tableActs = tableActsFromOnlineRoom(roomLike, game.tableActs || [null, null, null]);
+        game.online = false; // keep local controls usable in QA
+        selected = new Set();
+        renderGame();
+        return {
+          tableActs: (game.tableActs || []).map((a) => (a ? { kind: a.kind, n: a.cards?.length || 0 } : null)),
+          centerN: document.querySelectorAll('#lastPlayFan .table-card').length,
+          zoneN: [0, 1, 2].map((i) => document.querySelectorAll(`#playZone${i} .table-card, #playZone${i} .pass-bubble`).length),
+        };
+      },
     };
     console.log('[TeaParlor] 全玩法已就绪 · 品牌', ACTIVE_BRAND.name, '· 模式', playMode);
   } catch (e) {
@@ -5101,6 +5132,7 @@ function applyOnlineDdzScores(g) {
   return { payout: delta, fee: 0, kind: null };
 }
 
+
 /** 将 Pinus/Colyseus room 快照映射为本地 game 结构供 renderGame 使用 */
 function applyPinusRoom(room, roomMeta, currency) {
   if (!room) throw new Error('empty room');
@@ -5109,6 +5141,7 @@ function applyPinusRoom(room, roomMeta, currency) {
   const rawHand = Array.isArray(room.myHand) ? room.myHand : [];
   hands[hi] = rawHand.filter(Boolean).map((c) => ({ ...c }));
   const prevPlayed = Array.isArray(game?.playedCards) ? game.playedCards.slice() : [];
+  const prevTableActs = Array.isArray(game?.tableActs) ? game.tableActs.slice() : [null, null, null];
   const prevVariant = game?.variant;
   const prevVariantLabel = game?.variantLabel;
   const prevEnableDouble = game?.enableDouble;
@@ -5154,9 +5187,9 @@ function applyPinusRoom(room, roomMeta, currency) {
             : null,
         }
       : null,
-    tableActs: [null, null, null],
+    tableActs: tableActsFromOnlineRoom(room, prevTableActs),
     playedCards: Array.isArray(room.playedCards) ? room.playedCards.filter(Boolean) : prevPlayed,
-    passCount: 0,
+    passCount: Math.max(0, Number(room.passCount) || 0),
     multiplier: room.multiplier || 1,
     bombCount: room.bombCount || 0,
     winner: room.winner,
@@ -6436,11 +6469,29 @@ function renderSeat(node, player) {
 
 function renderPlayZones() {
   if (!game) return;
+  if (!Array.isArray(game.tableActs)) game.tableActs = [null, null, null];
+  // Offline/local already fills tableActs; online snapshots rebuild via tableActsFromOnlineRoom.
+  // Fallback: if seats empty but lastPlay exists, seed the lead seat so follow-play is visible.
+  if (game.phase === 'play' && game.lastPlay?.cards?.length) {
+    const lp = game.lastPlay.player;
+    if (Number.isInteger(lp) && lp >= 0 && lp < 3 && !game.tableActs[lp]) {
+      game.tableActs[lp] = {
+        kind: 'play',
+        cards: game.lastPlay.cards.slice(),
+        parsed: game.lastPlay.parsed || null,
+      };
+    }
+  }
   for (let p = 0; p < 3; p++) {
     const zone = nodes.playZones[p];
     if (!zone) continue;
     const act = game.tableActs[p];
     zone.innerHTML = '';
+    zone.hidden = false;
+    zone.removeAttribute('hidden');
+    zone.style.removeProperty('display');
+    zone.style.removeProperty('opacity');
+    zone.style.removeProperty('visibility');
     if (!act) continue;
     if (act.kind === 'pass') {
       const b = document.createElement('div');
@@ -6475,6 +6526,42 @@ function renderPlayZones() {
       });
     }
   }
+  renderCenterLastPlay();
+}
+
+function renderCenterLastPlay() {
+  const pot = document.querySelector('#tableView .center-pot.qq-center');
+  if (!pot) return;
+  let fan = document.getElementById('lastPlayFan');
+  if (!fan) {
+    fan = document.createElement('div');
+    fan.id = 'lastPlayFan';
+    fan.className = 'last-play-fan';
+    fan.setAttribute('aria-label', '上一手出牌');
+    const msg = document.getElementById('lastPlayText');
+    if (msg && msg.parentElement === pot) pot.insertBefore(fan, msg);
+    else pot.appendChild(fan);
+  }
+  fan.innerHTML = '';
+  const showPlay = game?.phase === 'play' || game?.phase === 'settle';
+  const cards = showPlay && game?.lastPlay?.cards?.length
+    ? sortCards(game.lastPlay.cards.slice(), false)
+    : [];
+  if (!cards.length) {
+    fan.hidden = true;
+    fan.setAttribute('hidden', '');
+    return;
+  }
+  fan.hidden = false;
+  fan.removeAttribute('hidden');
+  cards.forEach((card, i) => {
+    const el = document.createElement('span');
+    const wild = game?.variant === 'laizi' && isWildCard(card, game.wildRank);
+    el.className = 'table-card' + (isRed(card) ? ' red-card' : '') + (wild ? ' is-wild' : '');
+    el.innerHTML = cardFaceHtml(card, { wild });
+    el.style.zIndex = String(i + 1);
+    fan.appendChild(el);
+  });
 }
 
 function renderHand() {
@@ -6546,6 +6633,15 @@ function renderHand() {
     nodes.handArea.appendChild(btn);
   });
   try { fitAllHands(); } catch (_) {}
+  try {
+    // play9v3d: first card fully on-screen at scrollLeft=0 (never start mid-fan).
+    nodes.handArea.style.setProperty('justify-content', 'flex-start', 'important');
+    nodes.handArea.style.setProperty('width', '100%', 'important');
+    nodes.handArea.style.setProperty('max-width', '100%', 'important');
+    nodes.handArea.style.setProperty('margin-left', '0', 'important');
+    nodes.handArea.style.setProperty('margin-right', '0', 'important');
+    nodes.handArea.scrollLeft = 0;
+  } catch (_) {}
 }
 
 function statusLine() {
