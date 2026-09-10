@@ -39,8 +39,9 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3e';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3e';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3f';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3f';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9v3f';
 import { initTableOrientation, expandTelegramTable } from './net/table-orient.js';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
@@ -723,6 +724,8 @@ async function boot() {
         return true;
       },
       toggleCard: (cardId) => toggleCardSelect(cardId),
+      selectionPlayState: () => selectionPlayState(),
+      play: () => onPlay(),
       /** QA: re-paint current local/online game state */
       render: () => { try { renderGame(); return true; } catch (e) { console.warn(e); return false; } },
       /** QA: simulate online snapshot lastPlay → seat/center zones */
@@ -4260,10 +4263,26 @@ function canSelectHand() {
   return Boolean(game && game.phase === 'play' && game.currentPlayer === HUMAN);
 }
 
+/** play9v3f: enable「出牌」only for legal + beatable selection */
+function selectionPlayState() {
+  if (!game || game.phase !== 'play' || game.currentPlayer !== HUMAN) {
+    return { allowPlay: false, reason: 'not_turn', parsed: null, message: '还没轮到你出牌', cards: [] };
+  }
+  const cards = game.hands[HUMAN].filter((c) => selected.has(String(c.id)) || selected.has(c.id));
+  const verdict = evaluatePlaySelection({
+    selectedCards: cards,
+    lastPlay: game.lastPlay,
+    humanSeat: HUMAN,
+    parseHand: parsePlayCards,
+    canBeat: canBeatPlay,
+  });
+  return { ...verdict, cards };
+}
+
 function syncPlayButtonFromSelection() {
   const myPlay = Boolean(game && game.phase === 'play' && game.currentPlayer === HUMAN);
   if (nodes.playButton) {
-    const allowPlay = Boolean(myPlay && selected.size > 0);
+    const { allowPlay } = myPlay ? selectionPlayState() : { allowPlay: false };
     nodes.playButton.disabled = !allowPlay;
     nodes.playButton.setAttribute('aria-disabled', allowPlay ? 'false' : 'true');
     nodes.playButton.classList.toggle('is-recommended', allowPlay);
@@ -5696,13 +5715,29 @@ function onPlay() {
     }
   }
 
+  // play9v3f: validate locally before online send (illegal A+10 must not look playable / silently fail)
+  const precheck = evaluatePlaySelection({
+    selectedCards: cards,
+    lastPlay: game.lastPlay,
+    humanSeat: HUMAN,
+    parseHand: parsePlayCards,
+    canBeat: canBeatPlay,
+  });
+  if (!precheck.allowPlay) {
+    hintText = game?.variant === 'laizi' && precheck.reason === 'illegal_pattern'
+      ? '牌型不合法（癞子可凑单/对/三/顺/连对/软炸）'
+      : (precheck.message || '牌型不合法');
+    renderGame();
+    return;
+  }
+
   if (game.online) {
     const ids = cards.map((c) => c.id);
     pinusSync(() => getOnlineNet().ddzPlay(ids));
     return;
   }
 
-  const parsed = parsePlayCards(cards);
+  const parsed = precheck.parsed || parsePlayCards(cards);
   if (!parsed) {
     hintText = game?.variant === 'laizi'
       ? '牌型不合法（癞子可凑单/对/三/顺/连对/软炸）'
@@ -6225,16 +6260,8 @@ function _renderGameBody() {
         + `<span class="mini-card face-down">${brandMiniBackBadgeHtml()}</span>`;
   }
 
-  if (nodes.remain1) {
-    nodes.remain1.textContent = String(
-      game.handsCount?.[1] ?? game.hands[1]?.length ?? 0,
-    );
-  }
-  if (nodes.remain2) {
-    nodes.remain2.textContent = String(
-      game.handsCount?.[2] ?? game.hands[2]?.length ?? 0,
-    );
-  }
+  paintRemainChips(nodes.remain1, game.handsCount?.[1] ?? game.hands[1]?.length ?? 0);
+  paintRemainChips(nodes.remain2, game.handsCount?.[2] ?? game.hands[2]?.length ?? 0);
 
   // 豆子展示（影子积分）
   if (nodes.selfBeanDisplay) nodes.selfBeanDisplay.textContent = format(appState.ingots);
@@ -6329,9 +6356,8 @@ function _renderGameBody() {
     nodes.passButton.classList.toggle('is-recommended', canPass && !selected.size);
   }
   if (nodes.playButton) {
-    // 保守：没选牌不能出；有选牌时仍允许点击，由 onPlay 校验（避免误伤现有提示流）
-    // 若已有 parseSelection / canBeat 之类，改为：const allowPlay = myPlay && selectionLegal;
-    const allowPlay = Boolean(myPlay && selected.size > 0);
+    // play9v3f: illegal selection stays grey; only legal (and beatable) lights up
+    const allowPlay = Boolean(myPlay && selectionPlayState().allowPlay);
     nodes.playButton.disabled = !allowPlay;
     nodes.playButton.setAttribute('aria-disabled', allowPlay ? 'false' : 'true');
     nodes.playButton.classList.toggle('is-recommended', allowPlay);
@@ -6435,6 +6461,19 @@ function setHidden(el, hidden) {
     el.style.removeProperty('display');
     el.style.removeProperty('pointer-events');
   }
+}
+
+function paintRemainChips(node, count) {
+  if (!node) return;
+  const n = Math.max(0, Number(count) || 0);
+  const stackN = n <= 0 ? 0 : (n >= 10 ? 3 : (n >= 4 ? 2 : 1));
+  const backs = Array.from({ length: stackN }, () => '<i class="remain-back" aria-hidden="true"></i>').join('');
+  node.innerHTML =
+    (stackN
+      ? `<span class="remain-stack" aria-hidden="true">${backs}</span>`
+      : '')
+    + `<span class="remain-count">${n}</span>`;
+  node.setAttribute('aria-label', `剩余手牌 ${n}`);
 }
 
 function renderSeat(node, player) {

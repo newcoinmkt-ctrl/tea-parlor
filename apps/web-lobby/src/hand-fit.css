@@ -411,14 +411,17 @@ html body .lobby-shell.multi-active #multiGameView.mj-2p .mg-row-hero {
 }
 
 
-/* play9v3e: first card clear of self avatar (金佬); cards above avatar */
+/* play9v3f: adaptive avatar gutter (CSS var; JS sets --hand-avatar-gutter 52–68).
+   Prefer scroll over fixed 100px so the rightmost card is not clipped. */
 .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea,
 .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea.hand-fitted,
 .lobby-shell.p0-tg.table-active:not(.texas-active):not(.multi-active) #tableView.harbor-table #handArea {
-  padding-left: 100px !important;
-  padding-right: 8px !important;
+  padding-left: var(--hand-avatar-gutter, 56px) !important;
+  padding-right: 12px !important;
   z-index: 90 !important;
   position: relative !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #handArea .playing-card {
   position: relative !important;
@@ -433,4 +436,63 @@ html.table-landscape .lobby-shell.table-active:not(.texas-active):not(.multi-act
 .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .char-figure-self {
   z-index: 18 !important;
   pointer-events: none !important;
+}
+
+/* play9v3f: seat remain = card-back stack + count (not bare number) */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 52px !important;
+  padding: 3px 8px 3px 6px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, rgba(14, 60, 36, 0.92), rgba(8, 40, 24, 0.95)) !important;
+  border: 1px solid rgba(255, 220, 140, 0.35) !important;
+  color: #ffe9a8 !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28) !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips .remain-stack {
+  position: relative !important;
+  width: 28px !important;
+  height: 34px !important;
+  flex: 0 0 28px !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips .remain-back {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 22px !important;
+  height: 32px !important;
+  border-radius: 3px !important;
+  border: 1px solid rgba(255, 230, 160, 0.55) !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(145deg, #0b573f, #147a58) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips .remain-back:nth-child(1) { transform: translate(0, 0); z-index: 1; }
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips .remain-back:nth-child(2) { transform: translate(3px, -1px); z-index: 2; }
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips .remain-back:nth-child(3) { transform: translate(6px, -2px); z-index: 3; }
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView .remain-chips .remain-count {
+  min-width: 1.25em !important;
+  text-align: center !important;
+  color: #ffe9a8 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* play9v3f: illegal / empty selection —「出牌」must look grey, not lit orange */
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls .qq-btn-play:disabled,
+.lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #playControls .qq-btn-play[aria-disabled="true"],
+.lobby-shell.p0-tg.table-active #tableView #playControls .qq-btn-play:disabled,
+.lobby-shell.p0-tg.table-active #tableView #playControls .qq-btn-play[aria-disabled="true"] {
+  background: linear-gradient(180deg, #94a3b8, #64748b) !important;
+  color: #e2e8f0 !important;
+  opacity: 0.55 !important;
+  filter: grayscale(0.45) !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+  cursor: not-allowed !important;
 }

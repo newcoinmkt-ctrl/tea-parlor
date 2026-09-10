@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { packOverlap } from "../src/net/hand-layout.js";
+import { packOverlap, computeHandAvatarGutter } from "../src/net/hand-layout.js";
 
 test("packOverlap never inflates cardW above maxW", () => {
   const p = packOverlap(20, 338, { minW: 40, maxW: 48, minPeek: 16, ratio: 1.42 });
@@ -31,4 +31,9 @@ test("narrow crush path does not set cardW > maxW", () => {
   const p = packOverlap(20, 250, { minW: 36, maxW: 44, minPeek: 14, ratio: 1.42 });
   assert.ok(p.cardW <= 44);
   assert.ok(p.needsScroll);
+});
+
+test("computeHandAvatarGutter clamps between min and max without DOM avatar", () => {
+  const g = computeHandAvatarGutter(null, { min: 52, max: 68 });
+  assert.equal(g, 52);
 });
