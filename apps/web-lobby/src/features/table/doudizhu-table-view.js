@@ -30,13 +30,15 @@ export function typeLabel(type, parsed) {
 }
 
 export function cardText(card) {
+  if (!card) return '';
   if (card.rank === 16) return '小王';
   if (card.rank === 17) return '大王';
   const suit = typeof card.suit === 'number' && card.suit < 4 ? SUITS[card.suit] : '';
-  return suit + (RANK_LABEL[card.rank] || card.rank);
+  return suit + (RANK_LABEL[card.rank] || card.rank || '');
 }
 
 export function cardFaceHtml(card, { wild = false, brandBadgeHtml = '' } = {}) {
+  if (!card) return '';
   const wildTag = wild ? '<i class="pc-wild-tag">癞</i>' : '';
   if (card.rank === 16) return `<span class="pc-joker">小王</span>${brandBadgeHtml}`;
   if (card.rank === 17) return `<span class="pc-joker">大王</span>${brandBadgeHtml}`;

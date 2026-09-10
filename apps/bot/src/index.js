@@ -74,10 +74,42 @@ export function registerBotHandlers(bot, options = {}) {
   bot.action(BotCallback.SUPPORT, (ctx) => handleSupport(ctx, { config }));
   bot.action(BotCallback.INVITE, (ctx) => handleInvite(ctx, { config, botInfo: bot.botInfo }));
 
+  // Legacy ReplyKeyboardMarkup taps (older bot builds) — clear then route.
+  bot.hears(/^开始打牌$/, (ctx) => handleStart(ctx, { config }));
+  bot.hears(/^查询积分$/, async (ctx) => {
+    await clearStickyReplyKeyboard(ctx);
+    return handleBalance(ctx, { services });
+  });
+  bot.hears(/^最近战绩$/, async (ctx) => {
+    await clearStickyReplyKeyboard(ctx);
+    return handleRecords(ctx, { services });
+  });
+  bot.hears(/^分享邀请$/, async (ctx) => {
+    await clearStickyReplyKeyboard(ctx);
+    return handleInvite(ctx, { config, botInfo: bot.botInfo });
+  });
+  bot.hears(/^客服入口$/, async (ctx) => {
+    await clearStickyReplyKeyboard(ctx);
+    return handleSupport(ctx, { config });
+  });
+
   return { bot, config, services };
 }
 
+/** Clears legacy ReplyKeyboardMarkup that overlays Mini App hand/actions. */
+export function buildRemoveKeyboard() {
+  return { remove_keyboard: true };
+}
+
+async function clearStickyReplyKeyboard(ctx) {
+  try {
+    await ctx.reply('\u200b', { reply_markup: buildRemoveKeyboard() });
+  } catch (_) { /* ignore */ }
+}
+
 export async function handleStart(ctx, { config }) {
+  // Sticky reply keyboards from older bot builds cover H5 hand — remove then show inline entry.
+  await clearStickyReplyKeyboard(ctx);
   return ctx.reply(buildStartText(ctx.from), {
     parse_mode: 'HTML',
     reply_markup: buildMainKeyboard(config),
@@ -85,6 +117,7 @@ export async function handleStart(ctx, { config }) {
 }
 
 export async function handleHelp(ctx, { config }) {
+  await clearStickyReplyKeyboard(ctx);
   return ctx.reply(buildHelpText(), {
     parse_mode: 'HTML',
     reply_markup: buildMainKeyboard(config),

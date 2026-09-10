@@ -35,7 +35,7 @@ test('lobby HTML exposes honest local entry and keeps matching entry', () => {
   assert.match(html, /人机畅玩/);
   assert.match(html, /data-lobby-action="quick-doudizhu"/);
   assert.match(html, /id="ddzMatchMask"/);
-  assert.match(html, /app\.js\?v=play9e4/);
+  assert.match(html, /app\.js\?v=play9v3c/);
   // Local button copy must not say 匹配
   const localBtn = html.match(/data-lobby-action="local-doudizhu"[^>]*>([^<]+)</);
   assert.ok(localBtn, 'local button present');
