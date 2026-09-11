@@ -535,10 +535,12 @@ html.table-stage-upright #tableView.harbor-table.table-stage-upright-target {
   transform: none !important;
   /* geometry set inline by table-orient.syncTableStageLandscape (letterbox, no rotate) */
 }
-/* Kill any leftover play9v3g rotate target */
+/* play9jj1: letterbox uses translate+scale — do NOT force transform:none.
+ * Only forbid rotate(90deg); inline styles set translate(-50%,-50%) scale(s).
+ */
 html.table-stage-land #tableView.table-stage-land-target,
 #tableView.table-stage-land-target {
-  transform: none !important;
+  /* allow letterbox scale; never rotate — enforced in table-orient.js */
 }
 
 /* P1: strengthen wood remain chip + seat pass bubble placement */

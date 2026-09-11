@@ -598,6 +598,8 @@ const nodes = {
   multBadge: $('#multBadge'),
   footerMult: $('#footerMult'),
   deckMeter: $('#deckMeter'),
+  jjSettleHud: $('#jjSettleHud'),
+  jjSettleTopbar: $('#jjSettleTopbar'),
   selfBeanDisplay: $('#selfBeanDisplay'),
   turnTimer: $('#turnTimer'),
   chatBtn: $('#chatToastBtn'),
@@ -5434,8 +5436,12 @@ function syncP0Tabbar() {
     if (!el) return;
     const open = playing || tableOpen;
     if (open && !el.hidden && el.getAttribute('hidden') == null) {
-      const upright = el.id === 'tableView' && document.documentElement.classList.contains('table-stage-upright');
-      if (!upright) {
+      const staged = el.id === 'tableView' && (
+        document.documentElement.classList.contains('table-stage-upright')
+        || document.documentElement.classList.contains('table-stage-land')
+        || document.documentElement.classList.contains('table-stage-jj')
+      );
+      if (!staged) {
         el.style.setProperty('position', 'fixed', 'important');
         el.style.setProperty('top', '0', 'important');
         el.style.setProperty('left', '0', 'important');
@@ -6001,6 +6007,100 @@ function settle(winner) {
   queueMicrotask(() => showDdzResultModal());
 }
 
+
+function jjMiniCardHtml(c, { winStamp = false } = {}) {
+  if (!c) return '';
+  const t = cardText(c);
+  const red = isRed(c) ? ' red-card red' : '';
+  const stamp = winStamp ? '<span class="jj-win-stamp" aria-label="胜">胜</span>' : '';
+  return `<span class="jj-mini-card table-card${red}">`
+    + `<span class="pc-rank">${t.replace(/[♠♥♣♦]/g, '')}</span>`
+    + `<span class="pc-suit">${t.match(/[♠♥♣♦]/)?.[0] || ''}</span>`
+    + stamp
+    + `</span>`;
+}
+
+function renderJjSettleHud() {
+  const hud = nodes.jjSettleHud || document.getElementById('jjSettleHud');
+  if (!hud) return;
+  if (!game || game.phase !== 'settle') {
+    hud.hidden = true;
+    hud.setAttribute('hidden', '');
+    return;
+  }
+  hud.hidden = false;
+  hud.removeAttribute('hidden');
+
+  const scores = game.scores || [game.score || 0, 0, 0];
+  const totals = [
+    Math.max(0, 1050 + (scores[0] || 0)),
+    Math.max(0, 1050 + (scores[1] || 0)),
+    Math.max(0, 150 + (scores[2] || 0)),
+  ];
+  // Prefer real totals if present on game
+  if (Array.isArray(game.seatTotals)) {
+    for (let i = 0; i < 3; i++) if (game.seatTotals[i] != null) totals[i] = game.seatTotals[i];
+  }
+  const mult = game.multiplier || 1;
+  const stake = game.stake || 100;
+  const top = nodes.jjSettleTopbar || document.getElementById('jjSettleTopbar');
+  if (top) {
+    const xp = document.getElementById('jjSettleXp');
+    const mx = document.getElementById('jjSettleMult');
+    if (xp) xp.textContent = '235/360';
+    if (mx) mx.textContent = `${stake}x${mult}`;
+  }
+
+  const chunkRows = (cards, per = 8) => {
+    const rows = [];
+    for (let i = 0; i < cards.length; i += per) rows.push(cards.slice(i, i + per));
+    return rows;
+  };
+
+  for (let seat = 0; seat < 3; seat++) {
+    const el = document.getElementById(`jjSettleSeat${seat}`);
+    if (!el) continue;
+    const isLd = game.landlord === seat;
+    const d = scores[seat] || 0;
+    const winSide = game.landlordWin ? isLd : !isLd;
+    const src = isLd
+      ? getLandlordFigureSrc(seat)
+      : (seat === HUMAN ? getAvatarSrc() : getSeatCharacterSrc(seat));
+    const hands = (game.hands?.[seat] || []).slice();
+    // Show remaining hand; if empty winner, show last played as stamp card if available
+    let cards = hands;
+    let stampIdx = -1;
+    if (cards.length === 0 && winSide) {
+      const last = game.tableActs?.[seat];
+      if (last?.kind === 'play' && last.cards?.length) {
+        cards = last.cards.slice(-1);
+        stampIdx = 0;
+      }
+    } else if (cards.length && winSide) {
+      stampIdx = cards.length - 1;
+    }
+    const rows = chunkRows(cards, 8);
+    const handHtml = rows.map((row, ri) => (
+      `<div class="jj-settle-hand-row">${row.map((c, ci) => {
+        const globalIdx = ri * 8 + ci;
+        return jjMiniCardHtml(c, { winStamp: globalIdx === stampIdx });
+      }).join('')}</div>`
+    )).join('');
+    const scoreCls = d > 0 ? 'pos' : 'neg';
+    const scoreTxt = d > 0 ? `+${d}` : String(d);
+    el.innerHTML = `
+      <div class="jj-settle-row">
+        <img class="jj-settle-avatar ${winSide ? 'is-win' : 'is-lose'}" src="${src}" alt="" width="64" height="88" />
+        <div>
+          <div class="jj-settle-score ${scoreCls}">${scoreTxt}</div>
+          ${seat === HUMAN ? `<div class="jj-settle-total">总分: ${totals[seat]}</div>` : `<div class="jj-settle-stand">${totals[seat]}</div>`}
+        </div>
+      </div>
+      <div class="jj-settle-hand">${handHtml || ''}</div>
+    `;
+  }
+}
+
 function showDdzResultModal() {
   if (!game || game.phase !== 'settle' || !nodes.ddzModal || ddzSettleShown) return;
   ddzSettleShown = true;
@@ -6083,6 +6183,12 @@ function hideDdzResultModal() {
   nodes.ddzModal.hidden = true;
   nodes.ddzModal.setAttribute('hidden', '');
   nodes.ddzModal.classList.remove('is-open');
+  const hud = nodes.jjSettleHud || document.getElementById('jjSettleHud');
+  if (hud) {
+    hud.hidden = true;
+    hud.setAttribute('hidden', '');
+  }
+  nodes.tableView?.classList.remove('is-settle');
 }
 
 function escapeHtml(s) {
@@ -6348,6 +6454,8 @@ function _renderGameBody() {
   renderPlayZones();
   renderHand();
   renderDeckMeter();
+  nodes.tableView?.classList.toggle('is-settle', game.phase === 'settle');
+  renderJjSettleHud();
 
   const myBid = game.phase === 'bid' && game.bidTurn === HUMAN;
   const myDouble = game.phase === 'double' && !(game.doubleDecided || [])[HUMAN];
@@ -6460,10 +6568,27 @@ function renderDeckMeter() {
   }
 
   nodes.deckMeter.querySelectorAll('.qq-meter-item').forEach((item) => {
-    const r = Number(item.getAttribute('data-rank'));
+    const key = item.getAttribute('data-rank');
+    const i = item.querySelector('i');
+    if (key === 'joker') {
+      const left = Math.max(0, 2 - (played[16] || 0) - (played[17] || 0));
+      if (i) {
+        i.textContent = String(left);
+        i.classList.toggle('is-zero', left === 0);
+      }
+      item.title = `王 · 剩余 ${left}/2`;
+      return;
+    }
+    if (key === 'bomb') {
+      // Phase-2 shell: bomb count unknown → show ?
+      if (i) i.textContent = '?';
+      item.title = '炸 · 待统计';
+      return;
+    }
+    const r = Number(key);
+    if (!Number.isFinite(r)) return;
     const max = full(r);
     const left = Math.max(0, max - (played[r] || 0));
-    const i = item.querySelector('i');
     if (i) {
       i.textContent = String(left);
       i.classList.toggle('is-zero', left === 0);
@@ -6472,7 +6597,7 @@ function renderDeckMeter() {
     }
     item.title = `${item.querySelector('b')?.textContent || r} · 剩余 ${left}/${max}`;
   });
-  nodes.deckMeter.setAttribute('aria-label', '记牌器 · 各点数剩余张数');
+  nodes.deckMeter.setAttribute('aria-label', '记牌器 · 王/2/A/K/Q/J/炸');
 }
 
 function cardFaceMiniHtml(c) {
@@ -6581,12 +6706,25 @@ function renderPlayZones() {
     zone.style.removeProperty('display');
     zone.style.removeProperty('opacity');
     zone.style.removeProperty('visibility');
+    if (p === HUMAN) {
+      document.querySelectorAll('#tableView .qq-self-char .pass-bubble.seat-pass-bubble, #tableView .qq-bottom-bar > .pass-bubble.seat-pass-bubble').forEach((n) => n.remove());
+    }
     if (!act) continue;
     if (act.kind === 'pass') {
       const b = document.createElement('div');
       b.className = 'pass-bubble';
       b.textContent = '不出';
-      zone.appendChild(b);
+      // play9jj1: self「不出」anchors by bottom-left avatar (JJ reference), not table center
+      if (p === HUMAN) {
+        const host = document.querySelector('#tableView .qq-self-char .char-figure-wrap')
+          || document.querySelector('#tableView .qq-bottom-bar')
+          || zone;
+        host.querySelectorAll(':scope > .pass-bubble.seat-pass-bubble').forEach((n) => n.remove());
+        b.classList.add('seat-pass-bubble');
+        host.appendChild(b);
+      } else {
+        zone.appendChild(b);
+      }
       continue;
     }
     if (act.kind === 'bid') {
