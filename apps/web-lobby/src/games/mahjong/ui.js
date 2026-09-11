@@ -118,7 +118,7 @@ export function createMahjongUI(options = {}) {
     root.hidden = false;
     root.removeAttribute('hidden');
     root.dataset.game = 'mahjong';
-    root.classList.remove('zjh-active', 'gd-active', 'is-hu-settle', 'gd-4p', 'gd-yard', 'gd-settling');
+    root.classList.remove('zjh-active', 'gd-active', 'is-hu-settle', 'gd-4p', 'gd-yard', 'gd-settling', 'riichi-active');
     root.classList.toggle('mj-2p', playerCount === 2);
     root.classList.toggle('mj-4p', playerCount === 4);
     root.style.pointerEvents = 'auto';
@@ -174,7 +174,8 @@ export function createMahjongUI(options = {}) {
     if (el.settleRow) { el.settleRow.hidden = true; el.settleRow.setAttribute('hidden', ''); }
     root.hidden = true;
     root.setAttribute('hidden', '');
-    root.classList.remove('zjh-active', 'gd-active', 'mj-2p', 'mj-4p');
+    root.classList.remove('zjh-active', 'gd-active', 'mj-2p', 'mj-4p', 'riichi-active');
+    delete root.dataset.mjVariant;
     delete root.dataset.game;
     root.style.zIndex = '';
     root.style.pointerEvents = 'none';

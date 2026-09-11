@@ -1,0 +1,75 @@
+{
+  "cache": "play9mj2",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5173/index.html?v=play9mj2",
+  "ed_repro": {
+    "path": "大厅 → 麻将 → 日麻 → 进桌摸打 / 立直；四人麻将(推倒胡)仍可进",
+    "cache": "?v=play9mj2",
+    "fail_on": "new lobby icon for riichi; 推倒胡 broken; rotate90; missing pocket zones"
+  },
+  "shots": {
+    "01-home-896.png": {
+      "bytes": 80167,
+      "sha1": "b43dde9cd958"
+    },
+    "02-rooms-896.png": {
+      "bytes": 148417,
+      "sha1": "7832221172ce"
+    },
+    "03-riichi-table-896.png": {
+      "bytes": 201560,
+      "sha1": "df1ff46b4411"
+    },
+    "04-riichi-after-discard-896.png": {
+      "bytes": 200285,
+      "sha1": "cdbbb3c5db11"
+    },
+    "05-riichi-settle-896.png": {
+      "bytes": 166564,
+      "sha1": "229ca3c9b098"
+    },
+    "06-tuidaohu-table-896.png": {
+      "bytes": 177964,
+      "sha1": "fc7a38a3e891"
+    },
+    "07-riichi-414-portrait.png": {
+      "bytes": 231291,
+      "sha1": "50d3eb4cb035"
+    }
+  },
+  "checks": {
+    "riichi_hand": 13,
+    "riichi_active": true,
+    "dora_bar": true,
+    "dial": true,
+    "compass": true,
+    "walls": {
+      "n": 17,
+      "w": 17,
+      "e": 17,
+      "s": 17
+    },
+    "no_rotate": true,
+    "discard_before": 0,
+    "discard_after": 1,
+    "discard_ok": true,
+    "tuidaohu_active": true,
+    "tuidaohu_hand": 0,
+    "portrait_riichi": true
+  },
+  "pass": {
+    "riichi_enter": true,
+    "pocket_zones": true,
+    "discard": true,
+    "tuidaohu": true,
+    "no_rotate": true
+  },
+  "ok": true
+}
