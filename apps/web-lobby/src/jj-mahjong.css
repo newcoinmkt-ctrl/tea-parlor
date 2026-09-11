@@ -1,0 +1,674 @@
+/* play9mj1 — JJ Mahjong landscape stage 1:1 (table + hu settle)
+ * Sole layout truth: docs/qa/play9mj1/reference/jj-table.png + jj-hu-settle.png
+ * Forbidden: page rotate; Forbidden: #multiGameView 90-degree content rotation.
+ * Letterbox via translate+scale only (table-orient.js → table-stage-land-target).
+ */
+
+/* ── Stage letterbox target (mahjong) ── */
+html.table-stage-mj #multiGameView.table-stage-land-target,
+html.table-stage-jj.table-stage-mj #multiGameView.table-stage-land-target,
+#multiGameView.mj-4p.table-stage-land-target,
+#multiGameView.mj-2p.table-stage-land-target {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: block !important;
+  background: #061428 !important;
+  /* transform set inline — never rotate */
+}
+
+/* Kill flat grid / portrait dock when JJ stage is on */
+html.table-stage-mj #multiGameView.mj-4p.table-stage-land-target,
+html.table-stage-mj #multiGameView.mj-2p.table-stage-land-target {
+  padding: 0 !important;
+  margin: 0 !important;
+  inset: auto !important;
+  grid-template-rows: none !important;
+}
+
+html.table-stage-mj #multiGameView.mj-4p .mg-hud,
+html.table-stage-mj #multiGameView.mj-2p .mg-hud,
+html.table-stage-mj #multiGameView.mj-4p .mg-footer,
+html.table-stage-mj #multiGameView.mj-2p .mg-footer,
+html.table-stage-mj #multiGameView .mg-ad-bar,
+html.table-stage-mj #multiGameView .mg-table-center-ad,
+html.table-stage-mj #multiGameView .costume-chip,
+html.table-stage-mj #multiGameView .mj-dock {
+  display: none !important;
+}
+
+/* ── Arena + perspective table ── */
+html.table-stage-mj #multiGameView .mg-table {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+html.table-stage-mj #multiGameView .mj-room-bg {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(90, 140, 220, 0.35), transparent 60%),
+    linear-gradient(180deg, #0a1a3a 0%, #12305a 28%, #0d2240 55%, #071222 100%) !important;
+}
+html.table-stage-mj #multiGameView .mj-room-bg::before {
+  content: "";
+  position: absolute;
+  inset: 8% 6% 22% 6%;
+  background:
+    repeating-linear-gradient(90deg, rgba(40, 70, 120, 0.35) 0 18px, rgba 18px 36px),
+    repeating-linear-gradient(0deg, rgba(30, 55, 100, 0.25) 0 12px, transparent 12px 28px);
+  opacity: 0.55;
+  border-radius: 8px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+}
+html.table-stage-mj #multiGameView .mj-room-bg::after {
+  /* golden trophy tip */
+  content: "";
+  position: absolute;
+  top: 2.5%;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 50% 35%, #ffe08a 0%, #d4a017 45%, transparent 70%);
+  filter: drop-shadow(0 0 10px rgba(255, 200, 80, 0.65));
+  opacity: 0.9;
+}
+
+/* Perspective trapezoid felt (CSS fake 3D — not flat four-grid) */
+html.table-stage-mj #multiGameView .mj-felt {
+  display: block !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  left: 50% !important;
+  top: 10% !important;
+  width: 92% !important;
+  height: 68% !important;
+  transform: translateX(-50%) perspective(820px) rotateX(52deg) !important;
+  transform-origin: center top !important;
+  inset: auto !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(20, 60, 140, 0.15), transparent 40%),
+    radial-gradient(ellipse at 50% 40%, #1a4a9a 0%, #0d2f6e 48%, #071f4a 100%) !important;
+  box-shadow:
+    inset 0 0 0 3px rgba(212, 175, 55, 0.85),
+    inset 0 0 0 8px rgba(8, 30, 70, 0.9),
+    inset 0 0 60px rgba(0, 0, 0, 0.35),
+    0 28px 48px rgba(0, 0, 0, 0.55) !important;
+  border: 0 !important;
+  pointer-events: none !important;
+}
+html.table-stage-mj #multiGameView .mj-felt::before {
+  content: "";
+  position: absolute;
+  inset: 10% 8%;
+  background:
+    linear-gradient(90deg, transparent 0 8%, rgba(80, 160, 255, 0.08) 8% 8.4%, transparent 8.4%),
+    linear-gradient(0deg, transparent 0 12%, rgba(80, 160, 255, 0.07) 12% 12.5%, transparent 12.5%);
+  background-size: 12% 100%, 100% 14%;
+  opacity: 0.7;
+  pointer-events: none;
+}
+html.table-stage-mj #multiGameView .mj-watermark {
+  display: block !important;
+  position: absolute !important;
+  left: 28% !important;
+  top: 58% !important;
+  z-index: 2 !important;
+  color: rgba(0, 0, 0, 0.35) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  pointer-events: none !important;
+  text-shadow: none !important;
+  transform: perspective(820px) rotateX(52deg) !important;
+}
+
+/* Walls: green double-stack along L / top / R (hide south under hand) */
+html.table-stage-mj #multiGameView .mj-wall {
+  display: flex !important;
+  gap: 1px !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+}
+html.table-stage-mj #multiGameView .mj-wall-s {
+  display: none !important;
+}
+html.table-stage-mj #multiGameView .mj-wall-n {
+  position: absolute !important;
+  top: 14% !important;
+  left: 22% !important;
+  right: 22% !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  max-height: 36px !important;
+  overflow: hidden !important;
+  transform: perspective(700px) rotateX(48deg) !important;
+}
+html.table-stage-mj #multiGameView .mj-wall-w {
+  position: absolute !important;
+  left: 7% !important;
+  top: 22% !important;
+  bottom: 34% !important;
+  width: 28px !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  transform: perspective(700px) rotateY(58deg) !important;
+}
+html.table-stage-mj #multiGameView .mj-wall-e {
+  position: absolute !important;
+  right: 7% !important;
+  top: 22% !important;
+  bottom: 34% !important;
+  width: 28px !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  transform: perspective(700px) rotateY(-58deg) !important;
+}
+html.table-stage-mj #multiGameView .mj-wall-tile {
+  width: 14px !important;
+  height: 20px !important;
+  border-radius: 2px !important;
+  background: linear-gradient(180deg, #3ecf6a 0%, #1a8a3e 55%, #0d5c28 100%) !important;
+  border: 1px solid #0a4a20 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.45) !important;
+}
+html.table-stage-mj #multiGameView .mj-wall-w .mj-wall-tile,
+html.table-stage-mj #multiGameView .mj-wall-e .mj-wall-tile {
+  width: 20px !important;
+  height: 12px !important;
+}
+
+/* Center wind compass + countdown */
+html.table-stage-mj #multiGameView .mj-compass {
+  position: absolute !important;
+  left: 50% !important;
+  top: 42% !important;
+  width: 86px !important;
+  height: 86px !important;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(160deg, #1e2430 0%, #0c1018 100%) !important;
+  box-shadow:
+    inset 0 0 0 2px #c9a227,
+    inset 0 0 18px rgba(0, 0, 0, 0.55),
+    0 8px 20px rgba(0, 0, 0, 0.45) !important;
+  z-index: 12 !important;
+  pointer-events: none !important;
+  color: #e8e0c8 !important;
+}
+html.table-stage-mj #multiGameView .mj-wind {
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  opacity: 0.55 !important;
+}
+html.table-stage-mj #multiGameView .mj-wind.is-active {
+  opacity: 1 !important;
+  color: #fff !important;
+  text-shadow: 0 0 8px #3a8fff !important;
+  background: #1a5fd4;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+html.table-stage-mj #multiGameView .mj-wind-n { top: 5px !important; }
+html.table-stage-mj #multiGameView .mj-wind-s { bottom: 5px !important; }
+html.table-stage-mj #multiGameView .mj-wind-w { left: 6px !important; }
+html.table-stage-mj #multiGameView .mj-wind-e { right: 6px !important; }
+html.table-stage-mj #multiGameView .mj-wall-count,
+html.table-stage-mj #multiGameView #mjCountdown {
+  position: absolute !important;
+  inset: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  color: #f5f0e0 !important;
+  letter-spacing: 0.04em !important;
+}
+html.table-stage-mj #multiGameView .mj-wall-count {
+  font-size: 11px !important;
+  top: auto !important;
+  bottom: 4px !important;
+  height: auto !important;
+  inset: auto 0 4px 0 !important;
+  opacity: 0.55 !important;
+}
+
+/* ── Top JJ chrome: progress / rank / rules ── */
+html.table-stage-mj #multiGameView .mj-jj-topbar {
+  display: flex !important;
+  position: absolute !important;
+  top: 6px !important;
+  left: 10px !important;
+  right: 10px !important;
+  z-index: 40 !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  pointer-events: none !important;
+  gap: 8px !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-topbar > * {
+  pointer-events: auto !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-progress {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 160px !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-progress-bar {
+  position: relative !important;
+  height: 14px !important;
+  border-radius: 8px !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(255, 220, 120, 0.35) !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 14px !important;
+  padding: 0 6px !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-progress-bar > i {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: var(--mj-progress, 8%) !important;
+  background: linear-gradient(90deg, #2a8cff, #5ec8ff) !important;
+  z-index: 0 !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-progress-bar > span {
+  position: relative !important;
+  z-index: 1 !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-rank-tag {
+  display: inline-block !important;
+  margin-left: 4px !important;
+  padding: 0 5px !important;
+  border-radius: 4px !important;
+  background: #2ecc71 !important;
+  color: #063 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-rank-copy {
+  font-size: 11px !important;
+  color: #dce8ff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-rules {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 220, 140, 0.5) !important;
+  background: linear-gradient(180deg, #3a2a10, #1a1208) !important;
+  color: #ffe08a !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+/* ── Seat HUDs: avatar + score bar + horse xN ── */
+html.table-stage-mj #multiGameView .mg-row-top,
+html.table-stage-mj #multiGameView .mg-row-hero {
+  display: contents !important;
+}
+html.table-stage-mj #multiGameView .mg-seat,
+html.table-stage-mj #multiGameView [data-mg-seat] {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  z-index: 20 !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  transform: none !important;
+  inset: auto !important;
+}
+html.table-stage-mj #multiGameView [data-mg-seat="1"] { /* left */
+  left: 1.5% !important;
+  top: 28% !important;
+  width: 72px !important;
+}
+html.table-stage-mj #multiGameView [data-mg-seat="2"] { /* opposite */
+  left: 50% !important;
+  top: 3.5% !important;
+  width: 80px !important;
+  transform: translateX(-50%) !important;
+}
+html.table-stage-mj #multiGameView [data-mg-seat="3"] { /* right */
+  right: 1.5% !important;
+  top: 28% !important;
+  width: 72px !important;
+}
+html.table-stage-mj #multiGameView [data-mg-seat="0"] { /* self */
+  left: 1.2% !important;
+  bottom: 4% !important;
+  top: auto !important;
+  width: 78px !important;
+  z-index: 28 !important;
+  flex: none !important;
+  min-width: 0 !important;
+}
+html.table-stage-mj #multiGameView .mg-seat .char-figure-wrap {
+  width: 48px !important;
+  height: 48px !important;
+  max-height: 48px !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: #1a3a6a !important;
+  border: 2px solid rgba(255, 220, 120, 0.55) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+}
+html.table-stage-mj #multiGameView .mg-seat .char-figure {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: top center !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-horse {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #ffe08a !important;
+  text-shadow: 0 1px 2px #000 !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-horse::before {
+  content: "🐴";
+  font-size: 12px;
+}
+html.table-stage-mj #multiGameView .mj-jj-score {
+  display: block !important;
+  min-width: 56px !important;
+  padding: 2px 8px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, #2a6ad4, #154a9a) !important;
+  border: 1px solid rgba(180, 210, 255, 0.45) !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-score.is-neg {
+  background: linear-gradient(180deg, #3a6aa0, #1a3a60) !important;
+}
+html.table-stage-mj #multiGameView .mg-seat-info {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+html.table-stage-mj #multiGameView .mg-meta,
+html.table-stage-mj #multiGameView .mg-count {
+  display: none !important;
+}
+html.table-stage-mj #multiGameView .mg-play {
+  display: none !important;
+}
+html.table-stage-mj #multiGameView .mg-seat.is-turn .char-figure-wrap {
+  box-shadow: 0 0 0 2px #5ec8ff, 0 0 14px rgba(80, 180, 255, 0.7) !important;
+}
+
+/* Discard board — floats on felt, visible */
+html.table-stage-mj #multiGameView .mg-center {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(420px, 48%) !important;
+  max-height: 28% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  z-index: 14 !important;
+  overflow: visible !important;
+  grid-area: unset !important;
+}
+html.table-stage-mj #multiGameView .mj-discard-board {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+html.table-stage-mj #multiGameView .mj-discard-board .mj-discard-tile {
+  width: 22px !important;
+  height: 30px !important;
+  font-size: 11px !important;
+}
+
+/* Hero column → hand dock bottom full width */
+html.table-stage-mj #multiGameView .mg-hero-column {
+  position: absolute !important;
+  left: 82px !important;
+  right: 8px !important;
+  bottom: 2% !important;
+  top: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  z-index: 35 !important;
+  pointer-events: auto !important;
+}
+html.table-stage-mj #multiGameView #mgActions {
+  order: 1 !important;
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+html.table-stage-mj #multiGameView .mg-hand-dock,
+html.table-stage-mj #multiGameView #mgHand {
+  order: 2 !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  overflow: visible !important;
+  gap: 0 !important;
+  pointer-events: auto !important;
+  z-index: 45 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+html.table-stage-mj #multiGameView #mgHand .mj-tile.mg-hand-tile,
+html.table-stage-mj #multiGameView #mgHand .mg-hand-tile {
+  width: 42px !important;
+  height: 58px !important;
+  min-width: 38px !important;
+  min-height: 52px !important;
+  margin-left: -6px !important;
+  font-size: 18px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.12) !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  cursor: pointer !important;
+  z-index: 46 !important;
+}
+html.table-stage-mj #multiGameView #mgHand .mg-hand-tile:first-child {
+  margin-left: 0 !important;
+}
+html.table-stage-mj #multiGameView #mgHand .mg-hand-tile.selected,
+html.table-stage-mj #multiGameView #mgHand .mg-hand-tile.is-drawn {
+  transform: translateY(-12px) !important;
+  z-index: 60 !important;
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 220, 100, 0.9) !important;
+}
+/* Drawn tile slightly separated (JJ) */
+html.table-stage-mj #multiGameView #mgHand .mg-hand-tile.is-drawn {
+  margin-left: 10px !important;
+}
+
+/* Chat bubble shell (right edge) */
+html.table-stage-mj #multiGameView .mj-jj-chat {
+  position: absolute !important;
+  right: 10px !important;
+  bottom: 38% !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: rgba(20, 40, 80, 0.75) !important;
+  border: 1px solid rgba(255, 220, 140, 0.4) !important;
+  color: #fff !important;
+  display: grid !important;
+  place-items: center !important;
+  z-index: 30 !important;
+  pointer-events: auto !important;
+  font-size: 16px !important;
+}
+
+/* ── Hu / settle float scores ── */
+html.table-stage-mj #multiGameView .mj-hu-settle {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 80 !important;
+  pointer-events: none !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-settle[hidden] {
+  display: none !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-settle:not([hidden]) {
+  display: block !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-banner {
+  position: absolute !important;
+  min-width: 88px !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+  transform: rotate(-8deg) !important;
+  opacity: 0.95 !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-banner.is-pos {
+  background: linear-gradient(135deg, #f0a020, #e07010) !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-banner.is-neg {
+  background: linear-gradient(135deg, #6ec8ff, #3a8fd4) !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-banner[data-seat="2"] {
+  top: 16% !important;
+  left: 50% !important;
+  transform: translateX(-50%) rotate(-6deg) !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-banner[data-seat="1"] {
+  top: 38% !important;
+  left: 12% !important;
+  transform: rotate(-12deg) !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-banner[data-seat="3"] {
+  top: 38% !important;
+  right: 10% !important;
+  left: auto !important;
+  transform: rotate(10deg) !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-banner[data-seat="0"] {
+  bottom: 28% !important;
+  left: 50% !important;
+  transform: translateX(-50%) rotate(4deg) !important;
+}
+html.table-stage-mj #multiGameView .mj-hu-stamp {
+  position: absolute !important;
+  left: 50% !important;
+  top: 44% !important;
+  transform: translate(-20%, -50%) rotate(-8deg) !important;
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 40px !important;
+  font-weight: 900 !important;
+  color: #ff4d7a !important;
+  background: radial-gradient(circle, rgba(255, 180, 200, 0.55), rgba(255, 80, 120, 0.15) 70%, transparent) !important;
+  text-shadow: 0 0 12px rgba(255, 60, 100, 0.8) !important;
+  border: 3px solid rgba(255, 80, 120, 0.65) !important;
+  box-shadow: 0 0 24px rgba(255, 80, 120, 0.45) !important;
+  font-family: "KaiTi", "STKaiti", "Songti SC", serif !important;
+}
+
+/* Keep result modal usable but under float banners visually optional */
+html.table-stage-mj #multiGameView.is-hu-settle #mgResultModal:not([hidden]) {
+  opacity: 0.92 !important;
+}
+
+/* Chat / rules only on JJ stage */
+.mj-jj-topbar,
+.mj-jj-chat,
+.mj-hu-settle,
+.mj-watermark,
+.mj-jj-horse,
+.mj-jj-score {
+  display: none;
+}
+html.table-stage-mj #multiGameView .mj-jj-topbar,
+html.table-stage-mj #multiGameView .mj-jj-chat,
+html.table-stage-mj #multiGameView .mj-watermark {
+  display: flex;
+}
+html.table-stage-mj #multiGameView .mj-jj-chat {
+  display: grid !important;
+}
+html.table-stage-mj #multiGameView .mj-watermark {
+  display: block !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-horse,
+html.table-stage-mj #multiGameView .mj-jj-score {
+  display: inline-flex !important;
+}
+html.table-stage-mj #multiGameView .mj-jj-score {
+  display: block !important;
+}

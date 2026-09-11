@@ -33,6 +33,10 @@ export function createMahjongUI(options = {}) {
   let roomLabel = '麻将';
   let settleReported = false;
   let moveCount = 0;
+  /** play9mj1: turn countdown (JJ compass center) */
+  let turnSeconds = 15;
+  let turnTimer = null;
+  const BASE_SCORE = 1800;
   /** 开局掷骰/发牌动画进行中 */
   let opening = false;
   let openTimers = [];
@@ -82,6 +86,11 @@ export function createMahjongUI(options = {}) {
   el.back?.addEventListener('click', exitToLobby);
   el.lobby?.addEventListener('click', exitToLobby);
   el.modalLobby?.addEventListener('click', exitToLobby);
+  document.getElementById('mjJjRulesBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (el.status) el.status.textContent = '推倒胡 · 点选手牌再点弃 / 再点已选牌直接打出';
+  });
   el.again?.addEventListener('click', (e) => {
     e.preventDefault();
     hideResult();
@@ -109,14 +118,16 @@ export function createMahjongUI(options = {}) {
     root.hidden = false;
     root.removeAttribute('hidden');
     root.dataset.game = 'mahjong';
-    root.classList.remove('zjh-active', 'gd-active');
+    root.classList.remove('zjh-active', 'gd-active', 'is-hu-settle', 'gd-4p', 'gd-yard', 'gd-settling');
     root.classList.toggle('mj-2p', playerCount === 2);
     root.classList.toggle('mj-4p', playerCount === 4);
     root.style.pointerEvents = 'auto';
     root.style.display = 'flex';
     root.style.visibility = 'visible';
-    root.style.zIndex = '200';
-    document.querySelector('.lobby-shell')?.classList.add('table-active', 'multi-active');
+    root.style.zIndex = '400';
+    // play9mj1: multi-active only (not table-active) so DDZ #tableView stays buried
+    document.querySelector('.lobby-shell')?.classList.add('multi-active');
+    document.querySelector('.lobby-shell')?.classList.remove('table-active', 'texas-active');
     el.seats.forEach((s, i) => {
       if (!s.panel) return;
       const on = i < playerCount;
@@ -139,15 +150,22 @@ export function createMahjongUI(options = {}) {
     }
     const topbar = document.querySelector('.topbar');
     if (topbar) topbar.style.display = 'none';
+    hideHuSettle();
+    resetJjHud(playerCount);
+    // Trigger landscape letterbox stage (table-orient observes class mutations)
+    try { window.dispatchEvent(new Event('resize')); } catch (_) { /* ignore */ }
   }
 
   function hide() {
     openSeq += 1;
     opening = false;
     stopAi();
+    stopTurnTimer();
     clearOpenTimers();
     hideOpenLayer();
+    hideHuSettle();
     hideResult();
+    root.classList.remove('is-hu-settle');
     // play9g1TearDown: clear tap HUD on table switch
     selected = null;
     if (el.actions) { el.actions.hidden = true; el.actions.innerHTML = ''; }
@@ -290,7 +308,7 @@ export function createMahjongUI(options = {}) {
     el.seats.forEach((s, i) => {
       s.panel?.classList.toggle('is-dealer', i === dealer && i < playerCount);
     });
-    await waitMs(1100);
+    await waitMs(380);
     if (!opening) return dealer;
 
     // ── 2) 发牌动画（三轮×4 + 一轮×1，从庄家起）──
@@ -367,7 +385,7 @@ export function createMahjongUI(options = {}) {
       layer.querySelector('.mj-open-tip').textContent = '发牌完成 · 理牌中…';
     }
     if (el.status) el.status.textContent = '理牌…';
-    await waitMs(550);
+    await waitMs(220);
     hideOpenLayer();
     return dealer;
   }
@@ -377,6 +395,98 @@ export function createMahjongUI(options = {}) {
       el.modal.hidden = true;
       el.modal.setAttribute('hidden', '');
     }
+  }
+
+  function stopTurnTimer() {
+    if (turnTimer) {
+      clearInterval(turnTimer);
+      turnTimer = null;
+    }
+  }
+
+  function resetJjHud(playerCount = 4) {
+    root.querySelectorAll('[data-mj-score]').forEach((n) => {
+      const seat = Number(n.getAttribute('data-mj-score'));
+      if (seat >= playerCount) return;
+      n.textContent = String(BASE_SCORE);
+      n.classList.remove('is-neg');
+    });
+    root.querySelectorAll('[data-mj-horse]').forEach((n) => {
+      n.textContent = 'x0';
+    });
+    const cd = document.getElementById('mjCountdown');
+    if (cd) cd.textContent = '15';
+  }
+
+  function syncJjScores(snap) {
+    const n = snap.playerCount || 4;
+    for (let i = 0; i < 4; i++) {
+      const node = root.querySelector(`[data-mj-score="${i}"]`);
+      if (!node) continue;
+      if (i >= n) {
+        node.textContent = '—';
+        continue;
+      }
+      const sc = Number(snap.scores?.[i] || 0);
+      const shown = BASE_SCORE + sc;
+      node.textContent = String(shown);
+      node.classList.toggle('is-neg', shown < BASE_SCORE);
+    }
+  }
+
+  function syncJjWinds(snap) {
+    // Map seat → wind relative to dealer (dealer = East)
+    const dealer = Number(snap.dealer || 0);
+    const current = Number(snap.current || 0);
+    const winds = ['e', 's', 'w', 'n']; // counterclockwise from East
+    const seatWind = {};
+    for (let i = 0; i < (snap.playerCount || 4); i++) {
+      const off = (i - dealer + 4) % 4;
+      seatWind[i] = winds[off];
+    }
+    const activeWind = seatWind[current] || 'e';
+    root.querySelectorAll('.mj-wind').forEach((elWind) => {
+      const w = elWind.getAttribute('data-wind');
+      elWind.classList.toggle('is-active', w === activeWind);
+    });
+  }
+
+  function startTurnTimer(snap) {
+    stopTurnTimer();
+    if (!snap || snap.phase === 'settle' || opening) return;
+    turnSeconds = 15;
+    const cd = document.getElementById('mjCountdown');
+    if (cd) cd.textContent = String(turnSeconds).padStart(2, '0');
+    turnTimer = setInterval(() => {
+      turnSeconds = Math.max(0, turnSeconds - 1);
+      if (cd) cd.textContent = String(turnSeconds).padStart(2, '0');
+      if (turnSeconds <= 0) stopTurnTimer();
+    }, 1000);
+  }
+
+  function hideHuSettle() {
+    const layer = document.getElementById('mjHuSettle');
+    if (!layer) return;
+    layer.hidden = true;
+    layer.setAttribute('hidden', '');
+    root.classList.remove('is-hu-settle');
+  }
+
+  function showHuSettle(snap) {
+    const layer = document.getElementById('mjHuSettle');
+    if (!layer) return;
+    const deltas = snap.deltas || snap.scores || [];
+    layer.querySelectorAll('[data-mj-hu-delta]').forEach((banner) => {
+      const seat = Number(banner.getAttribute('data-mj-hu-delta'));
+      const d = Number(deltas[seat] || 0);
+      banner.textContent = `${d > 0 ? '+' : ''}${d}`;
+      banner.classList.toggle('is-pos', d >= 0);
+      banner.classList.toggle('is-neg', d < 0);
+      banner.hidden = seat >= (snap.playerCount || 4);
+    });
+    layer.hidden = false;
+    layer.removeAttribute('hidden');
+    root.classList.add('is-hu-settle');
   }
 
   function start() {
@@ -706,6 +816,15 @@ export function createMahjongUI(options = {}) {
       el.sub.textContent = `${snap.modeName} · 底分 ${snap.stake}${scoreHint}`;
     }
     renderWalls(snap.wallLeft, snap.playerCount);
+    syncJjScores(snap);
+    syncJjWinds(snap);
+    if (snap.phase === 'settle') {
+      showHuSettle(snap);
+      stopTurnTimer();
+    } else {
+      hideHuSettle();
+      startTurnTimer(snap);
+    }
     const goldEl = document.getElementById('mjGold');
     const srcGold = document.getElementById('ingotBalance');
     if (goldEl && srcGold) goldEl.textContent = srcGold.textContent;
@@ -841,6 +960,7 @@ export function createMahjongUI(options = {}) {
       const canDiscard = snap.current === 0 && snap.phase === 'discard';
       const canExchange = snap.phase === 'exchange';
       const canClick = canDiscard || canExchange;
+      const drawnId = canDiscard && hand.length ? hand[hand.length - 1]?.id : null;
       el.hand.innerHTML = hand
         .map((c) => {
           const name = tileName(c);
@@ -848,8 +968,9 @@ export function createMahjongUI(options = {}) {
           const isSel = canExchange ? exSel.has(c.id) : selected === c.id;
           const miss = snap.missingSuits?.[0];
           const isQue = miss != null && miss >= 0 && miss <= 2 && c.suit === miss;
+          const isDrawn = canDiscard && drawnId && c.id === drawnId && hand.length % 3 === 2;
           return (
-            `<button type="button" class="mg-hand-tile mj-tile ${sc} ${isSel ? 'selected' : ''}${isQue ? ' mj-que' : ''}" `
+            `<button type="button" class="mg-hand-tile mj-tile ${sc} ${isSel ? 'selected' : ''}${isQue ? ' mj-que' : ''}${isDrawn ? ' is-drawn' : ''}" `
             + `data-tile-id="${c.id}" ${canClick ? '' : 'disabled'} title="${name}${isQue ? '（缺）' : ''}">${tileFaceHtml(c)}</button>`
           );
         })
@@ -866,6 +987,11 @@ export function createMahjongUI(options = {}) {
               if (el.status) el.status.textContent = '最多选 3 张，可点已选牌取消';
             }
             render();
+            return;
+          }
+          // play9mj1: re-tap selected tile → discard (JJ playable)
+          if (canDiscard && selected === id) {
+            onDiscard();
             return;
           }
           selected = id;
