@@ -11,11 +11,12 @@ const jjCss = readFileSync(path.join(root, '../src/jj-table.css'), 'utf8');
 const appSrc = readFileSync(path.join(root, '../src/app.js'), 'utf8');
 const html = readFileSync(path.join(root, '../index.html'), 'utf8');
 
-test('play9match3 cache bust on CSS + app.js', () => {
-  assert.match(html, /app\.js\?v=play9match3/);
-  assert.match(html, /hand-fit\.css\?v=play9match3/);
-  assert.match(html, /table-landscape\.css\?v=play9match3/);
-  assert.match(html, /jj-table\.css\?v=play9match3/);
+test('play9mj1 cache bust on CSS + app.js', () => {
+  assert.match(html, /app\.js\?v=play9mj1/);
+  assert.match(html, /hand-fit\.css\?v=play9mj1/);
+  assert.match(html, /table-landscape\.css\?v=play9mj1/);
+  assert.match(html, /jj-table\.css\?v=play9mj1/);
+  assert.match(html, /jj-mahjong\.css\?v=play9mj1/);
   assert.doesNotMatch(html, /\?v=play9v3h/);
   assert.doesNotMatch(html, /\?v=play9v3g/);
 });
@@ -71,4 +72,18 @@ test('pinP0ActionBar forces horizontal row', () => {
 test('renderJjSettleHud present', () => {
   assert.match(appSrc, /function renderJjSettleHud\(/);
   assert.match(appSrc, /jj-win-stamp/);
+});
+
+test('play9mj1 mahjong letterbox stage (no rotate)', () => {
+  assert.match(orientSrc, /isMjTableActive/);
+  assert.match(orientSrc, /table-stage-mj/);
+  assert.match(orientSrc, /multiGameView/);
+  assert.match(orientSrc, /getLetterboxTarget/);
+  const htmlNow = readFileSync(path.join(root, '../index.html'), 'utf8');
+  assert.match(htmlNow, /jj-mahjong\.css\?v=play9mj1/);
+  assert.match(htmlNow, /mjHuSettle|mj-hu-settle/);
+  assert.match(htmlNow, /mjCountdown/);
+  const mjCss = readFileSync(path.join(root, '../src/jj-mahjong.css'), 'utf8');
+  assert.match(mjCss, /perspective\(/);
+  assert.doesNotMatch(mjCss, /transform:\s*rotate\(90deg\)/);
 });

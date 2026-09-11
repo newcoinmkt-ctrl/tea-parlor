@@ -9,15 +9,16 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9match3" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9match3" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9mj1" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9mj1" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -1617,54 +1618,69 @@
 
         <div class="mg-table">
           <div class="mj-room-bg" aria-hidden="true"></div>
+          <div class="mj-jj-topbar" aria-label="JJ顶栏">
+            <div class="mj-jj-progress">
+              <div class="mj-jj-progress-bar" style="--mj-progress:8%"><i aria-hidden="true"></i><span id="mjJjProgressText">829/10000</span><em class="mj-jj-rank-tag" id="mjJjRankTag">71</em></div>
+              <div class="mj-jj-rank-copy" id="mjJjRankCopy">前9200名晋级</div>
+            </div>
+            <button type="button" class="mj-jj-rules" id="mjJjRulesBtn" title="规则" aria-label="规则">📖</button>
+          </div>
           <div class="mj-felt" aria-hidden="true">
             <div class="mj-wall mj-wall-n" id="mjWallN"></div>
             <div class="mj-wall mj-wall-w" id="mjWallW"></div>
             <div class="mj-wall mj-wall-e" id="mjWallE"></div>
             <div class="mj-wall mj-wall-s" id="mjWallS"></div>
-            <div class="mj-compass">
-              <span class="mj-wind mj-wind-n">北</span>
-              <span class="mj-wind mj-wind-w">西</span>
-              <span class="mj-wind mj-wind-e">东</span>
-              <span class="mj-wind mj-wind-s">南</span>
-              <strong id="mjWallCount" class="mj-wall-count">—</strong>
-            </div>
           </div>
+          <div class="mj-compass" aria-hidden="true">
+            <span class="mj-wind mj-wind-e" data-wind="e">东</span>
+            <span class="mj-wind mj-wind-s" data-wind="s">南</span>
+            <span class="mj-wind mj-wind-w" data-wind="w">西</span>
+            <span class="mj-wind mj-wind-n" data-wind="n">北</span>
+            <strong id="mjCountdown" class="mj-countdown">05</strong>
+            <span id="mjWallCount" class="mj-wall-count">—</span>
+          </div>
+          <div class="mj-watermark" aria-hidden="true">jj麻将 推倒胡</div>
           <div class="mg-ad-bar" aria-label="品牌位 · BTC">
             <a class="tx-ad-chip skin brand-slot brand-btc brand-surface-table" data-ad-slot="multi-table-skin" href="https://bitcoin.org" target="_blank" rel="noreferrer"><span class="ad-label">桌面</span> BTC</a>
             <a class="tx-ad-chip face brand-slot brand-btc brand-surface-card" data-ad-slot="multi-card-face" href="https://bitcoin.org" target="_blank" rel="noreferrer"><span class="ad-label">牌面</span> BTC</a>
           </div>
           <div class="table-center-ad brand-slot brand-btc brand-surface-table mg-table-center-ad" data-ad-slot="multi-table-center" aria-hidden="true">BTC · Bitcoin</div>
-          <!-- 对手：麻将四人时 CSS 网格分布 左/对家/右；炸金花仍用顶排 -->
+          <!-- 对手：麻将四人时 JJ 透视座位 左/对家/右；炸金花仍用顶排 -->
           <div class="mg-row-top">
             <div class="mg-seat mg-seat-1 full-body-char" data-mg-seat="1" data-char="1">
+              <span class="mj-jj-horse" data-mj-horse="1">x0</span>
               <div class="char-figure-wrap">
                 <img class="char-figure char-float" src="./public/characters/female-glam.png" alt="茶友A" width="108" height="168" />
               </div>
               <div class="mg-seat-info">
                 <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-1"><em>BTC</em></span>
+                <div class="mj-jj-score" data-mj-score="1">1800</div>
                 <div id="mgMeta1" class="mg-meta"></div>
                 <div id="mgCount1" class="mg-count">0</div>
                 <div id="mgPlay1" class="mg-play" aria-label="出牌"></div>
               </div>
             </div>
             <div class="mg-seat mg-seat-2 full-body-char" data-mg-seat="2" data-char="2">
+              <span class="mj-jj-horse" data-mj-horse="2">x0</span>
               <div class="char-figure-wrap">
                 <img class="char-figure char-float" src="./public/characters/male-charm.png" alt="茶友B" width="108" height="168" />
               </div>
               <div class="mg-seat-info">
                 <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-2"><em>BTC</em></span>
+                <div class="mj-jj-score" data-mj-score="2">1800</div>
                 <div id="mgMeta2" class="mg-meta"></div>
                 <div id="mgCount2" class="mg-count">0</div>
                 <div id="mgPlay2" class="mg-play" aria-label="出牌"></div>
               </div>
             </div>
             <div class="mg-seat mg-seat-3 full-body-char" data-mg-seat="3" data-char="3" hidden>
+              <span class="mj-jj-horse" data-mj-horse="3">x0</span>
               <div class="char-figure-wrap">
                 <img class="char-figure char-float" src="./public/characters/animal-fox.png" alt="茶友C" width="108" height="168" />
               </div>
               <div class="mg-seat-info">
                 <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-3"><em>BTC</em></span>
+                <div class="mj-jj-score" data-mj-score="3">1800</div>
                 <div id="mgMeta3" class="mg-meta"></div>
                 <div id="mgCount3" class="mg-count">0</div>
                 <div id="mgPlay3" class="mg-play" aria-label="出牌"></div>
@@ -1673,14 +1689,17 @@
           </div>
 
           <div id="mgCenter" class="mg-center" aria-label="弃牌区"></div>
+          <button type="button" class="mj-jj-chat" id="mjJjChatBtn" title="聊天" aria-label="聊天">💬</button>
 
           <div class="mg-row-hero">
             <div class="mg-seat mg-seat-0 full-body-char" data-mg-seat="0" data-char="0">
+              <span class="mj-jj-horse" data-mj-horse="0">x0</span>
               <div class="char-figure-wrap">
                 <img class="char-figure char-float" src="./public/characters/male-hero.png" alt="我" width="108" height="168" />
               </div>
               <div class="mg-seat-info">
                 <span class="costume-chip brand-slot brand-btc brand-surface-costume" data-ad-slot="multi-costume-0"><em>BTC</em></span>
+                <div class="mj-jj-score" data-mj-score="0">1800</div>
                 <div id="mgMeta0" class="mg-meta"></div>
                 <div id="mgCount0" class="mg-count">0</div>
                 <div id="mgPlay0" class="mg-play" aria-label="我的明牌"></div>
@@ -1692,6 +1711,14 @@
                 <div id="mgHand" class="mg-hand" aria-label="我的手牌"></div>
               </div>
             </div>
+          </div>
+
+          <div id="mjHuSettle" class="mj-hu-settle" hidden aria-live="polite">
+            <div class="mj-hu-banner is-pos" data-seat="2" data-mj-hu-delta="2">+0</div>
+            <div class="mj-hu-banner is-pos" data-seat="1" data-mj-hu-delta="1">+0</div>
+            <div class="mj-hu-banner is-pos" data-seat="3" data-mj-hu-delta="3">+0</div>
+            <div class="mj-hu-banner is-neg" data-seat="0" data-mj-hu-delta="0">+0</div>
+            <div class="mj-hu-stamp" aria-hidden="true">胡</div>
           </div>
         </div>
 
@@ -1798,6 +1825,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9match3"></script>
+    <script type="module" src="./src/app.js?v=play9mj1"></script>
   </body>
 </html>

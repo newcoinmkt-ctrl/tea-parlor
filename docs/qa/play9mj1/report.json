@@ -1,0 +1,130 @@
+{
+  "cache": "play9mj1",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5241/index.html?v=play9mj1",
+  "ed_repro": {
+    "path": "大厅 → 麻将 → 四人麻将 → 进桌发牌 → 点选手牌再点一次打出（或点弃）",
+    "cache": "?v=play9mj1",
+    "fail_on": "flat 2D four-grid without perspective; page/multiGameView 90° rotate; unresponsive 四人麻将 entry"
+  },
+  "shots": {
+    "lobby-896-home.png": {
+      "bytes": 84966,
+      "sha1": "9edf0c6cd242"
+    },
+    "mj-896-table-zones.png": {
+      "bytes": 193519,
+      "sha1": "1921e97636f3"
+    },
+    "mj-896-after-discard.png": {
+      "bytes": 196345,
+      "sha1": "df5ff8b1ef48"
+    },
+    "mj-896-hu-settle.png": {
+      "bytes": 220868,
+      "sha1": "8a54d4d48ac1"
+    },
+    "mj-414-portrait-letterbox.png": {
+      "bytes": 87358,
+      "sha1": "c11c54a73520"
+    }
+  },
+  "checks": {
+    "stage": {
+      "stageLand": true,
+      "stageJj": true,
+      "stageMj": true,
+      "target": true,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "feltTransform": "matrix3d(1, 0, 0, 0, 0.395192, 0.615661, 0.788011, -0.000960989, 0.308758, -0.788011, 0.615661, -0.000750807, -411.234, 0, 0, 1)",
+      "feltHas3d": true,
+      "compass": true,
+      "countdown": "15",
+      "walls": {
+        "n": 14,
+        "w": 14,
+        "e": 14
+      },
+      "scores": [
+        "1800",
+        "1800",
+        "1800",
+        "1800"
+      ],
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "stageWider": true,
+      "topbar": true,
+      "watermark": true
+    },
+    "hand_after_deal": 13,
+    "room_card_click": true,
+    "discard_before": 1,
+    "discard_after": 4,
+    "hand_after_discard": 13,
+    "discard_ok": true,
+    "portrait_letterbox": {
+      "transform": "matrix(0.462054, 0, 0, 0.462054, -448, -207)",
+      "noRotate90": true,
+      "rect": {
+        "w": 414,
+        "h": 191
+      },
+      "stageMj": true
+    }
+  },
+  "pass": {
+    "enter_table": true,
+    "deal": true,
+    "discard": true,
+    "landscape_stage": true,
+    "no_rotate_90": true,
+    "perspective_felt": true,
+    "compass_countdown": true,
+    "walls": true,
+    "hu_settle_shot": true
+  },
+  "ok": true,
+  "deferred": [
+    "Match ≤3s align with play9match3 — DEFER (mahjong local AI enter; not DDZ match overlay)"
+  ],
+  "files_changed": [
+    "apps/web-lobby/src/jj-mahjong.css",
+    "apps/web-lobby/src/net/table-orient.js",
+    "apps/web-lobby/src/games/mahjong/ui.js",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/tests/table-orient-upright.test.js",
+    "docs/qa/play9mj1/"
+  ],
+  "done": [
+    "JJ landscape letterbox for #multiGameView (table-stage-mj)",
+    "Perspective trapezoid felt + arena chrome",
+    "Tile walls L/top/R, compass+countdown, 4 seat HUD score/horse",
+    "Top progress/rank + rules entry",
+    "Hu settle float +/- banners + 胡 stamp",
+    "Lobby 四人麻将 enter → deal → tap discard",
+    "Cache ?v=play9mj1"
+  ],
+  "self_test": {
+    "url": "http://127.0.0.1:<PORT>/index.html?v=play9mj1",
+    "steps": [
+      "大厅 → 麻将 → 四人麻将",
+      "Wait deal (~2s)",
+      "Tap tile select → tap again or 弃 to discard"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 /** Table viewport: Telegram.WebApp.viewportStableHeight, never 100vh, never whole-page CSS-rotate.
  *  play9jj1/jj1b: landscape coordinate stage (width > height), letterbox center-scale into the
  *  Mini App viewport. NEVER rotate #tableView / content (play9v3g FAIL).
+ *  play9mj1: same letterbox for #multiGameView mahjong (no page rotate, no 90°).
  *  Text/cards/buttons stay upright relative to the stage; Ed holds phone landscape to align.
  *  play9jj1b: pin self-slot/felt/avatar absolute-to-stage on every sync (beat position:fixed drift).
  */
@@ -11,6 +12,8 @@ const MIN_TG_VH_PX = 240;
 
 let lastStageKey = '';
 let expandedOnce = false;
+let expandedTableActive = false;
+let lastLetterboxKind = "";
 
 function isPlayingTable() {
   const shell = document.querySelector(".lobby-shell");
@@ -26,6 +29,21 @@ function isDdzTableActive() {
   if (shell.classList.contains("texas-active") || shell.classList.contains("multi-active")) return false;
   const tv = document.getElementById("tableView");
   return Boolean(tv && !tv.hidden);
+}
+
+/** play9mj1: mahjong multi table uses same JJ landscape letterbox as DDZ */
+function isMjTableActive() {
+  const shell = document.querySelector(".lobby-shell");
+  if (!shell?.classList.contains("multi-active")) return false;
+  const mg = document.getElementById("multiGameView");
+  if (!mg || mg.hidden) return false;
+  return mg.classList.contains("mj-4p") || mg.classList.contains("mj-2p") || mg.dataset.game === "mahjong";
+}
+
+function getLetterboxTarget() {
+  if (isDdzTableActive()) return document.getElementById("tableView");
+  if (isMjTableActive()) return document.getElementById("multiGameView");
+  return null;
 }
 
 function isMobileish() {
@@ -193,7 +211,11 @@ export function syncTableStageLandscape() {
   const root = document.documentElement;
   const body = document.body;
   const tv = document.getElementById("tableView");
-  const want = isDdzTableActive() && isMobileish();
+  const mg = document.getElementById("multiGameView");
+  const ddzWant = isDdzTableActive() && isMobileish();
+  const mjWant = isMjTableActive() && isMobileish();
+  const want = ddzWant || mjWant;
+  const target = getLetterboxTarget();
 
   // Drop play9v3h upright-fill class; landscape letterbox is the JJ truth.
   root.classList.remove("table-stage-upright");
@@ -202,15 +224,35 @@ export function syncTableStageLandscape() {
   body?.classList.toggle("table-stage-land", want);
   root.classList.toggle("table-stage-jj", want);
   body?.classList.toggle("table-stage-jj", want);
+  root.classList.toggle("table-stage-mj", mjWant);
+  body?.classList.toggle("table-stage-mj", mjWant);
 
-  if (!tv) {
-    lastStageKey = '';
-    return want;
+  const kind = mjWant ? "mj" : (ddzWant ? "ddz" : "off");
+  // Clear inactive target only when letterbox kind changes (avoid observer thrash).
+  if (kind !== lastLetterboxKind) {
+    if (kind !== "ddz" && tv) clearTableViewGeometry(tv);
+    if (kind !== "mj" && mg) {
+      mg.classList.remove("table-stage-land-target", "table-stage-upright-target");
+      [
+        "position", "top", "left", "right", "bottom", "width", "height",
+        "max-width", "max-height", "transform", "transform-origin", "margin",
+        "z-index", "overflow",
+      ].forEach((k) => mg.style.removeProperty(k));
+    }
+    lastLetterboxKind = kind;
   }
 
-  if (!want) {
+  if (!want || !target) {
     if (lastStageKey !== 'off') {
-      clearTableViewGeometry(tv);
+      if (tv) clearTableViewGeometry(tv);
+      if (mg) {
+        mg.classList.remove("table-stage-land-target", "table-stage-upright-target");
+        [
+          "position", "top", "left", "right", "bottom", "width", "height",
+          "max-width", "max-height", "transform", "transform-origin", "margin",
+          "z-index", "overflow",
+        ].forEach((k) => mg.style.removeProperty(k));
+      }
       root.style.removeProperty("--table-stage-w");
       root.style.removeProperty("--table-stage-h");
       root.style.removeProperty("--table-stage-scale");
@@ -231,9 +273,9 @@ export function syncTableStageLandscape() {
   }
   // Fit entire landscape stage inside viewport (letterbox), no rotate.
   const scale = Math.min(vw / stageW, vh / stageH);
-  const key = `jj-land:${stageW}x${stageH}@${scale.toFixed(4)}:${vw}x${vh}`;
-  if (key === lastStageKey && tv.classList.contains("table-stage-land-target")) {
-    pinJjZoneGeometry(tv);
+  const key = `jj-land:${kind}:${stageW}x${stageH}@${scale.toFixed(4)}:${vw}x${vh}`;
+  if (key === lastStageKey && target.classList.contains("table-stage-land-target")) {
+    if (ddzWant) pinJjZoneGeometry(target);
     return true;
   }
   lastStageKey = key;
@@ -244,28 +286,28 @@ export function syncTableStageLandscape() {
   const padY = Math.max(0, (vh - stageH * scale) / 2);
   root.style.setProperty("--table-letterbox-pad", `${Math.round(padY)}px`);
 
-  tv.classList.remove("table-stage-upright-target");
-  tv.classList.add("table-stage-land-target");
-  tv.style.setProperty("position", "fixed", "important");
-  tv.style.setProperty("top", "50%", "important");
-  tv.style.setProperty("left", "50%", "important");
-  tv.style.setProperty("right", "auto", "important");
-  tv.style.setProperty("bottom", "auto", "important");
-  tv.style.setProperty("width", `${stageW}px`, "important");
-  tv.style.setProperty("height", `${stageH}px`, "important");
-  tv.style.setProperty("max-width", "none", "important");
-  tv.style.setProperty("max-height", "none", "important");
-  tv.style.setProperty("margin", "0", "important");
+  target.classList.remove("table-stage-upright-target");
+  target.classList.add("table-stage-land-target");
+  target.style.setProperty("position", "fixed", "important");
+  target.style.setProperty("top", "50%", "important");
+  target.style.setProperty("left", "50%", "important");
+  target.style.setProperty("right", "auto", "important");
+  target.style.setProperty("bottom", "auto", "important");
+  target.style.setProperty("width", `${stageW}px`, "important");
+  target.style.setProperty("height", `${stageH}px`, "important");
+  target.style.setProperty("max-width", "none", "important");
+  target.style.setProperty("max-height", "none", "important");
+  target.style.setProperty("margin", "0", "important");
   // CRITICAL: letterbox via translate+scale ONLY — never rotate
-  tv.style.setProperty(
+  target.style.setProperty(
     "transform",
     `translate(-50%, -50%) scale(${scale})`,
     "important",
   );
-  tv.style.setProperty("transform-origin", "center center", "important");
-  tv.style.setProperty("z-index", "400", "important");
-  tv.style.setProperty("overflow", "hidden", "important");
-  pinJjZoneGeometry(tv);
+  target.style.setProperty("transform-origin", "center center", "important");
+  target.style.setProperty("z-index", "400", "important");
+  target.style.setProperty("overflow", "hidden", "important");
+  if (ddzWant) pinJjZoneGeometry(target);
   return true;
 }
 
@@ -282,8 +324,13 @@ export function syncTableLandscape() {
   root.classList.toggle("table-portrait-dock", on);
   body?.classList.toggle("table-portrait-dock", on);
 
-  if (on) {
+  // Expand TG once per table session — calling expand every sync loops
+  // viewportChanged → run → expand (play9mj1 freeze on mahjong enter).
+  if (on && !expandedTableActive) {
+    expandedTableActive = true;
     expandTelegramTable();
+  } else if (!on) {
+    expandedTableActive = false;
   }
 
   root.classList.remove("css-landscape");
@@ -309,6 +356,10 @@ export function initTableOrientation() {
   const tv = document.getElementById("tableView");
   if (tv) {
     new MutationObserver(run).observe(tv, { attributes: true, attributeFilter: ["hidden", "class"] });
+  }
+  const mg = document.getElementById("multiGameView");
+  if (mg) {
+    new MutationObserver(run).observe(mg, { attributes: true, attributeFilter: ["hidden", "class", "data-game"] });
   }
   window.addEventListener("resize", run);
   window.addEventListener("orientationchange", () => setTimeout(run, 80));
