@@ -34,17 +34,18 @@ import {
 import { decideBid, decidePlay, makeAIDecision } from './jj/ai.js';
 import { createTexasUI } from './texas/ui.js';
 import { createMahjongUI } from './games/mahjong/ui.js';
+import { createRiichiUI } from './games/mahjong/riichi-ui.js';
 import { createZhajinhuaUI } from './games/zhajinhua/ui.js';
 import { createBlackjackUI } from './games/blackjack/ui.js';
 import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9nn1b';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9nn1b';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9nn1b';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9nn1b';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9nn1b';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9mj2';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9mj2';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9mj2';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9mj2';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9mj2';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -517,10 +518,11 @@ const TEXAS_TABLES = {
 };
 
 const MAHJONG_TABLES = {
-  er: { label: '二人麻将', mode: 'er', stake: 100, buyIn: 1000, minEntry: 1000 },
-  siren: { label: '四人麻将', mode: 'siren', stake: 100, buyIn: 1200, minEntry: 1200 },
-  xuezhan: { label: '血战到底', mode: 'xuezhan', stake: 100, buyIn: 1500, minEntry: 1500 },
-  xueliu: { label: '血流成河', mode: 'xueliu', stake: 200, buyIn: 2000, minEntry: 2000 },
+  er: { label: '二人麻将', mode: 'er', stake: 100, buyIn: 1000, minEntry: 1000, variant: 'tuidaohu' },
+  siren: { label: '四人麻将', mode: 'siren', stake: 100, buyIn: 1200, minEntry: 1200, variant: 'tuidaohu' },
+  riichi: { label: '日麻', mode: 'riichi', stake: 100, buyIn: 1000, minEntry: 1000, variant: 'riichi' },
+  xuezhan: { label: '血战到底', mode: 'xuezhan', stake: 100, buyIn: 1500, minEntry: 1500, variant: 'tuidaohu' },
+  xueliu: { label: '血流成河', mode: 'xueliu', stake: 200, buyIn: 2000, minEntry: 2000, variant: 'tuidaohu' },
   er_c: { label: '二人麻将·链游', mode: 'er', stake: 2, buyIn: 8, minEntry: 8, currency: 'crypto' },
   siren_c: { label: '四人麻将·链游', mode: 'siren', stake: 2, buyIn: 10, minEntry: 10, currency: 'crypto' },
   xuezhan_c: { label: '血战·链游', mode: 'xuezhan', stake: 2, buyIn: 10, minEntry: 10, currency: 'crypto' },
@@ -2468,8 +2470,10 @@ function startMahjong(modeKey = 'xuezhan', options = {}) {
   multiBuyIn = t.buyIn;
   window.__multiCurrency = currency;
 
-  multiUI = createMahjongUI({
-    getStake: () => ({ stake: t.stake, label: t.label, mode: t.mode }),
+  const isRiichi = t.mode === 'riichi' || t.variant === 'riichi' || modeKey === 'riichi';
+  const makeUI = isRiichi ? createRiichiUI : createMahjongUI;
+  multiUI = makeUI({
+    getStake: () => ({ stake: t.stake, label: t.label, mode: t.mode, variant: t.variant || (isRiichi ? 'riichi' : 'tuidaohu') }),
     onExit: () => {
       leaveMultiTable();
       setLobbyView('rooms', currency === 'crypto' ? 'real' : 'mahjong');
@@ -3407,7 +3411,7 @@ function setLobbyView(view = 'home', gameType = null) {
   if (nodes.claimStatus && view === 'rooms') {
     if (gameType === 'texas') nodes.claimStatus.textContent = '请选择德州牌桌（金币场）';
     else if (gameType === 'zhajinhua') nodes.claimStatus.textContent = '请选择炸金花场次（可玩）';
-    else if (gameType === 'mahjong') nodes.claimStatus.textContent = '请选择麻将玩法：四人 / 二人 / 血战 / 血流';
+    else if (gameType === 'mahjong') nodes.claimStatus.textContent = '请选择麻将玩法：推倒胡（默认）/ 日麻 / 二人 / 血战 / 血流';
     else if (gameType === 'guandan') nodes.claimStatus.textContent = '掼蛋 2v2 · 选场次开局（金币 / 链游）';
     else if (gameType === 'blackjack') nodes.claimStatus.textContent = '二十一点 · 标准规则 · 选场次开局（金币 / 链游）';
     else if (gameType === 'niuniu') nodes.claimStatus.textContent = '牛牛 · 看牌抢庄 · 选场次开局（影子金币）';

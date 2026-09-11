@@ -30,10 +30,10 @@ test('lobby grid lists 牛牛 beside DDZ/麻将 without breaking existing games'
   assert.doesNotMatch(html, /data-game-room="niuniu"[^>]*data-currency="crypto"/);
 });
 
-test('cache play9nn1b + niuniu.css', () => {
-  assert.match(html, /app\.js\?v=play9nn1b/);
-  assert.match(html, /niuniu\.css\?v=play9nn1b/);
-  assert.match(appSrc, /\?v=play9nn1b/);
+test('cache play9mj2 + niuniu.css', () => {
+  assert.match(html, /app\.js\?v=play9mj2/);
+  assert.match(html, /niuniu\.css\?v=play9mj2/);
+  assert.match(appSrc, /\?v=play9mj2/);
   assert.doesNotMatch(html, /\?v=play9ship1/);
 });
 

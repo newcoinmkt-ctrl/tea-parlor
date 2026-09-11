@@ -370,6 +370,7 @@ export function modeName(mode) {
   return {
     er: '二人麻将',
     siren: '四人麻将',
+    riichi: '日麻',
     xuezhan: '血战到底',
     xueliu: '血流成河',
   }[mode] || '麻将';
@@ -378,7 +379,8 @@ export function modeName(mode) {
 export function modeDesc(mode) {
   return {
     er: '2 人桌 · 摸打碰杠胡',
-    siren: '4 人经典 · 首胡结算',
+    siren: '4 人经典 · 推倒胡 · 首胡结算',
+    riichi: '4 人日麻 · 立直/宝牌/荣自摸',
     xuezhan: '4 人 · 换三张/定缺 · 胡牌退场',
     xueliu: '4 人 · 换三张/定缺 · 胡后留场可再胡',
   }[mode] || '麻将';
