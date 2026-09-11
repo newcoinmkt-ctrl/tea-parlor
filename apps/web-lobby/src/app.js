@@ -43,7 +43,7 @@ import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3g';
 import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3g';
 import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9v3g';
 import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9v3g';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9jj1b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9match3';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -5047,6 +5047,27 @@ function startRoomLocal(room, currency, variant = 'classic') {
   scheduleAi();
 }
 
+/**
+ * play9match3 — wait until gateway session token is set (or timeout).
+ * Avoid awaiting telegramLoginPromise: that promise also fetches wallet/daily-supply
+ * and was inflating 「匹配中」well past Colyseus MATCH_MS (live was already 3s deal).
+ */
+async function waitForMatchSessionToken(maxMs = 2_500) {
+  const existing = String(window.__teaParlorSessionToken || '').trim();
+  if (existing) return existing;
+  const started = Date.now();
+  while (Date.now() - started < maxMs) {
+    if (ddzMatchAborted) return '';
+    const tok = String(window.__teaParlorSessionToken || '').trim();
+    if (tok) return tok;
+    await Promise.race([
+      Promise.resolve(telegramLoginPromise).then(() => null).catch(() => null),
+      new Promise((r) => setTimeout(r, 50)),
+    ]);
+  }
+  return String(window.__teaParlorSessionToken || '').trim();
+}
+
 async function startRoomOnline(room, currency, variant = 'classic', backend = 'colyseus', extra = {}) {
   const v = DDZ_VARIANTS[variant] || DDZ_VARIANTS.classic;
   const profile = getProfile();
@@ -5059,9 +5080,10 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
   if (!keepOverlay) showDdzTable();
   if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
 
-  try { await telegramLoginPromise; } catch (_) {}
+  // play9match3: do NOT await full telegramLoginPromise (it also syncs wallet).
+  // Token is set as soon as /auth returns — poll that so match clock starts ASAP.
+  const sessionToken = await waitForMatchSessionToken(2_500);
   if (ddzMatchAborted) throw new Error('match_cancelled');
-  const sessionToken = window.__teaParlorSessionToken || '';
   if (window.__teaParlorSessionUserId) pinusUid = String(window.__teaParlorSessionUserId);
   // Matching is online-only: without a gateway session, fail honestly (no local fallback).
   // Production Colyseus keeps verifyRoomJoin secret-required — do not enable trust mode.

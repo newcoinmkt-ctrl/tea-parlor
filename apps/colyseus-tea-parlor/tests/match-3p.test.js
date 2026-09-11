@@ -5,6 +5,9 @@ import { createSessionToken } from '@tea-parlor/session-auth';
 import {
   DdzTable,
   MATCH_MS,
+  MATCH_MS_DEFAULT,
+  MATCH_MS_MAX,
+  resolveMatchMs,
   aiThinkDelayMs,
   AI_THINK_MS_MIN,
   AI_THINK_MS_MAX,
@@ -148,11 +151,46 @@ test('trustee: disconnected human seat is played by AI (injected flag)', async (
 
 test('MATCH_MS is 3000 ms (Colyseus clock uses ms)', () => {
   assert.equal(MATCH_MS, 3_000);
+  assert.equal(MATCH_MS_DEFAULT, 3_000);
+  assert.equal(MATCH_MS_MAX, 3_000);
   assert.equal(EMPTY_ROOM_MS, 45_000);
   assert.equal(FRESH_JOIN_MIN_REMAIN_MS, 1_000);
   assert.ok(EMPTY_ROOM_MS > MATCH_MS, 'empty dispose must outlive match window');
   assert.ok(FRESH_JOIN_MIN_REMAIN_MS < MATCH_MS);
   assert.equal(MATCH_MS - FRESH_JOIN_MIN_REMAIN_MS, 2_000);
+});
+
+test('resolveMatchMs defaults 3000 and caps above 3s', () => {
+  assert.equal(resolveMatchMs({}), 3_000);
+  assert.equal(resolveMatchMs({ MATCH_MS: '2000' }), 2_000);
+  assert.equal(resolveMatchMs({ MATCH_MS: '10000' }), 3_000, 'stale Railway 10s env must not win');
+  assert.equal(resolveMatchMs({ DDZ_MATCH_MS: '1500' }), 1_500);
+});
+
+test('publicState exposes matchMs for live/QA verification', async () => {
+  const t = new DdzTable({ match: true, autoDeal: false });
+  await t.ensureReady();
+  t.occupy('u1', '茶馆');
+  const snap = t.publicState('u1');
+  assert.equal(snap.matchMs, MATCH_MS);
+  assert.equal(snap.matchMs, 3_000);
+});
+
+test('wall-clock: 1 human AI fill completes within MATCH_MS+250ms', async () => {
+  const t = new DdzTable({ match: true, autoDeal: false });
+  await t.ensureReady();
+  const t0 = Date.now();
+  t.occupy('u_wall', '茶馆');
+  const remain = t.matchEndsAt - Date.now();
+  assert.ok(remain <= MATCH_MS + 50, `remain=${remain}`);
+  await new Promise((r) => setTimeout(r, remain + 20));
+  await t.onMatchTimeout();
+  const elapsed = Date.now() - t0;
+  assert.ok(['bid', 'play'].includes(t.phase), `phase=${t.phase}`);
+  assert.equal(t.seats.filter((s) => s && s.kind === 'ai').length, 2);
+  assert.ok(elapsed <= MATCH_MS + 250, `elapsed=${elapsed}ms (budget MATCH_MS+250)`);
+  assert.ok(elapsed >= MATCH_MS - 100, `elapsed=${elapsed}ms (too fast?)`);
+  console.log(`[play9match3] measured wall-clock match ms=${elapsed}`);
 });
 
 test('empty create: matchEndsAt is 0 until first human', async () => {

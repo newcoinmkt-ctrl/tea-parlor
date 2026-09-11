@@ -11,16 +11,16 @@ const jjCss = readFileSync(path.join(root, '../src/jj-table.css'), 'utf8');
 const appSrc = readFileSync(path.join(root, '../src/app.js'), 'utf8');
 const html = readFileSync(path.join(root, '../index.html'), 'utf8');
 
-test('play9jj1b cache bust on CSS + app.js', () => {
-  assert.match(html, /app\.js\?v=play9jj1b/);
-  assert.match(html, /hand-fit\.css\?v=play9jj1b/);
-  assert.match(html, /table-landscape\.css\?v=play9jj1b/);
-  assert.match(html, /jj-table\.css\?v=play9jj1b/);
+test('play9match3 cache bust on CSS + app.js', () => {
+  assert.match(html, /app\.js\?v=play9match3/);
+  assert.match(html, /hand-fit\.css\?v=play9match3/);
+  assert.match(html, /table-landscape\.css\?v=play9match3/);
+  assert.match(html, /jj-table\.css\?v=play9match3/);
   assert.doesNotMatch(html, /\?v=play9v3h/);
   assert.doesNotMatch(html, /\?v=play9v3g/);
 });
 
-test('table-orient pins JJ zones absolute-to-stage (play9jj1b)', () => {
+test('table-orient pins JJ zones absolute-to-stage (play9match3)', () => {
   assert.match(orientSrc, /function pinJjZoneGeometry/);
   assert.match(orientSrc, /padding-bottom", "4px"/);
   assert.match(orientSrc, /clearPinnedJjZones/);
