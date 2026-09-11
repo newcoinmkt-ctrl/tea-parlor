@@ -12,13 +12,15 @@ const mjCss = readFileSync(path.join(root, '../src/jj-mahjong.css'), 'utf8');
 const appSrc = readFileSync(path.join(root, '../src/app.js'), 'utf8');
 const html = readFileSync(path.join(root, '../index.html'), 'utf8');
 
-test('play9ship1 cache bust on CSS + app.js', () => {
-  assert.match(html, /app\.js\?v=play9ship1/);
-  assert.match(html, /hand-fit\.css\?v=play9ship1/);
-  assert.match(html, /table-landscape\.css\?v=play9ship1/);
-  assert.match(html, /jj-table\.css\?v=play9ship1/);
-  assert.match(html, /jj-mahjong\.css\?v=play9ship1/);
+test('play9nn1 cache bust on CSS + app.js', () => {
+  assert.match(html, /app\.js\?v=play9nn1/);
+  assert.match(html, /hand-fit\.css\?v=play9nn1/);
+  assert.match(html, /table-landscape\.css\?v=play9nn1/);
+  assert.match(html, /jj-table\.css\?v=play9nn1/);
+  assert.match(html, /jj-mahjong\.css\?v=play9nn1/);
+  assert.match(html, /niuniu\.css\?v=play9nn1/);
   assert.doesNotMatch(html, /\?v=play9mj1/);
+  assert.doesNotMatch(html, /\?v=play9ship1/);
   assert.doesNotMatch(html, /\?v=play9v3h/);
 });
 
@@ -81,12 +83,15 @@ test('renderJjSettleHud present', () => {
   assert.match(appSrc, /jj-win-stamp/);
 });
 
-test('play9ship1 mahjong adaptive stage (no rotate)', () => {
+test('play9nn1 mahjong+niuniu adaptive stage (no rotate)', () => {
   assert.match(orientSrc, /isMjTableActive/);
+  assert.match(orientSrc, /isNnTableActive/);
+  assert.match(orientSrc, /table-stage-nn/);
   assert.match(orientSrc, /table-stage-mj/);
   assert.match(orientSrc, /multiGameView/);
   assert.match(orientSrc, /getStageTarget|getLetterboxTarget/);
-  assert.match(html, /jj-mahjong\.css\?v=play9ship1/);
+  assert.match(html, /jj-mahjong\.css\?v=play9nn1/);
+  assert.match(html, /niuniu\.css\?v=play9nn1/);
   assert.match(mjCss, /perspective\(/);
   assert.match(mjCss, /play9fix1 — portrait upright mahjong/);
   assert.doesNotMatch(mjCss, /transform:\s*rotate\(90deg\)/);

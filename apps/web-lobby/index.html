@@ -9,16 +9,17 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9ship1" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9ship1" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/niuniu.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9nn1" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9nn1" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -80,6 +81,7 @@
           <button class="mode-item" type="button" data-side-game="texas">德州扑克</button>
           <button class="mode-item" type="button" data-side-game="zhajinhua">炸金花</button>
           <button class="mode-item" type="button" data-side-game="mahjong">麻将</button>
+          <button class="mode-item" type="button" data-side-game="niuniu">牛牛</button>
           <button class="mode-item" type="button" data-side-game="guandan">掼蛋</button>
           <button class="mode-item" type="button" data-side-game="blackjack">二十一点</button>
           <button class="mode-item gold-rail" type="button" data-side-game="real">链游测试区</button>
@@ -121,6 +123,10 @@
               <button class="home-icon-btn" type="button" data-side-game="mahjong">
                 <img src="./public/assets/home/icon-mahjong.png" alt="" />
                 <strong>麻将</strong>
+              </button>
+              <button class="home-icon-btn" type="button" data-side-game="niuniu">
+                <img src="./public/assets/home/icon-niuniu.png?v=play9nn1" alt="" />
+                <strong>牛牛</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="texas">
                 <img src="./public/assets/home/icon-texas.png" alt="" />
@@ -292,6 +298,19 @@
               <span class="tile-copy">
                 <strong>麻将合集</strong>
                 <small>二人 · 血战 · 血流 · 自研</small>
+              </span>
+              <span class="tile-state local">人机</span>
+            </button>
+
+            <button class="game-tile game-tile-active" type="button" data-game="niuniu">
+              <span class="tile-art poker-art" aria-hidden="true">
+                <span class="chip chip-gold"></span>
+                <span class="card card-a">牛</span>
+                <span class="card card-k">牛</span>
+              </span>
+              <span class="tile-copy">
+                <strong>牛牛</strong>
+                <small>看牌抢庄 · 六人 · 人机</small>
               </span>
               <span class="tile-state local">人机</span>
             </button>
@@ -719,6 +738,49 @@
             </div>
           </section>
 
+
+          <section class="room-band" data-lobby-view="rooms" aria-label="牛牛场次" data-room-game="niuniu" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>牛牛</p>
+                <h1>选择场次</h1>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <p>看牌抢庄 · 六人 · 自研人机</p>
+                <h1>抢庄 / 下注 / 开牌</h1>
+              </div>
+              <div class="online-pill">影子积分</div>
+            </div>
+            <div class="room-grid">
+              <button class="room-card room-card-qq primary-room" type="button" data-game-room="niuniu" data-nn="novice">
+                <span class="room-stake-tl" aria-label="底分 5"><em>底分</em><b>5</b></span>
+                <strong class="room-name-center">新手场</strong>
+                <span class="room-meta">最低 200 金币 · 六人 AI</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="niuniu" data-nn="mid">
+                <span class="room-stake-tl" aria-label="底分 10"><em>底分</em><b>10</b></span>
+                <strong class="room-name-center">进阶场</strong>
+                <span class="room-meta">最低 400 金币</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="niuniu" data-nn="high">
+                <span class="room-stake-tl" aria-label="底分 20"><em>底分</em><b>20</b></span>
+                <strong class="room-name-center">高手场</strong>
+                <span class="room-meta">最低 800 金币</span>
+                <span class="room-action">进入</span>
+              </button>
+              <button class="room-card room-card-qq" type="button" data-game-room="niuniu" data-nn="top">
+                <span class="room-stake-tl" aria-label="底分 50"><em>底分</em><b>50</b></span>
+                <strong class="room-name-center">土豪场</strong>
+                <span class="room-meta">最低 2,000 金币</span>
+                <span class="room-action">进入</span>
+              </button>
+            </div>
+          </section>
           <section class="room-band" data-lobby-view="rooms" aria-label="炸金花场次" data-room-game="zhajinhua" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1825,6 +1887,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9ship1"></script>
+    <script type="module" src="./src/app.js?v=play9nn1"></script>
   </body>
 </html>

@@ -1,0 +1,349 @@
+/* play9nn1 — 牛牛 6-seat 看牌抢庄. Never rotate #multiGameView. */
+
+#multiGameView.nn-active,
+.multi-game-view.nn-active {
+  display: flex;
+  flex-direction: column;
+}
+
+.nn-active .mj-felt,
+.nn-active .mj-room-bg,
+.nn-active .mj-compass,
+.nn-active .mj-jj-topbar,
+.nn-active .mj-watermark,
+.nn-active .mj-jj-chat,
+.nn-active .mg-row-top,
+.nn-active .mg-row-hero,
+.nn-active .mg-center,
+.nn-active .mg-ad-bar,
+.nn-active .table-center-ad,
+.nn-active .mg-table-center-ad,
+.nn-active .mj-hu-settle,
+.nn-active .mj-dock {
+  display: none !important;
+}
+
+#nnLayout,
+.nn-layout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.nn-table-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.nn-felt {
+  position: absolute;
+  inset: 8px 8px 96px;
+  border-radius: 48% / 42%;
+  background:
+    radial-gradient(ellipse at 50% 45%, #1e6b45 0%, #0d3a28 62%, #082418 100%);
+  box-shadow: inset 0 0 0 6px #c9a227, inset 0 0 40px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.nn-center {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  text-align: center;
+  pointer-events: none;
+}
+
+.nn-pot-card {
+  min-width: 140px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(8, 28, 18, 0.55);
+  color: #f5f0e0;
+  border: 1px solid rgba(201, 162, 39, 0.45);
+}
+
+.nn-pot-label { font-size: 12px; opacity: 0.8; }
+.nn-banker-tag { font-weight: 700; margin: 4px 0; color: #ffe08a; }
+.nn-pot-action { font-size: 12px; opacity: 0.9; }
+
+.nn-seats { position: absolute; inset: 0; }
+
+.nn-seat {
+  position: absolute;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 6;
+}
+
+.nn-seat.is-banker { filter: drop-shadow(0 0 8px #ffe08a); }
+
+.nn-ava {
+  width: 52px;
+  height: 78px;
+  object-fit: contain;
+  object-position: top;
+  pointer-events: none;
+}
+
+.nn-seat-meta {
+  background: rgba(0, 0, 0, 0.55);
+  color: #f5f0e0;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.25;
+}
+.nn-seat-meta strong { display: block; font-size: 12px; }
+
+.nn-seat-cards {
+  display: flex;
+  gap: 2px;
+}
+
+.nn-card {
+  width: 28px;
+  height: 40px;
+  font-size: 11px;
+}
+
+.nn-active #mgHand .nn-card {
+  width: 54px;
+  height: 76px;
+  font-size: 16px;
+}
+
+.nn-stamp {
+  height: 42px;
+  width: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+.nn-stamp.is-sm { height: 28px; }
+
+.nn-zhuang {
+  position: absolute;
+  top: -4px;
+  right: 8px;
+  background: #c0392b;
+  color: #fff;
+  font-style: normal;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+.nn-self {
+  position: absolute;
+  left: 8px;
+  bottom: 118px;
+  z-index: 8;
+}
+
+.nn-self-meta {
+  background: rgba(0, 0, 0, 0.55);
+  color: #f5f0e0;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.nn-self-meta.is-banker { outline: 1px solid #ffe08a; }
+
+/* 抢庄/下注 bar: clean row on 414 — override global .qq-btn min-width/padding */
+.nn-active #mgActions,
+.nn-actions {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  row-gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px !important;
+  z-index: 220;
+  pointer-events: auto;
+  overflow: visible !important;
+}
+
+.nn-active #mgActions .nn-bei,
+.nn-actions .nn-bei,
+.nn-bei {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 76px !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 52px !important;
+  max-height: none !important;
+  padding: 4px 2px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  position: relative !important;
+  z-index: 1 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 0 #c96a0e,
+    0 4px 8px rgba(0, 0, 0, 0.22) !important;
+}
+
+.nn-bei img {
+  height: 24px !important;
+  width: auto !important;
+  max-width: calc(100% - 2px) !important;
+  object-fit: contain !important;
+  display: block !important;
+  pointer-events: none !important;
+  flex: 0 0 auto !important;
+}
+
+.nn-bei span,
+.nn-bei .nn-bei-label {
+  display: block !important;
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+/* Art assets already carry 不抢/×N倍 — drop duplicate caption to free height */
+.nn-bei img + .nn-bei-label {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Very narrow: allow 2 neat rows (3+2 / 2+3) without overlap */
+@media (max-width: 360px) {
+  .nn-active #mgActions,
+  .nn-actions {
+    flex-wrap: wrap !important;
+  }
+  .nn-active #mgActions .nn-bei,
+  .nn-actions .nn-bei,
+  .nn-bei {
+    flex: 1 1 calc(33.33% - 8px) !important;
+    max-width: calc(33.33% - 6px) !important;
+    min-height: 48px !important;
+  }
+}
+
+.nn-match {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 18, 12, 0.72);
+}
+.nn-match[hidden] { display: none !important; }
+.nn-match-card {
+  text-align: center;
+  color: #f5f0e0;
+  background: #123326;
+  border: 1px solid #c9a227;
+  border-radius: 16px;
+  padding: 28px 36px;
+}
+.nn-match-card h2 { margin: 8px 0 4px; font-size: 22px; }
+.nn-match-card p { margin: 0; opacity: 0.85; }
+.nn-match-dot {
+  width: 12px;
+  height: 12px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: #ffe08a;
+  animation: nn-pulse 0.9s ease-in-out infinite;
+}
+@keyframes nn-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.nn-floats { position: absolute; inset: 0; pointer-events: none; z-index: 12; }
+.nn-float {
+  position: absolute;
+  font-weight: 800;
+  font-size: 22px;
+  animation: nn-fly 1.8s ease-out forwards;
+}
+.nn-float.win { color: #ffd36a; }
+.nn-float.lose { color: #ff8a8a; }
+@keyframes nn-fly {
+  0% { opacity: 0; transform: translate(-50%, 8px); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -36px); }
+}
+
+/* Portrait upright: fill, tappable, no rotate */
+html.table-stage-upright #multiGameView.nn-active,
+#multiGameView.nn-active.table-stage-upright-target {
+  transform: none !important;
+}
+
+html.table-stage-land #multiGameView.nn-active .nn-felt {
+  inset: 6px 6px 88px;
+}
+
+@media (max-width: 520px) {
+  .nn-seat { width: 96px; }
+  .nn-ava { width: 40px; height: 60px; }
+  .nn-card { width: 22px; height: 32px; font-size: 9px; }
+  .nn-active #mgHand .nn-card { width: 44px; height: 62px; font-size: 14px; }
+}
+
+.nn-dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 8px;
+  pointer-events: auto;
+}
+.nn-hand {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  min-height: 72px;
+}
+.nn-actions .qq-btn { pointer-events: auto; }
+.nn-felt { inset: 8px 8px 148px; }
+html.table-stage-land #multiGameView.nn-active .nn-felt { inset: 6px 6px 128px; }
+
+/* Keep #mgActions (fallback) clear if ever used */
+.nn-active #mgActions .qq-btn.nn-bei {
+  pointer-events: auto !important;
+}

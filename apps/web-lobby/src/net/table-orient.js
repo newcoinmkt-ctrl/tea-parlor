@@ -42,9 +42,18 @@ function isMjTableActive() {
   return mg.classList.contains("mj-4p") || mg.classList.contains("mj-2p") || mg.dataset.game === "mahjong";
 }
 
+/** play9nn1: 牛牛 local vs-AI on #multiGameView — same adaptive stage, never rotate */
+function isNnTableActive() {
+  const shell = document.querySelector(".lobby-shell");
+  if (!shell?.classList.contains("multi-active")) return false;
+  const mg = document.getElementById("multiGameView");
+  if (!mg || mg.hidden) return false;
+  return mg.classList.contains("nn-active") || mg.dataset.game === "niuniu";
+}
+
 function getStageTarget() {
   if (isDdzTableActive()) return document.getElementById("tableView");
-  if (isMjTableActive()) return document.getElementById("multiGameView");
+  if (isMjTableActive() || isNnTableActive()) return document.getElementById("multiGameView");
   return null;
 }
 
@@ -229,7 +238,7 @@ function clearTableViewGeometry(tv) {
 function applyUprightFill(target, root, vw, vh, ddzWant) {
   const stageW = Math.round(vw);
   const stageH = Math.round(vh);
-  const kind = target?.id === "multiGameView" ? "mj" : "ddz";
+  const kind = target?.id === "multiGameView" ? (target.classList.contains("nn-active") || target.dataset.game === "niuniu" ? "nn" : "mj") : "ddz";
   const key = `upright-fill:${kind}:${stageW}x${stageH}`;
   if (key === lastStageKey && target.classList.contains("table-stage-upright-target")) {
     if (ddzWant) pinJjZoneGeometry(target);
@@ -271,7 +280,7 @@ function applyLandscapeLetterbox(target, root, vw, vh, ddzWant) {
     stageW = Math.round(stageH * (16 / 9));
   }
   const scale = Math.min(vw / stageW, vh / stageH);
-  const kind = target?.id === "multiGameView" ? "mj" : "ddz";
+  const kind = target?.id === "multiGameView" ? (target.classList.contains("nn-active") || target.dataset.game === "niuniu" ? "nn" : "mj") : "ddz";
   const key = `jj-land:${kind}:${stageW}x${stageH}@${scale.toFixed(4)}:${vw}x${vh}`;
   if (key === lastStageKey && target.classList.contains("table-stage-land-target")) {
     if (ddzWant) pinJjZoneGeometry(target);
@@ -323,7 +332,8 @@ export function syncTableStageLandscape() {
   const mg = document.getElementById("multiGameView");
   const ddzWant = isDdzTableActive() && isMobileish();
   const mjWant = isMjTableActive() && isMobileish();
-  const want = ddzWant || mjWant;
+  const nnWant = isNnTableActive() && isMobileish();
+  const want = ddzWant || mjWant || nnWant;
   const target = getStageTarget();
   const portrait = isPortraitViewport();
 
@@ -331,6 +341,8 @@ export function syncTableStageLandscape() {
   body?.classList.toggle("table-stage-jj", want);
   root.classList.toggle("table-stage-mj", mjWant);
   body?.classList.toggle("table-stage-mj", mjWant);
+  root.classList.toggle("table-stage-nn", nnWant);
+  body?.classList.toggle("table-stage-nn", nnWant);
 
   // Adaptive class pair — mutually exclusive
   root.classList.toggle("table-stage-land", want && !portrait);
@@ -338,20 +350,20 @@ export function syncTableStageLandscape() {
   root.classList.toggle("table-stage-upright", want && portrait);
   body?.classList.toggle("table-stage-upright", want && portrait);
 
-  const kind = mjWant ? "mj" : (ddzWant ? "ddz" : "off");
+  const kind = nnWant ? "nn" : (mjWant ? "mj" : (ddzWant ? "ddz" : "off"));
   const mode = want ? (portrait ? "upright" : "land") : "off";
   const kindMode = `${kind}:${mode}`;
   if (kindMode !== lastLetterboxKind) {
     if (kind !== "ddz" && tv) clearTableViewGeometry(tv);
-    if (kind !== "mj" && mg) clearMultiGeometry(mg);
+    if (kind !== "mj" && kind !== "nn" && mg) clearMultiGeometry(mg);
     // Mode flip on same game: drop opposite target class geometry
     if (kind === "ddz" && tv && mode === "upright") {
       tv.classList.remove("table-stage-land-target");
     } else if (kind === "ddz" && tv && mode === "land") {
       tv.classList.remove("table-stage-upright-target");
-    } else if (kind === "mj" && mg && mode === "upright") {
+    } else if ((kind === "mj" || kind === "nn") && mg && mode === "upright") {
       mg.classList.remove("table-stage-land-target");
-    } else if (kind === "mj" && mg && mode === "land") {
+    } else if ((kind === "mj" || kind === "nn") && mg && mode === "land") {
       mg.classList.remove("table-stage-upright-target");
     }
     lastLetterboxKind = kindMode;

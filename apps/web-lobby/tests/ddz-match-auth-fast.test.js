@@ -27,6 +27,6 @@ test('play9match3: syncMatchOverlay keeps silent 匹配中… only', () => {
   assert.doesNotMatch(slice, /copy\.textContent = [^;]*秒/);
 });
 
-test('play9ship1 cache stamp on app.js', () => {
-  assert.match(html, /app\.js\?v=play9ship1/);
+test('play9nn1 cache stamp on app.js', () => {
+  assert.match(html, /app\.js\?v=play9nn1/);
 });

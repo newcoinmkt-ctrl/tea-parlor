@@ -1,0 +1,157 @@
+{
+  "cache": "play9nn1",
+  "branch": "play9nn1",
+  "url": "http://127.0.0.1:5251/index.html?v=play9nn1",
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "fix": "抢庄栏 overlap on 414 — now single row, no overlap",
+  "qiang_bar": {
+    "count": 5,
+    "sameRow": true,
+    "boxes": [
+      {
+        "i": 0,
+        "label": "不抢",
+        "x": 21,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 89,
+        "btm": 876
+      },
+      {
+        "i": 1,
+        "label": "1倍",
+        "x": 97,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 165,
+        "btm": 876
+      },
+      {
+        "i": 2,
+        "label": "2倍",
+        "x": 173,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 241,
+        "btm": 876
+      },
+      {
+        "i": 3,
+        "label": "3倍",
+        "x": 249,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 317,
+        "btm": 876
+      },
+      {
+        "i": 4,
+        "label": "4倍",
+        "x": 325,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 393,
+        "btm": 876
+      }
+    ],
+    "gaps": [
+      8,
+      8,
+      8,
+      8
+    ],
+    "overlaps": []
+  },
+  "xia_bar": {
+    "count": 5,
+    "sameRow": true,
+    "boxes": [
+      {
+        "i": 0,
+        "label": "1倍",
+        "x": 21,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 89,
+        "btm": 876
+      },
+      {
+        "i": 1,
+        "label": "2倍",
+        "x": 97,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 165,
+        "btm": 876
+      },
+      {
+        "i": 2,
+        "label": "3倍",
+        "x": 173,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 241,
+        "btm": 876
+      },
+      {
+        "i": 3,
+        "label": "4倍",
+        "x": 249,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 317,
+        "btm": 876
+      },
+      {
+        "i": 4,
+        "label": "5倍",
+        "x": 325,
+        "y": 840,
+        "w": 68,
+        "h": 36,
+        "r": 393,
+        "btm": 876
+      }
+    ],
+    "gaps": [
+      8,
+      8,
+      8,
+      8
+    ],
+    "overlaps": []
+  },
+  "layout_fix": {
+    "qiang_count_5": true,
+    "qiang_same_row": true,
+    "qiang_no_overlap": true,
+    "qiang_gaps_ge_4": true,
+    "xia_no_overlap": true,
+    "xia_same_row": true,
+    "pass": true
+  },
+  "shots": [
+    "01-home.png",
+    "02-rooms.png",
+    "03-match.png",
+    "04-table.png",
+    "04b-qiang-bar.png",
+    "05-after-qiang.png",
+    "06-xia-bar.png",
+    "07-settle.png",
+    "08-landscape.png"
+  ],
+  "status": "layout_fix_qiang_bar; PR open, do not merge"
+}
