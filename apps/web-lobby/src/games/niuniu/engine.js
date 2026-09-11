@@ -162,7 +162,7 @@ export function niuName(point) {
 
 export function niuStampSrc(point) {
   const i = niuStampIndex(point);
-  return `./public/assets/niuniu/niu/niu${i}.png?v=play9nn1`;
+  return `./public/assets/niuniu/niu/niu${i}.png?v=play9nn1b`;
 }
 
 function sourceList(cards) {
@@ -669,17 +669,17 @@ export function createNiuniuTable(options = {}) {
           || state.phase === PHASE.xiazhu
           || cuo)) {
           holds = sd.holds.map(cloneCard);
-          if (!sd.hasKan && !cuo) {
+          // play9nn1b: keep 5th hole until 搓牌/开牌 so 搓 is tappable+visible
+          if (!sd.hasKan && !sd.hasLiang) {
             holds[holds.length - 1] = null;
-          } else if (cuo) {
-            // cuopai: own 5 known (source sends full holds to that user)
           }
         } else if (mine && cuo) {
           holds = sd.holds.map(cloneCard);
+          if (!sd.hasKan && !sd.hasLiang) holds[holds.length - 1] = null;
         } else {
           holds = sd.holds.map(() => null);
         }
-        const showNiu = revealAll || sd.hasLiang || (mine && (cuo || sd.hasKan));
+        const showNiu = revealAll || sd.hasLiang || (mine && (sd.hasKan || sd.hasLiang));
         return {
           seat: i,
           name: sd.name,

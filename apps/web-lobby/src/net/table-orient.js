@@ -42,7 +42,7 @@ function isMjTableActive() {
   return mg.classList.contains("mj-4p") || mg.classList.contains("mj-2p") || mg.dataset.game === "mahjong";
 }
 
-/** play9nn1: 牛牛 local vs-AI on #multiGameView — same adaptive stage, never rotate */
+/** play9nn1b: 牛牛 local vs-AI on #multiGameView — same adaptive stage, never rotate */
 function isNnTableActive() {
   const shell = document.querySelector(".lobby-shell");
   if (!shell?.classList.contains("multi-active")) return false;

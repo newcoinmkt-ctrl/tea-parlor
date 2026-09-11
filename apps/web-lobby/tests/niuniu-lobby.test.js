@@ -30,10 +30,10 @@ test('lobby grid lists 牛牛 beside DDZ/麻将 without breaking existing games'
   assert.doesNotMatch(html, /data-game-room="niuniu"[^>]*data-currency="crypto"/);
 });
 
-test('cache play9nn1 + niuniu.css', () => {
-  assert.match(html, /app\.js\?v=play9nn1/);
-  assert.match(html, /niuniu\.css\?v=play9nn1/);
-  assert.match(appSrc, /\?v=play9nn1/);
+test('cache play9nn1b + niuniu.css', () => {
+  assert.match(html, /app\.js\?v=play9nn1b/);
+  assert.match(html, /niuniu\.css\?v=play9nn1b/);
+  assert.match(appSrc, /\?v=play9nn1b/);
   assert.doesNotMatch(html, /\?v=play9ship1/);
 });
 
@@ -68,4 +68,20 @@ test('colyseus /health lists niuniu without requiring NnRoom', () => {
   assert.match(colyseus, /no NnRoom/);
   assert.match(colyseus, /gameServer\.define\('doudizhu'/);
   assert.doesNotMatch(colyseus, /define\('niuniu'/);
+});
+
+test('play9nn1b harden: nn kills landscape mg-table grid + footer; dock tappable', () => {
+  assert.match(css, /#multiGameView\.nn-active \.mg-table/);
+  assert.match(css, /grid-template-columns: none !important/);
+  assert.match(css, /\.nn-active \.mg-footer/);
+  assert.match(css, /pointer-events: none !important/);
+  assert.match(css, /#nnActions/);
+  assert.match(css, /touch-action: manipulation/);
+});
+
+test('play9nn1b: rooms claim copy + multi-only shell class', () => {
+  assert.match(appSrc, /gameType === 'niuniu'/);
+  assert.match(appSrc, /牛牛 · 看牌抢庄/);
+  assert.match(readFileSync(path.join(root, '../src/games/niuniu/ui.js'), 'utf8'), /classList\.add\('multi-active'\)/);
+  assert.match(readFileSync(path.join(root, '../src/games/niuniu/ui.js'), 'utf8'), /pointerup/);
 });

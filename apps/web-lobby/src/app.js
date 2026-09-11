@@ -40,11 +40,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9nn1';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9nn1';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9nn1';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9nn1';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9nn1';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9nn1b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9nn1b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9nn1b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9nn1b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9nn1b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -3410,6 +3410,7 @@ function setLobbyView(view = 'home', gameType = null) {
     else if (gameType === 'mahjong') nodes.claimStatus.textContent = '请选择麻将玩法：四人 / 二人 / 血战 / 血流';
     else if (gameType === 'guandan') nodes.claimStatus.textContent = '掼蛋 2v2 · 选场次开局（金币 / 链游）';
     else if (gameType === 'blackjack') nodes.claimStatus.textContent = '二十一点 · 标准规则 · 选场次开局（金币 / 链游）';
+    else if (gameType === 'niuniu') nodes.claimStatus.textContent = '牛牛 · 看牌抢庄 · 选场次开局（影子金币）';
     else if (gameType === 'real') nodes.claimStatus.textContent = `链游测试区：赛季积分 可入座 · 下方更多游戏快捷 · 演示账本`;
     else if (gameType === 'doudizhu') {
       renderDdzRooms(ddzVariant);
