@@ -158,25 +158,102 @@
 }
 .nn-self-meta.is-banker { outline: 1px solid #ffe08a; }
 
-.nn-active #mgActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
+/* 抢庄/下注 bar: clean row on 414 — override global .qq-btn min-width/padding */
+.nn-active #mgActions,
+.nn-actions {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  row-gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px !important;
   z-index: 220;
   pointer-events: auto;
+  overflow: visible !important;
 }
 
+.nn-active #mgActions .nn-bei,
+.nn-actions .nn-bei,
 .nn-bei {
-  min-width: 64px;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 76px !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 52px !important;
+  max-height: none !important;
+  padding: 4px 2px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  position: relative !important;
+  z-index: 1 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 0 #c96a0e,
+    0 4px 8px rgba(0, 0, 0, 0.22) !important;
 }
+
 .nn-bei img {
-  height: 28px;
-  width: auto;
+  height: 24px !important;
+  width: auto !important;
+  max-width: calc(100% - 2px) !important;
+  object-fit: contain !important;
+  display: block !important;
+  pointer-events: none !important;
+  flex: 0 0 auto !important;
+}
+
+.nn-bei span,
+.nn-bei .nn-bei-label {
+  display: block !important;
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+/* Art assets already carry 不抢/×N倍 — drop duplicate caption to free height */
+.nn-bei img + .nn-bei-label {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Very narrow: allow 2 neat rows (3+2 / 2+3) without overlap */
+@media (max-width: 360px) {
+  .nn-active #mgActions,
+  .nn-actions {
+    flex-wrap: wrap !important;
+  }
+  .nn-active #mgActions .nn-bei,
+  .nn-actions .nn-bei,
+  .nn-bei {
+    flex: 1 1 calc(33.33% - 8px) !important;
+    max-width: calc(33.33% - 6px) !important;
+    min-height: 48px !important;
+  }
 }
 
 .nn-match {
@@ -262,14 +339,11 @@ html.table-stage-land #multiGameView.nn-active .nn-felt {
   align-items: flex-end;
   min-height: 72px;
 }
-.nn-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  z-index: 220;
-  pointer-events: auto;
-}
 .nn-actions .qq-btn { pointer-events: auto; }
-.nn-felt { inset: 8px 8px 132px; }
-html.table-stage-land #multiGameView.nn-active .nn-felt { inset: 6px 6px 120px; }
+.nn-felt { inset: 8px 8px 148px; }
+html.table-stage-land #multiGameView.nn-active .nn-felt { inset: 6px 6px 128px; }
+
+/* Keep #mgActions (fallback) clear if ever used */
+.nn-active #mgActions .qq-btn.nn-bei {
+  pointer-events: auto !important;
+}

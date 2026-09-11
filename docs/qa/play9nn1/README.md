@@ -38,3 +38,10 @@ Manual:
 2. 大厅 牛牛 → 新手场 → 「匹配中」→ deal 5 → 抢庄 → 下注 → 开牌 see niu stamp → settle +/-
 3. Portrait upright + landscape letterbox; no page rotate90
 4. DDZ play + MJ enter still load
+
+## Layout fix (PR #42 follow-up)
+- FAIL was 抢庄栏「4倍」overlapping「不抢」 on 414 portrait (global `.qq-btn` min-width/padding + wide beishu art → wrap/overlap).
+- Fix: `#nnActions` / `.nn-bei` forced single horizontal row (`flex-wrap: nowrap`, `flex: 1 1 0`, capped width, override padding/min-width). Same pattern for 下注 1–5倍.
+- Uniform `bei1–4` + `buqiang` assets; duplicate caption under art hidden (aria-label kept).
+- QA: `04-table.png`, `04b-qiang-bar.png`, `06-xia-bar.png` @ 414×896. Gaps 8px, no overlap.
+- Cache stays `?v=play9nn1`.

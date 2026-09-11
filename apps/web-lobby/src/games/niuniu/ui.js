@@ -25,12 +25,13 @@ const SEAT_IMGS = [
   './public/characters/f-ea-gold-dress.png?v=play9nn1',
 ];
 
+/* Uniform 110x50 ovals so 5-up row sizes evenly on 414 */
 const BEI_SRC = {
   0: './public/assets/niuniu/beishu/buqiang.png?v=play9nn1',
-  1: './public/assets/niuniu/beishu/Yibei_But.png?v=play9nn1',
-  2: './public/assets/niuniu/beishu/Linbei_but.png?v=play9nn1',
-  3: './public/assets/niuniu/beishu/Sanbei_but.png?v=play9nn1',
-  4: './public/assets/niuniu/beishu/Sibei_But.png?v=play9nn1',
+  1: './public/assets/niuniu/beishu/bei1.png?v=play9nn1',
+  2: './public/assets/niuniu/beishu/bei2.png?v=play9nn1',
+  3: './public/assets/niuniu/beishu/bei3.png?v=play9nn1',
+  4: './public/assets/niuniu/beishu/bei4.png?v=play9nn1',
 };
 
 let _instance = null;
@@ -519,11 +520,11 @@ export function createNiuniuUI(options = {}) {
       el.actions.innerHTML = QIANG_OPTIONS.map((v) => {
         const label = v === 0 ? '不抢' : `${v}倍`;
         const img = BEI_SRC[v] ? `<img src="${BEI_SRC[v]}" alt="" />` : '';
-        return `<button type="button" class="qq-btn qq-btn-gold nn-bei" data-nn-act="qiang" data-v="${v}">${img}<span>${label}</span></button>`;
+        return `<button type="button" class="qq-btn qq-btn-gold nn-bei" data-nn-act="qiang" data-v="${v}" aria-label="${label}">${img}<span class="nn-bei-label">${label}</span></button>`;
       }).join('');
     } else if (snap.phase === PHASE.xiazhu && snap.button !== 0 && !me.hasXia) {
       el.actions.innerHTML = XIA_OPTIONS.map((v) => (
-        `<button type="button" class="qq-btn qq-btn-gold nn-bei" data-nn-act="xia" data-v="${v}">${v}倍</button>`
+        `<button type="button" class="qq-btn qq-btn-gold nn-bei" data-nn-act="xia" data-v="${v}" aria-label="${v}倍"><span class="nn-bei-label">${v}倍</span></button>`
       )).join('');
     } else if (snap.phase === PHASE.cuopai && !me.hasLiang) {
       el.actions.innerHTML =
