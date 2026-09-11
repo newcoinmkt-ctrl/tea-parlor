@@ -29,6 +29,11 @@ test('lobby first screen contains real game lobby content', () => {
   assert.match(html, /data-side-game="mahjong"/);
   assert.match(html, /data-side-game="guandan"/);
   assert.match(html, /data-side-game="blackjack"/);
+  assert.match(html, /data-side-game="niuniu"/);
+  assert.match(html, /牛牛/);
+  assert.match(html, /data-room-game="niuniu"/);
+  assert.match(html, /data-game-room="niuniu"/);
+  assert.match(html, /data-game="niuniu"/);
   assert.match(html, /二十一点/);
   assert.match(html, /data-room-game="blackjack"/);
   assert.match(html, /data-game-room="blackjack"/);

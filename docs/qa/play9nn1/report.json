@@ -1,0 +1,37 @@
+{
+  "cache": "play9nn1",
+  "base": "687490e",
+  "branch": "play9nn1",
+  "url": "http://127.0.0.1:5251/index.html?v=play9nn1",
+  "scope": {
+    "in": ["niuniu 看牌抢庄 local vs-AI", "6-seat multiGameView", "wd_nn calculate/typeResult/compare", "niu0-17 stamps", "match overlay 匹配中 ≤3s", "colyseus health lists niuniu", "cache bust play9nn1"],
+    "out": ["NnRoom / Colyseus authoritative nn", "Cocos runtime", "轮庄 mode", "chain/USDT tables", "two TG same table"]
+  },
+  "code_assertions": {
+    "encoding": "source \"\"+rank+suit rank1-13 suit1-4; tea {rank,suit0-3}",
+    "typeResult": "7-8x2 9x3 10x4 >10x5 else x1",
+    "compare_quirk": "point==13||15 not bomb 16",
+    "lunzhuang": "not shipped; 看牌抢庄 only",
+    "no_rotate90": "table-orient does not setProperty rotate(",
+    "matchMs": 3000,
+    "seats": 6
+  },
+  "unit_tests": [
+    "apps/web-lobby/tests/niuniu-engine.test.js",
+    "apps/web-lobby/tests/niuniu-lobby.test.js",
+    "apps/web-lobby/tests/table-orient-upright.test.js"
+  ],
+  "manual_self_test": [
+    "Serve apps/web-lobby; open ?v=play9nn1",
+    "大厅 牛牛 → enter → 匹配中 → deal 5 → 抢庄 → 下注 → 开牌 niu stamp → settle +/-",
+    "Portrait upright + landscape letterbox; no rotate90",
+    "DDZ play + MJ enter still load"
+  ],
+  "colyseus": {
+    "health_games": ["doudizhu", "niuniu"],
+    "nn_room": false,
+    "matchMs": 3000,
+    "note": "listing only for dual-deploy; scoring lives in web-lobby engine.js"
+  },
+  "status": "code_assertions_ready; PR open, do not merge until product nod"
+}

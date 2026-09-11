@@ -36,14 +36,15 @@ import { createTexasUI } from './texas/ui.js';
 import { createMahjongUI } from './games/mahjong/ui.js';
 import { createZhajinhuaUI } from './games/zhajinhua/ui.js';
 import { createBlackjackUI } from './games/blackjack/ui.js';
+import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ship1';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ship1';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ship1';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ship1';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9ship1';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9nn1';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9nn1';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9nn1';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9nn1';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9nn1';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -497,7 +498,7 @@ let texasUI = null;
 let texasBuyIn = 0;
 let multiUI = null; // zhajinhua | mahjong | guandan
 let multiBuyIn = 0;
-let activeGame = null; // 'doudizhu' | 'texas' | 'zhajinhua' | 'mahjong' | 'guandan'
+let activeGame = null; // 'doudizhu' | 'texas' | 'zhajinhua' | 'mahjong' | 'guandan' | 'blackjack' | 'niuniu'
 let lobbyView = 'home';
 let recordFilter = 'all';
 /** 'local' 前端人机 | 'colyseus' 推荐联网 | 'pinus' 兼容联网 */
@@ -552,6 +553,15 @@ const BLACKJACK_TABLES = {
   c_mid: { label: '二十一点·链游进阶', minBet: 2, maxBet: 50, chips: 60, minEntry: 20, currency: 'crypto' },
   c_high: { label: '二十一点·链游高手', minBet: 5, maxBet: 100, chips: 150, minEntry: 40, currency: 'crypto' },
 };
+
+
+const NIUNIU_TABLES = {
+  novice: { label: '牛牛·新手', difen: 5, chips: 2000, minEntry: 200, currency: 'ingot' },
+  mid: { label: '牛牛·进阶', difen: 10, chips: 4000, minEntry: 400, currency: 'ingot' },
+  high: { label: '牛牛·高手', difen: 20, chips: 8000, minEntry: 800, currency: 'ingot' },
+  top: { label: '牛牛·土豪', difen: 50, chips: 20000, minEntry: 2000, currency: 'ingot' },
+};
+
 
 // 链游德州：buyIn 用 赛季积分
 TEXAS_TABLES.c_micro = { label: '链游·微盲', sb: 0.5, bb: 1, buyIn: 10, minEntry: 10, currency: 'crypto' };
@@ -693,6 +703,7 @@ async function boot() {
       startZhajinhua,
       startMahjong,
       startBlackjack,
+      startNiuniu,
       leaveMulti: leaveMultiTable,
       lobby: setLobbyView,
       brand: ACTIVE_BRAND,
@@ -2337,7 +2348,9 @@ function forceCloseMultiView() {
     if (settle) { settle.hidden = true; settle.setAttribute('hidden', ''); }
     mg.hidden = true;
     mg.setAttribute('hidden', '');
-    mg.classList.remove('zjh-active', 'gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p');
+    mg.classList.remove('zjh-active', 'bj-active', 'nn-active', 'gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p');
+    const nnLay = mg.querySelector('#nnLayout');
+    if (nnLay) { nnLay.hidden = true; nnLay.style.display = 'none'; }
     delete mg.dataset.game;
     mg.style.display = 'none';
     mg.style.pointerEvents = 'none';
@@ -2600,6 +2613,60 @@ function startBlackjack(tableKey = 'novice', options = {}) {
     resetAllCharActions();
     [0, 1, 2, 3, 4, 5, 6].forEach((s) => playCharAction(s, 'deal', { holdMs: 700 }));
   } catch (_) { /* ignore */ }
+}
+
+function startNiuniu(tableKey = 'novice', options = {}) {
+  if (!assertCanEnter(options.currency === 'crypto' ? 'real' : 'niuniu')) return;
+  const t = NIUNIU_TABLES[tableKey] || NIUNIU_TABLES.novice;
+  const currency = options.currency || t.currency || 'ingot';
+  if (getBal(currency) < t.minEntry) {
+    if (nodes.claimStatus) nodes.claimStatus.textContent = needEntryMsg(t.label, t.minEntry, currency);
+    if (currency === 'crypto') setLobbyView('recharge');
+    return;
+  }
+  prepareMultiTable();
+  buryDdzLayer();
+  hideTableActionBars();
+  activeGame = 'niuniu';
+  multiBuyIn = t.minEntry;
+  window.__multiCurrency = currency;
+
+  multiUI = createNiuniuUI({
+    getStake: () => ({
+      difen: t.difen,
+      chips: t.chips || t.minEntry,
+      minEntry: t.minEntry,
+      label: t.label,
+    }),
+    onExit: () => {
+      leaveMultiTable();
+      setLobbyView('rooms', 'niuniu');
+      if (nodes.claimStatus) nodes.claimStatus.textContent = '已离开牛牛桌';
+    },
+    onSettle: ({ deltas, winner, roomLabel }) => {
+      const delta = Array.isArray(deltas) ? (deltas[0] || 0) : 0;
+      applyResultWithRevenue({
+        currency,
+        resultDelta: delta,
+        baseScore: t.difen || t.minEntry || 0,
+        game: 'niuniu',
+        roomName: roomLabel || t.label,
+      });
+      appState.records.unshift({
+        roomName: roomLabel || t.label,
+        result: (deltas?.[0] || 0) > 0 ? '胜' : (deltas?.[0] || 0) < 0 ? '负' : '平',
+        score: delta,
+        at: new Date().toISOString(),
+        game: 'niuniu',
+        currency,
+      });
+      appState.records = appState.records.slice(0, 50);
+      saveState();
+      renderAccount();
+    },
+  });
+  multiUI.start();
+  buryDdzLayer();
 }
 
 async function startGuanDan(tableKey = 'novice', options = {}) {
@@ -2897,6 +2964,7 @@ function bindUi() {
       else if (g === 'mahjong') setLobbyView('rooms', 'mahjong');
       else if (g === 'guandan') setLobbyView('rooms', 'guandan');
       else if (g === 'blackjack') setLobbyView('rooms', 'blackjack');
+      else if (g === 'niuniu') setLobbyView('rooms', 'niuniu');
       return;
     }
 
@@ -2941,6 +3009,13 @@ function bindUi() {
         const t = BLACKJACK_TABLES[key];
         if (t?.currency) currency = t.currency;
         startBlackjack(key, { currency });
+        return;
+      }
+      if (g === 'niuniu') {
+        const key = roomCard.getAttribute('data-nn') || 'novice';
+        const t = NIUNIU_TABLES[key];
+        if (t?.currency) currency = t.currency;
+        startNiuniu(key, { currency });
         return;
       }
       const roomId = roomCard.getAttribute('data-room') || 'novice';
