@@ -1193,3 +1193,141 @@ html.table-stage-jj #tableView.harbor-table.table-stage-land-target .full-body-c
   max-width: 64px !important;
   max-height: 96px !important;
 }
+
+/* ===== play9fix1 — portrait upright fill (usable taps, NOT tiny letterbox strip) =====
+ * Strategy: landscape → table-stage-land-target letterbox; portrait → table-stage-upright-target fill.
+ * Keep jj1b zone lock semantics (absolute-to-stage, no vw, no safe-area pad drift).
+ */
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target,
+html.table-stage-upright #tableView.harbor-table.table-stage-upright-target {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  /* transform:none set inline — never rotate, never scale-down strip */
+}
+
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot,
+html.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  z-index: 20 !important;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  pointer-events: none !important;
+}
+
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot .hand-wrap,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot .hand-area,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot .playing-card,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot .qq-center-actions,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot .qq-btn {
+  pointer-events: auto !important;
+}
+
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot > .hand-wrap {
+  order: 3 !important;
+  width: 100% !important;
+  padding-left: 64px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+}
+
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #handArea {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: flex-end !important;
+  min-height: 110px !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  width: 100% !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Portrait cards must stay finger-sized (FAIL was ~19×28 under scale 0.46) */
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #handArea .playing-card {
+  margin-left: -22px !important;
+  width: 52px !important;
+  height: 74px !important;
+  min-width: 52px !important;
+  min-height: 74px !important;
+  flex: 0 0 auto !important;
+  z-index: 1 !important;
+}
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #handArea .playing-card:first-child {
+  margin-left: 0 !important;
+}
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #handArea .playing-card.selected,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #handArea .playing-card.is-selected,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #handArea .playing-card[aria-pressed="true"] {
+  transform: translateY(-22px) !important;
+  margin-top: -22px !important;
+  z-index: 5 !important;
+}
+
+/* Action bar above hand — must outrank raised cards */
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot > .qq-center-actions,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .self-slot > .action-panel {
+  order: 2 !important;
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  margin: 0 0 6px !important;
+  padding-left: 64px !important;
+  z-index: 230 !important;
+  pointer-events: none !important;
+}
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #playControls:not([hidden]),
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #bidControls:not([hidden]),
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #doubleControls:not([hidden]) {
+  display: flex !important;
+  flex-direction: row !important;
+  pointer-events: auto !important;
+  z-index: 220 !important;
+  transform: none !important;
+}
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #playControls .qq-btn,
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target #playControls #playButton {
+  min-width: 72px !important;
+  min-height: 40px !important;
+  z-index: 221 !important;
+  pointer-events: auto !important;
+}
+
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .qq-bottom-bar {
+  position: absolute !important;
+  left: 6px !important;
+  bottom: 8px !important;
+  width: 56px !important;
+  height: 78px !important;
+  z-index: 18 !important;
+  pointer-events: none !important;
+}
+
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .side-slot.left-slot {
+  position: absolute !important;
+  top: 14% !important;
+  left: 2% !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+html.table-stage-jj.table-stage-upright #tableView.harbor-table.table-stage-upright-target .side-slot.right-slot {
+  position: absolute !important;
+  top: 14% !important;
+  right: 2% !important;
+  left: auto !important;
+  bottom: auto !important;
+}
+
+/* Grey illegal 出牌 still visible */
+html.table-stage-jj #tableView #playButton:disabled,
+html.table-stage-jj #tableView #playButton[aria-disabled="true"] {
+  opacity: 0.45 !important;
+  filter: grayscale(0.35) !important;
+}

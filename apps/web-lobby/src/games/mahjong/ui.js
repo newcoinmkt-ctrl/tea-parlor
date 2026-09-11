@@ -152,7 +152,8 @@ export function createMahjongUI(options = {}) {
     if (topbar) topbar.style.display = 'none';
     hideHuSettle();
     resetJjHud(playerCount);
-    // Trigger landscape letterbox stage (table-orient observes class mutations)
+    // play9fix1: one coalesced stage sync (land letterbox OR portrait upright).
+    // Avoid expand storms — table-orient gates TG expand per session.
     try { window.dispatchEvent(new Event('resize')); } catch (_) { /* ignore */ }
   }
 

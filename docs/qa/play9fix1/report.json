@@ -1,0 +1,250 @@
+{
+  "cache": "play9fix1",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5251/index.html?v=play9fix1",
+  "strategy": {
+    "landscape": "JJ letterbox translate+scale landscape stage (jj1b zone lock)",
+    "portrait": "upright full-viewport fill — NOT tiny letterbox strip",
+    "forbidden": "page/tableView/multiGameView rotate(90deg)"
+  },
+  "ed_repro": {
+    "path": "大厅→人机畅玩/斗地主出牌; 大厅→麻将→四人麻将进桌发牌弃牌; 竖屏414与横屏896均可玩",
+    "cache": "?v=play9fix1",
+    "fail_on": "select→play broken; MJ cannot enter; portrait tiny untappable strip; rotate90"
+  },
+  "shots": {
+    "lobby-896-home.png": {
+      "bytes": 248413,
+      "sha1": "35e32427ccd4"
+    },
+    "ddz-896-illegal-play-disabled.png": {
+      "bytes": 293433,
+      "sha1": "71288ccfe463"
+    },
+    "ddz-896-touch-selected.png": {
+      "bytes": 302228,
+      "sha1": "c56696dd1791"
+    },
+    "ddz-896-after-legal-play.png": {
+      "bytes": 279752,
+      "sha1": "05daeb2868c9"
+    },
+    "ddz-896-landscape-zones.png": {
+      "bytes": 279533,
+      "sha1": "accdd744fa5f"
+    },
+    "mj-896-table-zones.png": {
+      "bytes": 581111,
+      "sha1": "a3b43539078e"
+    },
+    "mj-896-after-discard.png": {
+      "bytes": 594753,
+      "sha1": "2b6ce6e9b5dd"
+    },
+    "ddz-414-portrait-upright.png": {
+      "bytes": 570766,
+      "sha1": "8e31240658a4"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 560642,
+      "sha1": "56ba49a76101"
+    },
+    "mj-414-portrait-upright.png": {
+      "bytes": 768464,
+      "sha1": "3eb3e0efa5be"
+    },
+    "mj-414-after-discard.png": {
+      "bytes": 771309,
+      "sha1": "7161e0955386"
+    }
+  },
+  "checks": {
+    "ddz_land_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "ddz_hand_before": 17,
+    "ddz_illegal_empty": {
+      "disabled": true,
+      "aria": "true",
+      "selected": []
+    },
+    "ddz_touch_select": {
+      "selected": [
+        "17_4_53"
+      ],
+      "selectedDom": 1,
+      "playDisabled": false,
+      "raisedTop": 318
+    },
+    "ddz_action_bar_hit": {
+      "hitId": "playButton",
+      "hitCls": "qq-btn qq-btn-play is-recommended",
+      "playZ": "221",
+      "playRect": {
+        "w": 80,
+        "h": 34
+      }
+    },
+    "ddz_after_play": {
+      "handN": 16,
+      "selected": []
+    },
+    "mj_land_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "mj_hand_after_deal": 13,
+    "mj_discard": {
+      "before": 1,
+      "disc": 2,
+      "hand": 14
+    },
+    "ddz_port_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "ddz_port_sizes": {
+      "card": {
+        "w": 48,
+        "h": 64
+      },
+      "play": {
+        "w": 80,
+        "h": 40,
+        "t": 738
+      },
+      "tvH": 896
+    },
+    "ddz_port_play": {
+      "before": 17,
+      "after": 16
+    },
+    "mj_port_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "mj_port_hand": 14,
+    "mj_port_tile": {
+      "w": 36,
+      "h": 52
+    }
+  },
+  "pass": {
+    "ddz_land_select_play": true,
+    "ddz_17_to_16": true,
+    "ddz_illegal_grey": true,
+    "ddz_land_no_rotate": true,
+    "mj_land_enter_deal": true,
+    "mj_land_discard": true,
+    "ddz_port_usable": true,
+    "ddz_port_play": true,
+    "ddz_port_no_rotate": true,
+    "mj_port_enter_deal": true,
+    "mj_port_usable": true,
+    "mj_port_no_rotate": true,
+    "no_rotate_90": true
+  },
+  "ok": true,
+  "root_causes": [
+    "Portrait letterbox of landscape stage scaled cards to ~19px (untappable) — switch to upright fill when H>W",
+    "TG expand on every viewportChanged froze MJ enter — rate-limit expand + once-per-session gate",
+    "Kept jj1b zone lock on landscape letterbox; action bar z≥220; touch≠mousedown double-toggle guard",
+    "Adaptive: land→letterbox translate+scale; portrait→transform:none full viewport; never rotate90"
+  ],
+  "files_changed": [
+    "apps/web-lobby/src/net/table-orient.js",
+    "apps/web-lobby/src/jj-table.css",
+    "apps/web-lobby/src/jj-mahjong.css",
+    "apps/web-lobby/src/app.js",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/tests/table-orient-upright.test.js",
+    "apps/web-lobby/src/games/mahjong/ui.js",
+    "docs/qa/play9fix1/"
+  ],
+  "page_errors": [],
+  "self_test": {
+    "url": "http://127.0.0.1:5251/index.html?v=play9fix1",
+    "steps": [
+      "Landscape 896: local-doudizhu → force play → touch select → 出牌 → 17→16",
+      "Portrait 414: same; cards ≥52×74, stage full height",
+      "大厅→麻将→四人麻将 → deal ≥13 → discard",
+      "Both orients: no rotate90"
+    ]
+  }
+}

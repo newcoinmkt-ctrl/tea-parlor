@@ -39,11 +39,11 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3g';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3g';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9v3g';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9v3g';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9match3';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fix1';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fix1';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fix1';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fix1';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9fix1';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -2711,8 +2711,22 @@ function bindUi() {
     e.preventDefault();
     onHint();
   });
+    let lastTouchPlayAt = 0;
   nodes.playButton?.addEventListener('click', (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    // Ignore compat click after touch pointerup already played
+    if (Date.now() - lastTouchPlayAt < 700) return;
+    onPlay();
+  });
+  // play9fix1: TG/WebView sometimes drops click under transform; pointerup recovers once
+  nodes.playButton?.addEventListener('pointerup', (e) => {
+    if (e.pointerType !== 'touch') return;
+    if (!nodes.playButton || nodes.playButton.disabled || nodes.playButton.hidden) return;
+    if (nodes.playControls?.hidden) return;
+    e.preventDefault();
+    e.stopPropagation();
+    lastTouchPlayAt = Date.now();
     onPlay();
   });
   nodes.passButton?.addEventListener('click', (e) => {
@@ -5458,10 +5472,12 @@ function syncP0Tabbar() {
     if (!el) return;
     const open = playing || tableOpen;
     if (open && !el.hidden && el.getAttribute('hidden') == null) {
-      const staged = el.id === 'tableView' && (
+      const staged = (el.id === 'tableView' || el.id === 'multiGameView') && (
         document.documentElement.classList.contains('table-stage-upright')
         || document.documentElement.classList.contains('table-stage-land')
         || document.documentElement.classList.contains('table-stage-jj')
+        || el.classList.contains('table-stage-land-target')
+        || el.classList.contains('table-stage-upright-target')
       );
       if (!staged) {
         el.style.setProperty('position', 'fixed', 'important');
@@ -5483,10 +5499,13 @@ function syncP0Tabbar() {
           slot.style.setProperty('top', 'auto', 'important');
           slot.style.setProperty('width', '100%', 'important');
           slot.style.setProperty('z-index', '20', 'important');
-          // play9jj1b: no safe-area pad — stage letterbox already cleared chrome
+          // play9jj1b/fix1: stage already clears chrome (letterbox or upright)
           slot.style.setProperty('padding-bottom', '4px', 'important');
         }
-        // Re-assert landscape letterbox stage (never rotates) + pin JJ zones
+        // Re-assert adaptive stage (land letterbox OR portrait upright) + pin JJ zones
+        try { syncTableStageLandscape(); } catch (_) {}
+      }
+      if (el.id === 'multiGameView' && !el.hidden) {
         try { syncTableStageLandscape(); } catch (_) {}
       }
     } else if (!open) {
