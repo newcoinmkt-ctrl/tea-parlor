@@ -43,7 +43,7 @@ import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9v3g';
 import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9v3g';
 import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9v3g';
 import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9v3g';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9v3g';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9jj1b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -5460,9 +5460,11 @@ function syncP0Tabbar() {
           slot.style.setProperty('bottom', '0', 'important');
           slot.style.setProperty('top', 'auto', 'important');
           slot.style.setProperty('width', '100%', 'important');
-          slot.style.setProperty('z-index', '12', 'important');
+          slot.style.setProperty('z-index', '20', 'important');
+          // play9jj1b: no safe-area pad — stage letterbox already cleared chrome
+          slot.style.setProperty('padding-bottom', '4px', 'important');
         }
-        // Re-assert upright letterbox stage (never rotates)
+        // Re-assert landscape letterbox stage (never rotates) + pin JJ zones
         try { syncTableStageLandscape(); } catch (_) {}
       }
     } else if (!open) {

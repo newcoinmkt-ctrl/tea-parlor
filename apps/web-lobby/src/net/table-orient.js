@@ -1,7 +1,8 @@
 /** Table viewport: Telegram.WebApp.viewportStableHeight, never 100vh, never whole-page CSS-rotate.
- *  play9jj1: landscape coordinate stage (width > height), letterbox center-scale into the
+ *  play9jj1/jj1b: landscape coordinate stage (width > height), letterbox center-scale into the
  *  Mini App viewport. NEVER rotate #tableView / content (play9v3g FAIL).
  *  Text/cards/buttons stay upright relative to the stage; Ed holds phone landscape to align.
+ *  play9jj1b: pin self-slot/felt/avatar absolute-to-stage on every sync (beat position:fixed drift).
  */
 
 /** Extra bottom clearance so hand/bid sit above TG chat bar + leftover Bot reply keyboard. */
@@ -88,8 +89,92 @@ export function expandTelegramTable() {
   syncViewportHeight();
 }
 
+function clearPinnedJjZones(tv) {
+  if (!tv) return;
+  const slot = tv.querySelector(".self-slot");
+  if (slot) {
+    ["position", "top", "left", "right", "bottom", "width", "height", "z-index", "padding", "padding-bottom", "inset"].forEach((k) => {
+      slot.style.removeProperty(k);
+    });
+  }
+  const bar = tv.querySelector(".qq-bottom-bar");
+  if (bar) {
+    ["position", "top", "left", "right", "bottom", "width", "height", "z-index", "inset", "padding"].forEach((k) => {
+      bar.style.removeProperty(k);
+    });
+  }
+  const felt = tv.querySelector(".ddz-table.qq-felt, .ddz-table");
+  if (felt) {
+    ["position", "top", "left", "right", "bottom", "width", "height", "inset", "display"].forEach((k) => {
+      felt.style.removeProperty(k);
+    });
+  }
+  tv.querySelectorAll(".side-slot.left-slot, .side-slot.right-slot").forEach((el) => {
+    ["position", "top", "left", "right", "bottom", "inset"].forEach((k) => el.style.removeProperty(k));
+  });
+}
+
+/** Pin HUD children absolute-to-stage so table-play position:fixed + safe-area cannot drift. */
+function pinJjZoneGeometry(tv) {
+  if (!tv) return;
+  const felt = tv.querySelector(".ddz-table.qq-felt, .ddz-table");
+  if (felt) {
+    felt.style.setProperty("position", "absolute", "important");
+    felt.style.setProperty("inset", "0", "important");
+    felt.style.setProperty("top", "0", "important");
+    felt.style.setProperty("left", "0", "important");
+    felt.style.setProperty("right", "0", "important");
+    felt.style.setProperty("bottom", "0", "important");
+    felt.style.setProperty("width", "100%", "important");
+    felt.style.setProperty("height", "100%", "important");
+    felt.style.setProperty("display", "block", "important");
+  }
+  const slot = tv.querySelector(".self-slot");
+  if (slot) {
+    slot.style.setProperty("position", "absolute", "important");
+    slot.style.setProperty("left", "0", "important");
+    slot.style.setProperty("right", "0", "important");
+    slot.style.setProperty("bottom", "0", "important");
+    slot.style.setProperty("top", "auto", "important");
+    slot.style.setProperty("width", "100%", "important");
+    slot.style.setProperty("z-index", "20", "important");
+    // No safe-area pad — letterbox stage already clears TG chrome
+    slot.style.setProperty("padding-bottom", "4px", "important");
+  }
+  const bar = tv.querySelector(".qq-bottom-bar");
+  if (bar) {
+    bar.style.setProperty("position", "absolute", "important");
+    bar.style.setProperty("left", "8px", "important");
+    bar.style.setProperty("bottom", "6px", "important");
+    bar.style.setProperty("top", "auto", "important");
+    bar.style.setProperty("right", "auto", "important");
+    bar.style.setProperty("width", "68px", "important");
+    bar.style.setProperty("height", "92px", "important");
+    bar.style.setProperty("z-index", "18", "important");
+  }
+  const left = tv.querySelector(".side-slot.left-slot");
+  if (left) {
+    left.style.setProperty("position", "absolute", "important");
+    left.style.setProperty("top", "16%", "important");
+    left.style.setProperty("left", "1.2%", "important");
+    left.style.setProperty("right", "auto", "important");
+    left.style.setProperty("bottom", "auto", "important");
+    left.style.removeProperty("inset");
+  }
+  const right = tv.querySelector(".side-slot.right-slot");
+  if (right) {
+    right.style.setProperty("position", "absolute", "important");
+    right.style.setProperty("top", "16%", "important");
+    right.style.setProperty("right", "1.2%", "important");
+    right.style.setProperty("left", "auto", "important");
+    right.style.setProperty("bottom", "auto", "important");
+    right.style.removeProperty("inset");
+  }
+}
+
 function clearTableViewGeometry(tv) {
   if (!tv) return;
+  clearPinnedJjZones(tv);
   tv.classList.remove("table-stage-land-target", "table-stage-upright-target");
   [
     "position", "top", "left", "right", "bottom", "width", "height",
@@ -148,6 +233,7 @@ export function syncTableStageLandscape() {
   const scale = Math.min(vw / stageW, vh / stageH);
   const key = `jj-land:${stageW}x${stageH}@${scale.toFixed(4)}:${vw}x${vh}`;
   if (key === lastStageKey && tv.classList.contains("table-stage-land-target")) {
+    pinJjZoneGeometry(tv);
     return true;
   }
   lastStageKey = key;
@@ -179,6 +265,7 @@ export function syncTableStageLandscape() {
   tv.style.setProperty("transform-origin", "center center", "important");
   tv.style.setProperty("z-index", "400", "important");
   tv.style.setProperty("overflow", "hidden", "important");
+  pinJjZoneGeometry(tv);
   return true;
 }
 
