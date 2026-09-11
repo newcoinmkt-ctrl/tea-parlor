@@ -5047,6 +5047,27 @@ function startRoomLocal(room, currency, variant = 'classic') {
   scheduleAi();
 }
 
+/**
+ * play9match3 — wait until gateway session token is set (or timeout).
+ * Avoid awaiting telegramLoginPromise: that promise also fetches wallet/daily-supply
+ * and was inflating 「匹配中」well past Colyseus MATCH_MS (live was already 3s deal).
+ */
+async function waitForMatchSessionToken(maxMs = 2_500) {
+  const existing = String(window.__teaParlorSessionToken || '').trim();
+  if (existing) return existing;
+  const started = Date.now();
+  while (Date.now() - started < maxMs) {
+    if (ddzMatchAborted) return '';
+    const tok = String(window.__teaParlorSessionToken || '').trim();
+    if (tok) return tok;
+    await Promise.race([
+      Promise.resolve(telegramLoginPromise).then(() => null).catch(() => null),
+      new Promise((r) => setTimeout(r, 50)),
+    ]);
+  }
+  return String(window.__teaParlorSessionToken || '').trim();
+}
+
 async function startRoomOnline(room, currency, variant = 'classic', backend = 'colyseus', extra = {}) {
   const v = DDZ_VARIANTS[variant] || DDZ_VARIANTS.classic;
   const profile = getProfile();

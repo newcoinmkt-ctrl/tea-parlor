@@ -6,6 +6,7 @@ const appSrc = readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
 test('play9match3: match does not await full telegramLoginPromise (wallet sync)', () => {
+  assert.match(appSrc, /async function waitForMatchSessionToken/);
   assert.match(appSrc, /waitForMatchSessionToken/);
   assert.match(appSrc, /do NOT await full telegramLoginPromise/);
   const idx = appSrc.indexOf('async function startRoomOnline');
