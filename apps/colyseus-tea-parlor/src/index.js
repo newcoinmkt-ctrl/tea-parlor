@@ -11,6 +11,7 @@ import cors from 'cors';
 import colyseus from 'colyseus';
 import wsTransport from '@colyseus/ws-transport';
 import { DoudizhuRoom } from './rooms/DoudizhuRoom.js';
+import { MATCH_MS } from './ddzLogic.js';
 
 const { Server } = colyseus;
 const { WebSocketTransport } = wsTransport;
@@ -28,6 +29,7 @@ app.get('/health', (_req, res) => {
     service: 'tea-parlor-colyseus',
     games: ['doudizhu'],
     port: PORT,
+    matchMs: MATCH_MS,
   });
 });
 
@@ -58,5 +60,6 @@ gameServer.define('doudizhu', DoudizhuRoom).filterBy(['roomKey']).enableRealtime
 httpServer.listen(PORT, HOST, () => {
   console.log(`[colyseus] Tea Parlor game server listening on http://${HOST}:${PORT}`);
   console.log(`[colyseus] room: doudizhu · engine: packages/doudizhu-engine`);
+  console.log(`[colyseus] MATCH_MS=${MATCH_MS} (play9match3 ≤3s AI fill)`);
   console.log(`[colyseus] health: http://127.0.0.1:${PORT}/health`);
 });

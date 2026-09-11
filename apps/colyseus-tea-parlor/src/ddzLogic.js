@@ -8,7 +8,22 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const MATCH_MS = 3_000;
+/** Product ≤3s AI fill (play9v3b / play9match3). Env MATCH_MS may lower further; never above 3000. */
+export const MATCH_MS_DEFAULT = 3_000;
+export const MATCH_MS_MAX = 3_000;
+export function resolveMatchMs(env = process.env) {
+  const raw = env?.MATCH_MS ?? env?.DDZ_MATCH_MS;
+  if (raw == null || raw === '') return MATCH_MS_DEFAULT;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return MATCH_MS_DEFAULT;
+  const ms = Math.floor(n);
+  if (ms > MATCH_MS_MAX) {
+    console.warn(`[ddz] MATCH_MS=${ms} capped to ${MATCH_MS_MAX} (play9match3 ≤3s)`);
+    return MATCH_MS_MAX;
+  }
+  return Math.max(500, ms);
+}
+export const MATCH_MS = resolveMatchMs();
 /** Human-like AI think window (play9v3h). Room enables; unit tests keep 0 = sync. */
 export const AI_THINK_MS_MIN = 800;
 export const AI_THINK_MS_MAX = 2000;
@@ -393,6 +408,7 @@ export class DdzTable {
         seats: rotArr(seats, me < 0 ? 0 : me) || seats,
         myHand: [],
         status: '匹配中，超时 AI 补位',
+        matchMs: this.matchMs || MATCH_MS,
         humanIndex: 0,
         backend: 'colyseus',
       };
