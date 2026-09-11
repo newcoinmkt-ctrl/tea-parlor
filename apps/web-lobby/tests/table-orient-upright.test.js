@@ -11,13 +11,26 @@ const jjCss = readFileSync(path.join(root, '../src/jj-table.css'), 'utf8');
 const appSrc = readFileSync(path.join(root, '../src/app.js'), 'utf8');
 const html = readFileSync(path.join(root, '../index.html'), 'utf8');
 
-test('play9jj1 cache bust on CSS + app.js', () => {
-  assert.match(html, /app\.js\?v=play9jj1/);
-  assert.match(html, /hand-fit\.css\?v=play9jj1/);
-  assert.match(html, /table-landscape\.css\?v=play9jj1/);
-  assert.match(html, /jj-table\.css\?v=play9jj1/);
+test('play9jj1b cache bust on CSS + app.js', () => {
+  assert.match(html, /app\.js\?v=play9jj1b/);
+  assert.match(html, /hand-fit\.css\?v=play9jj1b/);
+  assert.match(html, /table-landscape\.css\?v=play9jj1b/);
+  assert.match(html, /jj-table\.css\?v=play9jj1b/);
   assert.doesNotMatch(html, /\?v=play9v3h/);
   assert.doesNotMatch(html, /\?v=play9v3g/);
+});
+
+test('table-orient pins JJ zones absolute-to-stage (play9jj1b)', () => {
+  assert.match(orientSrc, /function pinJjZoneGeometry/);
+  assert.match(orientSrc, /padding-bottom", "4px"/);
+  assert.match(orientSrc, /clearPinnedJjZones/);
+});
+
+test('jj-table zone lock beats fixed + no vw play-zone', () => {
+  assert.match(jjCss, /play9jj1b — ZONE LOCK/);
+  assert.match(jjCss, /No safe-area pad|no safe-area/i);
+  assert.doesNotMatch(jjCss, /42vw/);
+  assert.match(jjCss, /table-stage-land-target \.self-slot/);
 });
 
 test('table-orient letterbox landscape without rotate transform', () => {

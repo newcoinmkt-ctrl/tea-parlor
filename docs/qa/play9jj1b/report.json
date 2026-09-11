@@ -1,0 +1,197 @@
+{
+  "cache": "play9jj1b",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5235/index.html?v=play9jj1b",
+  "ed_repro": {
+    "path": "TG Mini App → hold phone LANDSCAPE to align with landscape stage → 人机畅玩/local-doudizhu. Portrait: letterboxed landscape band (translate+scale, NO rotate). Zones: hole cards top-center, hand bottom, L/R seats, pass bubble by avatar.",
+    "cache": "?v=play9jj1b",
+    "fail_on": "play9v3g: #tableView rotate(90deg) sideways on portrait; play9v3h upright-fill was not JJ landscape coords"
+  },
+  "shots": {
+    "lobby-896-home.png": {
+      "bytes": 248413,
+      "sha1": "35e32427ccd4"
+    },
+    "ddz-896-landscape-zones.png": {
+      "bytes": 295089,
+      "sha1": "468beceb3e73"
+    },
+    "ddz-896-touch-selected.png": {
+      "bytes": 303837,
+      "sha1": "6740cc062e03"
+    },
+    "ddz-896-illegal-play-disabled.png": {
+      "bytes": 303981,
+      "sha1": "497dd78a3024"
+    },
+    "ddz-896-after-legal-play.png": {
+      "bytes": 280876,
+      "sha1": "98ee204da670"
+    },
+    "ddz-896-pass-by-avatar.png": {
+      "bytes": 299350,
+      "sha1": "19f57aed36c3"
+    },
+    "ddz-896-settle-triangle.png": {
+      "bytes": 327356,
+      "sha1": "0fb98a57d906"
+    },
+    "ddz-414-portrait-letterbox.png": {
+      "bytes": 209440,
+      "sha1": "611212230b5f"
+    }
+  },
+  "checks": {
+    "ddz_start": {
+      "via": "click-local"
+    },
+    "ddz_hand_n_deal": 17,
+    "ddz_hand_n": 17,
+    "landscape_stage": {
+      "stageLand": true,
+      "stageJj": true,
+      "upright": false,
+      "target": true,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "hasScale": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "stageWider": true,
+      "zones": {
+        "holeTop": true,
+        "handBottom": true,
+        "leftOk": true,
+        "rightOk": true,
+        "meterVisible": true,
+        "selfAvatar": true,
+        "seatsAligned": true,
+        "seatTopDelta": 0,
+        "topBandAligned": true,
+        "holeMeterBand": true,
+        "actionCentered": true,
+        "handCentered": true,
+        "avatarNotCoverFirst": true,
+        "selfSlotAbsolute": true,
+        "bottomBarAbsolute": true,
+        "noSafePadDrift": true
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "touch_select": {
+      "selectedDom": 1,
+      "allowPlay": true,
+      "disabled": false
+    },
+    "illegal_play": {
+      "disabled": false
+    },
+    "legal_play": {
+      "before": 17,
+      "after": 16,
+      "via": "force-single"
+    },
+    "pass_by_avatar": {
+      "ok": true,
+      "bubble": {
+        "x": 70,
+        "y": 328
+      },
+      "avatar": {
+        "x": 8,
+        "y": 316,
+        "w": 48
+      }
+    },
+    "settle_hud": {
+      "visible": true,
+      "seats": [
+        true,
+        true,
+        true
+      ],
+      "cards": 53,
+      "stamp": 2,
+      "isSettleClass": true
+    },
+    "portrait_letterbox": {
+      "stageLand": true,
+      "stageJj": true,
+      "upright": false,
+      "target": true,
+      "transform": "matrix(0.462054, 0, 0, 0.462054, -448, -207)",
+      "noRotate90": true,
+      "hasScale": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "0.46205357142857145",
+      "rect": {
+        "w": 414,
+        "h": 191,
+        "t": 352,
+        "l": 0
+      },
+      "stageWider": true,
+      "zones": {
+        "holeTop": true,
+        "handBottom": true,
+        "leftOk": true,
+        "rightOk": true,
+        "meterVisible": true,
+        "selfAvatar": true,
+        "seatsAligned": true,
+        "seatTopDelta": 0,
+        "topBandAligned": true,
+        "holeMeterBand": true,
+        "actionCentered": true,
+        "handCentered": true,
+        "avatarNotCoverFirst": true,
+        "selfSlotAbsolute": true,
+        "bottomBarAbsolute": true,
+        "noSafePadDrift": true
+      },
+      "vw": 414,
+      "vh": 896
+    }
+  },
+  "pass": {
+    "landscape_stage_w_gt_h_no_rotate": true,
+    "portrait_letterbox_no_rotate": true,
+    "jj_zones": true,
+    "zone_alignment_locked": true,
+    "touch_select_stays": true,
+    "legal_play_removes": true,
+    "settle_triangle_hud": true,
+    "pass_bubble_near_avatar": true
+  },
+  "ok": true,
+  "root_causes": [
+    "table-play position:fixed + vw/vh + safe-area on .self-slot fought letterbox → 跑偏",
+    "jj inset:auto shorthand clobbered side-slot top/left/right → both seats stacked top-left",
+    "play9jj1b: pin zones absolute-to-stage; top HUD flex band; L/R same top%; no vw on play-zone",
+    "Landscape stage (W>H) letterbox translate+scale only — never rotate"
+  ],
+  "files_changed": [
+    "apps/web-lobby/src/jj-table.css",
+    "apps/web-lobby/src/net/table-orient.js",
+    "apps/web-lobby/src/app.js",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/tests/table-orient-upright.test.js",
+    "docs/qa/play9jj1b/*"
+  ]
+}
