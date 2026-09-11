@@ -4567,3 +4567,36 @@ html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi
 html.table-stage-upright .lobby-shell.table-active:not(.texas-active):not(.multi-active) #tableView #deckMeter {
   display: none !important;
 }
+
+
+/* ===== play9ship1 — ten digit fit + illegal play grey ===== */
+html body .lobby-shell.table-active #tableView #handArea .playing-card .pc-rank.pc-rank--ten,
+html body .lobby-shell.table-active #tableView #handArea .playing-card.is-ten .pc-rank,
+html body .lobby-shell.table-active #tableView .table-card .pc-rank.pc-rank--ten,
+html body .lobby-shell.table-active #tableView #bottomCards .pc-rank.pc-rank--ten,
+html body .lobby-shell.table-active #tableView #lastPlayFan .pc-rank.pc-rank--ten {
+  white-space: nowrap !important;
+  letter-spacing: -0.08em !important;
+  font-size: clamp(11px, 2.8vw, 14px) !important;
+  transform: scaleX(0.88) !important;
+  transform-origin: left top !important;
+  display: inline-block !important;
+  overflow: visible !important;
+}
+
+#tableView #playButton:disabled,
+#tableView #playButton[aria-disabled="true"],
+#tableView #playControls #playButton:disabled,
+#tableView #playControls #playButton[aria-disabled="true"],
+#tableView #playButton.is-recommended:disabled,
+#tableView #playButton.is-recommended[aria-disabled="true"],
+#tableView #playControls .qq-btn.is-recommended:disabled,
+#tableView #playControls .qq-btn.is-recommended[aria-disabled="true"] {
+  opacity: 0.4 !important;
+  filter: grayscale(0.5) brightness(0.9) !important;
+  box-shadow: none !important;
+  animation: none !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+}

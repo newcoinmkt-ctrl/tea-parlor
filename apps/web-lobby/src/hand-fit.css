@@ -614,3 +614,14 @@ html.table-stage-upright #tableView.table-stage-upright-target,
   max-height: 86px !important;
   overflow: hidden !important;
 }
+
+
+/* play9ship1: two-digit rank in narrow peek */
+#handArea .playing-card .pc-rank.pc-rank--ten,
+#handArea .playing-card.is-ten .pc-rank {
+  white-space: nowrap !important;
+  letter-spacing: -0.08em !important;
+  transform: scaleX(0.88);
+  transform-origin: left top;
+  display: inline-block;
+}

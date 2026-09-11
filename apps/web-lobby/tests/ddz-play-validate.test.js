@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { evaluatePlaySelection } from "../src/net/ddz-play-validate.js";
+import { evaluatePlaySelection, shouldDisablePlayButton } from "../src/net/ddz-play-validate.js";
 import { parseHand, canBeat } from "../src/jj/rules.js";
 
 const c = (id, rank, suit = 0) => ({ id, rank, suit });
@@ -81,4 +81,25 @@ test("beating single enables play", () => {
   });
   assert.equal(r.allowPlay, true);
   assert.equal(r.reason, "ok");
+});
+
+test("shouldDisablePlayButton mirrors allowPlay for empty/illegal/ok", () => {
+  const empty = evaluatePlaySelection({ selectedCards: [], lastPlay: null, parseHand, canBeat });
+  assert.equal(shouldDisablePlayButton(empty), true);
+  const illegal = evaluatePlaySelection({
+    selectedCards: [c("a", 14), c("t", 10)],
+    lastPlay: null,
+    parseHand,
+    canBeat,
+  });
+  assert.equal(shouldDisablePlayButton(illegal), true);
+  const ok = evaluatePlaySelection({
+    selectedCards: [c("s", 5)],
+    lastPlay: null,
+    parseHand,
+    canBeat,
+  });
+  assert.equal(shouldDisablePlayButton(ok), false);
+  assert.equal(shouldDisablePlayButton(null), true);
+  assert.equal(shouldDisablePlayButton(undefined), true);
 });

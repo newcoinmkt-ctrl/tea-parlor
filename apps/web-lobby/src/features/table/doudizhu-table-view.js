@@ -44,5 +44,8 @@ export function cardFaceHtml(card, { wild = false, brandBadgeHtml = '' } = {}) {
   if (card.rank === 17) return `<span class="pc-joker">大王</span>${brandBadgeHtml}`;
   const suit = typeof card.suit === 'number' && card.suit < 4 ? SUITS[card.suit] : '';
   const rank = RANK_LABEL[card.rank] || String(card.rank);
-  return `<span class="pc-rank">${rank}</span><span class="pc-suit">${suit}</span>${wildTag}${brandBadgeHtml}`;
+  // play9ship1: fan peek (~18–26px) clips second digit of "10" — mark for CSS compress
+  const isTen = card.rank === 10 || rank === '10';
+  const rankCls = isTen ? 'pc-rank pc-rank--ten' : 'pc-rank';
+  return `<span class="${rankCls}">${rank}</span><span class="pc-suit">${suit}</span>${wildTag}${brandBadgeHtml}`;
 }

@@ -1,0 +1,41 @@
+{
+  "cache": "play9ship1",
+  "base": "a7b5398",
+  "branch": "play9ship1",
+  "url": "http://127.0.0.1:5251/index.html?v=play9ship1",
+  "scope": {
+    "in": ["card 10 face clip", "illegal playButton grey harden", "cache bust play9ship1"],
+    "out": ["two TG same table", "reconnect", "mahjong chi/peng/gang", "JJ pixel skins", "chain/USDT"]
+  },
+  "code_assertions": {
+    "rank_label_10": "RANK_LABEL[10] === '10'",
+    "pc_rank_ten_class": "cardFaceHtml rank===10 emits pc-rank--ten",
+    "css_ten_compress": "jj-table/table-play/hand-fit contain scaleX(0.88) + letter-spacing -0.08em",
+    "css_play_disabled_grey": "#playButton:disabled / aria-disabled grey + box-shadow none",
+    "sync_after_render": "phase===play calls syncPlayButtonFromSelection at end of _renderGameBody",
+    "should_disable_helper": "shouldDisablePlayButton(empty|illegal) === true",
+    "no_rotate90": "table-orient does not setProperty rotate(",
+    "upright_none": "portrait uses transform none",
+    "action_bar_z": "pinP0ActionBar z-index 220"
+  },
+  "unit_tests": [
+    "apps/web-lobby/tests/play9ship1-ten-grey.test.js",
+    "apps/web-lobby/tests/ddz-play-validate.test.js",
+    "apps/web-lobby/tests/table-orient-upright.test.js"
+  ],
+  "manual_self_test": [
+    "Serve apps/web-lobby; open ?v=play9ship1",
+    "DDZ: verify hand 「10」 shows both digits under fan overlap",
+    "Select illegal A+10 → 出牌 grey disabled",
+    "Legal play → cards leave hand (17→16)",
+    "Portrait upright + landscape letterbox; no rotate90"
+  ],
+  "cloud_alignment": {
+    "main": "a7b5398",
+    "web_lobby": "fae3707e",
+    "colyseus": "63b5c8d2",
+    "matchMs": 3000,
+    "note": "verified by coordinator prior to ship1; this PR is web-lobby residual only"
+  },
+  "status": "code_assertions_ready; awaiting product nod before merge"
+}

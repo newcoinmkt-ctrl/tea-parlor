@@ -1331,3 +1331,42 @@ html.table-stage-jj #tableView #playButton[aria-disabled="true"] {
   opacity: 0.45 !important;
   filter: grayscale(0.35) !important;
 }
+
+
+/* ===== play9ship1 — "10" face + illegal grey harden ===== */
+/* Fan peek strip (~18–26px with margin-left:-28) must show both digits of 10 */
+html.table-stage-jj #tableView #handArea .playing-card .pc-rank.pc-rank--ten,
+html.table-stage-jj #tableView #handArea .playing-card.is-ten .pc-rank,
+html.table-stage-jj #tableView .table-card .pc-rank.pc-rank--ten,
+html.table-stage-jj #tableView .table-card.is-ten .pc-rank,
+html.table-stage-jj #tableView #bottomCards .pc-rank.pc-rank--ten,
+html.table-stage-jj #tableView #bottomCards .mini-card.is-ten .pc-rank,
+html.table-stage-jj #tableView #lastPlayFan .pc-rank.pc-rank--ten,
+html.table-stage-jj .jj-settle-hand .jj-mini-card .pc-rank.pc-rank--ten,
+html.table-stage-jj .jj-settle-hand .jj-mini-card.is-ten .pc-rank {
+  white-space: nowrap !important;
+  letter-spacing: -0.08em !important;
+  font-size: 0.78em !important;
+  transform: scaleX(0.88) !important;
+  transform-origin: left top !important;
+  display: inline-block !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Grey illegal / empty 出牌 — beat glow + is-recommended leftovers */
+html.table-stage-jj #tableView #playButton:disabled,
+html.table-stage-jj #tableView #playButton[aria-disabled="true"],
+html.table-stage-jj #tableView #playControls #playButton:disabled,
+html.table-stage-jj #tableView #playControls #playButton[aria-disabled="true"],
+html.table-stage-jj #tableView #playButton.is-recommended:disabled,
+html.table-stage-jj #tableView #playButton.is-recommended[aria-disabled="true"] {
+  opacity: 0.42 !important;
+  filter: grayscale(0.55) brightness(0.88) !important;
+  box-shadow: none !important;
+  animation: none !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
