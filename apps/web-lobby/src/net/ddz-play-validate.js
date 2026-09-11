@@ -64,3 +64,12 @@ export function evaluatePlaySelection({
     message: '',
   };
 }
+
+/**
+ * DOM-free: play button must stay disabled unless evaluatePlaySelection.allowPlay.
+ * @param {{ allowPlay?: boolean } | null | undefined} verdict
+ * @returns {boolean}
+ */
+export function shouldDisablePlayButton(verdict) {
+  return !verdict || verdict.allowPlay !== true;
+}

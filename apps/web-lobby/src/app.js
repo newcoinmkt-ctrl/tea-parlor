@@ -39,11 +39,11 @@ import { createBlackjackUI } from './games/blackjack/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fix1';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fix1';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fix1';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fix1';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9fix1';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ship1';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ship1';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ship1';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ship1';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9ship1';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -4320,6 +4320,8 @@ function syncPlayButtonFromSelection() {
     nodes.playButton.disabled = !allowPlay;
     nodes.playButton.setAttribute('aria-disabled', allowPlay ? 'false' : 'true');
     nodes.playButton.classList.toggle('is-recommended', allowPlay);
+    // play9ship1: never leave active glow on illegal/empty
+    if (!allowPlay) nodes.playButton.classList.remove('pulse-hint');
   }
   if (nodes.passButton) {
     const canPass = Boolean(myPlay && game.lastPlay && game.lastPlay.player !== HUMAN);
@@ -6056,8 +6058,10 @@ function jjMiniCardHtml(c, { winStamp = false } = {}) {
   const t = cardText(c);
   const red = isRed(c) ? ' red-card red' : '';
   const stamp = winStamp ? '<span class="jj-win-stamp" aria-label="胜">胜</span>' : '';
-  return `<span class="jj-mini-card table-card${red}">`
-    + `<span class="pc-rank">${t.replace(/[♠♥♣♦]/g, '')}</span>`
+  const rankTxt = t.replace(/[♠♥♣♦]/g, '');
+  const tenCls = (c.rank === 10 || rankTxt === '10') ? ' pc-rank--ten' : '';
+  return `<span class="jj-mini-card table-card${red}${(c.rank === 10 || rankTxt === '10') ? ' is-ten' : ''}">`
+    + `<span class="pc-rank${tenCls}">${rankTxt}</span>`
     + `<span class="pc-suit">${t.match(/[♠♥♣♦]/)?.[0] || ''}</span>`
     + stamp
     + `</span>`;
@@ -6583,6 +6587,11 @@ function _renderGameBody() {
     nodes.tableView.hidden = false;
     nodes.tableView.removeAttribute('hidden');
   }
+
+  // play9ship1: re-sync after action-bar re-render so illegal/empty never looks enabled
+  if (game.phase === 'play') {
+    syncPlayButtonFromSelection();
+  }
 }
 
 /**
@@ -6647,8 +6656,10 @@ function cardFaceMiniHtml(c) {
   if (!c) return '';
   const t = cardText(c);
   const wild = game?.variant === 'laizi' && isWildCard(c, game.wildRank);
-  return `<span class="mini-card ${isRed(c) ? 'red-card' : ''}${wild ? ' is-wild' : ''}" title="${t}${wild ? ' · 癞子' : ''}">`
-    + `<span class="pc-rank">${t.replace(/[♠♥♣♦]/g, '')}</span>`
+  const rankTxt = t.replace(/[♠♥♣♦]/g, '');
+  const isTen = c.rank === 10 || rankTxt === '10';
+  return `<span class="mini-card ${isRed(c) ? 'red-card' : ''}${wild ? ' is-wild' : ''}${isTen ? ' is-ten' : ''}" title="${t}${wild ? ' · 癞子' : ''}">`
+    + `<span class="pc-rank${isTen ? ' pc-rank--ten' : ''}">${rankTxt}</span>`
     + `<span class="pc-suit">${t.match(/[♠♥♣♦]/)?.[0] || ''}</span>`
     + (wild ? '<i class="pc-wild-tag mini-wild">癞</i>' : '')
     + brandMiniBadgeHtml()
@@ -6788,7 +6799,7 @@ function renderPlayZones() {
       sortCards(act.cards, false).forEach((card, i) => {
         const el = document.createElement('span');
         const wild = game?.variant === 'laizi' && isWildCard(card, game.wildRank);
-        el.className = 'table-card' + (isRed(card) ? ' red-card' : '') + (wild ? ' is-wild' : '');
+        el.className = 'table-card' + (isRed(card) ? ' red-card' : '') + (wild ? ' is-wild' : '') + (card.rank === 10 ? ' is-ten' : '');
         el.innerHTML = cardFaceHtml(card, { wild });
         el.title = typeLabel(act.parsed?.type, act.parsed);
         el.style.zIndex = String(i + 1);
@@ -6827,7 +6838,7 @@ function renderCenterLastPlay() {
   cards.forEach((card, i) => {
     const el = document.createElement('span');
     const wild = game?.variant === 'laizi' && isWildCard(card, game.wildRank);
-    el.className = 'table-card' + (isRed(card) ? ' red-card' : '') + (wild ? ' is-wild' : '');
+    el.className = 'table-card' + (isRed(card) ? ' red-card' : '') + (wild ? ' is-wild' : '') + (card.rank === 10 ? ' is-ten' : '');
     el.innerHTML = cardFaceHtml(card, { wild });
     el.style.zIndex = String(i + 1);
     fan.appendChild(el);
@@ -6866,7 +6877,8 @@ function renderHand() {
     btn.className = 'playing-card'
       + (isRed(card) ? ' red-card' : '')
       + ((selected.has(String(card.id)) || selected.has(card.id)) ? ' selected' : '')
-      + (isWild ? ' is-wild' : '');
+      + (isWild ? ' is-wild' : '')
+      + (card.rank === 10 ? ' is-ten' : '');
     btn.dataset.id = card.id;
     btn.dataset.index = String(index);
     btn.title = isWild ? `${cardText(card)} · 癞子` : cardText(card);
