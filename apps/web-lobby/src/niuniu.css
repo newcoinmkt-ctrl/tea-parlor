@@ -1,4 +1,4 @@
-/* play9nn1 — 牛牛 6-seat 看牌抢庄. Never rotate #multiGameView. */
+/* play9nn1b — 牛牛 6-seat 看牌抢庄. Never rotate #multiGameView. */
 
 #multiGameView.nn-active,
 .multi-game-view.nn-active {
@@ -346,4 +346,89 @@ html.table-stage-land #multiGameView.nn-active .nn-felt { inset: 6px 6px 128px; 
 /* Keep #mgActions (fallback) clear if ever used */
 .nn-active #mgActions .qq-btn.nn-bei {
   pointer-events: auto !important;
+}
+
+/* play9nn1b — harden playability: kill landscape grid bleed, footer cover, safe dock */
+#multiGameView.nn-active .mg-table,
+html.table-landscape #multiGameView.nn-active .mg-table,
+html.table-stage-nn #multiGameView.nn-active .mg-table,
+html.table-stage-upright #multiGameView.nn-active .mg-table,
+html.table-stage-land #multiGameView.nn-active .mg-table {
+  display: block !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  position: relative !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  gap: 0 !important;
+}
+
+#multiGameView.nn-active .mg-footer,
+.nn-active .mg-footer {
+  display: none !important;
+  height: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Felt never steals taps from #nnActions */
+.nn-felt,
+#nnFelt {
+  pointer-events: none !important;
+}
+.nn-seats,
+.nn-seat,
+.nn-center,
+.nn-floats {
+  pointer-events: none !important;
+}
+
+/* Dock above TG chrome / safe-area; keep actions tappable */
+.nn-dock {
+  z-index: 240 !important;
+  padding: 4px 8px calc(10px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))) !important;
+  pointer-events: auto !important;
+}
+.nn-actions,
+#nnActions,
+.nn-active #mgActions {
+  z-index: 250 !important;
+  pointer-events: auto !important;
+  position: relative !important;
+}
+.nn-actions .qq-btn,
+.nn-bei,
+.nn-active #mgActions .qq-btn {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Match overlay must not linger as an invisible hit shield */
+.nn-match[hidden],
+#nnMatch[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  z-index: -1 !important;
+}
+.nn-match:not([hidden]) {
+  pointer-events: auto !important;
+  z-index: 260 !important;
+}
+
+/* Compact opponent seats so 5-up cards don't flood the pot */
+@media (max-width: 520px) {
+  .nn-seat { width: 84px; }
+  .nn-seat-cards .nn-card { width: 18px; height: 26px; font-size: 8px; }
+  .nn-stamp.is-sm { height: 22px; }
+}
+html.table-stage-land #multiGameView.nn-active .nn-dock {
+  padding-bottom: 6px !important;
+}
+html.table-stage-land #multiGameView.nn-active .nn-felt {
+  inset: 6px 6px 120px !important;
 }

@@ -17,21 +17,21 @@ import { resultPlayerHtml, getResultSeatSrc } from '../../shared/result-avatar.j
 import { brandMgCardBadgeHtml, brandMgCardBackBadgeHtml } from '../../shared/branding.js';
 
 const SEAT_IMGS = [
-  './public/characters/m-ea-suit.png?v=play9nn1',
-  './public/characters/f-ea-red-qipao.png?v=play9nn1',
-  './public/characters/m-ea-casual.png?v=play9nn1',
-  './public/characters/f-ea-black-dress.png?v=play9nn1',
-  './public/characters/m-ea-cool.png?v=play9nn1',
-  './public/characters/f-ea-gold-dress.png?v=play9nn1',
+  './public/characters/m-ea-suit.png?v=play9nn1b',
+  './public/characters/f-ea-red-qipao.png?v=play9nn1b',
+  './public/characters/m-ea-casual.png?v=play9nn1b',
+  './public/characters/f-ea-black-dress.png?v=play9nn1b',
+  './public/characters/m-ea-cool.png?v=play9nn1b',
+  './public/characters/f-ea-gold-dress.png?v=play9nn1b',
 ];
 
 /* Uniform 110x50 ovals so 5-up row sizes evenly on 414 */
 const BEI_SRC = {
-  0: './public/assets/niuniu/beishu/buqiang.png?v=play9nn1',
-  1: './public/assets/niuniu/beishu/bei1.png?v=play9nn1',
-  2: './public/assets/niuniu/beishu/bei2.png?v=play9nn1',
-  3: './public/assets/niuniu/beishu/bei3.png?v=play9nn1',
-  4: './public/assets/niuniu/beishu/bei4.png?v=play9nn1',
+  0: './public/assets/niuniu/beishu/buqiang.png?v=play9nn1b',
+  1: './public/assets/niuniu/beishu/bei1.png?v=play9nn1b',
+  2: './public/assets/niuniu/beishu/bei2.png?v=play9nn1b',
+  3: './public/assets/niuniu/beishu/bei3.png?v=play9nn1b',
+  4: './public/assets/niuniu/beishu/bei4.png?v=play9nn1b',
 };
 
 let _instance = null;
@@ -166,8 +166,17 @@ export function createNiuniuUI(options = {}) {
   function showMatch(on) {
     if (!el.match) return;
     el.match.hidden = !on;
-    if (on) el.match.removeAttribute('hidden');
-    else el.match.setAttribute('hidden', '');
+    if (on) {
+      el.match.removeAttribute('hidden');
+      el.match.style.display = '';
+      el.match.style.pointerEvents = 'auto';
+      el.match.style.zIndex = '260';
+    } else {
+      el.match.setAttribute('hidden', '');
+      el.match.style.display = 'none';
+      el.match.style.pointerEvents = 'none';
+      el.match.style.zIndex = '-1';
+    }
   }
 
   function show() {
@@ -177,7 +186,9 @@ export function createNiuniuUI(options = {}) {
     root.classList.remove('gd-active', 'mj-4p', 'mj-2p', 'zjh-active', 'bj-active');
     root.classList.add('nn-active');
     const shell = document.querySelector('.lobby-shell');
-    shell?.classList.add('table-active', 'multi-active');
+    // play9nn1b: multi-only — table-active pulls DDZ landscape grid/HUD rules onto nn
+    shell?.classList.add('multi-active');
+    shell?.classList.remove('table-active', 'texas-active');
     root.style.pointerEvents = 'auto';
     root.style.display = 'flex';
     root.style.visibility = 'visible';
@@ -342,6 +353,11 @@ export function createNiuniuUI(options = {}) {
       showSettle(snap);
       return;
     }
+    // play9nn1b: cuopai — keep AI closed until human 开牌/搓 or timeout; avoids
+    // "everyone already stamped but I still have 搓/开" dead feel.
+    const delay = snap.phase === PHASE.cuopai
+      ? (1200 + Math.random() * 900)
+      : (380 + Math.random() * 420);
     aiTimer = setTimeout(() => {
       if (!table) return;
       let s = table.snapshot(0);
@@ -356,6 +372,8 @@ export function createNiuniuUI(options = {}) {
           continue;
         }
         let acted = false;
+        const me = s.seats[0];
+        const humanOpened = !!(me && (me.hasLiang || me.hasKan));
         for (let i = 1; i < 6; i++) {
           const seat = s.seats[i];
           if (!seat) continue;
@@ -365,7 +383,8 @@ export function createNiuniuUI(options = {}) {
           } else if (s.phase === PHASE.xiazhu && i !== s.button && !seat.hasXia) {
             runAiSeat(i);
             acted = true;
-          } else if (s.phase === PHASE.cuopai && !seat.hasLiang) {
+          } else if (s.phase === PHASE.cuopai && !seat.hasLiang && humanOpened) {
+            // Only flip AI after human has 搓/开 — otherwise wait for phase timer
             runAiSeat(i);
             acted = true;
           }
@@ -381,9 +400,11 @@ export function createNiuniuUI(options = {}) {
           return;
         }
         armPhaseTimer();
+        // Keep draining AI cuopai after human opened
+        if (table.snapshot(0).phase === PHASE.cuopai) scheduleAi();
       }
       render();
-    }, 380 + Math.random() * 420);
+    }, delay);
   }
 
   function renderCards(cards, faceUp) {
@@ -482,7 +503,7 @@ export function createNiuniuUI(options = {}) {
       el.hand.hidden = false;
       el.hand.style.display = 'flex';
       el.hand.innerHTML = renderCards(me.holds, true);
-      if (me.niu != null && (me.hasLiang || snap.phase === PHASE.cuopai || snap.phase === PHASE.settle)) {
+      if (me.niu != null && (me.hasLiang || me.hasKan || snap.phase === PHASE.settle)) {
         el.hand.insertAdjacentHTML('beforeend', stampHtml(me.niu, false));
       }
     }
@@ -536,11 +557,17 @@ export function createNiuniuUI(options = {}) {
       el.actions.innerHTML = `<span class="mg-last-label">${snap.lastAction || '等待…'}</span>`;
     }
     el.actions.querySelectorAll('[data-nn-act]').forEach((btn) => {
-      btn.addEventListener('click', (ev) => {
+      const fire = (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
+        const now = Date.now();
+        if (now - (btn._nnLast || 0) < 450) return; // pointerup+click debounce
+        btn._nnLast = now;
         doHuman(btn.getAttribute('data-nn-act'), Number(btn.getAttribute('data-v')));
-      });
+      };
+      // play9nn1b: pointerup for TG Mini App (compat mouse/click often dropped)
+      btn.addEventListener('pointerup', fire, { passive: false });
+      btn.addEventListener('click', fire);
     });
   }
 

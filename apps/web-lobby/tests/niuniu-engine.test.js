@@ -169,7 +169,10 @@ test('table: 6 seats deal 5, 抢庄→下注→开牌→settle', () => {
   }
   s = t.snapshot(0);
   assert.equal(s.phase, PHASE.cuopai);
-  assert.equal(s.seats[0].holds.filter(Boolean).length, 5);
+  assert.equal(s.seats[0].holds.filter(Boolean).length, 4, '搓牌前仍盖第5张');
+  t.kanpai(0);
+  s = t.snapshot(0);
+  assert.equal(s.seats[0].holds.filter(Boolean).length, 5, '搓牌后亮第5张');
 
   for (let i = 0; i < 6; i++) t.liangpai(i);
   s = t.snapshot(0);

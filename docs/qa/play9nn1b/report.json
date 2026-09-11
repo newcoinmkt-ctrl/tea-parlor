@@ -1,0 +1,243 @@
+{
+  "cache": "play9nn1b",
+  "branch": "play9nn1b",
+  "url": "http://127.0.0.1:5252/index.html?v=play9nn1b",
+  "root_cause": "After play9nn1 merge, mobile nn table inherited html.table-landscape .multi-active .mg-table {display:grid} + table-active shell class, so the 6-seat absolute layout collided with MJ/DDZ chrome; AI instant-liang during cuopai made the table look finished while 搓/开 still showed; 搓牌 was a no-op (5th card already face-up); dock lacked safe-area / pointer hardening for TG.",
+  "fix": [
+    "Override nn .mg-table to display:block (kill landscape grid bleed)",
+    "Hide .mg-footer under nn-active; felt pointer-events:none",
+    "nn show() uses multi-active only (no table-active)",
+    "搓牌 keeps 5th hole until kan/liang; AI waits for human 搓/开 before opening",
+    "pointerup+click debounce on #nnActions; dock safe-area; cache ?v=play9nn1b"
+  ],
+  "shots": {
+    "01-home.png": {
+      "bytes": 231046,
+      "sha1": "e2201fdd9d0e"
+    },
+    "414-02-rooms.png": {
+      "bytes": 315361,
+      "sha1": "aaae51df580d"
+    },
+    "414-03-match.png": {
+      "bytes": 339308,
+      "sha1": "a015a197995e"
+    },
+    "414-04-qiang.png": {
+      "bytes": 802676,
+      "sha1": "457788dcf053"
+    },
+    "414-05-after-qiang.png": {
+      "bytes": 825684,
+      "sha1": "845bf9a95e3e"
+    },
+    "414-06-cuo.png": {
+      "bytes": 837581,
+      "sha1": "e99aac54683f"
+    },
+    "414-06b-after-kan.png": {
+      "bytes": 847964,
+      "sha1": "ff3002e10775"
+    },
+    "414-07-settle.png": {
+      "bytes": 513149,
+      "sha1": "a7450f7781fc"
+    },
+    "896-02-rooms.png": {
+      "bytes": 385086,
+      "sha1": "9cd3e8e0b428"
+    },
+    "896-03-match.png": {
+      "bytes": 281103,
+      "sha1": "9dfda1048a47"
+    },
+    "896-04-qiang.png": {
+      "bytes": 708838,
+      "sha1": "ddad39b5ac61"
+    },
+    "896-05-after-qiang.png": {
+      "bytes": 702174,
+      "sha1": "4a36a2e8e575"
+    },
+    "896-06-cuo.png": {
+      "bytes": 711398,
+      "sha1": "20673c747ab2"
+    },
+    "896-06b-after-kan.png": {
+      "bytes": 724181,
+      "sha1": "369f3433eeec"
+    },
+    "896-07-settle.png": {
+      "bytes": 452063,
+      "sha1": "932946f37ec2"
+    },
+    "ddz-smoke-414.png": {
+      "bytes": 549858,
+      "sha1": "d91bbfb6be41"
+    },
+    "mj-smoke-414.png": {
+      "bytes": 538139,
+      "sha1": "7da748c19976"
+    }
+  },
+  "checks": {
+    "414-stage": {
+      "land": false,
+      "upright": true,
+      "nn": true,
+      "transform": "none",
+      "noRotate90": true,
+      "grid": "block",
+      "shell": "lobby-shell p0-tg lobby-view-rooms multi-active",
+      "footerDisp": "none",
+      "actsPE": "auto"
+    },
+    "414-qiang-bar": [
+      {
+        "i": 0,
+        "label": "不抢",
+        "x": 21,
+        "y": 669,
+        "w": 68,
+        "h": 36,
+        "r": 89
+      },
+      {
+        "i": 1,
+        "label": "1倍",
+        "x": 97,
+        "y": 669,
+        "w": 68,
+        "h": 36,
+        "r": 165
+      },
+      {
+        "i": 2,
+        "label": "2倍",
+        "x": 173,
+        "y": 669,
+        "w": 68,
+        "h": 36,
+        "r": 241
+      },
+      {
+        "i": 3,
+        "label": "3倍",
+        "x": 249,
+        "y": 669,
+        "w": 68,
+        "h": 36,
+        "r": 317
+      },
+      {
+        "i": 4,
+        "label": "4倍",
+        "x": 325,
+        "y": 669,
+        "w": 68,
+        "h": 36,
+        "r": 393
+      }
+    ],
+    "414-hole": {
+      "n": 5,
+      "backs": 1
+    },
+    "414-after-kan": {
+      "n": 5,
+      "backs": 0
+    },
+    "414-settle": {
+      "text": "胜利！\n\n庄 茶友C · 底分 5 · 影子金币\n\n玩家\t状态\t本局\n\n茶馆（我）\n牛4\n\t\n牛4\n♥A ♦4 ♥7 ♦2 ♦Q\n\t+10\n\n茶友D\n牛5\n\t\n牛5\n♠3 ♣A ♠A ♠8 ♣2\n\t+5\n\n茶友C\n庄\n\t\n牛2\n♣7 ♥2 ♣10 ♣3 ♣J\n\t-10\n\n小金\n牛4\n\t\n牛4\n♠J ♣K ♦J ♣9 ♥5\n\t+5\n\n茶友A\n没牛\n\t\n没牛\n♣",
+      "stamps": 6,
+      "matchHidden": true
+    },
+    "896-stage": {
+      "land": true,
+      "upright": false,
+      "nn": true,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "grid": "block",
+      "shell": "lobby-shell p0-tg lobby-view-rooms multi-active",
+      "footerDisp": "none",
+      "actsPE": "auto"
+    },
+    "896-qiang-bar": [
+      {
+        "i": 0,
+        "label": "不抢",
+        "x": 242,
+        "y": 359,
+        "w": 76,
+        "h": 36,
+        "r": 318
+      },
+      {
+        "i": 1,
+        "label": "1倍",
+        "x": 326,
+        "y": 359,
+        "w": 76,
+        "h": 36,
+        "r": 402
+      },
+      {
+        "i": 2,
+        "label": "2倍",
+        "x": 410,
+        "y": 359,
+        "w": 76,
+        "h": 36,
+        "r": 486
+      },
+      {
+        "i": 3,
+        "label": "3倍",
+        "x": 494,
+        "y": 359,
+        "w": 76,
+        "h": 36,
+        "r": 570
+      },
+      {
+        "i": 4,
+        "label": "4倍",
+        "x": 578,
+        "y": 359,
+        "w": 76,
+        "h": 36,
+        "r": 654
+      }
+    ],
+    "896-hole": {
+      "n": 5,
+      "backs": 1
+    },
+    "896-after-kan": {
+      "n": 5,
+      "backs": 0
+    },
+    "896-settle": {
+      "text": "胜利！\n\n庄 茶友C · 底分 5 · 影子金币\n\n玩家\t状态\t本局\n\n茶馆（我）\n牛7\n\t\n牛7\n♠6 ♠7 ♣5 ♠9 ♠10\n\t+20\n\n茶友C\n庄\n\t\n牛4\n♥2 ♥6 ♣8 ♣K ♥8\n\t-30\n\n小金\n牛9\n\t\n牛9\n♥4 ♠K ♦5 ♦J ♦10\n\t+15\n\n茶友A\n牛6\n\t\n牛6\n♥K ♦A ♣6 ♠2 ♦7\n\t+5\n\n阿茶\n没牛\n\t\n没牛\n",
+      "stamps": 6,
+      "matchHidden": true
+    },
+    "ddz": {
+      "hand": 17,
+      "tvHidden": false
+    },
+    "mj": {
+      "open": true,
+      "cls": "table-view multi-game-view mj-4p table-stage-upright-target mj-opening"
+    }
+  },
+  "pass": {
+    "414": true,
+    "896": true,
+    "ddz": true,
+    "mj": true
+  },
+  "ok": true,
+  "errs": []
+}
