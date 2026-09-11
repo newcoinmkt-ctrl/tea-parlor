@@ -672,3 +672,78 @@ html.table-stage-mj #multiGameView .mj-jj-score {
 html.table-stage-mj #multiGameView .mj-jj-score {
   display: block !important;
 }
+
+/* ===== play9fix1 — portrait upright mahjong (usable hand, not tiny strip) ===== */
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target,
+html.table-stage-mj #multiGameView.mj-4p.table-stage-upright-target,
+html.table-stage-mj #multiGameView.mj-2p.table-stage-upright-target {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: block !important;
+  background: #061428 !important;
+  /* transform:none inline — full viewport portrait */
+}
+
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target .mg-table {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Soften perspective on tall portrait so felt stays readable */
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target .mj-felt {
+  top: 12% !important;
+  height: 52% !important;
+  transform: translateX(-50%) perspective(900px) rotateX(42deg) !important;
+}
+
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target .mg-hand-dock,
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target #mgHand {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  min-height: 120px !important;
+  padding: 8px 6px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: flex-end !important;
+  overflow-x: auto !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target #mgHand .mj-tile.mg-hand-tile,
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target #mgHand .mg-hand-tile {
+  width: 36px !important;
+  height: 50px !important;
+  min-width: 36px !important;
+  min-height: 50px !important;
+  flex: 0 0 auto !important;
+  pointer-events: auto !important;
+  font-size: 13px !important;
+}
+
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target #mgHand .mg-hand-tile.selected {
+  transform: translateY(-14px) !important;
+}
+
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target #mgActions {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 128px !important;
+  transform: translateX(-50%) !important;
+  z-index: 60 !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  gap: 8px !important;
+}
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target #mgActions .qq-btn,
+html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-target #mgActions button {
+  min-width: 64px !important;
+  min-height: 40px !important;
+  pointer-events: auto !important;
+}
