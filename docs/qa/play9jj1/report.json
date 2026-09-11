@@ -1,0 +1,168 @@
+{
+  "cache": "play9jj1",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5231/index.html?v=play9jj1",
+  "ed_repro": {
+    "path": "TG Mini App → hold phone LANDSCAPE to align with landscape stage → 人机畅玩/local-doudizhu. Portrait: letterboxed landscape band (translate+scale, NO rotate). Zones: hole cards top-center, hand bottom, L/R seats, pass bubble by avatar.",
+    "cache": "?v=play9jj1",
+    "fail_on": "play9v3g: #tableView rotate(90deg) sideways on portrait; play9v3h upright-fill was not JJ landscape coords"
+  },
+  "shots": {
+    "lobby-896-home.png": {
+      "bytes": 248413,
+      "sha1": "35e32427ccd4"
+    },
+    "ddz-896-landscape-zones.png": {
+      "bytes": 320921,
+      "sha1": "8fb577ffc5b4"
+    },
+    "ddz-896-touch-selected.png": {
+      "bytes": 329650,
+      "sha1": "d8672ffea157"
+    },
+    "ddz-896-illegal-play-disabled.png": {
+      "bytes": 329837,
+      "sha1": "9638d0940816"
+    },
+    "ddz-896-after-legal-play.png": {
+      "bytes": 306164,
+      "sha1": "8ac8f80822fd"
+    },
+    "ddz-896-pass-by-avatar.png": {
+      "bytes": 313629,
+      "sha1": "682a1a798059"
+    },
+    "ddz-896-settle-triangle.png": {
+      "bytes": 358761,
+      "sha1": "29c5602351f4"
+    },
+    "ddz-414-portrait-letterbox.png": {
+      "bytes": 214859,
+      "sha1": "c2e985a080d0"
+    }
+  },
+  "checks": {
+    "ddz_start": {
+      "via": "click-local"
+    },
+    "ddz_hand_n_deal": 17,
+    "ddz_hand_n": 17,
+    "landscape_stage": {
+      "stageLand": true,
+      "stageJj": true,
+      "upright": false,
+      "target": true,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "hasScale": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "stageWider": true,
+      "zones": {
+        "holeTop": true,
+        "handBottom": true,
+        "leftOk": true,
+        "rightOk": true,
+        "meterVisible": true,
+        "selfAvatar": true
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "touch_select": {
+      "selectedDom": 1,
+      "allowPlay": true,
+      "disabled": false
+    },
+    "illegal_play": {
+      "disabled": false
+    },
+    "legal_play": {
+      "before": 17,
+      "after": 16,
+      "via": "force-single"
+    },
+    "pass_by_avatar": {
+      "ok": true,
+      "bubble": {
+        "x": 32,
+        "y": 382
+      },
+      "avatar": {
+        "x": 2,
+        "y": 338,
+        "w": 48
+      }
+    },
+    "settle_hud": {
+      "visible": true,
+      "seats": [
+        true,
+        true,
+        true
+      ],
+      "cards": 53,
+      "stamp": 2,
+      "isSettleClass": true
+    },
+    "portrait_letterbox": {
+      "stageLand": true,
+      "stageJj": true,
+      "upright": false,
+      "target": true,
+      "transform": "matrix(0.462054, 0, 0, 0.462054, -448, -207)",
+      "noRotate90": true,
+      "hasScale": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "0.46205357142857145",
+      "rect": {
+        "w": 414,
+        "h": 191,
+        "t": 352,
+        "l": 0
+      },
+      "stageWider": true,
+      "zones": {
+        "holeTop": true,
+        "handBottom": true,
+        "leftOk": true,
+        "rightOk": true,
+        "meterVisible": true,
+        "selfAvatar": true
+      },
+      "vw": 414,
+      "vh": 896
+    }
+  },
+  "pass": {
+    "landscape_stage_w_gt_h_no_rotate": true,
+    "portrait_letterbox_no_rotate": true,
+    "jj_zones": true,
+    "touch_select_stays": true,
+    "legal_play_removes": true,
+    "settle_triangle_hud": true,
+    "pass_bubble_near_avatar": true
+  },
+  "ok": true,
+  "root_causes": [
+    "Landscape stage (W>H) letterboxed via translate(-50%,-50%) scale — never rotate",
+    "JJ zone layout + cruise-deck skin placeholder",
+    "Settle triangle HUD with multi-row remain grids",
+    "Kept play9v3g/v3h touch select + legal play remove + AI 0.8–2s + MATCH≈3s"
+  ]
+}

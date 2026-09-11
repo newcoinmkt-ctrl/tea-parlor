@@ -9,14 +9,15 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9v3h" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9v3h" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9v3h" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9v3h" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9v3h" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9v3h" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9v3h" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9v3h" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9jj1" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9jj1" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -1256,23 +1257,26 @@
           <div class="landlord-cards-wrap hud-bottom-cards">
             <div id="bottomCards" class="bottom-cards"></div>
           </div>
-          <div class="qq-deck-meter" id="deckMeter" role="status" aria-label="记牌器 · 各点数剩余张数" title="记牌器：显示各点数还剩几张">
+          <div class="qq-deck-meter" id="deckMeter" role="status" aria-label="记牌器 · 王/2/A/K/Q/J/炸" title="记牌器：王/2/A/K/Q/J/炸">
             <span class="qq-meter-label">记牌</span>
-            <span class="qq-meter-item" data-rank="17"><b>大王</b><i>1</i></span>
-            <span class="qq-meter-item" data-rank="16"><b>小王</b><i>1</i></span>
-            <span class="qq-meter-item" data-rank="15"><b>2</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="14"><b>A</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="13"><b>K</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="12"><b>Q</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="11"><b>J</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="10"><b>10</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="9"><b>9</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="8"><b>8</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="7"><b>7</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="6"><b>6</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="5"><b>5</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="4"><b>4</b><i>4</i></span>
-            <span class="qq-meter-item" data-rank="3"><b>3</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="joker"><b>王</b><i>2</i></span>
+            <span class="qq-meter-item" data-rank="15"><b>2</b><i>2</i></span>
+            <span class="qq-meter-item" data-rank="14"><b>A</b><i>3</i></span>
+            <span class="qq-meter-item" data-rank="13"><b>K</b><i>2</i></span>
+            <span class="qq-meter-item" data-rank="12"><b>Q</b><i>3</i></span>
+            <span class="qq-meter-item" data-rank="11"><b>J</b><i>1</i></span>
+            <span class="qq-meter-item" data-rank="bomb"><b>炸</b><i>?</i></span>
+            <!-- phase2 live counts; low ranks hidden in CSS -->
+            <span class="qq-meter-item" data-rank="17" hidden><b>大王</b><i>1</i></span>
+            <span class="qq-meter-item" data-rank="16" hidden><b>小王</b><i>1</i></span>
+            <span class="qq-meter-item" data-rank="10" hidden><b>10</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="9" hidden><b>9</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="8" hidden><b>8</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="7" hidden><b>7</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="6" hidden><b>6</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="5" hidden><b>5</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="4" hidden><b>4</b><i>4</i></span>
+            <span class="qq-meter-item" data-rank="3" hidden><b>3</b><i>4</i></span>
           </div>
           <div class="qq-mult-pill" id="multBadge" hidden>1倍</div>
           <div class="qq-hud-tools" id="hudTools">
@@ -1295,7 +1299,7 @@
         <div class="ddz-table qq-felt" aria-label="三人牌桌">
           <!-- 桌面广告：中心冠名 + 左右灯牌，内容由 ops 广告配置写入 -->
           <div class="qq-logo-mark" aria-hidden="true">
-            <strong>欢乐斗地主</strong>
+            <strong>JJ斗地主</strong>
             <small>经典叫分 · 超时 AI 补位</small>
           </div>
           <a class="table-skin-ad brand-slot brand-surface-table" data-ad-slot="doudizhu-table-skin" href="#" target="_blank" rel="noreferrer">
@@ -1428,6 +1432,18 @@
             <div class="qq-mult-chip">倍 <b id="footerMult">1</b></div>
             <button type="button" class="qq-chat-btn" id="chatToastBtn">聊天</button>
           </div>
+        </div>
+
+
+        <!-- play9jj1 JJ settlement overlay (triangle seats) -->
+        <div id="jjSettleHud" class="jj-settle-hud" hidden aria-live="polite">
+          <div class="jj-settle-topbar" id="jjSettleTopbar">
+            <span id="jjSettleXp">235/360</span>
+            <span id="jjSettleMult">100x3</span>
+          </div>
+          <div class="jj-settle-seat seat-tl" data-seat="1" id="jjSettleSeat1"></div>
+          <div class="jj-settle-seat seat-tr" data-seat="2" id="jjSettleSeat2"></div>
+          <div class="jj-settle-seat seat-bl" data-seat="0" id="jjSettleSeat0"></div>
         </div>
 
         <!-- 斗地主局末结算弹窗 -->
@@ -1782,6 +1798,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9v3h"></script>
+    <script type="module" src="./src/app.js?v=play9jj1"></script>
   </body>
 </html>

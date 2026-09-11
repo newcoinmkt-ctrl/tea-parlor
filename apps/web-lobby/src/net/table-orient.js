@@ -1,6 +1,7 @@
 /** Table viewport: Telegram.WebApp.viewportStableHeight, never 100vh, never whole-page CSS-rotate.
- *  play9v3h: upright coordinate system — full-viewport JJ zones in portrait.
- *  Never rotate #tableView / content container to fake landscape (play9v3g FAIL).
+ *  play9jj1: landscape coordinate stage (width > height), letterbox center-scale into the
+ *  Mini App viewport. NEVER rotate #tableView / content (play9v3g FAIL).
+ *  Text/cards/buttons stay upright relative to the stage; Ed holds phone landscape to align.
  */
 
 /** Extra bottom clearance so hand/bid sit above TG chat bar + leftover Bot reply keyboard. */
@@ -30,12 +31,6 @@ function isMobileish() {
   const w = Math.min(window.innerWidth || 400, window.innerHeight || 700);
   const coarse = window.matchMedia?.("(pointer: coarse)")?.matches;
   return coarse || w <= 900 || Boolean(window.Telegram?.WebApp);
-}
-
-function isPortraitViewport() {
-  const w = window.innerWidth || 0;
-  const h = window.innerHeight || 0;
-  return h > w + 8;
 }
 
 function readInsetPx(inset, key) {
@@ -99,26 +94,29 @@ function clearTableViewGeometry(tv) {
   [
     "position", "top", "left", "right", "bottom", "width", "height",
     "max-width", "max-height", "transform", "transform-origin", "margin",
+    "z-index", "overflow",
   ].forEach((k) => tv.style.removeProperty(k));
 }
 
 /**
- * Portrait Mini App → upright full-viewport stage with JJ landscape zones (no rotate).
- * Does NOT rotate #tableView, html, or body. All text/avatars/buttons stay upright to eyes.
+ * DDZ table → landscape coordinate stage (W > H), letterboxed into the viewport.
+ * Uses translate + scale only — NEVER apply 90-degree content rotation (play9v3g FAIL).
+ * On portrait Mini App the stage is a centered landscape band; Ed holds landscape to align.
  * Idempotent: skips DOM writes when geometry unchanged.
  */
 export function syncTableStageLandscape() {
   const root = document.documentElement;
   const body = document.body;
   const tv = document.getElementById("tableView");
-  const portrait = isPortraitViewport();
-  const want = isDdzTableActive() && isMobileish() && portrait;
+  const want = isDdzTableActive() && isMobileish();
 
-  // Drop legacy rotate class from play9v3g
-  root.classList.remove("table-stage-land");
-  body?.classList.remove("table-stage-land");
-  root.classList.toggle("table-stage-upright", want);
-  body?.classList.toggle("table-stage-upright", want);
+  // Drop play9v3h upright-fill class; landscape letterbox is the JJ truth.
+  root.classList.remove("table-stage-upright");
+  body?.classList.remove("table-stage-upright");
+  root.classList.toggle("table-stage-land", want);
+  body?.classList.toggle("table-stage-land", want);
+  root.classList.toggle("table-stage-jj", want);
+  body?.classList.toggle("table-stage-jj", want);
 
   if (!tv) {
     lastStageKey = '';
@@ -130,6 +128,7 @@ export function syncTableStageLandscape() {
       clearTableViewGeometry(tv);
       root.style.removeProperty("--table-stage-w");
       root.style.removeProperty("--table-stage-h");
+      root.style.removeProperty("--table-stage-scale");
       root.style.removeProperty("--table-letterbox-pad");
       lastStageKey = 'off';
     }
@@ -138,39 +137,52 @@ export function syncTableStageLandscape() {
 
   const vw = Math.max(1, window.innerWidth || 1);
   const vh = Math.max(1, Number.parseFloat(root.style.getPropertyValue("--tg-vh")) || window.innerHeight || 1);
-  // Portrait upright fill: use full viewport with JJ zones (never rotate).
-  // Strict landscape-aspect letterbox is too short on phones; prefer playable upright HUD.
-  const stageW = Math.round(vw);
-  const stageH = Math.round(vh);
-  const key = `upright-fill:${stageW}x${stageH}`;
-  if (key === lastStageKey && tv.classList.contains("table-stage-upright-target")) {
+
+  // Landscape stage matches device long×short edge (always W > H).
+  let stageW = Math.round(Math.max(vw, vh));
+  let stageH = Math.round(Math.min(vw, vh));
+  if (stageW <= stageH) {
+    stageW = Math.round(stageH * (16 / 9));
+  }
+  // Fit entire landscape stage inside viewport (letterbox), no rotate.
+  const scale = Math.min(vw / stageW, vh / stageH);
+  const key = `jj-land:${stageW}x${stageH}@${scale.toFixed(4)}:${vw}x${vh}`;
+  if (key === lastStageKey && tv.classList.contains("table-stage-land-target")) {
     return true;
   }
   lastStageKey = key;
+
   root.style.setProperty("--table-stage-w", `${stageW}px`);
   root.style.setProperty("--table-stage-h", `${stageH}px`);
-  root.style.setProperty("--table-letterbox-pad", `0px`);
-  tv.classList.remove("table-stage-land-target");
-  tv.classList.add("table-stage-upright-target");
+  root.style.setProperty("--table-stage-scale", String(scale));
+  const padY = Math.max(0, (vh - stageH * scale) / 2);
+  root.style.setProperty("--table-letterbox-pad", `${Math.round(padY)}px`);
+
+  tv.classList.remove("table-stage-upright-target");
+  tv.classList.add("table-stage-land-target");
   tv.style.setProperty("position", "fixed", "important");
-  tv.style.setProperty("top", "0", "important");
-  tv.style.setProperty("left", "0", "important");
-  tv.style.setProperty("right", "0", "important");
-  tv.style.setProperty("bottom", "0", "important");
+  tv.style.setProperty("top", "50%", "important");
+  tv.style.setProperty("left", "50%", "important");
+  tv.style.setProperty("right", "auto", "important");
+  tv.style.setProperty("bottom", "auto", "important");
   tv.style.setProperty("width", `${stageW}px`, "important");
   tv.style.setProperty("height", `${stageH}px`, "important");
   tv.style.setProperty("max-width", "none", "important");
   tv.style.setProperty("max-height", "none", "important");
-  // CRITICAL: no rotate — upright to user's eyes
-  tv.style.setProperty("transform", "none", "important");
-  tv.style.removeProperty("transform-origin");
+  tv.style.setProperty("margin", "0", "important");
+  // CRITICAL: letterbox via translate+scale ONLY — never rotate
+  tv.style.setProperty(
+    "transform",
+    `translate(-50%, -50%) scale(${scale})`,
+    "important",
+  );
+  tv.style.setProperty("transform-origin", "center center", "important");
   tv.style.setProperty("z-index", "400", "important");
-  // Hide overflow so bottom-bar / char art cannot stray outside stage
   tv.style.setProperty("overflow", "hidden", "important");
   return true;
 }
 
-/** @deprecated alias — name kept so call sites compile; no longer rotates. */
+/** @deprecated alias — name kept so call sites compile; letterbox landscape, no rotate. */
 export const syncTableStageUpright = syncTableStageLandscape;
 
 export function syncTableLandscape() {
