@@ -1,0 +1,80 @@
+{
+  "cache": "play9mj2b",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5263/index.html?v=play9mj2b",
+  "ed_repro": {
+    "path": "大厅 → 麻将 → 日麻 → 进桌；核对四面黄背墙/四家河/木框蓝毡/罗盘",
+    "cache": "?v=play9mj2b",
+    "fail_on": "green walls; missing 4 kawa; rotate90; 推倒胡/牛牛/DDZ regression; new icon"
+  },
+  "shots": {
+    "01-home-896.png": {
+      "bytes": 80167,
+      "sha1": "b43dde9cd958"
+    },
+    "02-rooms-896.png": {
+      "bytes": 148417,
+      "sha1": "7832221172ce"
+    },
+    "03-riichi-table-896.png": {
+      "bytes": 217563,
+      "sha1": "55499a07eae7"
+    },
+    "04-riichi-after-discard-896.png": {
+      "bytes": 220178,
+      "sha1": "c5149c5d96b5"
+    },
+    "05-riichi-settle-896.png": {
+      "bytes": 197092,
+      "sha1": "aa51d6295321"
+    },
+    "06-tuidaohu-table-896.png": {
+      "bytes": 179084,
+      "sha1": "9faf6dcf5f3a"
+    },
+    "07-riichi-414-portrait.png": {
+      "bytes": 204528,
+      "sha1": "1a71486e77ff"
+    }
+  },
+  "checks": {
+    "riichi_hand": 13,
+    "riichi_active": true,
+    "dora_bar": true,
+    "compass": true,
+    "walls": {
+      "n": 18,
+      "w": 17,
+      "e": 17,
+      "s": 17,
+      "stacks": 36
+    },
+    "kawa": 4,
+    "compass_scores": 4,
+    "wall_s_visible": true,
+    "no_rotate": true,
+    "felt_color": "radial-gradient(at 50% 42%, rgb(12, 90, 130) 0%, rgb(10, 74, 110) 48%, rgb(6, 58, 84) 100%)",
+    "discard_before": 0,
+    "discard_after": 1,
+    "discard_ok": true,
+    "tuidaohu_active": true,
+    "portrait_riichi": true
+  },
+  "pass": {
+    "riichi_enter": true,
+    "four_walls": true,
+    "four_kawa": true,
+    "compass_scores": true,
+    "discard": true,
+    "tuidaohu": true,
+    "no_rotate": true
+  },
+  "ok": true
+}
