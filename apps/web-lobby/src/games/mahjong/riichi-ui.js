@@ -207,6 +207,23 @@ export function createRiichiUI(options = {}) {
       node.textContent = String(sc);
       node.classList.toggle('is-neg', sc < START_POINTS);
     }
+    // Compass-hugging scores (Pocket)
+    const compass = root.querySelector('.mj-compass');
+    if (compass) {
+      let box = compass.querySelector('.rk-compass-scores');
+      if (!box) {
+        box = document.createElement('div');
+        box.className = 'rk-compass-scores';
+        box.innerHTML = [0, 1, 2, 3].map((i) => `<span class="rk-cscore" data-seat="${i}">25000</span>`).join('');
+        compass.appendChild(box);
+      }
+      box.querySelectorAll('.rk-cscore').forEach((elScore) => {
+        const i = Number(elScore.getAttribute('data-seat'));
+        const sc = Number(snap.scores?.[i] ?? START_POINTS);
+        elScore.textContent = String(sc);
+        elScore.classList.toggle('is-neg', sc < START_POINTS);
+      });
+    }
   }
 
   function syncWinds(snap) {
@@ -227,11 +244,22 @@ export function createRiichiUI(options = {}) {
     const per = Math.max(0, Math.floor(left / 4));
     const rem = Math.max(0, left - per * 4);
     const counts = [per + (rem > 0 ? 1 : 0), per + (rem > 1 ? 1 : 0), per + (rem > 2 ? 1 : 0), per];
+    // Pocket: double-layer stacks (up to 17) wrapping N/W/E/S
     ['mjWallN', 'mjWallW', 'mjWallE', 'mjWallS'].forEach((id, i) => {
       const node = document.getElementById(id);
       if (!node) return;
-      const n = Math.min(17, counts[i] || 0);
-      node.innerHTML = Array.from({ length: n }, () => '<i class="mj-wall-tile"></i>').join('');
+      const sideTiles = counts[i] || 0;
+      const stacks = Math.min(17, Math.ceil(sideTiles / 2));
+      let used = 0;
+      const parts = [];
+      for (let s = 0; s < stacks; s++) {
+        const remain = sideTiles - used;
+        const n = remain >= 2 ? 2 : 1;
+        used += n;
+        const tiles = Array.from({ length: n }, () => '<i class="mj-wall-tile"></i>').join('');
+        parts.push(`<span class="mj-wall-stack">${tiles}</span>`);
+      }
+      node.innerHTML = parts.join('');
     });
     const wc = document.getElementById('mjWallCount');
     if (wc) wc.textContent = String(left);
@@ -255,23 +283,24 @@ export function createRiichiUI(options = {}) {
 
   function renderRivers(snap) {
     if (!el.center) return;
-    // Bottom player's river prominent; others compact
-    const seats = [2, 1, 3, 0]; // top, left-ish label rows — keep simple list of bottom river focus
-    const bottom = snap.rivers?.[0] || [];
-    const tilesHtml = bottom.map((t) => tileImg(t)).join('') || '<span class="muted">河牌</span>';
-    el.center.innerHTML =
-      `<div class="rk-river-grid">`
-      + `<div class="rk-river-tiles" data-river="0">${tilesHtml}</div>`
-      + `<div class="muted" style="text-align:center;font-size:11px;margin-top:4px">`
-      + `对家河 ${ (snap.rivers?.[2] || []).length } · 上家 ${(snap.rivers?.[3] || []).length } · 下家 ${(snap.rivers?.[1] || []).length }`
-      + `</div></div>`;
-
-    // Also paint seat play zones lightly
-    for (let s = 1; s < 4; s++) {
-      const play = root.querySelector(`#mgPlay${s}`);
-      if (!play) continue;
+    // 四家河：0自 / 1下家右 / 2对家 / 3上家左 — orientation via CSS
+    const seats = [0, 1, 2, 3];
+    const parts = seats.map((s) => {
       const riv = snap.rivers?.[s] || [];
-      play.innerHTML = `<div class="rk-river-tiles">${riv.slice(-6).map((t) => tileImg(t)).join('')}</div>`;
+      const riichi = !!snap.riichi?.[s];
+      // Mark first discard as riichi-declaration tile when seat is in riichi (Pocket sideways)
+      const tiles = riv.map((t, idx) => {
+        const cls = riichi && idx === 0 ? 'rk-tile-mini is-riichi-discard' : 'rk-tile-mini';
+        return tileImg(t, cls);
+      }).join('');
+      return `<div class="rk-kawa-seat" data-seat="${s}">${tiles}</div>`;
+    }).join('');
+    el.center.innerHTML = `<div class="rk-kawa" aria-label="四家河">${parts}</div>`;
+
+    // Clear seat play zones (rivers live in center)
+    for (let s = 0; s < 4; s++) {
+      const play = root.querySelector(`#mgPlay${s}`);
+      if (play) play.innerHTML = '';
     }
   }
 
