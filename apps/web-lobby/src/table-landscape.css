@@ -356,7 +356,9 @@ html.table-landscape .texas-active img.char-figure {
 }
 
 /* ── Multi (mahjong / zjh / guandan / blackjack) ── */
-html.table-landscape #multiGameView {
+/* play9fix2: only when multi is actually open — bare #multiGameView {display:grid!important}
+   overrides [hidden] on some TG WebViews and covers DDZ hand / lobby taps */
+html.table-landscape .lobby-shell.multi-active #multiGameView:not([hidden]) {
   display: grid !important;
   grid-template-rows: auto minmax(0, 1fr) auto auto !important;
   padding: 4px 8px 6px !important;

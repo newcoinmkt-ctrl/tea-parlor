@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9mj2b';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9mj2b';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9mj2b';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9mj2b';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9mj2b';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fix2';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fix2';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fix2';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fix2';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9fix2';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -2350,7 +2350,15 @@ function forceCloseMultiView() {
     if (settle) { settle.hidden = true; settle.setAttribute('hidden', ''); }
     mg.hidden = true;
     mg.setAttribute('hidden', '');
-    mg.classList.remove('zjh-active', 'bj-active', 'nn-active', 'gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p');
+    mg.classList.remove('zjh-active', 'bj-active', 'nn-active', 'gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p', 'riichi-active');
+    // play9fix2: tear down Pocket 日麻 chrome (do NOT remove static .mj-wall nodes in index.html)
+    const rkSettle = mg.querySelector('#rkSettle');
+    if (rkSettle) { rkSettle.hidden = true; rkSettle.setAttribute('hidden', ''); rkSettle.innerHTML = ''; }
+    mg.querySelectorAll('.rk-kawa, .rk-dora-bar, .rk-dial, .rk-ops, .rk-compass-scores, .rk-riichi-stick').forEach((n) => {
+      try { n.remove(); } catch (_) { /* ignore */ }
+    });
+    mg.querySelectorAll('.mj-wall').forEach((w) => { w.innerHTML = ''; });
+    delete mg.dataset.mjVariant;
     const nnLay = mg.querySelector('#nnLayout');
     if (nnLay) { nnLay.hidden = true; nnLay.style.display = 'none'; }
     delete mg.dataset.game;
@@ -4658,11 +4666,10 @@ function initTelegramMiniApp() {
   const tg = window.Telegram?.WebApp;
   if (!tg) return;
   try { tg.ready(); } catch (_) {}
-  try { tg.expand(); } catch (_) {}
-  try { tg.disableVerticalSwipes?.(); } catch (_) {}
+  // play9fix2: never raw tg.expand here — expandTelegramTable rate-limits (expand↔viewportChanged freeze)
   try { tg.MainButton?.hide?.(); } catch (_) {}
-  try { applyTelegramSafeArea(); } catch (_) {}
   try { expandTelegramTable(); } catch (_) {}
+  try { applyTelegramSafeArea(); } catch (_) {}
   if (!window.__teaParlorErrorGuard) {
     window.__teaParlorErrorGuard = true;
     window.addEventListener('error', (ev) => {
@@ -7203,15 +7210,16 @@ function applyTelegramSafeArea() {
   let h = window.innerHeight || document.documentElement?.clientHeight || 0;
   try {
     if (tg) {
-      tg.ready();
-      tg.expand();
-      try { tg.disableVerticalSwipes?.(); } catch (_) {}
+      // play9fix2: rate-limit expand via expandTelegramTable — raw expand on every
+      // viewportChanged freezes 麻将 enter on TG Mini App (play9fix1 partial fix).
+      try { expandTelegramTable(); } catch (_) {}
       try { tg.MainButton?.hide?.(); } catch (_) {}
       const safe = tg.safeAreaInset || {};
       const content = tg.contentSafeAreaInset || {};
       const top = Math.max(Number(safe.top) || 0, Number(content.top) || 0);
       const bottomInset = Math.max(Number(safe.bottom) || 0, Number(content.bottom) || 0);
-      const playing = document.querySelector('.lobby-shell')?.classList.contains('table-active');
+      const shell = document.querySelector('.lobby-shell');
+      const playing = shell?.classList.contains('table-active') || shell?.classList.contains('multi-active');
       const bottom = Math.max(bottomInset, playing ? TG_BOT_KEYBOARD_CLEARANCE_PX : bottomInset);
       root.style.setProperty('--safe-top', top + 'px');
       root.style.setProperty('--safe-bottom', bottom + 'px');

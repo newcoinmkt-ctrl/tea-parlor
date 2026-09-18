@@ -22,10 +22,10 @@ test('lobby keeps single 麻将 icon; adds 日麻 room card', () => {
   assert.equal((html.match(/icon-mahjong\.png/g) || []).length >= 1, true);
 });
 
-test('cache play9mj2b + riichi css', () => {
-  assert.match(html, /app\.js\?v=play9mj2b/);
-  assert.match(html, /riichi-mahjong\.css\?v=play9mj2b/);
-  assert.match(appSrc, /\?v=play9mj2b/);
+test('cache play9fix2 + riichi css', () => {
+  assert.match(html, /app\.js\?v=play9fix2/);
+  assert.match(html, /riichi-mahjong\.css\?v=play9fix2/);
+  assert.match(appSrc, /\?v=play9fix2/);
   assert.doesNotMatch(html, /\?v=play9nn1b/);
 });
 
