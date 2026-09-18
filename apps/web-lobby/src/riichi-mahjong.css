@@ -1,5 +1,5 @@
 /**
- * play9mj2b — Pocket 日麻桌面布局抛光（四面黄背墙 + 四家河 + 木框蓝毡）
+ * play9fix2 — Pocket 日麻布局 + harden bleed into 推倒胡/DDZ
  * 挂在 #multiGameView.riichi-active。不旋转 90°；与 jj-mahjong 推倒胡并存。
  */
 html.table-stage-mj #multiGameView.riichi-active,
@@ -573,8 +573,8 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   margin: 0 2px;
 }
 
-/* Settle overlay — Pocket over.jpg style (unchanged zones) */
-#rkSettle {
+/* Settle overlay — scoped to riichi only (play9fix2: unscoped #rkSettle covered DDZ/推倒胡) */
+#multiGameView.riichi-active #rkSettle {
   position: absolute;
   inset: 0;
   z-index: 80;
@@ -583,9 +583,15 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   justify-content: center;
   background: rgba(0, 0, 0, 0.45);
   padding: 12px;
+  pointer-events: auto;
 }
-#rkSettle[hidden] { display: none !important; }
-#rkSettle .rk-settle-panel {
+#multiGameView.riichi-active #rkSettle[hidden],
+#rkSettle[hidden],
+#multiGameView:not(.riichi-active) #rkSettle {
+  display: none !important;
+  pointer-events: none !important;
+}
+#multiGameView.riichi-active #rkSettle .rk-settle-panel {
   width: min(520px, 94%);
   max-height: 92%;
   overflow: auto;
@@ -599,19 +605,19 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   color: #2a1a10;
   position: relative;
 }
-#rkSettle .rk-settle-top {
+#multiGameView.riichi-active #rkSettle .rk-settle-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-#rkSettle .rk-settle-points {
+#multiGameView.riichi-active #rkSettle .rk-settle-points {
   font-size: 28px;
   font-weight: 900;
   color: #fff;
   text-shadow: 0 2px 0 #000, 0 0 8px rgba(0, 0, 0, 0.6);
 }
-#rkSettle .rk-settle-stamp {
+#multiGameView.riichi-active #rkSettle .rk-settle-stamp {
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -625,7 +631,7 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   border: 3px solid #f0d080;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
-#rkSettle .rk-settle-han {
+#multiGameView.riichi-active #rkSettle .rk-settle-han {
   width: 88px;
   height: 88px;
   margin: 8px auto;
@@ -638,15 +644,15 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   justify-content: center;
   border: 3px solid #c9a24a;
 }
-#rkSettle .rk-settle-han strong { font-size: 26px; line-height: 1; }
-#rkSettle .rk-settle-han span { font-size: 12px; color: #eee; }
-#rkSettle .rk-yaku-cols {
+#multiGameView.riichi-active #rkSettle .rk-settle-han strong { font-size: 26px; line-height: 1; }
+#multiGameView.riichi-active #rkSettle .rk-settle-han span { font-size: 12px; color: #eee; }
+#multiGameView.riichi-active #rkSettle .rk-yaku-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px 12px;
   margin: 8px 0;
 }
-#rkSettle .rk-yaku-tag {
+#multiGameView.riichi-active #rkSettle .rk-yaku-tag {
   background: #6a4028;
   color: #ffe8c0;
   border-radius: 8px;
@@ -655,7 +661,7 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   display: flex;
   justify-content: space-between;
 }
-#rkSettle .rk-settle-hand {
+#multiGameView.riichi-active #rkSettle .rk-settle-hand {
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
@@ -665,15 +671,15 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   padding: 8px;
   margin-top: 8px;
 }
-#rkSettle .rk-settle-hand img {
+#multiGameView.riichi-active #rkSettle .rk-settle-hand img {
   width: 32px;
   height: 44px;
   object-fit: contain;
   background: #f7f2e8;
   border-radius: 3px;
 }
-#rkSettle .rk-settle-hand .rk-win-sep { width: 8px; }
-#rkSettle .rk-settle-tier {
+#multiGameView.riichi-active #rkSettle .rk-settle-hand .rk-win-sep { width: 8px; }
+#multiGameView.riichi-active #rkSettle .rk-settle-tier {
   text-align: center;
   font-size: 26px;
   font-weight: 900;
@@ -681,12 +687,12 @@ html.table-stage-mj #multiGameView.riichi-active [data-mg-seat="2"],
   text-shadow: 0 2px 0 #000;
   margin-top: 6px;
 }
-#rkSettle .rk-settle-actions {
+#multiGameView.riichi-active #rkSettle .rk-settle-actions {
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
 }
-#rkSettle .rk-settle-actions button {
+#multiGameView.riichi-active #rkSettle .rk-settle-actions button {
   min-width: 96px;
   height: 40px;
   border-radius: 8px;
@@ -737,4 +743,26 @@ html.table-stage-jj #multiGameView.riichi-active .mj-jj-topbar,
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+
+/* play9fix2: kill riichi-only chrome outside riichi-active (keep shared .mj-wall for 推倒胡) */
+#multiGameView:not(.riichi-active) .rk-kawa,
+#multiGameView:not(.riichi-active) .rk-dora-bar,
+#multiGameView:not(.riichi-active) .rk-dial,
+#multiGameView:not(.riichi-active) .rk-ops,
+#multiGameView:not(.riichi-active) .rk-compass-scores,
+#multiGameView:not(.riichi-active) .rk-riichi-stick,
+#multiGameView:not(.riichi-active) #rkSettle {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* DDZ hand / play controls stay above any leftover multi layer */
+.lobby-shell.table-active:not(.multi-active):not(.texas-active) #tableView #handArea,
+.lobby-shell.table-active:not(.multi-active):not(.texas-active) #tableView #playControls,
+.lobby-shell.table-active:not(.multi-active):not(.texas-active) #tableView #playButton,
+.lobby-shell.table-active:not(.multi-active):not(.texas-active) #tableView .playing-card {
+  pointer-events: auto !important;
 }

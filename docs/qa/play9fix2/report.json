@@ -1,0 +1,444 @@
+{
+  "cache": "play9fix2",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5280/index.html?v=play9fix2",
+  "ed_repro": {
+    "path": "大厅→人机畅玩/斗地主出牌; 大厅→麻将→推倒胡+日麻进桌发牌弃牌; 竖屏414与横屏896",
+    "cache": "?v=play9fix2",
+    "fail_on": "select→play broken; MJ enter freeze; riichi CSS bleed; rotate90; matchMs!=3000"
+  },
+  "root_causes": [
+    "applyTelegramSafeArea called unbound tg.expand() on every viewportChanged → expand↔viewportChanged freeze on TG MJ enter (play9fix1 only rate-limited expandTelegramTable)",
+    "forceCloseMultiView omitted riichi-active + rkSettle/kawa teardown → Pocket walls/settle could bleed into 推倒胡/DDZ",
+    "html.table-landscape #multiGameView {display:grid!important} could override [hidden] on TG WebView covering DDZ hand",
+    "Unscoped #rkSettle {inset:0;z-index:80} could cover non-riichi tables"
+  ],
+  "files_changed": [
+    "apps/web-lobby/src/app.js",
+    "apps/web-lobby/src/table-landscape.css",
+    "apps/web-lobby/src/riichi-mahjong.css",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/tests/niuniu-lobby.test.js",
+    "apps/web-lobby/tests/riichi-lobby.test.js",
+    "docs/qa/play9fix2/"
+  ],
+  "shots": {
+    "lobby-896-home.png": {
+      "bytes": 232536,
+      "sha1": "5069be27dc9d"
+    },
+    "ddz-896-illegal-grey.png": {
+      "bytes": 294081,
+      "sha1": "22c6d9f9b234"
+    },
+    "ddz-896-touch-selected.png": {
+      "bytes": 303201,
+      "sha1": "1690dcbc204a"
+    },
+    "ddz-896-after-play.png": {
+      "bytes": 280555,
+      "sha1": "9276c9a768bd"
+    },
+    "mj-tdh-896-table.png": {
+      "bytes": 610705,
+      "sha1": "0d48796b255c"
+    },
+    "mj-tdh-896-after-discard.png": {
+      "bytes": 610897,
+      "sha1": "aef659107894"
+    },
+    "mj-riichi-896-table.png": {
+      "bytes": 673669,
+      "sha1": "f37a229e974e"
+    },
+    "mj-riichi-896-after-discard.png": {
+      "bytes": 686342,
+      "sha1": "3b36dcaa6338"
+    },
+    "ddz-post-riichi-illegal-grey.png": {
+      "bytes": 293330,
+      "sha1": "d76f17bea07c"
+    },
+    "ddz-post-riichi-touch-selected.png": {
+      "bytes": 303799,
+      "sha1": "1e94ef7d1a34"
+    },
+    "ddz-post-riichi-after-play.png": {
+      "bytes": 281470,
+      "sha1": "7e49188a4581"
+    },
+    "ddz-414-illegal-grey.png": {
+      "bytes": 571492,
+      "sha1": "fb07bbcf3352"
+    },
+    "ddz-414-touch-selected.png": {
+      "bytes": 580704,
+      "sha1": "71fe5a6cee1c"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 561380,
+      "sha1": "0b657163ab05"
+    },
+    "mj-tdh-414-table.png": {
+      "bytes": 760127,
+      "sha1": "3c70f38fb317"
+    },
+    "mj-tdh-414-after-discard.png": {
+      "bytes": 774390,
+      "sha1": "b6050aad1d6a"
+    },
+    "mj-riichi-414-table.png": {
+      "bytes": 614337,
+      "sha1": "55be4b58d2d2"
+    },
+    "mj-riichi-414-after-discard.png": {
+      "bytes": 614066,
+      "sha1": "a5c30d4acf5f"
+    }
+  },
+  "checks": {
+    "tg_expand_rate": {
+      "expandCalls": 0,
+      "hasTP": true
+    },
+    "ddz_896_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "ddz_896_hand_before": 17,
+    "ddz_896_illegal": {
+      "disabled": true,
+      "aria": "true",
+      "selected": []
+    },
+    "ddz_896_touch_select": {
+      "selected": [
+        "16_4_52"
+      ],
+      "selectedDom": 1,
+      "playDisabled": false,
+      "playPe": "auto"
+    },
+    "ddz_896_action_bar": {
+      "hitId": "playButton",
+      "hitCls": "qq-btn qq-btn-play is-recommended",
+      "playZ": "221",
+      "playRect": {
+        "w": 80,
+        "h": 34
+      },
+      "barZ": "220"
+    },
+    "ddz_896_after_play": {
+      "handN": 16,
+      "selected": []
+    },
+    "mj_tdh-896_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "mj_tdh-896_info": {
+      "handN": 13,
+      "riichiActive": false,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_tdh-896_discard": {
+      "before": 0,
+      "disc": 2,
+      "hand": 13
+    },
+    "mj_riichi-896_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "mj_riichi-896_info": {
+      "handN": 13,
+      "riichiActive": true,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_riichi-896_discard": {
+      "before": 0,
+      "disc": 1,
+      "hand": 14
+    },
+    "ddz_post-riichi_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "ddz_post-riichi_hand_before": 17,
+    "ddz_post-riichi_illegal": {
+      "disabled": true,
+      "aria": "true",
+      "selected": []
+    },
+    "ddz_post-riichi_touch_select": {
+      "selected": [
+        "15_0_12"
+      ],
+      "selectedDom": 1,
+      "playDisabled": false,
+      "playPe": "auto"
+    },
+    "ddz_post-riichi_action_bar": {
+      "hitId": "playButton",
+      "hitCls": "qq-btn qq-btn-play is-recommended",
+      "playZ": "221",
+      "playRect": {
+        "w": 80,
+        "h": 34
+      },
+      "barZ": "220"
+    },
+    "ddz_post-riichi_after_play": {
+      "handN": 16,
+      "selected": []
+    },
+    "post_riichi_bleed": {
+      "riichiActive": false,
+      "mgDisplay": "none",
+      "mgHidden": true,
+      "rkVisible": false
+    },
+    "ddz_414_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "ddz_414_hand_before": 17,
+    "ddz_414_illegal": {
+      "disabled": true,
+      "aria": "true",
+      "selected": []
+    },
+    "ddz_414_touch_select": {
+      "selected": [
+        "17_4_53"
+      ],
+      "selectedDom": 1,
+      "playDisabled": false,
+      "playPe": "auto"
+    },
+    "ddz_414_action_bar": {
+      "hitId": "playButton",
+      "hitCls": "qq-btn qq-btn-play is-recommended",
+      "playZ": "221",
+      "playRect": {
+        "w": 80,
+        "h": 40
+      },
+      "barZ": "220"
+    },
+    "ddz_414_after_play": {
+      "handN": 16,
+      "selected": []
+    },
+    "ddz_414_sizes": {
+      "card": {
+        "w": 48,
+        "h": 64
+      },
+      "play": {
+        "w": 0,
+        "h": 0,
+        "t": 0
+      },
+      "tvH": 896
+    },
+    "mj_tdh-414_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "mj_tdh-414_info": {
+      "handN": 13,
+      "riichiActive": false,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_tdh-414_discard": {
+      "before": 1,
+      "disc": 3,
+      "hand": 13
+    },
+    "mj_riichi-414_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "mj_riichi-414_info": {
+      "handN": 13,
+      "riichiActive": true,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_riichi-414_discard": {
+      "before": 1,
+      "disc": 2,
+      "hand": 14
+    }
+  },
+  "pass": {
+    "tg_expand_rate_limited": true,
+    "ddz_896_select_play": true,
+    "ddz_896_17_to_16": true,
+    "ddz_896_illegal_grey": true,
+    "ddz_896_no_rotate": true,
+    "ddz_896_touch_guard": true,
+    "mj_tdh-896_enter_deal": true,
+    "mj_tdh-896_discard": true,
+    "mj_tdh-896_no_rotate": true,
+    "mj_riichi-896_enter_deal": true,
+    "mj_riichi-896_discard": true,
+    "mj_riichi-896_no_rotate": true,
+    "ddz_post-riichi_select_play": true,
+    "ddz_post-riichi_17_to_16": true,
+    "ddz_post-riichi_illegal_grey": true,
+    "ddz_post-riichi_no_rotate": true,
+    "ddz_post-riichi_touch_guard": true,
+    "no_riichi_bleed_on_ddz": true,
+    "ddz_414_select_play": true,
+    "ddz_414_17_to_16": true,
+    "ddz_414_illegal_grey": true,
+    "ddz_414_no_rotate": true,
+    "ddz_414_touch_guard": true,
+    "mj_tdh-414_enter_deal": true,
+    "mj_tdh-414_discard": true,
+    "mj_tdh-414_no_rotate": true,
+    "mj_riichi-414_enter_deal": true,
+    "mj_riichi-414_discard": true,
+    "mj_riichi-414_no_rotate": true,
+    "no_page_errors": true,
+    "no_rotate_90": true
+  },
+  "ok": true,
+  "page_errors": []
+}
