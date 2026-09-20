@@ -816,8 +816,19 @@ export function createMahjongTable({
       }
       keep.push(c);
     }
+    // play9ship3: 必须从手牌实际扣除 need 张，否则拒绝碰/杠
+    if (removed < need) {
+      return { ok: false, reason: asGang ? 'no_gang' : 'no_peng' };
+    }
     state.hands[seat] = sortMahjongHand(keep);
     const from = state.lastDiscard?.player;
+    // play9ship3: 碰/杠后从弃牌河移除被吃的那张，避免「手牌未扣 / 河中仍在」错觉
+    if (state.discards.length) {
+      const last = state.discards[state.discards.length - 1];
+      if (last && last.player === from && sameTile(last.tile, tile)) {
+        state.discards.pop();
+      }
+    }
     if (asGang) {
       state.melds[seat].push({
         id: `m_${++state._meldSeq}`,
@@ -857,6 +868,7 @@ export function createMahjongTable({
       state.drawn = null;
       state.canHuSelf = canHu(state.hands[seat], state.melds[seat].length, state.missingSuits[seat]);
     }
+    return { ok: true, deducted: need, handLeft: state.hands[seat].length };
   }
 
   function discard(player, tileId) {
@@ -869,6 +881,15 @@ export function createMahjongTable({
     const hand = state.hands[player];
     const tile = hand.find((c) => c.id === tileId);
     if (!tile) return { ok: false, reason: 'missing' };
+
+    // play9ship3: 定缺未打完前只能打缺门（手牌校验）
+    const missing = state.missingSuits[player];
+    if (missing != null && missing >= 0 && missing <= 2) {
+      const hasQue = hand.some((c) => c.suit === missing);
+      if (hasQue && tile.suit !== missing) {
+        return { ok: false, reason: 'must_discard_dingque' };
+      }
+    }
 
     state.hands[player] = sortMahjongHand(hand.filter((c) => c.id !== tileId));
     state.discards.push({ player, tile });
@@ -982,8 +1003,9 @@ export function createMahjongTable({
       const same = countSame(state.hands[0], tile);
       if (action === 'peng' && same.length < 2) return { ok: false, reason: 'no_peng' };
       if (action === 'gang' && same.length < 3) return { ok: false, reason: 'no_gang' };
-      doPeng(0, tile, action === 'gang');
-      return { ok: true };
+      const pr = doPeng(0, tile, action === 'gang');
+      if (pr && pr.ok === false) return pr;
+      return { ok: true, peng: true, deducted: pr?.deducted };
     }
 
     // pass：胡权放弃后，其他人仍可碰/杠这张弃牌

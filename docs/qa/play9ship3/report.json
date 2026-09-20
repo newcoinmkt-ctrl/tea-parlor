@@ -1,0 +1,673 @@
+{
+  "cache": "play9ship3",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "url": "http://127.0.0.1:5293/index.html?v=play9ship3",
+  "ed_repro": {
+    "path": "大厅→DDZ选牌出牌; 麻将推倒胡碰杠扣牌+非空结算+倒计时; 日麻进桌; 牛牛抢庄下注开牌; 414+896",
+    "cache": "?v=play9ship3",
+    "fail_on": "DDZ select→play broken; MJ settle empty; peng no deduct; freeze on hide; rotate90; matchMs!=3000; Stars/TON/NFT"
+  },
+  "root_causes": [
+    "碰/杠后弃牌仍留河中 + 副露未可视化 → 手牌扣除不明显",
+    "定缺未强制先打缺门；倒计时到0不代打 → 回合冻结",
+    "结算仅 scheduleAi 调 showSettle，render 只飘分 → 偶发结算面板空",
+    "切后台无软代打 → 牌桌停住（完整托管后补）"
+  ],
+  "files_changed": [
+    "apps/web-lobby/src/games/mahjong/engine.js",
+    "apps/web-lobby/src/games/mahjong/ui.js",
+    "apps/web-lobby/src/jj-mahjong.css",
+    "apps/web-lobby/src/app.js",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/tests/mahjong-ship3.test.js",
+    "docs/qa/play9ship3/"
+  ],
+  "shots": {
+    "lobby-896-home.png": {
+      "bytes": 232489,
+      "sha1": "d3d5b7d7fcdb"
+    },
+    "ddz-896-illegal-grey.png": {
+      "bytes": 292199,
+      "sha1": "ceb65bcd6230"
+    },
+    "ddz-896-touch-selected.png": {
+      "bytes": 302974,
+      "sha1": "078469dd3174"
+    },
+    "ddz-896-after-play.png": {
+      "bytes": 281276,
+      "sha1": "be930683e42e"
+    },
+    "mj-tdh-896-table.png": {
+      "bytes": 615554,
+      "sha1": "2a206790be21"
+    },
+    "mj-tdh-896-after-discard.png": {
+      "bytes": 633041,
+      "sha1": "d9d65b9563f2"
+    },
+    "mj-tdh-896-settle.png": {
+      "bytes": 546662,
+      "sha1": "ea3fd8f7c327"
+    },
+    "mj-riichi-896-table.png": {
+      "bytes": 688938,
+      "sha1": "70154c1a1e59"
+    },
+    "mj-riichi-896-after-discard.png": {
+      "bytes": 696046,
+      "sha1": "cbd74bf64aeb"
+    },
+    "nn-896-enter.png": {
+      "bytes": 711108,
+      "sha1": "a96b33e815f8"
+    },
+    "nn-896-flow.png": {
+      "bytes": 314284,
+      "sha1": "6911459c6f83"
+    },
+    "ddz-post-riichi-illegal-grey.png": {
+      "bytes": 294757,
+      "sha1": "3d38a0cf1c0e"
+    },
+    "ddz-post-riichi-touch-selected.png": {
+      "bytes": 305069,
+      "sha1": "dd09efe0611d"
+    },
+    "ddz-post-riichi-after-play.png": {
+      "bytes": 282499,
+      "sha1": "c8ca88ea48d6"
+    },
+    "ddz-414-illegal-grey.png": {
+      "bytes": 571514,
+      "sha1": "6e9e5a3e9f61"
+    },
+    "ddz-414-touch-selected.png": {
+      "bytes": 580437,
+      "sha1": "fb5562e17442"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 561658,
+      "sha1": "6aa52bf1511c"
+    },
+    "mj-tdh-414-table.png": {
+      "bytes": 760592,
+      "sha1": "b3ed097fb3e5"
+    },
+    "mj-tdh-414-after-discard.png": {
+      "bytes": 775377,
+      "sha1": "a8d83d48631f"
+    },
+    "mj-tdh-414-settle.png": {
+      "bytes": 593998,
+      "sha1": "c7df62ee3305"
+    },
+    "mj-riichi-414-table.png": {
+      "bytes": 620798,
+      "sha1": "3a15a3b74105"
+    },
+    "mj-riichi-414-after-discard.png": {
+      "bytes": 623951,
+      "sha1": "e912b670ce75"
+    }
+  },
+  "checks": {
+    "tg_expand_rate": {
+      "expandCalls": 0,
+      "hasTP": true
+    },
+    "ddz_896_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "ddz_896_hand_before": 17,
+    "ddz_896_illegal": {
+      "disabled": true,
+      "aria": "true",
+      "selected": []
+    },
+    "ddz_896_touch_select": {
+      "selected": [
+        "15_1_25"
+      ],
+      "selectedDom": 1,
+      "playDisabled": false,
+      "playPe": "auto"
+    },
+    "ddz_896_action_bar": {
+      "hitId": "playButton",
+      "hitCls": "qq-btn qq-btn-play is-recommended",
+      "playZ": "221",
+      "playRect": {
+        "w": 80,
+        "h": 34
+      },
+      "barZ": "220"
+    },
+    "ddz_896_after_play": {
+      "handN": 16,
+      "selected": []
+    },
+    "mj_tdh-896_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "mj_tdh-896_info": {
+      "handN": 13,
+      "riichiActive": false,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_tdh-896_discard": {
+      "before": 1,
+      "disc": 3,
+      "hand": 14
+    },
+    "mj_tdh-896_countdown": {
+      "text": "15",
+      "display": "grid",
+      "visibility": "visible",
+      "opacity": "1"
+    },
+    "mj_tdh-896_settle": {
+      "ok": true,
+      "phase": "settle",
+      "deltas": [
+        600,
+        -200,
+        -200,
+        -200
+      ],
+      "nonEmpty": true,
+      "rows": 4,
+      "modalShown": true
+    },
+    "mj_tdh-896_peng": {
+      "before": 13,
+      "after": 11,
+      "melds": 1,
+      "deducted": 2
+    },
+    "mj_riichi-896_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "mj_riichi-896_info": {
+      "handN": 13,
+      "riichiActive": true,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_riichi-896_discard": {
+      "before": 0,
+      "disc": 1,
+      "hand": 14
+    },
+    "mj_riichi-896_countdown": {
+      "text": "33",
+      "display": "grid",
+      "visibility": "visible",
+      "opacity": "1"
+    },
+    "nn_896_enter": {
+      "nn": true,
+      "multi": true,
+      "status": "抢庄 · 发牌 · 看牌抢庄",
+      "actions": [
+        "不抢",
+        "1倍",
+        "2倍",
+        "3倍",
+        "4倍"
+      ]
+    },
+    "nn_896_steps": {
+      "phase_log": [
+        "不抢",
+        "1倍",
+        "开牌"
+      ],
+      "eng": {
+        "phase": "settle",
+        "deltas": [
+          20,
+          60,
+          40,
+          20,
+          80,
+          -220
+        ],
+        "nonEmpty": true,
+        "button": 5,
+        "log": [
+          [
+            "deal",
+            "qiangzhuang"
+          ],
+          [
+            "qiang0",
+            true,
+            "qiangzhuang"
+          ],
+          [
+            "qiang1",
+            true,
+            "qiangzhuang"
+          ],
+          [
+            "qiang2",
+            true,
+            "qiangzhuang"
+          ],
+          [
+            "qiang3",
+            true,
+            "qiangzhuang"
+          ],
+          [
+            "qiang4",
+            true,
+            "qiangzhuang"
+          ],
+          [
+            "qiang5",
+            true,
+            "dingzhuang"
+          ],
+          [
+            "afterQiang",
+            "xiazhu",
+            "btn",
+            5
+          ],
+          [
+            "xia0",
+            true,
+            "xiazhu"
+          ],
+          [
+            "xia1",
+            true,
+            "xiazhu"
+          ],
+          [
+            "xia2",
+            true,
+            "xiazhu"
+          ],
+          [
+            "xia3",
+            true,
+            "xiazhu"
+          ],
+          [
+            "xia4",
+            true,
+            "cuopai"
+          ],
+          [
+            "afterXia",
+            "cuopai"
+          ],
+          [
+            "liang0",
+            true,
+            "cuopai"
+          ],
+          [
+            "liang1",
+            true,
+            "cuopai"
+          ],
+          [
+            "liang2",
+            true,
+            "cuopai"
+          ],
+          [
+            "liang3",
+            true,
+            "cuopai"
+          ],
+          [
+            "liang4",
+            true,
+            "cuopai"
+          ],
+          [
+            "liang5",
+            true,
+            "settle"
+          ]
+        ]
+      },
+      "final": {
+        "hasSettle": true,
+        "status": "结算 · 结算 · 庄 小金 +5",
+        "rows": 6,
+        "nnActive": true
+      }
+    },
+    "ddz_post-riichi_stage": {
+      "stageLand": true,
+      "stageUpright": false,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": true,
+      "uprightTarget": false,
+      "transform": "matrix(1, 0, 0, 1, -448, -207)",
+      "noRotate90": true,
+      "stageW": "896px",
+      "stageH": "414px",
+      "stageScale": "1",
+      "rect": {
+        "w": 896,
+        "h": 414,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 896,
+      "vh": 414
+    },
+    "ddz_post-riichi_hand_before": 17,
+    "ddz_post-riichi_illegal": {
+      "disabled": true,
+      "aria": "true",
+      "selected": []
+    },
+    "ddz_post-riichi_touch_select": {
+      "selected": [
+        "15_0_12"
+      ],
+      "selectedDom": 1,
+      "playDisabled": false,
+      "playPe": "auto"
+    },
+    "ddz_post-riichi_action_bar": {
+      "hitId": "playButton",
+      "hitCls": "qq-btn qq-btn-play is-recommended",
+      "playZ": "221",
+      "playRect": {
+        "w": 80,
+        "h": 34
+      },
+      "barZ": "220"
+    },
+    "ddz_post-riichi_after_play": {
+      "handN": 16,
+      "selected": []
+    },
+    "post_riichi_bleed": {
+      "riichiActive": false,
+      "mgDisplay": "none",
+      "mgHidden": true,
+      "rkVisible": false
+    },
+    "ddz_414_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": false,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "ddz_414_hand_before": 17,
+    "ddz_414_illegal": {
+      "disabled": true,
+      "aria": "true",
+      "selected": []
+    },
+    "ddz_414_touch_select": {
+      "selected": [
+        "14_0_11"
+      ],
+      "selectedDom": 1,
+      "playDisabled": false,
+      "playPe": "auto"
+    },
+    "ddz_414_action_bar": {
+      "hitId": "playButton",
+      "hitCls": "qq-btn qq-btn-play is-recommended",
+      "playZ": "221",
+      "playRect": {
+        "w": 80,
+        "h": 40
+      },
+      "barZ": "220"
+    },
+    "ddz_414_after_play": {
+      "handN": 16,
+      "selected": []
+    },
+    "ddz_414_sizes": {
+      "card": {
+        "w": 48,
+        "h": 64
+      },
+      "play": {
+        "w": 0,
+        "h": 0,
+        "t": 0
+      },
+      "tvH": 896
+    },
+    "mj_tdh-414_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "mj_tdh-414_info": {
+      "handN": 13,
+      "riichiActive": false,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_tdh-414_discard": {
+      "before": 1,
+      "disc": 2,
+      "hand": 14
+    },
+    "mj_tdh-414_countdown": {
+      "text": "14",
+      "display": "grid",
+      "visibility": "visible",
+      "opacity": "1"
+    },
+    "mj_tdh-414_settle": {
+      "ok": true,
+      "phase": "settle",
+      "deltas": [
+        600,
+        -200,
+        -200,
+        -200
+      ],
+      "nonEmpty": true,
+      "rows": 4,
+      "modalShown": true
+    },
+    "mj_tdh-414_peng": {
+      "before": 13,
+      "after": 11,
+      "melds": 1,
+      "deducted": 2
+    },
+    "mj_riichi-414_stage": {
+      "stageLand": false,
+      "stageUpright": true,
+      "stageJj": true,
+      "stageMj": true,
+      "landTarget": false,
+      "uprightTarget": true,
+      "transform": "none",
+      "noRotate90": true,
+      "stageW": "414px",
+      "stageH": "896px",
+      "stageScale": "1",
+      "rect": {
+        "w": 414,
+        "h": 896,
+        "t": 0,
+        "l": 0
+      },
+      "vw": 414,
+      "vh": 896
+    },
+    "mj_riichi-414_info": {
+      "handN": 13,
+      "riichiActive": true,
+      "multiActive": true,
+      "mgDisplay": "flex",
+      "walls": 4
+    },
+    "mj_riichi-414_discard": {
+      "before": 0,
+      "disc": 1,
+      "hand": 13
+    },
+    "mj_riichi-414_countdown": {
+      "text": "34",
+      "display": "grid",
+      "visibility": "visible",
+      "opacity": "1"
+    }
+  },
+  "pass": {
+    "tg_expand_rate_limited": true,
+    "ddz_896_select_play": true,
+    "ddz_896_17_to_16": true,
+    "ddz_896_illegal_grey": true,
+    "ddz_896_no_rotate": true,
+    "ddz_896_touch_guard": true,
+    "mj_tdh-896_enter_deal": true,
+    "mj_tdh-896_discard": true,
+    "mj_tdh-896_no_rotate": true,
+    "mj_tdh-896_countdown": true,
+    "mj_tdh-896_settle_nonempty": true,
+    "mj_tdh-896_peng_deduct": true,
+    "mj_riichi-896_enter_deal": true,
+    "mj_riichi-896_discard": true,
+    "mj_riichi-896_no_rotate": true,
+    "nn_896_enter": true,
+    "nn_896_flow": true,
+    "ddz_post-riichi_select_play": true,
+    "ddz_post-riichi_17_to_16": true,
+    "ddz_post-riichi_illegal_grey": true,
+    "ddz_post-riichi_no_rotate": true,
+    "ddz_post-riichi_touch_guard": true,
+    "no_riichi_bleed_on_ddz": true,
+    "ddz_414_select_play": true,
+    "ddz_414_17_to_16": true,
+    "ddz_414_illegal_grey": true,
+    "ddz_414_no_rotate": true,
+    "ddz_414_touch_guard": true,
+    "mj_tdh-414_enter_deal": true,
+    "mj_tdh-414_discard": true,
+    "mj_tdh-414_no_rotate": true,
+    "mj_tdh-414_countdown": true,
+    "mj_tdh-414_settle_nonempty": true,
+    "mj_tdh-414_peng_deduct": true,
+    "mj_riichi-414_enter_deal": true,
+    "mj_riichi-414_discard": true,
+    "mj_riichi-414_no_rotate": true,
+    "no_page_errors": true,
+    "no_rotate_90": true
+  },
+  "ok": true,
+  "page_errors": [],
+  "commit": "ea3259b54220cdeb1e9ade462e5cd4c84fe5c3f1",
+  "branch": "play9ship3",
+  "base": "e9a80ce",
+  "ship_note": "GitHub write PAT blocked (403); local commit ready for push/PR/squash-merge + web-lobby deploy only"
+}

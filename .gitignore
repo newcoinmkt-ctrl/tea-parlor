@@ -25,3 +25,4 @@ apps/ops-service/data/
 .env
 .env.*
 !.env.example
+__pycache__/

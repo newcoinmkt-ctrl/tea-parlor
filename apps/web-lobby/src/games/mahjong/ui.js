@@ -36,6 +36,9 @@ export function createMahjongUI(options = {}) {
   /** play9mj1: turn countdown (JJ compass center) */
   let turnSeconds = 15;
   let turnTimer = null;
+  /** play9ship3: 倒计时到期 / 切后台 → 软代打，避免牌桌冻结（完整托管可后补） */
+  let softTrustee = false;
+  let disconnectBound = false;
   const BASE_SCORE = 1800;
   /** 开局掷骰/发牌动画进行中 */
   let opening = false;
@@ -54,6 +57,7 @@ export function createMahjongUI(options = {}) {
     sub: root.querySelector('#mgSub'),
     center: root.querySelector('#mgCenter'),
     hand: root.querySelector('#mgHand'),
+    melds: root.querySelector('#mgMelds'),
     actions: root.querySelector('#mgActions'),
     settleRow: root.querySelector('#mgSettleRow'),
     again: root.querySelector('#mgAgainBtn'),
@@ -171,6 +175,7 @@ export function createMahjongUI(options = {}) {
     selected = null;
     if (el.actions) { el.actions.hidden = true; el.actions.innerHTML = ''; }
     if (el.hand) el.hand.innerHTML = '';
+    if (el.melds) { el.melds.innerHTML = ''; el.melds.hidden = true; el.melds.setAttribute('hidden', ''); }
     if (el.settleRow) { el.settleRow.hidden = true; el.settleRow.setAttribute('hidden', ''); }
     root.hidden = true;
     root.setAttribute('hidden', '');
@@ -453,16 +458,119 @@ export function createMahjongUI(options = {}) {
     });
   }
 
+  function pickTimeoutDiscardId(snap) {
+    const hand = snap.hands?.[0] || [];
+    if (!hand.length) return null;
+    const miss = snap.missingSuits?.[0];
+    if (miss != null && miss >= 0 && miss <= 2) {
+      const que = hand.find((c) => c.suit === miss);
+      if (que) return que.id;
+    }
+    if (selected && hand.some((c) => c.id === selected)) return selected;
+    return hand[hand.length - 1]?.id || hand[0]?.id || null;
+  }
+
+  function autoTimeoutAct(reason = 'timeout') {
+    if (!table || opening) return;
+    const snap = table.snapshot();
+    if (!snap || snap.phase === 'settle') return;
+    softTrustee = true;
+    if (el.status) {
+      el.status.textContent = reason === 'disconnect'
+        ? '连接中断 · 已软代打（完整托管后补）'
+        : '倒计时到 · 系统代打';
+    }
+    if (snap.phase === 'call') {
+      table.humanCall('pass');
+      selected = null;
+      moveCount += 1;
+      render();
+      scheduleAi();
+      return;
+    }
+    if (snap.phase === 'exchange') {
+      const hand = snap.hands[0] || [];
+      const cur = [...(snap.exchangeSelected || [])];
+      for (const id of cur) table.toggleExchangeTile(id);
+      const set = suggestExchangeTiles(hand);
+      for (const t of set) table.toggleExchangeTile(t.id);
+      table.confirmExchange();
+      render();
+      scheduleAi();
+      return;
+    }
+    if (snap.phase === 'dingque') {
+      table.chooseDingque(0, -1);
+      selected = null;
+      render();
+      scheduleAi();
+      return;
+    }
+    if (snap.phase === 'discard' && snap.current === 0) {
+      if (snap.canHuSelf) {
+        const r = table.huSelf(0);
+        if (r.ok) {
+          selected = null;
+          render();
+          scheduleAi();
+          return;
+        }
+      }
+      const id = pickTimeoutDiscardId(snap);
+      if (!id) return;
+      const r = table.discard(0, id);
+      if (!r.ok) {
+        if (el.status) el.status.textContent = `代打失败（${r.reason || ''}）`;
+        return;
+      }
+      selected = null;
+      moveCount += 1;
+      render();
+      scheduleAi();
+    }
+  }
+
+  function bindDisconnectGuard() {
+    if (disconnectBound) return;
+    disconnectBound = true;
+    document.addEventListener('visibilitychange', () => {
+      if (!table || opening) return;
+      const snap = table.snapshot();
+      if (!snap || snap.phase === 'settle') return;
+      if (document.hidden) {
+        // play9ship3: 切后台至少不冻桌 — 软代打推进回合
+        softTrustee = true;
+        if (snap.current === 0 || snap.phase === 'call' || snap.phase === 'exchange' || snap.phase === 'dingque') {
+          autoTimeoutAct('disconnect');
+        } else {
+          scheduleAi();
+        }
+      }
+    });
+  }
+
   function startTurnTimer(snap) {
     stopTurnTimer();
     if (!snap || snap.phase === 'settle' || opening) return;
-    turnSeconds = 15;
+    turnSeconds = softTrustee ? 3 : 15;
     const cd = document.getElementById('mjCountdown');
-    if (cd) cd.textContent = String(turnSeconds).padStart(2, '0');
+    if (cd) {
+      cd.textContent = String(turnSeconds).padStart(2, '0');
+      cd.hidden = false;
+      cd.removeAttribute('hidden');
+    }
     turnTimer = setInterval(() => {
       turnSeconds = Math.max(0, turnSeconds - 1);
       if (cd) cd.textContent = String(turnSeconds).padStart(2, '0');
-      if (turnSeconds <= 0) stopTurnTimer();
+      if (turnSeconds <= 0) {
+        stopTurnTimer();
+        // 仅在需要真人行动时代打；AI 回合由 scheduleAi 推进
+        const s = table?.snapshot();
+        if (!s || s.phase === 'settle') return;
+        if (s.current === 0 || s.phase === 'call' || s.phase === 'exchange' || s.phase === 'dingque') {
+          autoTimeoutAct('timeout');
+        }
+      }
     }, 1000);
   }
 
@@ -495,12 +603,19 @@ export function createMahjongUI(options = {}) {
     const stake = opts.getStake();
     roomLabel = stake.label || modeName(stake.mode || 'xuezhan');
     settleReported = false;
+    softTrustee = false;
     selected = null;
     moveCount = 0;
     stopAi();
     clearOpenTimers();
     hideOpenLayer();
     hideResult();
+    bindDisconnectGuard();
+    if (el.melds) {
+      el.melds.innerHTML = '';
+      el.melds.hidden = true;
+      el.melds.setAttribute('hidden', '');
+    }
 
     const names = ['茶馆', '茶友A', '茶友B', '茶友C'];
     const seq = ++openSeq;
@@ -807,6 +922,29 @@ export function createMahjongUI(options = {}) {
     return parts.length ? parts.join(' · ') : '';
   }
 
+
+  function renderMelds(snap) {
+    if (!el.melds) return;
+    const melds = snap.melds?.[0] || [];
+    if (!melds.length) {
+      el.melds.innerHTML = '';
+      el.melds.hidden = true;
+      el.melds.setAttribute('hidden', '');
+      return;
+    }
+    el.melds.hidden = false;
+    el.melds.removeAttribute('hidden');
+    el.melds.innerHTML = melds.map((m) => {
+      const n = m.type === 'gang' ? 4 : 3;
+      const tile = m.tile || { suit: m.suit, rank: m.rank };
+      const label = m.type === 'gang' ? '杠' : m.type === 'peng' ? '碰' : (m.type || '副露');
+      const faces = Array.from({ length: n }, () => (
+        `<span class="mg-tile mj-tile mj-meld-tile ${tileSuitClass(tile)}">${tileFaceHtml(tile)}</span>`
+      )).join('');
+      return `<div class="mg-meld-group" data-meld-type="${m.type || ''}" title="${label}">${faces}<em class="mg-meld-tag">${label}</em></div>`;
+    }).join('');
+  }
+
   function render() {
     if (!table || opening) return;
     const snap = table.snapshot();
@@ -820,8 +958,10 @@ export function createMahjongUI(options = {}) {
     renderWalls(snap.wallLeft, snap.playerCount);
     syncJjScores(snap);
     syncJjWinds(snap);
+    renderMelds(snap);
     if (snap.phase === 'settle') {
       showHuSettle(snap);
+      showSettle(snap);
       stopTurnTimer();
     } else {
       hideHuSettle();
@@ -1143,7 +1283,11 @@ export function createMahjongUI(options = {}) {
     }
     const r = table.discard(0, selected);
     if (!r.ok) {
-      if (el.status) el.status.textContent = `无法打出（${r.reason || '错误'}）`;
+      if (el.status) {
+        el.status.textContent = r.reason === 'must_discard_dingque'
+          ? '定缺未打完：请先打缺门牌'
+          : `无法打出（${r.reason || '错误'}）`;
+      }
       return;
     }
     selected = null;
@@ -1155,18 +1299,36 @@ export function createMahjongUI(options = {}) {
   function showSettle(snap) {
     if (el.settleRow) el.settleRow.hidden = false;
     if (el.actions) el.actions.hidden = true;
-    const deltas = snap.deltas || snap.scores || [];
+    // play9ship3: 结算不得为空 — scores/deltas/ledger 兜底
+    const nSeats = snap.playerCount || snap.names?.length || 4;
+    const names = (snap.names && snap.names.length)
+      ? snap.names
+      : Array.from({ length: nSeats }, (_, i) => (i === 0 ? '茶馆' : `茶友${String.fromCharCode(64 + i)}`));
+    let deltas = Array.isArray(snap.deltas) ? snap.deltas.slice() : [];
+    if (!deltas.length && Array.isArray(snap.scores)) deltas = snap.scores.slice();
+    while (deltas.length < names.length) deltas.push(0);
+    if (!deltas.some((d) => Number(d) !== 0) && Array.isArray(snap.ledger)) {
+      // 从 ledger 回填，防止 scores 被清零时 UI 空白
+      const rebuilt = Array.from({ length: names.length }, () => 0);
+      for (const rec of snap.ledger) {
+        if (rec && typeof rec.amount === 'number' && rec.to != null && rec.from != null) {
+          rebuilt[rec.to] = (rebuilt[rec.to] || 0) + rec.amount;
+          rebuilt[rec.from] = (rebuilt[rec.from] || 0) - rec.amount;
+        }
+      }
+      if (rebuilt.some((d) => d !== 0)) deltas = rebuilt;
+    }
     const huSet = new Set(snap.huOrder || (snap.winner >= 0 ? [snap.winner] : []));
     if (el.modalBody) {
-      el.modalBody.innerHTML = snap.names
+      el.modalBody.innerHTML = names
         .map((name, i) => {
-          const d = deltas[i] || 0;
+          const d = Number(deltas[i] || 0);
           const cls = d > 0 ? 'win' : d < 0 ? 'lose' : '';
           const win = huSet.has(i);
           const order = (snap.huOrder || []).indexOf(i);
           const huLabel = win
             ? (order >= 0 ? `胡${order + 1}` : '胡')
-            : (snap.status?.[i] === PlayerStatus.HU_STAY ? '留场' : '—');
+            : (snap.status?.[i] === PlayerStatus.HU_STAY ? '留场' : (snap.finishedReason === 'wall_empty' ? '流局' : '—'));
           const player = resultPlayerHtml({
             seat: i,
             name,
@@ -1179,7 +1341,7 @@ export function createMahjongUI(options = {}) {
             + `<td>${huLabel}</td>`
             + `<td>${d > 0 ? '+' : ''}${d}</td></tr>`;
         })
-        .join('');
+        .join('') || '<tr><td colspan="3">本局无得分明细</td></tr>';
     }
     const you = deltas[0] || 0;
     const win = huSet.has(0);

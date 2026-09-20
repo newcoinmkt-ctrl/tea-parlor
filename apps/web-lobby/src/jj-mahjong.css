@@ -747,3 +747,50 @@ html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-targe
   min-height: 40px !important;
   pointer-events: auto !important;
 }
+
+
+/* play9ship3: 副露区 — 碰/杠后手牌扣除可视化 */
+.mg-hand-dock .mg-melds,
+#mgMelds.mg-melds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: flex-end;
+  justify-content: flex-start;
+  min-height: 0;
+  margin: 0 0 4px 2px;
+  max-width: 100%;
+}
+#mgMelds.mg-melds[hidden] {
+  display: none !important;
+}
+.mg-meld-group {
+  position: relative;
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px 4px 2px 2px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 220, 140, 0.28);
+}
+.mg-meld-group .mj-meld-tile {
+  transform: scale(0.82);
+  transform-origin: bottom left;
+  pointer-events: none;
+}
+.mg-meld-tag {
+  position: absolute;
+  right: -2px;
+  top: -8px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  color: #ffe08a;
+  text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  pointer-events: none;
+}
+html.table-stage-mj #mjCountdown.mj-countdown {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
