@@ -1,0 +1,15 @@
+{
+  "slice": "play9fin2c",
+  "cache": "play9fin2c",
+  "ok": true,
+  "checks": {
+    "five_tabs": "repeat(5) + labels 大厅/战绩/补给/说明/我",
+    "no_clip": "minmax(0,1fr) + ellipsis labels + padding-bottom",
+    "tappable": "pointer-events auto + min-height 48px",
+    "no_page_rotate": "table-orient + jj-table Forbidden",
+    "tg_vh": "preserved",
+    "regression": "DDZ/MJ/NiuNiu wired; no Stars; no new game icons",
+    "fin2a_logos": "slots still present",
+    "fin2b_trustee": "trustee buttons present"
+  }
+}
