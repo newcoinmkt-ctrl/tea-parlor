@@ -1,0 +1,15 @@
+{
+  "slice": "play9fin3c",
+  "cache": "play9fin3c",
+  "ok": true,
+  "checks": {
+    "dual_smoke_ddz": "two clients + steps + settle",
+    "dual_smoke_mj": "two clients + steps + settle",
+    "regression_tabs": "five tabs",
+    "regression_games": "DDZ/MJ/NN",
+    "no_stars_chain_rotate_withdraw": true,
+    "fin3a_trustee": true,
+    "fin3b_ads": true,
+    "tg_vh": true
+  }
+}
