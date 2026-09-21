@@ -9,18 +9,18 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin6b" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin6b" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin6c" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -94,7 +94,7 @@
         <div class="stage-content">
           <section class="home-app" data-lobby-view="home" aria-label="茶馆主房间">
             <p class="home-kicker">茶馆主房间</p>
-            <p class="lobby-version-stamp" id="lobbyVersionStamp" aria-label="版本缓存戳">茶馆 play9fin6b · cache play9fin6b</p>
+            <p class="lobby-version-stamp" id="lobbyVersionStamp" aria-label="版本缓存戳">茶馆 play9fin6c · cache play9fin6c</p>
             <strong id="homePlayerName" hidden>茶馆</strong>
 
             <div class="p0-home-chrome">
@@ -127,7 +127,7 @@
                 <strong>麻将</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="niuniu">
-                <img src="./public/assets/home/icon-niuniu.png?v=play9fin6b" alt="" />
+                <img src="./public/assets/home/icon-niuniu.png?v=play9fin6c" alt="" />
                 <strong>牛牛</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="texas">
@@ -153,7 +153,7 @@
             </section>
             <p class="home-chain-hint">USDT 专用 · 与金币场分开</p>
 
-            <!-- play9fin6b: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
+            <!-- play9fin6c: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
             <section class="activity-entry-band" aria-label="活动入口">
               <button type="button" class="activity-entry-btn" data-lobby-action="activity" id="homeActivityEntry">
                 <span class="activity-entry-ico" aria-hidden="true">🎁</span>
@@ -165,7 +165,7 @@
               </button>
             </section>
 
-            <!-- play9fin6b: light social — room code / invite OR recent same-table -->
+            <!-- play9fin6c: light social — room code / invite OR recent same-table -->
             <section class="social-entry-band" aria-label="轻社交入口">
               <button type="button" class="social-entry-btn" data-lobby-action="social" id="homeSocialEntry">
                 <span class="social-entry-ico" aria-hidden="true">👥</span>
@@ -1275,7 +1275,7 @@
           </section>
 
 
-          <!-- play9fin6b: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
+          <!-- play9fin6c: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
           <section class="panel-page activity-page" data-lobby-view="activity" aria-label="活动中心" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1327,7 +1327,7 @@
 
           <!-- 战绩 -->
           
-          <!-- play9fin6b: light social — room code invite + recent same-table; NO full IM -->
+          <!-- play9fin6c: light social — room code invite + recent same-table; NO full IM -->
           <section class="panel-page social-page" data-lobby-view="social" aria-label="约局同桌" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1345,11 +1345,17 @@
               </header>
               <div class="social-room-row">
                 <button type="button" class="gold-button" data-lobby-action="friend-room" id="socialOpenFriendRoom">打开好友房</button>
+                <button type="button" class="muted-button" id="socialGenInviteBtn">生成邀请链接</button>
                 <label class="social-join-label">
                   <span>输入房间号</span>
                   <input id="socialRoomCodeInput" type="text" maxlength="32" placeholder="如 dual_ddz_xxx" autocomplete="off" />
                 </label>
                 <button type="button" class="muted-button" id="socialJoinRoomBtn">加入同桌</button>
+              </div>
+              <div class="social-invite-preview" id="socialInvitePreview" hidden>
+                <p>Telegram 深链（startapp）· 另一会话点开可入同桌</p>
+                <code id="socialInviteUrl">t.me/…</code>
+                <button type="button" class="muted-button" id="socialCopyInviteBtn">复制链接</button>
               </div>
               <p class="social-status" id="socialStatus" aria-live="polite">可生成邀请链接或输入房间号加入</p>
             </div>
@@ -2009,7 +2015,7 @@
             <span><b>用 AI 补位</b><small>满座前可用机器人先开局</small></span>
             <input id="ddzFriendAi" type="checkbox" />
           </label>
-          <button type="button" class="p0-friend-ghost" id="ddzFriendLink">生成邀请链接</button>
+          <button type="button" class="p0-friend-ghost" id="ddzFriendLink">生成邀请链接 · startapp</button>
           <button type="button" class="p0-friend-gold" id="ddzFriendEnter">进入同桌</button>
           <button type="button" id="ddzFriendShare">发给好友</button>
           <div class="p0-tg-preview" id="ddzFriendPreview" hidden>
@@ -2024,6 +2030,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9fin6b"></script>
+    <script type="module" src="./src/app.js?v=play9fin6c"></script>
   </body>
 </html>

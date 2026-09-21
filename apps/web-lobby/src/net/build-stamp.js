@@ -1,9 +1,9 @@
 /**
- * play9fin6b — settle page polish
+ * play9fin6c — TG invite deep link + full regression
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9fin6b';
-export const BUILD_VERSION = 'play9fin6b';
+export const CACHE_STAMP = 'play9fin6c';
+export const BUILD_VERSION = 'play9fin6c';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

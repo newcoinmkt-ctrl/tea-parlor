@@ -1,5 +1,5 @@
 /**
- * play9fin6b — settle page polish
+ * play9fin6c — settle page polish
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,10 +17,10 @@ const nn = readFileSync(join(root, 'src/games/niuniu/ui.js'), 'utf8');
 const mj = readFileSync(join(root, 'src/games/mahjong/ui.js'), 'utf8');
 const rcss = readFileSync(join(root, 'src/riichi-mahjong.css'), 'utf8');
 
-test('cache play9fin6b', () => {
-  assert.match(html, /app\.js\?v=play9fin6b/);
-  assert.equal(CACHE_STAMP, 'play9fin6b');
-  assert.equal(BUILD_VERSION, 'play9fin6b');
+test('cache play9fin6c', () => {
+  assert.match(html, /app\.js\?v=play9fin6c/);
+  assert.equal(CACHE_STAMP, 'play9fin6c');
+  assert.equal(BUILD_VERSION, 'play9fin6c');
   assert.doesNotMatch(html, /app\.js\?v=play9fin6a/);
 });
 
@@ -61,7 +61,7 @@ test('fin6a room/match preserved', () => {
   assert.match(app, /showDdzMatchWaiting|retryDdzMatch/);
 });
 
-test('docs/qa play9fin6b present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin6b/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin6b/report.json')), true);
+test('docs/qa play9fin6c present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin6c/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin6c/report.json')), true);
 });
