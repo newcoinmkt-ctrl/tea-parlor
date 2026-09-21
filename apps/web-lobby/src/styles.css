@@ -26689,3 +26689,12 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
 .p0-match-mask.is-fail .p0-match-seats {
   opacity: 0.35;
 }
+
+
+/* play9fin6b — settle chip readability */
+.tx-result-table th:last-child { color: #f6e3a4; }
+.tx-result-you .flat { color: #f7f2e6; font-size: 20px; }
+#mgResultModal .tx-result-you .pos,
+#ddzResultModal .tx-result-you .pos { color: #7dffb0; font-size: 22px; }
+#mgResultModal .tx-result-you .neg,
+#ddzResultModal .tx-result-you .neg { color: #ff8a7a; font-size: 22px; }
