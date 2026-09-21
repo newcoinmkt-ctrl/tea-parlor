@@ -1,0 +1,12 @@
+{
+  "slice": "play9fin5b",
+  "cache": "play9fin5b",
+  "ok": true,
+  "checks": {
+    "activity_session_prompt_retry": true,
+    "no_silent_claim_fail": true,
+    "yaku_decompose_thickened": true,
+    "settle_lists_yaku_separately": true,
+    "cache_play9fin5b": true
+  }
+}

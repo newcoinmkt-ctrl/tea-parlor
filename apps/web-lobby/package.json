@@ -13,7 +13,8 @@
     "test:fin4a": "node --test tests/play9fin4c-activity.test.js tests/play9fin2c-lobby-tabs.test.js",
     "test:fin4b": "node --test tests/play9fin4c-rarer-yaku.test.js tests/play9fin1c-yaku-fu.test.js",
     "test:fin4c": "node --test tests/play9fin4c-regression.test.js tests/play9fin4a-activity.test.js tests/play9fin4b-rarer-yaku.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js",
-    "test:fin5a": "node --test tests/play9fin5a-recent-tables.test.js tests/play9fin4c-regression.test.js tests/play9fin4a-activity.test.js tests/play9fin4b-rarer-yaku.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js"
+    "test:fin5a": "node --test tests/play9fin5a-recent-tables.test.js tests/play9fin4c-regression.test.js tests/play9fin4a-activity.test.js tests/play9fin4b-rarer-yaku.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js",
+    "test:fin5b": "node --test tests/play9fin5b-activity-yaku.test.js tests/play9fin5a-recent-tables.test.js tests/play9fin4b-rarer-yaku.test.js tests/play9fin4a-activity.test.js tests/play9fin4c-regression.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js"
   },
   "dependencies": {
     "@tea-parlor/common": "file:../../packages/common"

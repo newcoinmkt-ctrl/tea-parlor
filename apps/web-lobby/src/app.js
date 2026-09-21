@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin5a';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin5a';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin5a';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin5a';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin5a';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin5b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin5b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin5b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin5b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin5b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -72,6 +72,7 @@ import {
   DAILY_SUPPLY_AMOUNT,
   DAILY_SUPPLY_LIMIT,
   DAILY_SUPPLY_TG_PROMPT,
+  DAILY_SUPPLY_TG_RETRY,
   DAILY_SUPPLY_NON_CASH,
   formatDailySupplyStatus,
   formatDailySupplyClaimSuccess,
@@ -4543,7 +4544,7 @@ function applyServerShadowBalance(summary) {
 
 /** play9fin4c: activity center — chips-only daily supply; no Stars/chain top-up */
 
-/** play9fin5a: recent same-table — server-backed when session available; localStorage cache/fallback */
+/** play9fin5b: recent same-table — server-backed when session available; localStorage cache/fallback */
 const RECENT_TABLE_KEY = 'tea-parlor-recent-tables';
 const RECENT_TABLE_MAX = 8;
 let _recentTablesCache = null;
@@ -4609,7 +4610,7 @@ function rememberRecentTable({ roomKey, game = 'doudizhu', label } = {}) {
   const next = loadRecentTables().filter((x) => x.roomKey !== key);
   next.unshift(entry);
   saveRecentTables(next);
-  // play9fin5a: push to server when TG session available (survives refresh / device switch)
+  // play9fin5b: push to server when TG session available (survives refresh / device switch)
   const token = getLobbySessionToken();
   if (token) {
     postRecentTableApi(token, entry).then((body) => {
@@ -4714,10 +4715,11 @@ function bindSocialUi() {
 function syncActivityClaimStatus() {
   const el = document.getElementById('activityClaimStatus');
   const btn = document.getElementById('activityClaimBtn');
-  if (!el && !btn) return;
+  const retry = document.getElementById('activitySessionRetryBtn');
+  if (!el && !btn && !retry) return;
   const left = Math.max(0, DAILY_CLAIM_LIMIT - (Number(appState.claims?.count) || 0));
   const hasSession = Boolean(getLobbySessionToken());
-  const text = formatDailySupplyStatus({
+  const statusText = formatDailySupplyStatus({
     remaining: left,
     limit: DAILY_CLAIM_LIMIT,
     amount: DAILY_CLAIM_AMOUNT,
@@ -4725,8 +4727,13 @@ function syncActivityClaimStatus() {
   });
   if (el) {
     const current = String(el.textContent || '');
-    const keep = /已领取|领取失败|领取中|请从 Telegram|今日补给次数已用完/.test(current);
-    if (!keep || !hasSession) el.textContent = hasSession ? text : DAILY_SUPPLY_TG_PROMPT;
+    const keep = /已领取|领取失败|领取中|今日补给次数已用完/.test(current);
+    if (!hasSession) {
+      // play9fin5b: never silent — always show clear TG prompt when session missing
+      el.textContent = /重试登录|仍未就绪/.test(current) ? current : DAILY_SUPPLY_TG_PROMPT;
+    } else if (!keep) {
+      el.textContent = statusText;
+    }
   }
   if (btn) {
     btn.disabled = !hasSession || left <= 0;
@@ -4736,13 +4743,77 @@ function syncActivityClaimStatus() {
       hasSession,
     });
   }
+  if (retry) {
+    retry.hidden = hasSession;
+    retry.disabled = false;
+  }
 }
 
 function renderActivityPage() {
   syncActivityClaimStatus();
+  bindActivitySessionRetry();
   const legal = document.getElementById('activityLegal');
   if (legal) {
     legal.textContent = '奖励仅为影子金币（内部娱乐筹码）· 不可提现 · 不支持 Stars / 链上充值';
+  }
+}
+
+/** play9fin5b: retry TG session login when claim blocked — clear prompt, no silent fail */
+function bindActivitySessionRetry() {
+  if (bindActivitySessionRetry._done) return;
+  bindActivitySessionRetry._done = true;
+  document.getElementById('activitySessionRetryBtn')?.addEventListener('click', () => {
+    retryActivityTelegramSession();
+  });
+}
+
+async function retryActivityTelegramSession() {
+  const el = document.getElementById('activityClaimStatus');
+  const retry = document.getElementById('activitySessionRetryBtn');
+  if (el) el.textContent = '正在重试 Telegram 登录…';
+  if (retry) retry.disabled = true;
+  showLobbyToast('正在重试 Telegram 登录…');
+  try {
+    const tg = window.Telegram?.WebApp;
+    const initData = typeof tg?.initData === 'string' ? tg.initData : '';
+    if (!initData) {
+      const msg = DAILY_SUPPLY_TG_RETRY;
+      if (el) el.textContent = msg;
+      showLobbyToast(msg);
+      return;
+    }
+    const start = String(tg.initDataUnsafe?.start_param || new URLSearchParams(location.search).get('tgWebAppStartParam') || '');
+    const body = await loginWithTelegramInitData(initData, { startParam: start });
+    if (body?.token) {
+      window.__teaParlorSessionToken = body.token;
+      const uid = body?.user?.id != null ? String(body.user.id) : '';
+      if (uid) window.__teaParlorSessionUserId = uid;
+      try {
+        const summary = await fetchWalletSummary(body.token);
+        applyServerShadowBalance(summary);
+        applyDailySupplyStatus(summary?.dailySupply);
+        saveState();
+      } catch (_) {
+        await syncDailySupplyFromServer();
+      }
+      renderAccount();
+      syncActivityClaimStatus();
+      const ok = 'Telegram 会话已就绪 · 可领取每日补给（影子金币不可提现）';
+      if (el) el.textContent = ok;
+      showLobbyToast(ok);
+    } else {
+      const msg = DAILY_SUPPLY_TG_RETRY;
+      if (el) el.textContent = msg;
+      showLobbyToast(msg);
+    }
+  } catch (err) {
+    const msg = `${DAILY_SUPPLY_TG_RETRY}（${err?.message || 'login_failed'}）`;
+    if (el) el.textContent = msg;
+    showLobbyToast(msg);
+    console.warn('[tea-parlor] activity session retry failed', err?.message || err);
+  } finally {
+    if (retry) retry.disabled = false;
+    syncActivityClaimStatus();
   }
 }
 
@@ -4780,9 +4851,15 @@ async function onClaim() {
   refreshClaims();
   const token = getLobbySessionToken();
   if (!token) {
+    // play9fin5b: clear prompt + surface retry (never silent fail)
     const msg = DAILY_SUPPLY_TG_PROMPT;
     if (nodes.claimStatus) nodes.claimStatus.textContent = msg;
+    const actSt = document.getElementById('activityClaimStatus');
+    if (actSt) actSt.textContent = msg;
+    const retry = document.getElementById('activitySessionRetryBtn');
+    if (retry) retry.hidden = false;
     showLobbyToast(msg);
+    syncActivityClaimStatus();
     renderAccount();
     return;
   }

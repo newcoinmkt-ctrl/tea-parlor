@@ -1,10 +1,14 @@
 /**
  * Pure copy helpers for 每日补给 UI (server-authoritative, shadow / non-cash).
+ * play9fin5b: clearer TG-session missing prompt + retry hint (no silent fail).
  */
 export const DAILY_SUPPLY_LIMIT = 4;
 export const DAILY_SUPPLY_AMOUNT = 4000;
 
-export const DAILY_SUPPLY_TG_PROMPT = '请从 Telegram 打开茶馆领取每日补给';
+export const DAILY_SUPPLY_TG_PROMPT =
+  '未检测到 Telegram 会话 · 请从 Telegram 打开茶馆后领取（不可静默失败）';
+export const DAILY_SUPPLY_TG_RETRY =
+  '会话仍未就绪 · 点「重试登录」或从 Telegram 重新打开茶馆';
 export const DAILY_SUPPLY_EXHAUSTED = '今日补给次数已用完';
 export const DAILY_SUPPLY_NON_CASH = '影子金币 · 不可提现';
 
@@ -21,11 +25,13 @@ export function formatDailySupplyClaimSuccess({ amount = DAILY_SUPPLY_AMOUNT, re
 
 export function formatDailySupplyExhaustedReason(reason) {
   if (reason === 'daily_supply_exhausted') return '今日补给次数已用完';
-  return reason || '领取失败';
+  if (!reason) return '领取失败 · 请重试';
+  if (/session|auth|401|unauthorized/i.test(String(reason))) return DAILY_SUPPLY_TG_PROMPT;
+  return String(reason);
 }
 
 export function claimButtonLabel({ remaining, amount = DAILY_SUPPLY_AMOUNT, hasSession = true } = {}) {
-  if (!hasSession) return '请从 Telegram 打开';
+  if (!hasSession) return '需 Telegram 会话';
   const left = Math.max(0, Number(remaining) || 0);
   if (left <= 0) return '今日已领完';
   return `领取 ${Number(amount).toLocaleString('zh-CN')}`;
