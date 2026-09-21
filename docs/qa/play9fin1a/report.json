@@ -1,0 +1,12 @@
+{
+  "slice": "play9fin1a",
+  "cache": "play9fin1a",
+  "ok": true,
+  "checks": {
+    "ddz_soft_park": "parkColyseus leave(false) + token",
+    "ddz_reenter": "startColyseusDdzSession reconnect",
+    "mj_persist_restore": "sessionStorage engine state",
+    "wall_clock_countdown": "turnEndsAt / ddzTurnEndsAt",
+    "tg_vh": "preserved"
+  }
+}

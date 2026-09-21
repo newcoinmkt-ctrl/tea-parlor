@@ -13,6 +13,13 @@ import { riichiAiStep } from './riichi-ai.js';
 const ASSET = './public/assets/mahjong-pocket';
 const TILE = `${ASSET}/tiles`;
 
+import {
+  saveMjSession,
+  peekMjSession,
+  clearMjSession,
+  remainSeconds,
+} from '../../net/table-session.js';
+
 let _instance = null;
 
 function tileImg(t, cls = '') {
@@ -42,6 +49,7 @@ export function createRiichiUI(options = {}) {
   let settleReported = false;
   let turnSeconds = 34;
   let turnTimer = null;
+  let turnEndsAt = 0;
   let openSeq = 0;
   let softTrustee = false;
   let disconnectBound = false;
@@ -191,7 +199,9 @@ export function createRiichiUI(options = {}) {
     if (!table) return;
     const snap = table.snapshot();
     if (!snap || snap.phase === 'settle') return;
-    turnSeconds = softTrustee ? 3 : 15;
+    const budget = softTrustee ? 3 : 15;
+    turnEndsAt = Date.now() + budget * 1000;
+    turnSeconds = budget;
     const cd = document.getElementById('mjCountdown');
     if (cd) {
       cd.textContent = String(turnSeconds).padStart(2, '0');
@@ -199,14 +209,13 @@ export function createRiichiUI(options = {}) {
       cd.removeAttribute('hidden');
     }
     turnTimer = setInterval(() => {
-      turnSeconds = Math.max(0, turnSeconds - 1);
+      turnSeconds = remainSeconds(turnEndsAt, 0);
       if (cd) cd.textContent = String(turnSeconds).padStart(2, '0');
       if (turnSeconds <= 0) {
         stopTurnTimer();
-        const s = table?.snapshot();
-        if (s && (s.current === 0 || s.phase === 'call')) autoTimeoutAct('timeout');
+        autoTimeoutAct('timeout');
       }
-    }, 1000);
+    }, 250);
   }
 
   function show() {
@@ -244,7 +253,52 @@ export function createRiichiUI(options = {}) {
     try { window.dispatchEvent(new Event('resize')); } catch (_) { /* ignore */ }
   }
 
+
+  function persistSoftSession() {
+    if (!table) return;
+    const snap = table.snapshot();
+    if (!snap || snap.phase === 'settle') {
+      clearMjSession('riichi');
+      return;
+    }
+    try {
+      const stake = opts.getStake();
+      saveMjSession('riichi', {
+        mode: 'riichi',
+        label: stake.label || '日麻',
+        state: JSON.parse(JSON.stringify(table.state)),
+        turnEndsAt,
+        softTrustee,
+      });
+    } catch (e) {
+      console.warn('[riichi] persistSoftSession', e);
+    }
+  }
+
+  function tryRestoreSession() {
+    const stake = opts.getStake();
+    const saved = peekMjSession('riichi', 'riichi');
+    if (!saved?.state) return false;
+    table = createRiichiTable({
+      stake: stake.stake || 100,
+      names: saved.state.names || ['茶馆', '东家', '南家', '西家'],
+    });
+    try {
+      const st = saved.state;
+      for (const k of Object.keys(st)) table.state[k] = st[k];
+    } catch (e) {
+      console.warn('[riichi] hydrate failed', e);
+      clearMjSession('riichi');
+      return false;
+    }
+    softTrustee = !!saved.softTrustee;
+    turnEndsAt = Number(saved.turnEndsAt) || 0;
+    if (el.status) el.status.textContent = '已重连回桌';
+    return true;
+  }
+
   function hide() {
+    persistSoftSession();
     openSeq += 1;
     stopAi();
     stopTurnTimer();
@@ -501,6 +555,7 @@ export function createRiichiUI(options = {}) {
 
     if (!settleReported) {
       settleReported = true;
+      clearMjSession('riichi');
       opts.onSettle({
         deltas: s.deltas || [0, 0, 0, 0],
         winner: snap.winner,
@@ -683,6 +738,15 @@ export function createRiichiUI(options = {}) {
     show();
     if (el.title) el.title.textContent = stake.label || '日麻';
     if (el.status) el.status.textContent = '发牌中…';
+    // play9fin1a: resume parked riichi table
+    if (tryRestoreSession()) {
+      show();
+      render();
+      scheduleAi();
+      startTurnTimer();
+      return;
+    }
+    clearMjSession('riichi');
     table = createRiichiTable({
       names: ['茶馆', '茶友A', '茶友B', '茶友C'],
     });
