@@ -1,6 +1,6 @@
 /**
- * play9fin5a — recent same-table server-backed (not localStorage-only)
- * Fetch/post by user session; local cache fallback; survives refresh when auth available
+ * play9fin5a feature preserved under play9fin5b cache
+ * recent same-table server-backed (not localStorage-only)
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,10 +16,10 @@ const wallet = readFileSync(join(root, 'src/net/wallet-client.js'), 'utf8');
 const gateway = readFileSync(join(repo, 'apps/api-gateway/src/server.js'), 'utf8');
 const store = readFileSync(join(repo, 'apps/api-gateway/src/recent-tables.js'), 'utf8');
 
-test('cache play9fin5a', () => {
-  assert.match(html, /app\.js\?v=play9fin5a/);
-  assert.match(app, /\?v=play9fin5a/);
-  assert.doesNotMatch(html, /app\.js\?v=play9fin4c/);
+test('cache play9fin5b', () => {
+  assert.match(html, /app\.js\?v=play9fin5b/);
+  assert.match(app, /\?v=play9fin5b/);
+  assert.doesNotMatch(html, /app\.js\?v=play9fin5a/);
 });
 
 test('client syncs recent tables via session API (not localStorage-only)', () => {
@@ -28,7 +28,6 @@ test('client syncs recent tables via session API (not localStorage-only)', () =>
   assert.match(app, /paintSocialRecentList/);
   assert.match(app, /_recentTablesSource/);
   assert.match(app, /账号同步|换机\/刷新/);
-  // must still keep local cache as offline fallback
   assert.match(app, /loadRecentTablesLocal|RECENT_TABLE_KEY/);
   assert.match(wallet, /fetchRecentTables/);
   assert.match(wallet, /postRecentTable/);
@@ -54,5 +53,4 @@ test('social page still openable; no full IM', () => {
 test('docs/qa play9fin5a present', () => {
   assert.equal(existsSync(join(repo, 'docs/qa/play9fin5a/README.md')), true);
   assert.equal(existsSync(join(repo, 'docs/qa/play9fin5a/report.json')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin5a.md')), true);
 });

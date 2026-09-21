@@ -9,18 +9,18 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin5a" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin5a" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin5b" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin5b" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -126,7 +126,7 @@
                 <strong>麻将</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="niuniu">
-                <img src="./public/assets/home/icon-niuniu.png?v=play9fin5a" alt="" />
+                <img src="./public/assets/home/icon-niuniu.png?v=play9fin5b" alt="" />
                 <strong>牛牛</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="texas">
@@ -152,7 +152,7 @@
             </section>
             <p class="home-chain-hint">USDT 专用 · 与金币场分开</p>
 
-            <!-- play9fin5a: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
+            <!-- play9fin5b: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
             <section class="activity-entry-band" aria-label="活动入口">
               <button type="button" class="activity-entry-btn" data-lobby-action="activity" id="homeActivityEntry">
                 <span class="activity-entry-ico" aria-hidden="true">🎁</span>
@@ -164,7 +164,7 @@
               </button>
             </section>
 
-            <!-- play9fin5a: light social — room code / invite OR recent same-table -->
+            <!-- play9fin5b: light social — room code / invite OR recent same-table -->
             <section class="social-entry-band" aria-label="轻社交入口">
               <button type="button" class="social-entry-btn" data-lobby-action="social" id="homeSocialEntry">
                 <span class="social-entry-ico" aria-hidden="true">👥</span>
@@ -1273,7 +1273,7 @@
           </section>
 
 
-          <!-- play9fin5a: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
+          <!-- play9fin5b: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
           <section class="panel-page activity-page" data-lobby-view="activity" aria-label="活动中心" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1296,9 +1296,12 @@
                   <strong class="activity-reward-amt">4,000 影子金币</strong>
                   <span class="activity-reward-note">不可提现 · 不可兑外部资产</span>
                 </div>
-                <button type="button" class="gold-button" data-lobby-action="claim" id="activityClaimBtn">领取每日补给</button>
+                <div class="activity-claim-actions">
+                  <button type="button" class="gold-button" data-lobby-action="claim" id="activityClaimBtn">领取每日补给</button>
+                  <button type="button" class="muted-button" id="activitySessionRetryBtn" hidden>重试登录</button>
+                </div>
               </div>
-              <p class="activity-status" id="activityClaimStatus" aria-live="polite">请从 Telegram 打开茶馆领取每日补给</p>
+              <p class="activity-status" id="activityClaimStatus" aria-live="polite">未检测到 Telegram 会话 · 请从 Telegram 打开茶馆后领取</p>
             </div>
 
             <div class="activity-list" aria-label="今日活动">
@@ -1322,7 +1325,7 @@
 
           <!-- 战绩 -->
           
-          <!-- play9fin5a: light social — room code invite + recent same-table; NO full IM -->
+          <!-- play9fin5b: light social — room code invite + recent same-table; NO full IM -->
           <section class="panel-page social-page" data-lobby-view="social" aria-label="约局同桌" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -2009,6 +2012,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9fin5a"></script>
+    <script type="module" src="./src/app.js?v=play9fin5b"></script>
   </body>
 </html>
