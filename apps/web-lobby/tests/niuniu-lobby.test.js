@@ -30,10 +30,10 @@ test('lobby grid lists 牛牛 beside DDZ/麻将 without breaking existing games'
   assert.doesNotMatch(html, /data-game-room="niuniu"[^>]*data-currency="crypto"/);
 });
 
-test('cache play9fin2c + niuniu.css', () => {
-  assert.match(html, /app\.js\?v=play9fin2c/);
-  assert.match(html, /niuniu\.css\?v=play9fin2c/);
-  assert.match(appSrc, /\?v=play9fin2c/);
+test('cache play9fin3c + niuniu.css', () => {
+  assert.match(html, /app\.js\?v=play9fin3c/);
+  assert.match(html, /niuniu\.css\?v=play9fin3c/);
+  assert.match(appSrc, /\?v=play9fin3c/);
   assert.doesNotMatch(html, /\?v=play9ship1/);
 });
 
@@ -64,7 +64,7 @@ test('niu0–niu17 stamps copied', () => {
 });
 
 test('colyseus /health lists niuniu without requiring NnRoom', () => {
-  assert.match(colyseus, /games: \['doudizhu', 'niuniu'\]/);
+  assert.match(colyseus, /games: \['doudizhu', 'mahjong', 'niuniu'\]/);
   assert.match(colyseus, /no NnRoom/);
   assert.match(colyseus, /gameServer\.define\('doudizhu'/);
   assert.doesNotMatch(colyseus, /define\('niuniu'/);
