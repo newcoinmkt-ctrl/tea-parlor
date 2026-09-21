@@ -1,9 +1,9 @@
 /**
- * play9fin5c — light observability: version / cache stamp
+ * play9fin6a — room select / match thicken
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9fin5c';
-export const BUILD_VERSION = 'play9fin5c';
+export const CACHE_STAMP = 'play9fin6a';
+export const BUILD_VERSION = 'play9fin6a';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

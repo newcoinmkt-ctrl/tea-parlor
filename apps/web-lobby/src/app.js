@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin5c';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin5c';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin5c';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin5c';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin5c';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin6a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin6a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin6a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin6a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin6a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -83,6 +83,8 @@ import {
 import {
   ddzMatchFailureCopy,
   ddzMatchFailureTitle,
+  ddzMatchWaitingCopy,
+  ddzMatchWaitingTitle,
   DDZ_LOCAL_PLAY_HINT,
   DDZ_LOCAL_PLAY_LABEL,
 } from './net/ddz-match-copy.js';
@@ -238,6 +240,10 @@ let ddzLane = 'gold';
 let ddzMatchTimer = 0;
 let ddzKeepOverlay = false;
 let ddzMatchAborted = false;
+/** play9fin6a: visible field selection for DDZ rooms */
+let selectedDdzRoomId = 'novice';
+let lastMatchRoomId = 'novice';
+let lastMatchOpts = { variant: 'classic', currency: 'ingot' };
 
 const DDZ_TIER_IDS = {
   gold: ['novice', 'classic', 'high'],
@@ -3004,6 +3010,11 @@ function bindUi() {
         const key = roomCard.getAttribute('data-mj-mode') || 'xuezhan';
         const t = MAHJONG_TABLES[key];
         if (t?.currency) currency = t.currency;
+        roomCard.closest('.room-grid')?.querySelectorAll('[data-game-room="mahjong"]').forEach((b) => {
+          const on = b === roomCard;
+          b.classList.toggle('is-selected', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
         startMahjong(key, { currency });
         return;
       }
@@ -3032,6 +3043,12 @@ function bindUi() {
         const key = roomCard.getAttribute('data-nn') || 'novice';
         const t = NIUNIU_TABLES[key];
         if (t?.currency) currency = t.currency;
+        // play9fin6a: visible field selection before enter
+        roomCard.closest('.room-grid')?.querySelectorAll('[data-game-room="niuniu"]').forEach((b) => {
+          const on = b === roomCard;
+          b.classList.toggle('is-selected', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
         startNiuniu(key, { currency });
         return;
       }
@@ -3039,6 +3056,9 @@ function bindUi() {
       const roomMeta = ROOMS[roomId];
       if (roomMeta?.currency) currency = roomMeta.currency;
       const ddzMode = roomCard.getAttribute('data-ddz-mode') || ddzVariant || 'classic';
+      selectedDdzRoomId = roomId;
+      markDdzRoomSelected(roomId);
+      paintDdzFieldSelect();
       startDdzMatched(roomId, { currency, variant: ddzMode });
     }
   }, true);
@@ -3116,7 +3136,7 @@ function handleLobbyAction(action, opts = {}) {
   if (action === 'home') setLobbyView('home');
   else if (action === 'open-games' || action === 'games') setLobbyView('games');
   else if (action === 'quick-doudizhu') {
-    startDdzMatched('novice', { variant: 'classic' });
+    startDdzMatched(selectedDdzRoomId || 'novice', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
   }
   else if (action === 'quick-doudizhu-classic') {
     const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
@@ -5076,28 +5096,131 @@ function mountP0Overlay(el) {
 }
 
 function startDdzMatched(roomId, options = {}) {
-  const mask = document.getElementById('ddzMatchMask');
-  const copy = document.getElementById('ddzMatchCopy');
-  const title = mask?.querySelector('h2');
   const room = ROOMS[roomId] || ROOMS.novice;
-  if (title) title.textContent = '匹配中';
-  if (copy) copy.textContent = '匹配中…';
-  ddzKeepOverlay = true;
-  ddzMatchAborted = false;
-  if (mask) {
-    mountP0Overlay(mask);
-    mask.hidden = false;
-    mask.removeAttribute('hidden');
-    mask.style.setProperty('display', 'grid', 'important');
-  }
-  clearTimeout(ddzMatchTimer);
-  startRoom(roomId, {
+  selectedDdzRoomId = room.id || roomId || 'novice';
+  lastMatchRoomId = selectedDdzRoomId;
+  lastMatchOpts = {
     variant: options.variant || 'classic',
     currency: options.currency || room.currency || 'ingot',
+  };
+  paintDdzFieldSelect();
+  markDdzRoomSelected(selectedDdzRoomId);
+  showDdzMatchWaiting({
+    roomLabel: roomLabelForMatch(selectedDdzRoomId),
+    humans: 1,
+    seats: 3,
+    leftMs: 3000,
+  });
+  ddzKeepOverlay = true;
+  ddzMatchAborted = false;
+  clearTimeout(ddzMatchTimer);
+  startRoom(selectedDdzRoomId, {
+    variant: lastMatchOpts.variant,
+    currency: lastMatchOpts.currency,
     online: true,
     backend: 'colyseus',
     keepMatchOverlay: true,
   });
+}
+
+function roomLabelForMatch(roomId) {
+  const room = ROOMS[roomId] || ROOMS.novice;
+  const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
+  const idx = ids.indexOf(roomId);
+  const tier = idx >= 0 ? (DDZ_TIER_LABEL[idx] || room.name) : (room?.name || '场次');
+  return `${tier} · 底分 ${room?.stake ?? '—'}`;
+}
+
+function paintDdzFieldSelect() {
+  const el = document.getElementById('ddzFieldSelect');
+  if (!el) return;
+  const room = ROOMS[selectedDdzRoomId] || ROOMS.novice;
+  const ids = DDZ_TIER_IDS[ddzLane] || DDZ_TIER_IDS.gold;
+  const idx = ids.indexOf(selectedDdzRoomId);
+  const tier = idx >= 0 ? (DDZ_TIER_LABEL[idx] || room.name) : (room?.name || '场次');
+  el.textContent = `已选场次：${tier} · 底分 ${room?.stake ?? '—'} · 点卡片匹配 / 快速开始`;
+}
+
+function markDdzRoomSelected(roomId) {
+  const grid = document.getElementById('ddzRoomGrid');
+  if (!grid) return;
+  grid.querySelectorAll('[data-room]').forEach((btn) => {
+    const on = btn.getAttribute('data-room') === roomId;
+    btn.classList.toggle('is-selected', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+function paintMatchSeats(humans = 1, seats = 3) {
+  const root = document.getElementById('ddzMatchSeats');
+  if (!root) return;
+  const n = Math.max(0, Math.min(seats, Number(humans) || 0));
+  root.querySelectorAll('.p0-match-seat').forEach((el, i) => {
+    const filled = i < n;
+    el.classList.toggle('is-filled', filled);
+    el.textContent = filled ? (i === 0 ? '我' : '座') : '空';
+  });
+}
+
+function showDdzMatchWaiting({ roomLabel, humans = 1, seats = 3, leftMs = 3000 } = {}) {
+  const mask = document.getElementById('ddzMatchMask');
+  const copy = document.getElementById('ddzMatchCopy');
+  const title = document.getElementById('ddzMatchTitle') || mask?.querySelector('h2');
+  const field = document.getElementById('ddzMatchField');
+  const eta = document.getElementById('ddzMatchEta');
+  const retry = document.getElementById('ddzMatchRetry');
+  if (title) title.textContent = ddzMatchWaitingTitle();
+  if (field) field.textContent = roomLabel || roomLabelForMatch(selectedDdzRoomId);
+  if (copy) copy.textContent = ddzMatchWaitingCopy({ roomLabel: roomLabel || roomLabelForMatch(selectedDdzRoomId), humans, seats, leftMs });
+  paintMatchSeats(humans, seats);
+  if (eta) {
+    const sec = Math.max(0, Math.ceil((Number(leftMs) || 0) / 1000));
+    eta.hidden = false;
+    eta.removeAttribute('hidden');
+    eta.textContent = `约 ${sec}s（超时 AI 补位）`;
+  }
+  if (retry) {
+    retry.hidden = true;
+    retry.setAttribute('hidden', '');
+  }
+  if (mask) {
+    mountP0Overlay(mask);
+    mask.hidden = false;
+    mask.removeAttribute('hidden');
+    mask.classList.remove('is-fail');
+    mask.style.setProperty('display', 'grid', 'important');
+  }
+}
+
+function showDdzMatchFailure(msg) {
+  const mask = document.getElementById('ddzMatchMask');
+  const copy = document.getElementById('ddzMatchCopy');
+  const title = document.getElementById('ddzMatchTitle') || mask?.querySelector('h2');
+  const eta = document.getElementById('ddzMatchEta');
+  const retry = document.getElementById('ddzMatchRetry');
+  ddzKeepOverlay = true;
+  if (title) title.textContent = ddzMatchFailureTitle(msg);
+  if (copy) copy.textContent = ddzMatchFailureCopy(msg);
+  if (eta) {
+    eta.hidden = true;
+    eta.setAttribute('hidden', '');
+  }
+  if (retry) {
+    retry.hidden = false;
+    retry.removeAttribute('hidden');
+  }
+  if (mask) {
+    mountP0Overlay(mask);
+    mask.hidden = false;
+    mask.removeAttribute('hidden');
+    mask.classList.add('is-fail');
+    mask.style.setProperty('display', 'grid', 'important');
+  }
+}
+
+function retryDdzMatch() {
+  const rid = lastMatchRoomId || selectedDdzRoomId || 'novice';
+  startDdzMatched(rid, { ...lastMatchOpts });
 }
 
 /** Non-TG QA / offline: honest local AI table — copy must not say 匹配. */
@@ -5277,7 +5400,12 @@ function bindP0Lobby() {
   document.getElementById('ddzQuickStart')?.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    startDdzMatched('novice', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
+    startDdzMatched(selectedDdzRoomId || 'novice', { variant: 'classic', currency: ddzLane === 'season' ? 'crypto' : 'ingot' });
+  });
+  document.getElementById('ddzMatchRetry')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    retryDdzMatch();
   });
   document.getElementById('ddzLocalPlay')?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -5321,24 +5449,31 @@ function renderDdzRooms(variantId = ddzVariant) {
 
   if (!grid) return;
   const unit = ddzLane === 'season' ? '赛季积分' : '影子积分';
+  if (!rooms.some((r) => r.id === selectedDdzRoomId)) {
+    selectedDdzRoomId = rooms[0]?.id || 'novice';
+  }
   grid.innerHTML = rooms.map((room, idx) => {
     const label = DDZ_TIER_LABEL[idx] || room.name;
     const queue = DDZ_QUEUE[idx] || '匹配中';
+    const selected = room.id === selectedDdzRoomId;
+    const selCls = selected ? ' is-selected' : '';
+    const primary = idx === 1 ? ' primary-room' : '';
     return (
-      `<button class="room-card room-card-qq p0-room${idx === 1 ? ' primary-room' : ''}" type="button" data-game-room="doudizhu" data-room="${room.id}" data-ddz-mode="classic">`
+      `<button class="room-card room-card-qq p0-room${primary}${selCls}" type="button" data-game-room="doudizhu" data-room="${room.id}" data-ddz-mode="classic" aria-pressed="${selected ? 'true' : 'false'}">`
       + `<strong class="room-name-center">${label}</strong>`
       + `<span class="room-meta">底分 ${room.stake} · 入场 ${format(room.minEntry)} ${unit}</span>`
       + `<span class="p0-queue">${queue}</span>`
-      + `<span class="room-action">进入</span>`
+      + `<span class="room-action">${selected ? '已选' : '进入'}</span>`
       + `</button>`
     );
   }).join('');
+  paintDdzFieldSelect();
 
   const hint = document.querySelector('.p0-dock-hint');
-  if (hint) hint.textContent = '快速开始=联网匹配 · 人机畅玩不经匹配';
+  if (hint) hint.textContent = '快速开始=联网匹配已选场次 · 人机畅玩不经匹配';
   const quick = document.getElementById('ddzQuickStart');
   if (quick) {
-    quick.setAttribute('data-room', 'novice');
+    quick.setAttribute('data-room', selectedDdzRoomId || 'novice');
     quick.setAttribute('data-ddz-mode', 'classic');
   }
 }
@@ -5438,24 +5573,11 @@ function startRoom(roomId, options = {}) {
       const authFail = /auth/i.test(msg);
       // Quick-match overlay: never pretend local AI was a successful online match.
       if (keepOverlay || ddzKeepOverlay) {
-        ddzKeepOverlay = true;
-        const mask = document.getElementById('ddzMatchMask');
-        const copy = document.getElementById('ddzMatchCopy');
-        const title = mask?.querySelector('h2');
-        if (mask) {
-          mountP0Overlay(mask);
-          mask.hidden = false;
-          mask.removeAttribute('hidden');
-          mask.style.setProperty('display', 'grid', 'important');
-        }
-        if (title) title.textContent = ddzMatchFailureTitle(msg);
-        if (copy) {
-          copy.textContent = ddzMatchFailureCopy(msg);
-        }
+        showDdzMatchFailure(msg);
         if (nodes.claimStatus) {
           nodes.claimStatus.textContent = authFail
             ? '登录校验失败，请从 Telegram 打开'
-            : '斗地主联网匹配失败';
+            : '斗地主联网匹配失败 · 可重试';
         }
         onlineBackend = null;
         return;
@@ -5683,30 +5805,31 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
 }
 
 function syncMatchOverlay(room) {
-  const copy = document.getElementById('ddzMatchCopy');
   if (room?.phase === 'match') {
-    ddzKeepOverlay = true;
-    const mask = document.getElementById('ddzMatchMask');
-    if (mask) {
-      mountP0Overlay(mask);
-      mask.hidden = false;
-      mask.removeAttribute('hidden');
-      mask.style.setProperty('display', 'grid', 'important');
-    }
     const ends = Number(room.matchEndsAt) || 0;
-    const leftMs = ends ? Math.max(0, ends - Date.now()) : 0;
-    // play9v2: silent match UI — no AI 替补 / countdown seconds in copy
-    if (copy) copy.textContent = '匹配中…';
-    const titleEl = document.querySelector('#ddzMatchMask h2');
-    if (titleEl) titleEl.textContent = '匹配中';
+    const leftMs = ends ? Math.max(0, ends - Date.now()) : 3000;
+    const humans = Math.max(1, Number(room.humanCount) || 1);
+    const seats = Math.max(3, Number(room.seatCount) || 3);
+    // play9fin6a: clear waiting feedback — room + seats + ETA (≤3s)
+    showDdzMatchWaiting({
+      roomLabel: roomLabelForMatch(selectedDdzRoomId || game?.roomId || 'novice'),
+      humans,
+      seats,
+      leftMs,
+    });
     clearTimeout(ddzMatchTimer);
-    // Tick overlay from server matchEndsAt; never hide while phase === match.
     if (leftMs > 0) {
       ddzMatchTimer = setTimeout(() => {
         if (game?.phase === 'match' && game.matchEndsAt === ends) {
-          syncMatchOverlay({ phase: 'match', matchEndsAt: ends, status: room.status });
+          syncMatchOverlay({
+            phase: 'match',
+            matchEndsAt: ends,
+            status: room.status,
+            humanCount: humans,
+            seatCount: seats,
+          });
         }
-      }, Math.min(500, leftMs));
+      }, Math.min(400, leftMs));
     }
     return;
   }

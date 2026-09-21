@@ -16,8 +16,8 @@ const adsFeat = readFileSync(join(root, 'src/features/ads/index.js'), 'utf8');
 const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const manifestPath = join(root, 'public/ads/manifest.json');
 
-test('cache play9fin5c', () => {
-  assert.match(html, /app\.js\?v=play9fin5c/);
+test('cache play9fin6a', () => {
+  assert.match(html, /app\.js\?v=play9fin6a/);
 });
 
 test('static ads manifest covers skin/card/felt/clothes', () => {

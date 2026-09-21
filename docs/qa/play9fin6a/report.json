@@ -1,0 +1,11 @@
+{
+  "wave": "play9fin6a",
+  "cache": "play9fin6a",
+  "goals": [
+    "visible room/field selection",
+    "quick match waiting feedback",
+    "MATCH_MS \u22643s",
+    "failure retryable"
+  ],
+  "status": "ready"
+}

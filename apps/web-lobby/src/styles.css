@@ -26607,3 +26607,85 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
   color: #fff8e8;
   border-color: rgba(255, 240, 180, 0.6);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   play9fin6a — room select visible + match waiting thicken
+   ═══════════════════════════════════════════════════════════════ */
+.room-card.is-selected,
+.room-card[aria-pressed="true"] {
+  outline: 2px solid rgba(246, 227, 164, 0.95);
+  box-shadow: 0 0 0 3px rgba(201, 154, 58, 0.35), 0 8px 22px rgba(0, 0, 0, 0.28);
+  transform: translateY(-1px);
+}
+.room-card.is-selected .room-action,
+.room-card[aria-pressed="true"] .room-action {
+  color: #3a2508;
+  background: linear-gradient(180deg, #f6e3a4, #c99a3a);
+}
+.p0-field-select {
+  margin: 8px 12px 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(18, 34, 26, 0.88);
+  border: 1px solid rgba(232, 195, 106, 0.28);
+  color: #f6e3a4;
+  font-size: 13px;
+  text-align: center;
+}
+.p0-match-field {
+  margin: 0 0 8px;
+  color: #f6e3a4;
+  font-size: 14px;
+  font-weight: 700;
+}
+.p0-match-seats {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.p0-match-seat {
+  min-width: 44px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(247, 242, 230, 0.55);
+  font-size: 12px;
+}
+.p0-match-seat.is-filled {
+  background: linear-gradient(180deg, #f6e3a4, #c99a3a);
+  color: #3a2508;
+  font-weight: 800;
+}
+.p0-match-eta {
+  margin: 0 0 8px;
+  color: rgba(247, 242, 230, 0.72);
+  font-size: 12px;
+}
+.p0-match-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.p0-match-actions button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 0 !important;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.p0-match-retry {
+  background: linear-gradient(180deg, #f6e3a4, #c99a3a) !important;
+  color: #3a2508 !important;
+  font-weight: 800;
+}
+.p0-match-mask.is-fail .p0-match-dot {
+  background: #e07a6a;
+}
+.p0-match-mask.is-fail .p0-match-seats {
+  opacity: 0.35;
+}
