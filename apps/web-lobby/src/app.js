@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin3a';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin3a';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin3a';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin3a';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin3a';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin3b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin3b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin3b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin3b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin3b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -5337,7 +5337,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
         ? '已重连回桌 · 完整托管中'
         : '完整托管中';
       if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
-      // play9fin3a: re-assert server fullTrustee after reconnect (idempotent)
+      // play9fin3b: re-assert server fullTrustee after reconnect (idempotent)
       colyseusClient.ddzSetTrustee?.(true).catch(() => {});
     }
   }
@@ -5487,7 +5487,7 @@ function applyPinusRoom(room, roomMeta, currency) {
     game._bottomHidden = true;
   }
   if (room.status) hintText = room.status;
-  // play9fin3a: sync trustee UI from server-authoritative myFullTrustee / seats
+  // play9fin3b: sync trustee UI from server-authoritative myFullTrustee / seats
   if (typeof room.myFullTrustee === 'boolean' || typeof room.myTrustee === 'boolean') {
     const srv = !!(room.myFullTrustee ?? room.myTrustee);
     trustee = srv;
@@ -6140,7 +6140,7 @@ function onToggleTrustee() {
     hintText = on ? '已托管（完整代打中）' : '已取消托管';
     if (nodes.trusteeButton) nodes.trusteeButton.textContent = on ? '取消托管' : '托管';
     if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
-    // play9fin3a: if Colyseus MJ room active, also authorize server
+    // play9fin3b: if Colyseus MJ room active, also authorize server
     if (game?.online && onlineBackend === 'colyseus' && colyseusClient.mjSetTrustee) {
       colyseusClient.mjSetTrustee(on).catch(() => {});
     }
@@ -6157,7 +6157,7 @@ function onToggleTrustee() {
     }
   } catch (_) { /* ignore */ }
   renderGame();
-  // play9fin3a: online → Colyseus authoritative; forbid pure client auto-play
+  // play9fin3b: online → Colyseus authoritative; forbid pure client auto-play
   if (game?.online && onlineBackend === 'colyseus') {
     colyseusClient.ddzSetTrustee?.(trustee).then((data) => {
       if (data?.room) {
@@ -6520,7 +6520,7 @@ function aiThinkMs() {
 function scheduleAi() {
   clearAi();
   if (!game || game.phase === 'settle') return;
-  // 联网局：AI/托管在 Colyseus 服务端驱动，前端禁止纯客户端代打 (play9fin3a)
+  // 联网局：AI/托管在 Colyseus 服务端驱动，前端禁止纯客户端代打 (play9fin3b)
   if (game.online) return;
   if (game.phase === 'bid' && game.bidTurn === HUMAN) {
     if (trustee) aiTimer = setTimeout(() => onBid(safeAiBid(HUMAN)), 320);

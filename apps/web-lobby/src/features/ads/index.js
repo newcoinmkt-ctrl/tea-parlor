@@ -1,5 +1,6 @@
 import {
   resolveAdsUrl,
+  resolveInlineAdsConfig,
   resolveOpsBase,
   fetchOpsCatalog,
   fetchPlayerStatus,
@@ -9,9 +10,13 @@ import { loadAndApplyBrandPlacements } from '../../shared/branding.js';
 
 export function initAdPlacements({ search = window.location.search, logger = console } = {}) {
   mountCharLogos();
-  const adsUrl = resolveAdsUrl(new URLSearchParams(search).get('adsUrl'));
+  // play9fin3b: config chain query → env URL → inline JSON → static manifest → placeholder
+  const queryAds = new URLSearchParams(search).get('adsUrl');
+  const adsUrl = resolveAdsUrl(queryAds);
+  // Explicit ?adsUrl wins over inline env JSON
+  const inline = queryAds ? null : resolveInlineAdsConfig();
   try {
-    loadAndApplyBrandPlacements(adsUrl);
+    loadAndApplyBrandPlacements(adsUrl, { inlineConfig: inline, preferUrl: !!queryAds });
   } catch (error) {
     logger.warn?.('[TeaParlor] brand', error);
   }

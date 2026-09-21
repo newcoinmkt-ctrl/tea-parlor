@@ -1,0 +1,13 @@
+{
+  "slice": "play9fin3b",
+  "cache": "play9fin3b",
+  "ok": true,
+  "checks": {
+    "manifest": "public/ads/manifest.json",
+    "env_inject": "TEA_PARLOR_ADS_URL + TEA_PARLOR_ADS_CONFIG",
+    "normalize": "normalizeAdPlacement swappable image+link",
+    "fallback": "PLACEHOLDER_AD_LOGO + img onerror",
+    "pointer_events": "none preserved",
+    "tg_vh": "preserved"
+  }
+}
