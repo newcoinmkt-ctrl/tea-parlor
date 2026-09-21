@@ -1,0 +1,12 @@
+{
+  "slice": "play9fin1b",
+  "cache": "play9fin1b",
+  "ok": true,
+  "checks": {
+    "ddz_dual_humans_settle": true,
+    "mj_dual_humans_settle": true,
+    "mahjong_room_registered": true,
+    "friend_dual_enter": true,
+    "tg_vh": "preserved"
+  }
+}
