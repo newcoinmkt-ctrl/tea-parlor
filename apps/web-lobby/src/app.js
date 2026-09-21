@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin1b';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin1b';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin1b';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin1b';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin1b';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin1c';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin1c';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin1c';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin1c';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin1c';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -4810,7 +4810,7 @@ function hideDdzMatch() {
 }
 
 
-/** play9fin1b: wall-clock DDZ turn countdown (does not freeze when tab hidden) */
+/** play9fin1c: wall-clock DDZ turn countdown (does not freeze when tab hidden) */
 let ddzTurnEndsAt = 0;
 let ddzTurnClockTimer = null;
 function stopDdzTurnClock() {
@@ -4841,7 +4841,7 @@ function cancelDdzMatch() {
 }
 
 
-/** play9fin1b: dual-session shared room key (two TG / two clients same table) */
+/** play9fin1c: dual-session shared room key (two TG / two clients same table) */
 function ensureDualRoomKey(game = 'ddz') {
   try {
     const k = sessionStorage.getItem('tea-parlor-dual-room');
@@ -4862,7 +4862,7 @@ function openFriendRoom(id) {
   const panel = document.getElementById('ddzFriendPanel');
   const rid = document.getElementById('ddzFriendId');
   const preview = document.getElementById('ddzFriendPreview');
-  // play9fin1b: dual-session room key so two TG clients join same Colyseus table
+  // play9fin1c: dual-session room key so two TG clients join same Colyseus table
   const roomId = id || ensureDualRoomKey('ddz');
   if (rid) rid.textContent = roomId;
   if (preview) {
@@ -5318,7 +5318,7 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
     game.variant = variant;
     game.variantLabel = v.label;
   }
-  // play9fin1b: resumed via reconnectionToken → same table, not a fresh deal
+  // play9fin1c: resumed via reconnectionToken → same table, not a fresh deal
   if (!extra.fresh && !keepOverlay && session?.room && session.room.phase && session.room.phase !== 'match') {
     hintText = '已重连回桌';
     if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
@@ -5770,7 +5770,7 @@ function restoreLobbyChrome() {
 }
 
 /**
- * play9fin1b: soft park mid-hand (reconnect token kept) vs hard leave on settle/forfeit.
+ * play9fin1c: soft park mid-hand (reconnect token kept) vs hard leave on settle/forfeit.
  * @param {{ forfeit?: boolean }} [opts]
  */
 function showLobby(opts = {}) {

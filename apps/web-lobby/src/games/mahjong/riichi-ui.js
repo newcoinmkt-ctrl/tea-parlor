@@ -517,9 +517,16 @@ export function createRiichiUI(options = {}) {
         <div class="rk-settle-actions"><button type="button" id="rkSettleOk">确认</button></div>`;
     } else {
       let yaku = Array.isArray(s.yaku) ? s.yaku.slice() : [];
+      // play9fin1c: empty settle forbidden — synthesize common yaku line
       if (!yaku.length) {
         yaku = [{ name: s.title || '和了', han: Math.max(1, Number(s.han) || 1) }];
+        if (Number(s.fu) > 0) {
+          /* keep fu from settle */
+        }
       }
+      const fu = Math.max(20, Number(s.fu) || 30);
+      const han = Math.max(1, Number(s.han) || yaku.reduce((a, y) => a + (y.han || 0), 0));
+      const points = Math.max(1, Math.abs(Number(s.total) || 0));
       const mid = Math.ceil(yaku.length / 2) || 0;
       const left = yaku.slice(0, mid);
       const right = yaku.slice(mid);
@@ -528,10 +535,10 @@ export function createRiichiUI(options = {}) {
       const uraRow = (s.uraDoraIndicators || []).map((t) => tileImg(t)).join('');
       panel.innerHTML = `
         <div class="rk-settle-top">
-          <div class="rk-settle-points">${Math.abs(s.total)} 点</div>
+          <div class="rk-settle-points">${points} 点</div>
           <div class="rk-settle-stamp">${s.title || (s.kind === 'tsumo' ? '自摸' : '荣和')}</div>
         </div>
-        <div class="rk-settle-han"><strong>${s.han || yaku.reduce((a, y) => a + y.han, 0)} 番</strong><span>${s.fu || 30} 符</span></div>
+        <div class="rk-settle-han"><strong>${han} 番</strong><span>${fu} 符</span><em>${points} 点</em></div>
         <div class="rk-yaku-cols"><div>${yakuHtml(left)}</div><div>${yakuHtml(right)}</div></div>
         <div class="rk-settle-dora"><span>宝牌</span>${doraRow || '—'}</div>
         ${uraRow ? `<div class="rk-settle-dora rk-settle-ura"><span>里宝牌</span>${uraRow}</div>` : ''}

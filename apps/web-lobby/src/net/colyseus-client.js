@@ -239,7 +239,7 @@ export async function ddzState() {
 
 
 /**
- * play9fin1b — join/create mahjong dual-session room (推倒胡/血战)
+ * play9fin1c — join/create mahjong dual-session room (推倒胡/血战)
  */
 export async function startColyseusMjSession({
   endpoint = defaultColyseusUrl(),

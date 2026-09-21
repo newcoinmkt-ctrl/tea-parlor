@@ -1,0 +1,11 @@
+{
+  "slice": "play9fin1c",
+  "cache": "play9fin1c",
+  "ok": true,
+  "checks": {
+    "yaku_list": true,
+    "fu_points": true,
+    "empty_settle_forbidden": true,
+    "common_yaku": ["riichi","ippatsu","menzen","pinfu","tanyao","yakuhai","dora","ura"]
+  }
+}

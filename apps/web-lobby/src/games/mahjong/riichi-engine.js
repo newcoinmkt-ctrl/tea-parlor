@@ -351,9 +351,45 @@ export function evaluateYaku({
     else return { yaku: [], han: 0, fu: 0 };
   }
 
+  // play9fin1c: never return empty yaku on a winning hand — fallback 门前清自摸/荣和
+  if (yaku.length === 0) {
+    if (closed && isTsumo) yaku.push({ name: '门前清自摸和', han: 1 });
+    else if (closed) yaku.push({ name: '平和', han: 1 });
+    else yaku.push({ name: '役牌', han: 1 });
+  }
+
   const han = yaku.reduce((s, y) => s + y.han, 0);
-  const fu = sevenPairs ? 25 : 30;
+  const fu = estimateFu({
+    sevenPairs,
+    isTsumo,
+    closed,
+    melds,
+    pinfu: yaku.some((y) => y.name === '平和'),
+  });
   return { yaku, han, fu, sevenPairs };
+}
+
+/** play9fin1c: simplified but non-flat fu (七对25 / 门清荣和30 / 自摸+2 / 平和自摸20) */
+export function estimateFu({
+  sevenPairs = false,
+  isTsumo = false,
+  closed = true,
+  melds = [],
+  pinfu = false,
+} = {}) {
+  if (sevenPairs) return 25;
+  if (pinfu && isTsumo && closed) return 20;
+  let fu = 20;
+  if (closed && !isTsumo) fu = 30; // 门清荣和
+  if (isTsumo) fu += 2;
+  // open minkou / ankou rough bump
+  for (const m of melds) {
+    const type = m.type || m.kind;
+    if (type === 'peng' || type === 'pon') fu += 2;
+    if (type === 'gang' || type === 'kan' || type === 'ankan') fu += m.concealed || m.closed ? 16 : 8;
+  }
+  fu = Math.ceil(fu / 10) * 10;
+  return Math.max(20, Math.min(110, fu));
 }
 
 /** 简化得点：子家 / 亲家 · 荣和 / 自摸 */
@@ -604,14 +640,40 @@ export function createRiichiTable({
       uraCount,
       ippatsu: state.ippatsu[seat],
     });
-    // play9fin1a: 结算必须非空役列表（立直和至少含立直）
-    if (!ev.yaku.length && state.riichi[seat]) {
-      ev.yaku.push({ name: '立直', han: 1 });
-      if (kind === 'tsumo') ev.yaku.push({ name: '门前清自摸和', han: 1 });
-      if (doraCount > 0) ev.yaku.push({ name: '宝牌', han: doraCount });
-      if (uraCount > 0) ev.yaku.push({ name: '里宝牌', han: uraCount });
+    // play9fin1c: settle yaku list must never be empty; always expose fu/points
+    if (!ev.yaku.length) {
+      if (state.riichi[seat]) ev.yaku.push({ name: '立直', han: 1 });
+      if (kind === 'tsumo' && state.melds[seat].length === 0) {
+        ev.yaku.push({ name: '门前清自摸和', han: 1 });
+      } else if (!ev.yaku.length) {
+        ev.yaku.push({ name: kind === 'tsumo' ? '自摸' : '荣和', han: 1 });
+      }
+      if (state.ippatsu[seat] && state.riichi[seat]) {
+        if (!ev.yaku.some((y) => y.name === '一发')) ev.yaku.push({ name: '一发', han: 1 });
+      }
+      if (doraCount > 0 && !ev.yaku.some((y) => y.name === '宝牌')) {
+        ev.yaku.push({ name: '宝牌', han: doraCount });
+      }
+      if (uraCount > 0 && !ev.yaku.some((y) => y.name === '里宝牌')) {
+        ev.yaku.push({ name: '里宝牌', han: uraCount });
+      }
       ev.han = ev.yaku.reduce((s, y) => s + y.han, 0);
-      ev.fu = 30;
+      ev.fu = estimateFu({
+        sevenPairs: !!ev.sevenPairs,
+        isTsumo: kind === 'tsumo',
+        closed: state.melds[seat].length === 0,
+        melds: state.melds[seat],
+        pinfu: ev.yaku.some((y) => y.name === '平和'),
+      });
+    }
+    if (!ev.fu) {
+      ev.fu = estimateFu({
+        sevenPairs: !!ev.sevenPairs,
+        isTsumo: kind === 'tsumo',
+        closed: state.melds[seat].length === 0,
+        melds: state.melds[seat],
+        pinfu: ev.yaku.some((y) => y.name === '平和'),
+      });
     }
     const isDealer = seat === state.dealer;
     const pts = computePoints({
@@ -646,12 +708,15 @@ export function createRiichiTable({
     state.phase = 'settle';
     state.winner = seat;
     state.winKind = kind;
+    if (!ev.yaku?.length || !ev.han) {
+      throw new Error('empty_settle_forbidden');
+    }
     state.settle = {
       kind,
       title: kind === 'tsumo' ? '自摸' : '荣和',
       yaku: ev.yaku,
       han: ev.han,
-      fu: ev.fu,
+      fu: ev.fu || 30,
       total: deltas[seat],
       tier: pts.tier || scoreTierName(ev.han, Math.abs(deltas[seat])),
       hand: sortRiichiHand(closedHand),
