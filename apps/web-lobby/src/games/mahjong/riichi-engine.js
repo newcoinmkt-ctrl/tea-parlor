@@ -252,13 +252,13 @@ function isSimple(t) {
 }
 
 
-/** play9fin4c: clone count map */
+/** play9fin5a: clone count map */
 function cloneCounts(counts) {
   return new Map(counts);
 }
 
 /**
- * play9fin4c: find one standard decomposition (pair + melds).
+ * play9fin5a: find one standard decomposition (pair + melds).
  * @returns {{ pairKey:number, melds:{type:'chi'|'pon', keys:number[], suit?:number}[] }|null}
  */
 function findMeldDecomposition(counts, needMelds) {
@@ -324,7 +324,7 @@ function isTerminalOrHonorKey(k) {
   return suit >= 3 || rank === 1 || rank === 9;
 }
 
-/** play9fin4c rarer yaku from decomposition + tile counts */
+/** play9fin5a rarer yaku from decomposition + tile counts */
 function detectRarerYaku({ counts, closed, sevenPairs, melds, full }) {
   const extra = [];
   if (sevenPairs) return extra; // 七对子 already added; skip standard-shape rarer set
@@ -535,7 +535,7 @@ export function evaluateYaku({
     }
   }
 
-  // play9fin4c: rarer yaku (三色同顺/一气通贯/混全带幺九/对对和/清一色/混一色)
+  // play9fin5a: rarer yaku (三色同顺/一气通贯/混全带幺九/对对和/清一色/混一色)
   {
     const rarer = detectRarerYaku({ counts, closed, sevenPairs, melds, full });
     for (const y of rarer) {

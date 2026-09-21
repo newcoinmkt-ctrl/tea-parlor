@@ -1,5 +1,5 @@
 /**
- * play9fin4c — light social + full regression
+ * play9fin5a — light social + full regression
  * Room code / invite OR recent same-table openable; NO full IM
  * DDZ/MJ/NN + server trustee + ads config + five tabs; no whole-page rotate
  */
@@ -18,9 +18,9 @@ const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const lia = readFileSync(join(root, 'src/lobby-ia.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9fin4c', () => {
-  assert.match(html, /app\.js\?v=play9fin4c/);
-  assert.match(app, /\?v=play9fin4c/);
+test('cache play9fin5a', () => {
+  assert.match(html, /app\.js\?v=play9fin5a/);
+  assert.match(app, /\?v=play9fin5a/);
   assert.doesNotMatch(html, /app\.js\?v=play9fin4b/);
 });
 
@@ -38,6 +38,7 @@ test('light social entry openable — room code / invite OR recent same-table', 
   assert.match(app, /setLobbyView\('social'\)/);
   assert.match(app, /function renderSocialPage/);
   assert.match(app, /rememberRecentTable|loadRecentTables/);
+  assert.match(app, /syncRecentTablesFromServer/);
   assert.match(app, /enterFriendDualTable/);
   assert.match(html, /不含好友动态|不含.*IM|无完整 IM/);
   assert.doesNotMatch(html, /moments-feed|im-chat-panel|朋友圈动态流/);
@@ -90,7 +91,7 @@ test('dual-session smoke still green when available', () => {
   assert.equal(r.status, 0, r.stdout + r.stderr);
 });
 
-test('docs/qa play9fin4c present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin4c/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin4c/report.json')), true);
+test('docs/qa play9fin5a present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin5a/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin5a/report.json')), true);
 });
