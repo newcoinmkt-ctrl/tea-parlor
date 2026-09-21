@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin2c';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin2c';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin2c';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin2c';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin2c';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin3a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin3a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin3a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin3a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin3a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -5337,6 +5337,8 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
         ? '已重连回桌 · 完整托管中'
         : '完整托管中';
       if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
+      // play9fin3a: re-assert server fullTrustee after reconnect (idempotent)
+      colyseusClient.ddzSetTrustee?.(true).catch(() => {});
     }
   }
   syncMatchOverlay(session.room);
@@ -5485,6 +5487,21 @@ function applyPinusRoom(room, roomMeta, currency) {
     game._bottomHidden = true;
   }
   if (room.status) hintText = room.status;
+  // play9fin3a: sync trustee UI from server-authoritative myFullTrustee / seats
+  if (typeof room.myFullTrustee === 'boolean' || typeof room.myTrustee === 'boolean') {
+    const srv = !!(room.myFullTrustee ?? room.myTrustee);
+    trustee = srv;
+    window.__ddzFullTrustee = srv;
+    if (srv && !hintText?.includes?.('托管')) {
+      hintText = room.myFullTrustee ? '完整托管中（服务端代打）' : hintText;
+    }
+  } else if (Array.isArray(room.seats) && room.seats[0]) {
+    const srv = !!(room.seats[0].fullTrustee || room.seats[0].trustee);
+    if (room.seats[0].fullTrustee != null || room.seats[0].trustee != null) {
+      trustee = srv;
+      window.__ddzFullTrustee = !!room.seats[0].fullTrustee;
+    }
+  }
 }
 
 function showDdzTable() {
@@ -6116,13 +6133,17 @@ function toggleCardSelect(cardId) {
 }
 
 function onToggleTrustee() {
-  // play9fin2b: multi mahjong/riichi full trustee via multiUI
+  // play9fin2b: multi mahjong/riichi full trustee via multiUI (local engine)
   const shell = document.querySelector('.lobby-shell');
   if (shell?.classList.contains('multi-active') && multiUI?.toggleFullTrustee) {
     const on = multiUI.toggleFullTrustee();
     hintText = on ? '已托管（完整代打中）' : '已取消托管';
     if (nodes.trusteeButton) nodes.trusteeButton.textContent = on ? '取消托管' : '托管';
     if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
+    // play9fin3a: if Colyseus MJ room active, also authorize server
+    if (game?.online && onlineBackend === 'colyseus' && colyseusClient.mjSetTrustee) {
+      colyseusClient.mjSetTrustee(on).catch(() => {});
+    }
     return;
   }
   trustee = !trustee;
@@ -6136,6 +6157,19 @@ function onToggleTrustee() {
     }
   } catch (_) { /* ignore */ }
   renderGame();
+  // play9fin3a: online → Colyseus authoritative; forbid pure client auto-play
+  if (game?.online && onlineBackend === 'colyseus') {
+    colyseusClient.ddzSetTrustee?.(trustee).then((data) => {
+      if (data?.room) {
+        const meta = ROOMS[game.roomId] || { id: game.roomId, name: game.roomName, stake: game.stake, unit: game.unit };
+        applyPinusRoom(data.room, meta, game.currency);
+        renderGame();
+      }
+    }).catch((err) => {
+      console.warn('[trustee] colyseus', err?.message || err);
+    });
+    return;
+  }
   if (trustee) scheduleAi();
 }
 
@@ -6486,7 +6520,7 @@ function aiThinkMs() {
 function scheduleAi() {
   clearAi();
   if (!game || game.phase === 'settle') return;
-  // Pinus 联网局：AI 在服务端驱动，前端不再跑本地 AI
+  // 联网局：AI/托管在 Colyseus 服务端驱动，前端禁止纯客户端代打 (play9fin3a)
   if (game.online) return;
   if (game.phase === 'bid' && game.bidTurn === HUMAN) {
     if (trustee) aiTimer = setTimeout(() => onBid(safeAiBid(HUMAN)), 320);
