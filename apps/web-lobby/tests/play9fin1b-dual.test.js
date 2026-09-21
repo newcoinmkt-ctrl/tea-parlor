@@ -1,5 +1,5 @@
 /**
- * play9fin1b — two TG / dual-session same table (DDZ + Mahjong)
+ * play9fin1c — two TG / dual-session same table (DDZ + Mahjong)
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -10,11 +10,11 @@ import test from 'node:test';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const colRoot = join(root, '../colyseus-tea-parlor');
 
-test('cache play9fin1b', () => {
+test('cache play9fin1c', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const app = readFileSync(join(root, 'src/app.js'), 'utf8');
-  assert.match(html, /app\.js\?v=play9fin1b/);
-  assert.match(app, /\?v=play9fin1b/);
+  assert.match(html, /app\.js\?v=play9fin1c/);
+  assert.match(app, /\?v=play9fin1c/);
   assert.doesNotMatch(html, /app\.js\?v=play9fin1a/);
 });
 
