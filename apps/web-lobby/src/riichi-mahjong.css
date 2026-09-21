@@ -802,3 +802,45 @@ html.table-stage-jj #multiGameView.riichi-active .mj-jj-topbar,
 #multiGameView.riichi-active .rk-settle-ura span::before {
   content: '';
 }
+
+
+/* play9fin6b — riichi settle: 再来一局 + 回大厅 + chip + yaku list */
+#multiGameView.riichi-active #rkSettle .rk-settle-actions {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+#multiGameView.riichi-active #rkSettle .rk-settle-actions button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+}
+#multiGameView.riichi-active #rkSettle #rkSettleAgain {
+  background: linear-gradient(180deg, #f6e3a4, #c99a3a);
+  color: #3a2508;
+}
+#multiGameView.riichi-active #rkSettle #rkSettleLobby {
+  background: rgba(255,255,255,.12);
+  color: #f7f2e6;
+}
+#multiGameView.riichi-active #rkSettle .rk-settle-chip {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 15px;
+  color: #f7f2e6;
+}
+#multiGameView.riichi-active #rkSettle .rk-settle-chip .pos { color: #7dffb0; font-size: 20px; }
+#multiGameView.riichi-active #rkSettle .rk-settle-chip .neg { color: #ff8a7a; font-size: 20px; }
+#multiGameView.riichi-active #rkSettle .rk-yaku-list {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.28);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #f6e3a4;
+  text-align: center;
+}

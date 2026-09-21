@@ -1438,7 +1438,7 @@ export function createMahjongUI(options = {}) {
           return `<tr class="${cls}${win ? ' is-winner' : ''}${i === 0 ? ' is-me' : ''}">`
             + `<td>${player}</td>`
             + `<td>${huLabel}</td>`
-            + `<td>${d > 0 ? '+' : ''}${d}</td></tr>`;
+            + `<td class="${d > 0 ? 'pos' : (d < 0 ? 'neg' : 'flat')}">${d > 0 ? '+' : ''}${d}</td></tr>`;
         })
         .join('') || '<tr><td colspan="3">本局无得分明细</td></tr>';
     }
@@ -1468,8 +1468,13 @@ export function createMahjongUI(options = {}) {
       }
     }
     if (el.modalYou) {
-      el.modalYou.textContent =
-        isDraw && you === 0 ? '流局无输赢' : you >= 0 ? `你本局 +${you}` : `你本局 ${you}`;
+      if (isDraw && you === 0) {
+        el.modalYou.innerHTML = '流局无输赢 · 筹码 <strong class="flat">0</strong>';
+      } else {
+        const cls = you > 0 ? 'pos' : (you < 0 ? 'neg' : 'flat');
+        const txt = you > 0 ? `+${you}` : String(you);
+        el.modalYou.innerHTML = `本局筹码 <strong class="${cls}">${txt}</strong> 影子金币`;
+      }
     }
     if (el.modal) {
       el.modal.hidden = false;

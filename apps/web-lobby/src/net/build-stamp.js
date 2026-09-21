@@ -1,9 +1,9 @@
 /**
- * play9fin6a — room select / match thicken
+ * play9fin6b — settle page polish
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9fin6a';
-export const BUILD_VERSION = 'play9fin6a';
+export const CACHE_STAMP = 'play9fin6b';
+export const BUILD_VERSION = 'play9fin6b';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

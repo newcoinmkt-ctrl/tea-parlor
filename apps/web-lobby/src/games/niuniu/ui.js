@@ -612,7 +612,7 @@ export function createNiuniuUI(options = {}) {
           + `<td>${player}</td>`
           + `<td class="zjh-settle-hand"><div class="zjh-type">${sd.niuName || '—'}</div>`
           + `<div class="zjh-cards-text">${cards}</div></td>`
-          + `<td>${d > 0 ? '+' : ''}${d}</td></tr>`;
+          + `<td class="${d > 0 ? 'pos' : (d < 0 ? 'neg' : 'flat')}">${d > 0 ? '+' : ''}${d}</td></tr>`;
       }).join('');
     }
     const you = deltas[0] || 0;
@@ -622,7 +622,11 @@ export function createNiuniuUI(options = {}) {
       const banker = snap.seats[snap.button];
       el.modalSub.textContent = `庄 ${banker?.name || '—'} · 底分 ${snap.difen} · 影子金币`;
     }
-    if (el.modalYou) el.modalYou.textContent = you >= 0 ? `你本局 +${you}` : `你本局 ${you}`;
+    if (el.modalYou) {
+      const cls = you > 0 ? 'pos' : (you < 0 ? 'neg' : 'flat');
+      const txt = you > 0 ? `+${you}` : String(you);
+      el.modalYou.innerHTML = `本局筹码 <strong class="${cls}">${txt}</strong> 影子金币`;
+    }
     if (el.modal) {
       el.modal.hidden = false;
       el.modal.removeAttribute('hidden');

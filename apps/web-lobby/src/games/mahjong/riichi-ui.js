@@ -526,7 +526,11 @@ export function createRiichiUI(options = {}) {
       panel.innerHTML = `
         <div class="rk-settle-top"><div class="rk-settle-points">流局</div></div>
         <p style="text-align:center">牌山耗尽</p>
-        <div class="rk-settle-actions"><button type="button" id="rkSettleOk">确认</button></div>`;
+        <div class="rk-settle-chip" id="rkSettleChip">流局 · 筹码 ±0</div>
+        <div class="rk-settle-actions">
+          <button type="button" id="rkSettleAgain" class="qq-btn qq-btn-gold">再来一局</button>
+          <button type="button" id="rkSettleLobby" class="qq-btn qq-btn-blue">回大厅</button>
+        </div>`;
     } else {
       let yaku = Array.isArray(s.yaku) ? s.yaku.slice() : [];
       // play9fin1c: empty settle forbidden — synthesize common yaku line
@@ -560,17 +564,41 @@ export function createRiichiUI(options = {}) {
           ${s.winTile ? tileImg(s.winTile) : ''}
         </div>
         <div class="rk-settle-tier">${s.tier || ''}</div>
-        <div class="rk-settle-actions"><button type="button" id="rkSettleOk">确认</button></div>`;
+        <div class="rk-settle-chip" id="rkSettleChip"></div>
+        <div class="rk-yaku-list" aria-label="役种列表">${yaku.map((y) => `<span class="rk-yaku-line"><b>${y.name}</b> ${y.han}番</span>`).join(' · ') || '和了 1番'}</div>
+        <div class="rk-settle-actions">
+          <button type="button" id="rkSettleAgain" class="qq-btn qq-btn-gold">再来一局</button>
+          <button type="button" id="rkSettleLobby" class="qq-btn qq-btn-blue">回大厅</button>
+        </div>`;
     }
     layer.hidden = false;
     layer.removeAttribute('hidden');
-    document.getElementById('rkSettleOk')?.addEventListener('click', () => {
-      layer.hidden = true;
-      if (el.settleRow) {
-        el.settleRow.hidden = false;
-        el.settleRow.removeAttribute('hidden');
-      }
-    }, { once: true });
+    // play9fin6b: chip win/loss readable
+    const chipEl = document.getElementById('rkSettleChip');
+    if (chipEl && s.kind !== 'draw') {
+      const deltas = Array.isArray(s.deltas) ? s.deltas : (Array.isArray(snap.deltas) ? snap.deltas : [0, 0, 0, 0]);
+      const you = Number(deltas[0] || 0);
+      const cls = you > 0 ? 'pos' : (you < 0 ? 'neg' : 'flat');
+      chipEl.innerHTML = `本局筹码 <strong class="${cls}">${you > 0 ? '+' : ''}${you}</strong> 影子金币`;
+    }
+    const bindSettleActs = () => {
+      document.getElementById('rkSettleAgain')?.addEventListener('click', () => {
+        layer.hidden = true;
+        layer.setAttribute('hidden', '');
+        start();
+      }, { once: true });
+      document.getElementById('rkSettleLobby')?.addEventListener('click', () => {
+        layer.hidden = true;
+        layer.setAttribute('hidden', '');
+        clearMjSession('riichi');
+        opts.onExit();
+      }, { once: true });
+    };
+    bindSettleActs();
+    if (el.settleRow) {
+      el.settleRow.hidden = false;
+      el.settleRow.removeAttribute('hidden');
+    }
 
     if (!settleReported) {
       settleReported = true;

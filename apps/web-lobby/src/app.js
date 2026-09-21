@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin6a';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin6a';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin6a';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin6a';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin6a';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin6b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin6b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin6b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin6b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin6b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -6860,7 +6860,7 @@ function showDdzResultModal() {
     nodes.ddzBanner.classList.add(humanWin ? 'is-win' : (humanDraw ? 'is-draw' : 'is-lose'));
   }
   if (nodes.ddzTitle) {
-    nodes.ddzTitle.textContent = humanWin ? '你赢了' : (humanDraw ? '平局' : '再来一局');
+    nodes.ddzTitle.textContent = humanWin ? '你赢了' : (humanDraw ? '平局' : '你输了');
   }
   const settleAd = document.getElementById('ddzSettleAd');
   if (settleAd) {
