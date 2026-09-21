@@ -9,18 +9,18 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin4b" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin4b" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin4c" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin4c" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -126,7 +126,7 @@
                 <strong>麻将</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="niuniu">
-                <img src="./public/assets/home/icon-niuniu.png?v=play9fin4b" alt="" />
+                <img src="./public/assets/home/icon-niuniu.png?v=play9fin4c" alt="" />
                 <strong>牛牛</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="texas">
@@ -152,7 +152,7 @@
             </section>
             <p class="home-chain-hint">USDT 专用 · 与金币场分开</p>
 
-            <!-- play9fin4b: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
+            <!-- play9fin4c: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
             <section class="activity-entry-band" aria-label="活动入口">
               <button type="button" class="activity-entry-btn" data-lobby-action="activity" id="homeActivityEntry">
                 <span class="activity-entry-ico" aria-hidden="true">🎁</span>
@@ -163,6 +163,19 @@
                 <span class="activity-entry-go">进入</span>
               </button>
             </section>
+
+            <!-- play9fin4c: light social — room code / invite OR recent same-table -->
+            <section class="social-entry-band" aria-label="轻社交入口">
+              <button type="button" class="social-entry-btn" data-lobby-action="social" id="homeSocialEntry">
+                <span class="social-entry-ico" aria-hidden="true">👥</span>
+                <span class="social-entry-copy">
+                  <strong>约局 / 同桌</strong>
+                  <small>房间号邀请 · 最近同桌 · 无完整 IM</small>
+                </span>
+                <span class="social-entry-go">打开</span>
+              </button>
+            </section>
+
 
             </div>
 
@@ -863,7 +876,7 @@
             </div>
 
             <div class="start-strip p0-start-dock">
-              <button class="friend-room-button" type="button" data-lobby-action="friend-room" hidden>好友房</button>
+              <button class="friend-room-button" type="button" data-lobby-action="friend-room">好友房</button>
               <button class="friend-room-button" type="button" id="ddzLocalPlay" data-lobby-action="local-doudizhu">人机畅玩</button>
               <button class="quick-start-button" type="button" id="ddzQuickStart" data-lobby-action="quick-doudizhu">快速开始</button>
               <small class="p0-dock-hint">快速开始=联网匹配 · 人机畅玩不经匹配</small>
@@ -1260,7 +1273,7 @@
           </section>
 
 
-          <!-- play9fin4b: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
+          <!-- play9fin4c: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
           <section class="panel-page activity-page" data-lobby-view="activity" aria-label="活动中心" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1308,7 +1321,46 @@
           </section>
 
           <!-- 战绩 -->
-          <section class="panel-page records-page" data-lobby-view="records" aria-label="战绩" hidden>
+          
+          <!-- play9fin4c: light social — room code invite + recent same-table; NO full IM -->
+          <section class="panel-page social-page" data-lobby-view="social" aria-label="约局同桌" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>轻社交</p>
+                <h1>约局 / 同桌</h1>
+              </div>
+            </div>
+            <p class="social-legal">仅房间号邀请与最近同桌列表 · 不含好友动态 / 完整 IM</p>
+
+            <div class="social-card card-panel">
+              <header class="social-card-head">
+                <strong>房间号邀请</strong>
+                <small>生成房间号发给好友，或输入房间号加入</small>
+              </header>
+              <div class="social-room-row">
+                <button type="button" class="gold-button" data-lobby-action="friend-room" id="socialOpenFriendRoom">打开好友房</button>
+                <label class="social-join-label">
+                  <span>输入房间号</span>
+                  <input id="socialRoomCodeInput" type="text" maxlength="32" placeholder="如 dual_ddz_xxx" autocomplete="off" />
+                </label>
+                <button type="button" class="muted-button" id="socialJoinRoomBtn">加入同桌</button>
+              </div>
+              <p class="social-status" id="socialStatus" aria-live="polite">可生成邀请链接或输入房间号加入</p>
+            </div>
+
+            <div class="social-card card-panel">
+              <header class="social-card-head">
+                <strong>最近同桌</strong>
+                <small>本机最近对局桌 · 点按重新打开</small>
+              </header>
+              <ul class="social-recent-list" id="socialRecentList" aria-label="最近同桌列表">
+                <li class="social-recent-empty">暂无最近同桌 · 完成一局后出现在此</li>
+              </ul>
+            </div>
+          </section>
+
+<section class="panel-page records-page" data-lobby-view="records" aria-label="战绩" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
               <div>
@@ -1957,6 +2009,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9fin4b"></script>
+    <script type="module" src="./src/app.js?v=play9fin4c"></script>
   </body>
 </html>

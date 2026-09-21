@@ -25,11 +25,11 @@ function closedPinfuish() {
   return tiles;
 }
 
-test('cache play9fin4b', () => {
+test('cache play9fin4c', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const app = readFileSync(join(root, 'src/app.js'), 'utf8');
-  assert.match(html, /app\.js\?v=play9fin4b/);
-  assert.match(app, /\?v=play9fin4b/);
+  assert.match(html, /app\.js\?v=play9fin4c/);
+  assert.match(app, /\?v=play9fin4c/);
   assert.doesNotMatch(html, /app\.js\?v=play9fin1b/);
 });
 
