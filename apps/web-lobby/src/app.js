@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin6b';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin6b';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin6b';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin6b';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin6b';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin6c';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin6c';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin6c';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin6c';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin6c';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -88,6 +88,12 @@ import {
   DDZ_LOCAL_PLAY_HINT,
   DDZ_LOCAL_PLAY_LABEL,
 } from './net/ddz-match-copy.js';
+import {
+  buildTgInviteUrl,
+  parseTgInviteStartParam,
+  collectTgInviteSources,
+  normalizeDualRoomKey,
+} from './net/tg-invite.js';
 import {
   createChainCenterController,
   normalizeChainCenterState,
@@ -4719,9 +4725,44 @@ function renderSocialPage() {
   syncRecentTablesFromServer().then(() => paintSocialRecentList());
 }
 
+function paintSocialInvitePreview(roomKey) {
+  const preview = document.getElementById('socialInvitePreview');
+  const urlEl = document.getElementById('socialInviteUrl');
+  const url = friendInviteUrl(roomKey);
+  if (urlEl) urlEl.textContent = url.replace(/^https:\/\//, '');
+  if (preview) {
+    preview.hidden = false;
+    preview.removeAttribute('hidden');
+  }
+  return url;
+}
+
 function bindSocialUi() {
   if (bindSocialUi._done) return;
   bindSocialUi._done = true;
+  document.getElementById('socialGenInviteBtn')?.addEventListener('click', () => {
+    const key = ensureDualRoomKey('ddz');
+    const url = paintSocialInvitePreview(key);
+    const status = document.getElementById('socialStatus');
+    if (status) status.textContent = `已生成 startapp 邀请 · 房间 ${key}`;
+    const input = document.getElementById('socialRoomCodeInput');
+    if (input) input.value = key;
+    const rid = document.getElementById('ddzFriendId');
+    if (rid) rid.textContent = key;
+    try {
+      const tg = window.Telegram?.WebApp;
+      const share = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('来茶馆同桌 · 点链接入座')}`;
+      if (tg?.openTelegramLink) tg.openTelegramLink(share);
+    } catch (_) {}
+  });
+  document.getElementById('socialCopyInviteBtn')?.addEventListener('click', () => {
+    const text = document.getElementById('socialInviteUrl')?.textContent || '';
+    const full = text.startsWith('http') ? text : `https://${text}`;
+    navigator.clipboard?.writeText(full).then(() => {
+      const status = document.getElementById('socialStatus');
+      if (status) status.textContent = '邀请链接已复制';
+    }).catch(() => {});
+  });
   document.getElementById('socialJoinRoomBtn')?.addEventListener('click', () => {
     const code = String(document.getElementById('socialRoomCodeInput')?.value || '').trim();
     const status = document.getElementById('socialStatus');
@@ -4729,9 +4770,10 @@ function bindSocialUi() {
       if (status) status.textContent = '请输入有效房间号（至少 4 位）';
       return;
     }
-    rememberRecentTable({ roomKey: code, game: 'doudizhu', label: `房间·${code.slice(0, 12)}` });
-    enterFriendDualTable(code.startsWith('dual_') ? code : `dual_ddz_${code}`);
-    if (status) status.textContent = `正在加入同桌 ${code}…`;
+    const dual = normalizeDualRoomKey(code);
+    rememberRecentTable({ roomKey: dual || code, game: 'doudizhu', label: `房间·${code.slice(0, 12)}` });
+    enterFriendDualTable(dual || code);
+    if (status) status.textContent = `正在加入同桌 ${dual || code}…`;
   });
   document.getElementById('socialRecentList')?.addEventListener('click', (e) => {
     const btn = e.target?.closest?.('[data-social-room]');
@@ -4739,7 +4781,7 @@ function bindSocialUi() {
     const code = btn.getAttribute('data-social-room');
     if (!code) return;
     rememberRecentTable({ roomKey: code, game: btn.getAttribute('data-social-game') || 'doudizhu' });
-    enterFriendDualTable(code.startsWith('dual_') ? code : `dual_ddz_${code}`);
+    enterFriendDualTable(normalizeDualRoomKey(code) || code);
   });
 }
 
@@ -5297,7 +5339,8 @@ function ensureDualRoomKey(game = 'ddz') {
 function friendInviteUrl(roomId) {
   const tg = window.Telegram?.WebApp;
   const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
-  return `https://t.me/${bot}/app?startapp=t_${roomId}`;
+  // play9fin6c: startapp=t_<roomKey> deep link
+  return buildTgInviteUrl(roomId, bot);
 }
 
 function openFriendRoom(id) {
@@ -5330,9 +5373,10 @@ function enterFriendDualTable(roomKey) {
   closeFriendRoom();
   const room = ROOMS.friend || ROOMS.novice || { id: 'friend', name: '好友房', stake: 100, unit: 1 };
   const currency = ddzLane === 'season' ? 'crypto' : 'ingot';
-  startRoomOnline({ ...room, id: 'friend', name: `好友房·${key}` }, currency, 'classic', 'colyseus', {
+  const dualKey = normalizeDualRoomKey(key) || key;
+  startRoomOnline({ ...room, id: 'friend', name: `好友房·${dualKey}` }, currency, 'classic', 'colyseus', {
     keepMatchOverlay: true,
-    dualRoomKey: key.startsWith('dual_') ? key : `dual_ddz_${key}`,
+    dualRoomKey: dualKey,
   }).catch((err) => {
     console.warn('[dual] enterFriendDualTable', err);
     if (nodes.claimStatus) nodes.claimStatus.textContent = `同桌进入失败：${err?.message || err}`;
@@ -5354,16 +5398,24 @@ function bindFriendDualEnter() {
     e.preventDefault();
     enterFriendDualTable();
   });
-  // deep-link startapp=t_<roomKey>
+  // play9fin6c: TG invite deep link — start_param / tgWebAppStartParam / startapp
+  tryConsumeTgInviteDeepLink();
+}
+
+/** Consume Mini App startapp and join same dual room (another session). */
+function tryConsumeTgInviteDeepLink() {
   try {
-    const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param
-      || new URLSearchParams(location.search).get('startapp')
-      || '';
-    const m = String(startParam).match(/^t_(.+)$/);
-    if (m && (m[1].startsWith('dual_') || m[1].length >= 4)) {
-      setTimeout(() => enterFriendDualTable(m[1]), 400);
-    }
-  } catch (_) {}
+    if (tryConsumeTgInviteDeepLink._done) return;
+    const parsed = parseTgInviteStartParam(collectTgInviteSources());
+    if (!parsed?.roomKey) return;
+    tryConsumeTgInviteDeepLink._done = true;
+    const key = parsed.roomKey;
+    try { sessionStorage.setItem('tea-parlor-dual-room', key); } catch (_) {}
+    if (nodes.claimStatus) nodes.claimStatus.textContent = `邀请深链 · 正在加入 ${key.slice(0, 16)}…`;
+    setTimeout(() => enterFriendDualTable(key), 400);
+  } catch (err) {
+    console.warn('[invite] deep link', err);
+  }
 }
 
 function shareFriendRoom() {
