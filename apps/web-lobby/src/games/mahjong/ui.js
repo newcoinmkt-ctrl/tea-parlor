@@ -36,7 +36,7 @@ export function createMahjongUI(options = {}) {
   /** play9mj1: turn countdown (JJ compass center) */
   let turnSeconds = 15;
   let turnTimer = null;
-  /** play9ship3: 倒计时到期 / 切后台 → 软代打，避免牌桌冻结（完整托管可后补） */
+  /** play9ship3b: 倒计时到期 / 切后台 → 软代打，避免牌桌冻结（完整托管可后补） */
   let softTrustee = false;
   let disconnectBound = false;
   const BASE_SCORE = 1800;
@@ -538,7 +538,7 @@ export function createMahjongUI(options = {}) {
       const snap = table.snapshot();
       if (!snap || snap.phase === 'settle') return;
       if (document.hidden) {
-        // play9ship3: 切后台至少不冻桌 — 软代打推进回合
+        // play9ship3b: 切后台至少不冻桌 — 软代打推进回合
         softTrustee = true;
         if (snap.current === 0 || snap.phase === 'call' || snap.phase === 'exchange' || snap.phase === 'dingque') {
           autoTimeoutAct('disconnect');
@@ -1299,7 +1299,7 @@ export function createMahjongUI(options = {}) {
   function showSettle(snap) {
     if (el.settleRow) el.settleRow.hidden = false;
     if (el.actions) el.actions.hidden = true;
-    // play9ship3: 结算不得为空 — scores/deltas/ledger 兜底
+    // play9ship3b: 结算不得为空 — scores/deltas/ledger 兜底
     const nSeats = snap.playerCount || snap.names?.length || 4;
     const names = (snap.names && snap.names.length)
       ? snap.names

@@ -1,5 +1,5 @@
 /**
- * play9ship3: 推倒胡 archive-gap guards — peng deduct, dingque, settle non-empty
+ * play9ship3b: 推倒胡 archive-gap guards — peng deduct, dingque, settle non-empty
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -10,13 +10,13 @@ import { createMahjongTable } from '../src/games/mahjong/engine.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-test('cache play9ship3', () => {
+test('cache play9ship3b', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const app = readFileSync(join(root, 'src/app.js'), 'utf8');
-  assert.match(html, /app\.js\?v=play9ship3/);
-  assert.match(html, /jj-mahjong\.css\?v=play9ship3/);
+  assert.match(html, /app\.js\?v=play9ship3b/);
+  assert.match(html, /jj-mahjong\.css\?v=play9ship3b/);
   assert.match(html, /id="mgMelds"/);
-  assert.match(app, /\?v=play9ship3/);
+  assert.match(app, /\?v=play9ship3b/);
 });
 
 test('碰 deducts 2 tiles from hand + removes claim from river', () => {

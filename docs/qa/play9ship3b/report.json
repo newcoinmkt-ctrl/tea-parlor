@@ -1,0 +1,188 @@
+{
+  "cache": "play9ship3b",
+  "url": "http://127.0.0.1:5293/index.html?v=play9ship3b",
+  "root_cause": "TG --tg-vh used Math.max(innerHeight, viewportStableHeight) so DDZ hand/出牌 sat under Mini App bottom chrome; taps never reached cards. applyTelegramSafeArea also overwrote syncViewportHeight.",
+  "checks": {
+    "tg-414_geom": {
+      "tgVh": "720px",
+      "safeBottom": "34px",
+      "cardBottom": 672,
+      "playBottom": 576,
+      "vh": 844,
+      "playDisabled": true,
+      "hasTg": true,
+      "stable": 720,
+      "noRotate": true
+    },
+    "tg-414_select": {
+      "selectedDom": 1,
+      "playDisabled": false,
+      "handBefore": 17
+    },
+    "tg-414_after": {
+      "handN": 16,
+      "current": 1,
+      "lastPlayPlayer": 0
+    },
+    "tg-414_opponent": {
+      "current": 2,
+      "lastPlay": {
+        "player": 1,
+        "n": 1
+      },
+      "handN": 16
+    },
+    "896_geom": {
+      "tgVh": "414px",
+      "safeBottom": "",
+      "cardBottom": 396,
+      "playBottom": 294,
+      "vh": 414,
+      "playDisabled": true,
+      "hasTg": false,
+      "stable": null,
+      "noRotate": true
+    },
+    "896_select": {
+      "selectedDom": 1,
+      "playDisabled": false,
+      "handBefore": 17
+    },
+    "896_after": {
+      "handN": 16,
+      "current": 1,
+      "lastPlayPlayer": 0
+    },
+    "896_opponent": {
+      "current": 2,
+      "lastPlay": {
+        "player": 0,
+        "n": 1
+      },
+      "handN": 16
+    },
+    "414_geom": {
+      "tgVh": "896px",
+      "safeBottom": "",
+      "cardBottom": 878,
+      "playBottom": 778,
+      "vh": 896,
+      "playDisabled": true,
+      "hasTg": false,
+      "stable": null,
+      "noRotate": true
+    },
+    "414_select": {
+      "selectedDom": 1,
+      "playDisabled": false,
+      "handBefore": 17
+    },
+    "414_after": {
+      "handN": 16,
+      "current": 1,
+      "lastPlayPlayer": 0
+    },
+    "414_opponent": {
+      "current": 2,
+      "lastPlay": {
+        "player": 0,
+        "n": 1
+      },
+      "handN": 16
+    },
+    "mj_tdh_hand": 13,
+    "mj_riichi": {
+      "active": true,
+      "tiles": 0
+    },
+    "nn": {
+      "active": true,
+      "btns": [
+        "← 返回",
+        "📖",
+        "💬",
+        "再来一局",
+        "回大厅",
+        "继续游戏",
+        "回大厅"
+      ]
+    }
+  },
+  "pass": {
+    "tg-414_select_play": true,
+    "tg-414_17_to_16": true,
+    "896_select_play": true,
+    "896_17_to_16": true,
+    "414_select_play": true,
+    "414_17_to_16": true,
+    "mj_tdh_enter": true,
+    "mj_riichi_enter": true,
+    "nn_enter": true,
+    "nn_flow_smoke": true
+  },
+  "shots": {
+    "ddz-tg-414-illegal-grey.png": {
+      "bytes": 155853,
+      "sha1": "b546b695c203"
+    },
+    "ddz-tg-414-touch-selected.png": {
+      "bytes": 159120,
+      "sha1": "bbbb6064f7dd"
+    },
+    "ddz-tg-414-after-play.png": {
+      "bytes": 150377,
+      "sha1": "bbbe30e81e3f"
+    },
+    "ddz-896-illegal-grey.png": {
+      "bytes": 109992,
+      "sha1": "40e37af08d34"
+    },
+    "ddz-896-touch-selected.png": {
+      "bytes": 113539,
+      "sha1": "7ca542c651d7"
+    },
+    "ddz-896-after-play.png": {
+      "bytes": 103426,
+      "sha1": "79cc797de408"
+    },
+    "ddz-414-illegal-grey.png": {
+      "bytes": 185133,
+      "sha1": "bd02fe1b6860"
+    },
+    "ddz-414-touch-selected.png": {
+      "bytes": 188915,
+      "sha1": "70b1c612b457"
+    },
+    "ddz-414-after-play.png": {
+      "bytes": 181131,
+      "sha1": "51134b090fe0"
+    },
+    "mj-tdh-414-table.png": {
+      "bytes": 231268,
+      "sha1": "998f5b5c985e"
+    },
+    "mj-riichi-414-table.png": {
+      "bytes": 201786,
+      "sha1": "859ad53274f2"
+    },
+    "nn-414-enter.png": {
+      "bytes": 255923,
+      "sha1": "76d7964efebb"
+    },
+    "nn-414-flow.png": {
+      "bytes": 255923,
+      "sha1": "76d7964efebb"
+    }
+  },
+  "ok": true,
+  "page_errors": [],
+  "files_changed": [
+    "apps/web-lobby/src/net/table-orient.js",
+    "apps/web-lobby/src/app.js",
+    "apps/web-lobby/index.html",
+    "apps/web-lobby/tests/tg-viewport-stable.test.js",
+    "apps/web-lobby/tests/table-orient-upright.test.js",
+    "apps/web-lobby/tests/* cache stamps",
+    "docs/qa/play9ship3b/"
+  ]
+}

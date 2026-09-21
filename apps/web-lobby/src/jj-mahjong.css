@@ -749,7 +749,7 @@ html.table-stage-mj.table-stage-upright #multiGameView.table-stage-upright-targe
 }
 
 
-/* play9ship3: 副露区 — 碰/杠后手牌扣除可视化 */
+/* play9ship3b: 副露区 — 碰/杠后手牌扣除可视化 */
 .mg-hand-dock .mg-melds,
 #mgMelds.mg-melds {
   display: flex;
