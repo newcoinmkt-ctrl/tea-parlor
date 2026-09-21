@@ -236,3 +236,100 @@ export async function ddzState() {
   r.send('state', {});
   return { room: await p };
 }
+
+
+/**
+ * play9fin1b — join/create mahjong dual-session room (推倒胡/血战)
+ */
+export async function startColyseusMjSession({
+  endpoint = defaultColyseusUrl(),
+  uid,
+  name,
+  roomId = 'tuidaohu',
+  mode = 'xuezhan',
+  token,
+  fresh = false,
+} = {}) {
+  await connectColyseus(endpoint);
+  const options = {
+    uid: uid || `h5_${Date.now()}`,
+    name: name || '茶馆',
+    roomKey: roomId,
+    mode,
+  };
+  if (token) options.token = token;
+
+  if (fresh) {
+    try { sessionStorage.removeItem('tea-parlor-mj-reconnect'); } catch (_) {}
+  }
+  const storedTok = fresh ? null : (() => {
+    try {
+      const raw = sessionStorage.getItem('tea-parlor-mj-reconnect');
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed?.uid === options.uid && parsed?.token) return parsed.token;
+    } catch (_) {}
+    return null;
+  })();
+
+  let joined = null;
+  if (storedTok) {
+    try { joined = await client.reconnect(storedTok); } catch (_) { joined = null; }
+  }
+  if (!joined) {
+    joined = await client.joinOrCreate('mahjong', options);
+  }
+  room = joined;
+  try {
+    sessionStorage.setItem('tea-parlor-mj-reconnect', JSON.stringify({
+      uid: options.uid,
+      token: room.reconnectionToken || null,
+      roomKey: roomId,
+    }));
+  } catch (_) {}
+
+  room.onMessage('room', (msg) => {
+    if (msg?.room) emitRoom(msg.room);
+  });
+  room.onMessage('error', (msg) => {
+    console.warn('[colyseus:mj]', msg?.msg || msg);
+  });
+  room.onMessage('joined', () => {});
+
+  const first = await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('colyseus mj room state timeout')), 12000);
+    const off = onRoomUpdate((st) => {
+      clearTimeout(timer);
+      off();
+      resolve(st);
+    });
+    try { room.send('state', {}); } catch (_) {}
+  });
+
+  return {
+    room: first,
+    uid: options.uid,
+    sessionId: room.sessionId,
+    backend: 'colyseus',
+    game: 'mahjong',
+  };
+}
+
+export async function mjDiscard(tileId) {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('discard', { tileId });
+  return { room: await p };
+}
+
+export async function mjCall(action) {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('call', { action });
+  return { room: await p };
+}
+
+/** Shared dual-table room key for two TG / two clients */
+export function makeDualRoomKey(game = 'ddz') {
+  const suffix = Math.random().toString(36).slice(2, 8);
+  return `dual_${game}_${suffix}`;
+}

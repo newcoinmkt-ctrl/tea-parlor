@@ -24,6 +24,9 @@ export function resolveMatchMs(env = process.env) {
   return Math.max(500, ms);
 }
 export const MATCH_MS = resolveMatchMs();
+/** play9fin1b: friend/dual tables wait longer so 2nd human can join before AI fill */
+export const FRIEND_MATCH_MS = 30_000;
+export const DUAL_MIN_HUMANS = 2;
 /** Human-like AI think window (play9v3h). Room enables; unit tests keep 0 = sync. */
 export const AI_THINK_MS_MIN = 800;
 export const AI_THINK_MS_MAX = 2000;
@@ -83,7 +86,17 @@ export class DdzTable {
     this.roomKey = opts.roomKey || 'novice';
     this.currency = opts.currency || 'ingot';
     this.now = typeof opts.now === 'function' ? opts.now : () => Date.now();
-    this.matchMs = opts.matchMs ?? MATCH_MS;
+    this.matchMs = opts.matchMs ?? (
+      (opts.roomKey === 'friend' || String(opts.roomKey || '').startsWith('dual_'))
+        ? FRIEND_MATCH_MS
+        : MATCH_MS
+    );
+    /** play9fin1b: friend/dual rooms wait for ≥2 humans before AI fill (unless forced) */
+    this.minHumansBeforeAi = opts.minHumansBeforeAi ?? (
+      (opts.roomKey === 'friend' || String(opts.roomKey || '').startsWith('dual_'))
+        ? DUAL_MIN_HUMANS
+        : 1
+    );
     /** 0 = sync driveAi (tests); >0 = one PLAY action then room schedules continue */
     this.aiThinkMs = opts.aiThinkMs ?? 0;
     this._aiNeedsContinue = false;
@@ -261,7 +274,17 @@ export class DdzTable {
   async completeMatch() {
     if (this.phase !== 'match') return this.phase;
     const remaining = this.remainingMatchMs();
-    if (remaining > 0 && this.humanCount < 3) {
+    const need = this.minHumansBeforeAi || 1;
+    const humans = this.humanCount;
+    // Wait for partner on friend/dual until timeout; once ≥need humans (or 3), may deal.
+    if (remaining > 0 && humans < 3 && humans < need) {
+      console.log('[ddz] deal blocked waiting dual remaining=', remaining, 'humans=', humans);
+      return this.phase;
+    }
+    if (remaining > 0 && humans < 3 && humans >= need) {
+      // 2 humans ready — fill one AI and deal now (play9fin1b)
+      console.log('[ddz] dual ready humans=', humans, 'deal now');
+    } else if (remaining > 0 && humans < 3) {
       console.log('[ddz] deal blocked remaining=', remaining);
       return this.phase;
     }

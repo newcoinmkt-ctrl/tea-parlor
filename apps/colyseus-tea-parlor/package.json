@@ -15,7 +15,8 @@
     "@tea-parlor/session-auth": "file:../../packages/session-auth",
     "colyseus": "^0.15.26",
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "@tea-parlor/mahjong-engine": "file:../../packages/mahjong-engine"
   },
   "engines": {
     "node": ">=18"

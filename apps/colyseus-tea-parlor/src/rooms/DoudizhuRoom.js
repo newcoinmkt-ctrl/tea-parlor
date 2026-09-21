@@ -145,7 +145,9 @@ export class DoudizhuRoom extends Room {
         deltaMs: remainMs,
       });
       this._armMatchTimer(remainMs);
-      if (this.table.humanCount >= 3) {
+      // play9fin1b: 3 humans OR friend/dual with ≥minHumansBeforeAi → deal (AI fills rest)
+      const need = this.table.minHumansBeforeAi || 1;
+      if (this.table.humanCount >= 3 || this.table.humanCount >= need) {
         await this._dealNow();
       }
     } else {
@@ -261,8 +263,11 @@ export class DoudizhuRoom extends Room {
     if (this._dealt) return;
     if (this.table?.phase === 'match') {
       const remaining = this.table.remainingMatchMs();
-      if (remaining > 0 && this.table.humanCount < 3) {
-        console.log('[ddz] deal blocked remaining=', remaining);
+      const need = this.table.minHumansBeforeAi || 1;
+      const humans = this.table.humanCount;
+      // play9fin1b: allow early deal when dual/friend has ≥need humans (AI fills rest)
+      if (remaining > 0 && humans < 3 && humans < need) {
+        console.log('[ddz] deal blocked remaining=', remaining, 'humans=', humans);
         this._armMatchTimer(remaining);
         return;
       }
@@ -278,7 +283,8 @@ export class DoudizhuRoom extends Room {
     // completeMatch may no-op if still gated (defense in depth)
     if (this.table.phase === 'match') {
       const remaining = this.table.remainingMatchMs();
-      if (remaining > 0 && this.table.humanCount < 3) {
+      const need = this.table.minHumansBeforeAi || 1;
+      if (remaining > 0 && this.table.humanCount < 3 && this.table.humanCount < need) {
         console.log('[ddz] deal blocked remaining=', remaining);
         this._armMatchTimer(remaining);
         return;

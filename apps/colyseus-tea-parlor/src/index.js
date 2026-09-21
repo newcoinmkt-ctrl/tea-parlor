@@ -11,6 +11,7 @@ import cors from 'cors';
 import colyseus from 'colyseus';
 import wsTransport from '@colyseus/ws-transport';
 import { DoudizhuRoom } from './rooms/DoudizhuRoom.js';
+import { MahjongRoom } from './rooms/MahjongRoom.js';
 import { MATCH_MS } from './ddzLogic.js';
 
 const { Server } = colyseus;
@@ -27,7 +28,7 @@ app.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'tea-parlor-colyseus',
-    games: ['doudizhu', 'niuniu'], // niuniu listed for dual-deploy; no NnRoom in v1 (local vs-AI)
+    games: ['doudizhu', 'mahjong', 'niuniu'], // niuniu listed for dual-deploy; no NnRoom in v1 (local vs-AI)
     port: PORT,
     matchMs: MATCH_MS,
   });
@@ -40,7 +41,7 @@ app.get('/', (_req, res) => {
   <h1>Tea Parlor · Colyseus</h1>
   <p>权威多人房游戏服已启动 · 端口 <b>${PORT}</b></p>
   <ul>
-    <li>房间名：<code>doudizhu</code>（权威）· <code>niuniu</code>（health 列表，v1 无人机房）</li>
+    <li>房间名：<code>doudizhu</code>（权威）· <code>mahjong</code>（双人同桌）· <code>niuniu</code>（health 列表）</li>
     <li>健康检查：<a href="/health" style="color:#9fefc0">/health</a></li>
     <li>H5 模式：大厅 → 对局模式 → <b>Colyseus 联网</b></li>
   </ul>
@@ -56,6 +57,7 @@ const gameServer = new Server({
 });
 
 gameServer.define('doudizhu', DoudizhuRoom).filterBy(['roomKey']).enableRealtimeListing();
+gameServer.define('mahjong', MahjongRoom).filterBy(['roomKey']).enableRealtimeListing();
 
 httpServer.listen(PORT, HOST, () => {
   console.log(`[colyseus] Tea Parlor game server listening on http://${HOST}:${PORT}`);
