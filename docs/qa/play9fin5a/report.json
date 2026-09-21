@@ -1,0 +1,12 @@
+{
+  "slice": "play9fin5a",
+  "cache": "play9fin5a",
+  "ok": true,
+  "checks": {
+    "recent_same_table_server": true,
+    "session_auth_fetch_post": true,
+    "local_cache_fallback": true,
+    "no_full_im": true,
+    "cache_play9fin5a": true
+  }
+}

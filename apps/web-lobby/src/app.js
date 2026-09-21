@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin4c';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin4c';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin4c';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin4c';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin4c';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin5a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin5a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin5a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin5a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin5a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -65,6 +65,8 @@ import {
   fetchWalletSummary,
   fetchDailySupply,
   claimDailySupply as claimDailySupplyApi,
+  fetchRecentTables as fetchRecentTablesApi,
+  postRecentTable as postRecentTableApi,
 } from './net/wallet-client.js';
 import {
   DAILY_SUPPLY_AMOUNT,
@@ -4541,11 +4543,13 @@ function applyServerShadowBalance(summary) {
 
 /** play9fin4c: activity center — chips-only daily supply; no Stars/chain top-up */
 
-/** play9fin4c: recent same-table list (local only; no full IM) */
+/** play9fin5a: recent same-table — server-backed when session available; localStorage cache/fallback */
 const RECENT_TABLE_KEY = 'tea-parlor-recent-tables';
 const RECENT_TABLE_MAX = 8;
+let _recentTablesCache = null;
+let _recentTablesSource = 'local';
 
-function loadRecentTables() {
+function loadRecentTablesLocal() {
   try {
     const raw = localStorage.getItem(RECENT_TABLE_KEY);
     const list = raw ? JSON.parse(raw) : [];
@@ -4555,32 +4559,111 @@ function loadRecentTables() {
   }
 }
 
-function saveRecentTables(list) {
+function saveRecentTablesLocal(list) {
   try {
     localStorage.setItem(RECENT_TABLE_KEY, JSON.stringify(list.slice(0, RECENT_TABLE_MAX)));
   } catch (_) { /* ignore quota */ }
+}
+
+function loadRecentTables() {
+  if (Array.isArray(_recentTablesCache)) return _recentTablesCache.slice();
+  return loadRecentTablesLocal();
+}
+
+function saveRecentTables(list) {
+  const next = (Array.isArray(list) ? list : []).slice(0, RECENT_TABLE_MAX);
+  _recentTablesCache = next;
+  saveRecentTablesLocal(next);
+}
+
+function mergeRecentTableLists(primary, secondary) {
+  const out = [];
+  const seen = new Set();
+  for (const src of [primary || [], secondary || []]) {
+    for (const it of src) {
+      const key = String(it?.roomKey || '').trim();
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        roomKey: key,
+        game: String(it.game || 'doudizhu'),
+        label: String(it.label || `同桌·${key.slice(0, 12)}`),
+        at: Number(it.at) || Date.now(),
+      });
+      if (out.length >= RECENT_TABLE_MAX) return out;
+    }
+  }
+  return out;
 }
 
 function rememberRecentTable({ roomKey, game = 'doudizhu', label } = {}) {
   const key = String(roomKey || '').trim();
   if (!key) return;
   const now = Date.now();
-  const next = loadRecentTables().filter((x) => x.roomKey !== key);
-  next.unshift({
+  const entry = {
     roomKey: key,
     game,
     label: label || `同桌·${key.slice(0, 12)}`,
     at: now,
-  });
+  };
+  const next = loadRecentTables().filter((x) => x.roomKey !== key);
+  next.unshift(entry);
   saveRecentTables(next);
+  // play9fin5a: push to server when TG session available (survives refresh / device switch)
+  const token = getLobbySessionToken();
+  if (token) {
+    postRecentTableApi(token, entry).then((body) => {
+      if (body?.tables) {
+        saveRecentTables(mergeRecentTableLists(body.tables, loadRecentTablesLocal()));
+        _recentTablesSource = 'server';
+        paintSocialRecentList();
+      }
+    }).catch((err) => {
+      console.warn('[tea-parlor] recent-table sync failed', err?.message || err);
+    });
+  }
 }
 
-function renderSocialPage() {
+async function syncRecentTablesFromServer() {
+  const token = getLobbySessionToken();
+  const gateway = String(window.TEA_PARLOR_API_GATEWAY_URL || '').replace(/\/+$/, '');
+  if (!token || !gateway) {
+    _recentTablesSource = 'local';
+    _recentTablesCache = loadRecentTablesLocal();
+    return loadRecentTables();
+  }
+  try {
+    const body = await fetchRecentTablesApi(token);
+    const serverList = Array.isArray(body?.tables) ? body.tables : [];
+    const merged = mergeRecentTableLists(serverList, loadRecentTablesLocal());
+    saveRecentTables(merged);
+    _recentTablesSource = 'server';
+    // best-effort: push merged local-only entries up so other devices see them
+    const localOnly = loadRecentTablesLocal().filter(
+      (loc) => !serverList.some((s) => s.roomKey === loc.roomKey),
+    );
+    for (const entry of localOnly.slice(0, 3)) {
+      try { await postRecentTableApi(token, entry); } catch (_) { /* ignore */ }
+    }
+    return merged;
+  } catch (err) {
+    console.warn('[tea-parlor] recent-tables fetch failed', err?.message || err);
+    _recentTablesSource = 'local';
+    _recentTablesCache = loadRecentTablesLocal();
+    return loadRecentTables();
+  }
+}
+
+function paintSocialRecentList() {
   const listEl = document.getElementById('socialRecentList');
-  const status = document.getElementById('socialStatus');
-  if (status) status.textContent = '可生成邀请链接或输入房间号加入 · 不含好友动态 / 完整 IM';
   if (!listEl) return;
   const items = loadRecentTables();
+  const headSmall = listEl.closest?.('.social-card')?.querySelector?.('.social-card-head small');
+  if (headSmall) {
+    headSmall.textContent = _recentTablesSource === 'server'
+      ? '账号同步 · 换机/刷新仍可打开'
+      : '本机缓存 · 登录 Telegram 后同步到账号';
+  }
   if (!items.length) {
     listEl.innerHTML = '<li class="social-recent-empty">暂无最近同桌 · 完成一局后出现在此</li>';
     return;
@@ -4594,6 +4677,14 @@ function renderSocialPage() {
       </button>
     </li>`;
   }).join('');
+}
+
+function renderSocialPage() {
+  const status = document.getElementById('socialStatus');
+  if (status) status.textContent = '可生成邀请链接或输入房间号加入 · 不含好友动态 / 完整 IM';
+  paintSocialRecentList();
+  // async refresh from server when session available
+  syncRecentTablesFromServer().then(() => paintSocialRecentList());
 }
 
 function bindSocialUi() {

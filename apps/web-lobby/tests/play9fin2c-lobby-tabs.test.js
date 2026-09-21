@@ -15,10 +15,10 @@ const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 const jj = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 
-test('cache play9fin4c', () => {
-  assert.match(html, /app\.js\?v=play9fin4c/);
-  assert.match(html, /lobby-ia\.css\?v=play9fin4c/);
-  assert.match(app, /\?v=play9fin4c/);
+test('cache play9fin5a', () => {
+  assert.match(html, /app\.js\?v=play9fin5a/);
+  assert.match(html, /lobby-ia\.css\?v=play9fin5a/);
+  assert.match(app, /\?v=play9fin5a/);
 });
 
 test('five bottom tabs present and labeled', () => {

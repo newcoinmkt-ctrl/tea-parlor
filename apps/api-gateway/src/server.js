@@ -13,12 +13,15 @@ import {
   verifyTelegramInitData,
 } from './telegram-auth.js';
 import { createRateLimiter, rateLimitKey } from './rate-limit.js';
+import { createRecentTablesStore } from './recent-tables.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function createApiGateway(options = {}) {
   const avatarRepository = options.avatarRepository || createAvatarRepository(options.avatarOptions || {});
   const walletService = options.walletService || createWalletService(options.walletOptions || {});
+  // play9fin5a: server-backed recent same-table (by user/session)
+  const recentTablesStore = options.recentTablesStore || createRecentTablesStore(options.recentTablesOptions || {});
 
   // P1 修复（评审 #9）：按来源 IP 限流。登录端点带 HMAC 校验且关联邀请金币，
   // 单独用更严格的窗口；其余端点用宽松窗口兜底。测试可注入 clock。
@@ -103,6 +106,13 @@ export function createApiGateway(options = {}) {
         return handleInviteRoute(req, res, pathname, options, walletService);
       }
 
+      // play9fin5a: recent same-table — fetch/post by authenticated user
+      if (pathname.startsWith('/social/')) {
+        const auth = authenticateRequest(req, options);
+        if (!auth.ok) return sendJson(res, auth.status, { ok: false, reason: auth.reason });
+        return handleSocialRoute(req, res, pathname, auth.user, recentTablesStore);
+      }
+
       return sendJson(res, 404, { ok: false, reason: 'not_found' });
     } catch (error) {
       if (error.message === 'BOT_TOKEN_REQUIRED') {
@@ -117,6 +127,26 @@ export function createApiGateway(options = {}) {
       return sendJson(res, 400, { ok: false, reason: 'bad_request' });
     }
   };
+}
+
+/** play9fin5a — recent same-table server API (session auth) */
+async function handleSocialRoute(req, res, pathname, user, recentTablesStore) {
+  const userId = String(user.id);
+  if (req.method === 'GET' && pathname === '/social/recent-tables') {
+    const tables = recentTablesStore.list(userId);
+    return sendJson(res, 200, { ok: true, tables, source: 'server' });
+  }
+  if (req.method === 'POST' && pathname === '/social/recent-tables') {
+    const body = await readJson(req);
+    // Upsert one entry, or replace whole list when body.tables is provided
+    if (Array.isArray(body.tables)) {
+      const result = recentTablesStore.replace(userId, body.tables);
+      return sendJson(res, result.ok ? 200 : 400, { ...result, source: 'server' });
+    }
+    const result = recentTablesStore.remember(userId, body);
+    return sendJson(res, result.ok ? 200 : 400, { ...result, source: 'server' });
+  }
+  return sendJson(res, 404, { ok: false, reason: 'not_found' });
 }
 
 async function handleInviteRoute(req, res, pathname, options, walletService) {
@@ -497,7 +527,22 @@ export function startApiGateway(options = {}) {
     const { file, logger, ...rest } = walletOptions;
     const walletService = createPersistentWalletService({ file, logger, ...rest });
     console.log(`[api-gateway] wallet persistence: ${file} (loaded=${walletService.persistence.loaded})`);
-    const persistedServer = createServer(createApiGateway({ ...options, walletService, walletOptions: undefined }));
+    // play9fin5a: persist recent tables beside wallet snapshot
+    const recentTablesOptions = {
+      ...(options.recentTablesOptions || {}),
+      file: (options.recentTablesOptions && options.recentTablesOptions.file !== undefined)
+        ? options.recentTablesOptions.file
+        : join(__dirname, '..', 'data', 'recent-tables.json'),
+    };
+    const recentTablesStore = createRecentTablesStore(recentTablesOptions);
+    console.log(`[api-gateway] recent-tables persistence: ${recentTablesOptions.file || '(memory)'}`);
+    const persistedServer = createServer(createApiGateway({
+      ...options,
+      walletService,
+      walletOptions: undefined,
+      recentTablesStore,
+      recentTablesOptions: undefined,
+    }));
     persistedServer.listen(port, host);
     return persistedServer;
   }

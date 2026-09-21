@@ -103,3 +103,24 @@ async function readJsonResponse(response) {
   }
   return body;
 }
+
+/** play9fin5a — server-backed recent same-table (requires session) */
+export async function fetchRecentTables(token, options = {}) {
+  return walletRequest('/social/recent-tables', token, { method: 'GET' }, options);
+}
+
+export async function postRecentTable(token, entry = {}, options = {}) {
+  return walletRequest('/social/recent-tables', token, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(entry),
+  }, options);
+}
+
+export async function replaceRecentTables(token, tables = [], options = {}) {
+  return walletRequest('/social/recent-tables', token, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ tables }),
+  }, options);
+}
