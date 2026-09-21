@@ -244,6 +244,17 @@ export async function ddzState() {
   return { room: await p };
 }
 
+/**
+ * play9fin3a — server-authoritative full trustee (DDZ).
+ * Sends `{ on }` to Colyseus; server sets seat.fullTrustee and driveAi.
+ */
+export async function ddzSetTrustee(on = true) {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('trustee', { on: !!on });
+  return { room: await p };
+}
+
 
 /**
  * play9fin1c — join/create mahjong dual-session room (推倒胡/血战)
@@ -332,6 +343,14 @@ export async function mjCall(action) {
   const r = ensureRoom();
   const p = waitRoomUpdate();
   r.send('call', { action });
+  return { room: await p };
+}
+
+/** play9fin3a — server-authoritative full trustee (Mahjong Colyseus room) */
+export async function mjSetTrustee(on = true) {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('trustee', { on: !!on });
   return { room: await p };
 }
 

@@ -108,6 +108,26 @@ export class DoudizhuRoom extends Room {
       const uid = client.userData?.uid || client.sessionId;
       await this._explicitQuit(uid);
     });
+
+    // play9fin3a — server-authoritative voluntary full trustee
+    this.onMessage('trustee', async (client, msg) => {
+      try {
+        await this.table?.ensureReady();
+        const uid = client.userData?.uid || client.sessionId;
+        const on = msg?.on !== false && msg?.enabled !== false && msg?.trustee !== false;
+        const ok = this.table.setFullTrustee(uid, on);
+        if (!ok) {
+          client.send('error', { msg: 'trustee_unavailable' });
+          this._push(client);
+          return;
+        }
+        this._broadcast();
+        if (on) this._pumpAi();
+      } catch (e) {
+        client.send('error', { msg: e.message || String(e) });
+        this._push(client);
+      }
+    });
   }
 
   async onJoin(client, options = {}) {
@@ -203,6 +223,8 @@ export class DoudizhuRoom extends Room {
       this._clearLeaveTimers(uid);
       this.table.reconnect(uid);
       this._broadcast();
+      // play9fin3a: if voluntary fullTrustee survived reconnect, keep AI driving
+      if (this.table.seats[this.table.seatOf(uid)]?.fullTrustee) this._pumpAi();
     } catch {
       this._clearLeaveTimers(uid);
       if (this.table.phase !== 'settle') {

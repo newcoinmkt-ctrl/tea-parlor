@@ -1,0 +1,13 @@
+{
+  "slice": "play9fin3a",
+  "cache": "play9fin3a",
+  "ok": true,
+  "checks": {
+    "server_full_trustee": "setFullTrustee + driveAi",
+    "reconnect_preserves": "fullTrustee kept; soft cleared",
+    "room_message": "trustee { on }",
+    "client_online": "ddzSetTrustee; scheduleAi no-op online",
+    "mj_server": "MjTable setFullTrustee + _driveAi trustee humans",
+    "tg_vh": "preserved"
+  }
+}

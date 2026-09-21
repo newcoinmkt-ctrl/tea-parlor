@@ -54,6 +54,24 @@ export class MahjongRoom extends Room {
       await this.table.ensureReady();
       this._push(client);
     });
+    // play9fin3a — server-authoritative voluntary full trustee
+    this.onMessage('trustee', async (client, msg) => {
+      try {
+        await this.table.ensureReady();
+        const uid = client.userData?.uid || client.sessionId;
+        const on = msg?.on !== false && msg?.enabled !== false && msg?.trustee !== false;
+        const ok = this.table.setFullTrustee(uid, on);
+        if (!ok) {
+          client.send('error', { msg: 'trustee_unavailable' });
+          this._push(client);
+          return;
+        }
+        this._broadcast();
+      } catch (e) {
+        client.send('error', { msg: e.message || String(e) });
+        this._push(client);
+      }
+    });
   }
 
   async onJoin(client, options = {}) {

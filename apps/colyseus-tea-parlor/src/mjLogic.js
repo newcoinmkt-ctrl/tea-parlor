@@ -74,6 +74,8 @@ export class MjTable {
       name: name || `茶友${seat}`,
       kind: 'human',
       connected: true,
+      trustee: false,
+      fullTrustee: false,
     };
     if (this.humanCount === 1) this.resetMatchWindow();
     return seat;
@@ -83,6 +85,12 @@ export class MjTable {
     const seat = this.seatOf(uid);
     if (seat < 0) return this.occupy(uid, name);
     this.seats[seat].connected = true;
+    // play9fin3a: preserve voluntary fullTrustee
+    if (this.seats[seat].fullTrustee) {
+      this.seats[seat].trustee = true;
+    } else {
+      this.seats[seat].trustee = false;
+    }
     if (name) this.seats[seat].name = name;
     return seat;
   }
@@ -98,6 +106,31 @@ export class MjTable {
     return seat;
   }
 
+  /** Soft trustee after disconnect — AI plays seat. */
+  applyTrustee(uidOrSeat) {
+    const seat = typeof uidOrSeat === 'number' ? uidOrSeat : this.seatOf(uidOrSeat);
+    if (seat < 0 || !this.seats[seat]) return;
+    this.seats[seat].trustee = true;
+    this.seats[seat].connected = false;
+    this._driveAi();
+  }
+
+  /**
+   * play9fin3a — voluntary full trustee (server-authoritative for online MJ).
+   */
+  setFullTrustee(uidOrSeat, on = true) {
+    const seat = typeof uidOrSeat === 'number' ? uidOrSeat : this.seatOf(uidOrSeat);
+    if (seat < 0 || !this.seats[seat]) return false;
+    const s = this.seats[seat];
+    if (s.kind !== 'human') return false;
+    const want = !!on;
+    s.fullTrustee = want;
+    s.trustee = want;
+    if (want) s.connected = true;
+    if (want) this._driveAi();
+    return true;
+  }
+
   _fillAi() {
     let n = 0;
     for (let i = 0; i < 4; i++) {
@@ -107,6 +140,8 @@ export class MjTable {
           name: AI_NAMES[n++] || `茶友${i}`,
           kind: 'ai',
           connected: false,
+          trustee: true,
+          fullTrustee: false,
         };
       }
     }
@@ -154,7 +189,9 @@ export class MjTable {
       }
       const cur = this.table.currentPlayer;
       const seat = this.seats[cur];
-      if (!seat || seat.kind === 'human') break;
+      // play9fin3a: AI seats OR human full/soft trustee → server auto-plays
+      const auto = seat && (seat.kind === 'ai' || seat.trustee);
+      if (!seat || !auto) break;
       const hand = this.table.hands[cur];
       const tile = this._pickAiDiscard(hand);
       if (!tile) break;
@@ -244,7 +281,11 @@ export class MjTable {
         name: s.name,
         kind: s.kind,
         connected: !!s.connected,
+        trustee: !!s.trustee,
+        fullTrustee: !!s.fullTrustee,
       } : null)),
+      myTrustee: seat >= 0 ? !!this.seats[seat]?.trustee : false,
+      myFullTrustee: seat >= 0 ? !!this.seats[seat]?.fullTrustee : false,
     };
     if (this.phase === 'match' || !this.table) {
       return { ...base, status: '匹配中，等待同桌' };

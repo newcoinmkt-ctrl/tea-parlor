@@ -179,7 +179,10 @@ export class DdzTable {
     const existing = this.seatOf(uid);
     if (existing >= 0) {
       this.seats[existing].connected = true;
-      this.seats[existing].trustee = false;
+      // play9fin3a: preserve voluntary fullTrustee across re-occupy
+      if (!this.seats[existing].fullTrustee) {
+        this.seats[existing].trustee = false;
+      }
       this.seats[existing].disconnectedAt = null;
       if (name) this.seats[existing].name = name;
       this._syncNames();
@@ -194,6 +197,7 @@ export class DdzTable {
       kind: 'human',
       connected: true,
       trustee: false,
+      fullTrustee: false,
       disconnectedAt: null,
     };
     // Every new human seat during match: full MATCH_MS from now (reconnect path above skips this).
@@ -216,8 +220,13 @@ export class DdzTable {
     const seat = this.seatOf(uid);
     if (seat >= 0) {
       this.seats[seat].connected = true;
-      this.seats[seat].trustee = false;
       this.seats[seat].disconnectedAt = null;
+      // play9fin3a: soft (disconnect) trustee clears; voluntary fullTrustee persists + keeps auto-play
+      if (this.seats[seat].fullTrustee) {
+        this.seats[seat].trustee = true;
+      } else {
+        this.seats[seat].trustee = false;
+      }
       if (name) this.seats[seat].name = name;
       this._syncNames();
       return seat;
@@ -237,12 +246,35 @@ export class DdzTable {
     return seat;
   }
 
+  /**
+   * Soft trustee after disconnect timeout — AI plays while seat is gone.
+   * Does NOT set fullTrustee (voluntary flag); reconnect clears soft trustee.
+   */
   applyTrustee(uidOrSeat) {
     const seat = typeof uidOrSeat === 'number' ? uidOrSeat : this.seatOf(uidOrSeat);
     if (seat < 0 || !this.seats[seat]) return;
     this.seats[seat].trustee = true;
     this.seats[seat].connected = false;
     this.driveAi();
+  }
+
+  /**
+   * play9fin3a — voluntary full trustee (server-authoritative).
+   * Client must NOT locally auto-play online; Colyseus driveAi acts the seat.
+   * Survives reconnect while fullTrustee remains true.
+   */
+  setFullTrustee(uidOrSeat, on = true) {
+    const seat = typeof uidOrSeat === 'number' ? uidOrSeat : this.seatOf(uidOrSeat);
+    if (seat < 0 || !this.seats[seat]) return false;
+    const s = this.seats[seat];
+    if (s.kind !== 'human') return false;
+    const want = !!on;
+    s.fullTrustee = want;
+    s.trustee = want;
+    // Stay connected: voluntary trustee is not a disconnect soft-park
+    if (want) s.connected = true;
+    if (want) this.driveAi();
+    return true;
   }
 
   isWaitingHuman(seat) {
@@ -260,6 +292,7 @@ export class DdzTable {
           kind: 'ai',
           connected: false,
           trustee: true,
+          fullTrustee: false,
           disconnectedAt: null,
         };
       }
@@ -408,12 +441,13 @@ export class DdzTable {
     const me = this.seatOf(uid);
     const names = this.names.slice();
     const seats = this.seats.map((s, i) => {
-      if (!s) return { empty: true, name: names[i], kind: null, connected: false, trustee: false };
+      if (!s) return { empty: true, name: names[i], kind: null, connected: false, trustee: false, fullTrustee: false };
       return {
         name: s.name,
         kind: s.kind,
         connected: !!s.connected,
         trustee: !!s.trustee,
+        fullTrustee: !!s.fullTrustee,
         empty: false,
       };
     });
@@ -505,6 +539,9 @@ export class DdzTable {
       status,
       isHumanTurn: isMyTurn && this.isWaitingHuman(me),
       canPass,
+      // play9fin3a: client syncs UI from server; forbid pure client auto-play online
+      myTrustee: me >= 0 ? !!this.seats[me]?.trustee : false,
+      myFullTrustee: me >= 0 ? !!this.seats[me]?.fullTrustee : false,
       backend: 'colyseus',
     };
   }
