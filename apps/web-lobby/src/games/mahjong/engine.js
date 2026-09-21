@@ -351,6 +351,33 @@ export function findBuGangCandidates(concealed, pengMelds) {
   return out;
 }
 
+
+/** 吃：仅序数牌；返回从手牌取出的两张组合（不含弃牌） */
+export function findChiOptions(hand, tile) {
+  if (!tile || tile.suit > 2) return [];
+  const suit = tile.suit;
+  const r = Number(tile.rank);
+  const patterns = [
+    [r - 2, r - 1],
+    [r - 1, r + 1],
+    [r + 1, r + 2],
+  ];
+  const out = [];
+  const used = new Set();
+  for (const [a, b] of patterns) {
+    if (a < 1 || a > 9 || b < 1 || b > 9) continue;
+    const ta = hand.find((t) => t.suit === suit && t.rank === a && !used.has(t.id));
+    if (!ta) continue;
+    const tb = hand.find((t) => t.suit === suit && t.rank === b && t.id !== ta.id && !used.has(t.id));
+    if (!tb) continue;
+    const key = [a, r, b].sort((x, y) => x - y).join('-');
+    if (out.some((o) => o.key === key)) continue;
+    out.push({ key, tiles: [ta, tb], ranks: [a, r, b].sort((x, y) => x - y) });
+  }
+  return out;
+}
+
+
 // ─── 模式元信息 ───────────────────────────────────────
 
 export function playerCountForMode(mode) {
@@ -681,17 +708,19 @@ export function createMahjongTable({
     return { ok: true, suit: s };
   }
 
-  // ── 碰杠胡 ──
+  // ── 吃碰杠胡 ──
 
   function scanClaims(discarder, tile) {
     const claims = [];
+    // 吃仅上家（弃牌者下家），且仅非四川玩法（推倒胡/二人）
+    const chiSeat = !isSichuan ? ((discarder + 1) % playerCount) : -1;
     for (const i of playingSeats()) {
       if (i === discarder) continue;
       if (state.status[i] === PlayerStatus.HU_OUT) continue;
       const meldsCount = state.melds[i].length;
       const missing = state.missingSuits[i];
       if (canHu([...state.hands[i], tile], meldsCount, missing)) {
-        claims.push({ type: 'hu', seat: i, canHu: true, canPeng: false, canGang: false });
+        claims.push({ type: 'hu', seat: i, canHu: true, canPeng: false, canGang: false, canChi: false });
       }
       if (state.status[i] === PlayerStatus.ACTIVE) {
         const dingque = missing != null && missing >= 0 && missing <= 2 && tile.suit === missing;
@@ -703,10 +732,26 @@ export function createMahjongTable({
             canHu: false,
             canPeng: true,
             canGang: n >= 3,
+            canChi: false,
           });
         }
         if (!dingque && n >= 3) {
-          claims.push({ type: 'gang', seat: i, canHu: false, canPeng: true, canGang: true });
+          claims.push({ type: 'gang', seat: i, canHu: false, canPeng: true, canGang: true, canChi: false });
+        }
+        // play9mj3: 吃 — 仅序数牌 + 上家
+        if (!dingque && i === chiSeat && tile.suit <= 2) {
+          const chiOpts = findChiOptions(state.hands[i], tile);
+          if (chiOpts.length) {
+            claims.push({
+              type: 'chi',
+              seat: i,
+              canHu: false,
+              canPeng: false,
+              canGang: false,
+              canChi: true,
+              chiOptions: chiOpts,
+            });
+          }
         }
       }
     }
@@ -871,6 +916,43 @@ export function createMahjongTable({
     return { ok: true, deducted: need, handLeft: state.hands[seat].length };
   }
 
+
+  function doChi(seat, tile, optIndex = 0) {
+    const opts = findChiOptions(state.hands[seat], tile);
+    const opt = opts[optIndex] || opts[0];
+    if (!opt) return { ok: false, reason: 'no_chi' };
+    const takeIds = new Set(opt.tiles.map((t) => t.id));
+    const before = state.hands[seat].length;
+    state.hands[seat] = sortMahjongHand(state.hands[seat].filter((t) => !takeIds.has(t.id)));
+    if (state.hands[seat].length !== before - 2) {
+      return { ok: false, reason: 'chi_deduct' };
+    }
+    const from = state.lastDiscard?.player;
+    if (state.discards.length) {
+      const last = state.discards[state.discards.length - 1];
+      if (last && last.player === from && sameTile(last.tile, tile)) {
+        state.discards.pop();
+      }
+    }
+    state.melds[seat].push({
+      id: `m_${++state._meldSeq}`,
+      type: 'chi',
+      tile,
+      suit: tile.suit,
+      rank: tile.rank,
+      ranks: opt.ranks,
+      tiles: [...opt.tiles, tile],
+      open: true,
+      from,
+    });
+    state.lastDiscard = null;
+    state.current = seat;
+    state.phase = 'discard';
+    state.drawn = null;
+    state.canHuSelf = canHu(state.hands[seat], state.melds[seat].length, state.missingSuits[seat]);
+    return { ok: true, deducted: 2, handLeft: state.hands[seat].length };
+  }
+
   function discard(player, tileId) {
     if (state.phase !== 'discard' && state.phase !== 'draw') {
       return { ok: false, reason: 'not_discard' };
@@ -941,8 +1023,8 @@ export function createMahjongTable({
       return { ok: true, multiHu: huClaimants.length > 1 };
     }
 
-    // 真人可碰杠优先于 AI，避免 AI 抢走同一张弃牌的应答
-    if (claims.some((c) => c.seat === 0 && (c.canPeng || c.canGang || c.type === 'peng' || c.type === 'gang'))) {
+    // 真人可吃/碰/杠优先于 AI，避免 AI 抢走同一张弃牌的应答
+    if (claims.some((c) => c.seat === 0 && (c.canPeng || c.canGang || c.canChi || c.type === 'peng' || c.type === 'gang' || c.type === 'chi'))) {
       state.phase = 'call';
       state.current = 0;
       state.pendingClaims = claims.filter((c) => c.seat === 0);
@@ -993,6 +1075,18 @@ export function createMahjongTable({
       }
       drawFor(next);
       return { ok: true };
+    }
+
+    if (action === 'chi') {
+      if (isSichuan) return { ok: false, reason: 'no_chi_mode' };
+      if (((from + 1) % playerCount) !== 0) return { ok: false, reason: 'not_kami' };
+      const missing = state.missingSuits[0];
+      if (missing != null && missing >= 0 && missing <= 2 && tile.suit === missing) {
+        return { ok: false, reason: 'dingque' };
+      }
+      const cr = doChi(0, tile, 0);
+      if (cr && cr.ok === false) return cr;
+      return { ok: true, chi: true, deducted: cr?.deducted };
     }
 
     if (action === 'peng' || action === 'gang') {
@@ -1133,12 +1227,22 @@ export function createMahjongTable({
     let callOptions = null;
     if (state.phase === 'call' && state.lastDiscard) {
       const tile = state.lastDiscard.tile;
+      const fromSeat = state.lastDiscard.player;
+      const canChiLegal = !isSichuan
+        && state.status[0] === PlayerStatus.ACTIVE
+        && ((fromSeat + 1) % playerCount) === 0
+        && !(missing != null && missing >= 0 && missing <= 2 && tile.suit === missing)
+        && findChiOptions(state.hands[0], tile).length > 0;
       callOptions = {
         canHu: canHu([...state.hands[0], tile], state.melds[0].length, missing),
         canPeng: countSame(state.hands[0], tile).length >= 2
-          && state.status[0] === PlayerStatus.ACTIVE,
+          && state.status[0] === PlayerStatus.ACTIVE
+          && !(missing != null && missing >= 0 && missing <= 2 && tile.suit === missing),
         canGang: countSame(state.hands[0], tile).length >= 3
-          && state.status[0] === PlayerStatus.ACTIVE,
+          && state.status[0] === PlayerStatus.ACTIVE
+          && !(missing != null && missing >= 0 && missing <= 2 && tile.suit === missing),
+        canChi: canChiLegal,
+        chiOptions: canChiLegal ? findChiOptions(state.hands[0], tile) : [],
       };
     }
 

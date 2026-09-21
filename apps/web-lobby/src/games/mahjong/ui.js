@@ -937,7 +937,7 @@ export function createMahjongUI(options = {}) {
     el.melds.innerHTML = melds.map((m) => {
       const n = m.type === 'gang' ? 4 : 3;
       const tile = m.tile || { suit: m.suit, rank: m.rank };
-      const label = m.type === 'gang' ? '杠' : m.type === 'peng' ? '碰' : (m.type || '副露');
+      const label = m.type === 'gang' ? '杠' : m.type === 'peng' ? '碰' : m.type === 'chi' ? '吃' : (m.type || '副露');
       const faces = Array.from({ length: n }, () => (
         `<span class="mg-tile mj-tile mj-meld-tile ${tileSuitClass(tile)}">${tileFaceHtml(tile)}</span>`
       )).join('');
@@ -1198,6 +1198,7 @@ export function createMahjongUI(options = {}) {
         const o = snap.callOptions;
         el.actions.innerHTML =
           (o.canHu ? '<button type="button" class="qq-btn qq-btn-gold mj-btn-hu" data-mj-act="hu">胡</button>' : '')
+          + (o.canChi ? '<button type="button" class="qq-btn qq-btn-gold mj-btn-side" data-mj-act="chi">吃</button>' : '')
           + (o.canPeng ? '<button type="button" class="qq-btn qq-btn-gold mj-btn-side" data-mj-act="peng">碰</button>' : '')
           + (o.canGang ? '<button type="button" class="qq-btn qq-btn-gold mj-btn-side" data-mj-act="gang">杠</button>' : '')
           + '<button type="button" class="qq-btn qq-btn-blue mj-btn-qi" data-mj-act="pass">过</button>';
