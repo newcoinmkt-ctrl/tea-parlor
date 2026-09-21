@@ -1,4 +1,4 @@
-/** Table viewport: Telegram.WebApp.viewportStableHeight, never 100vh, never whole-page CSS-rotate.
+/** Table viewport: prefer Telegram.WebApp.viewportStableHeight (play9ship3b), never 100vh, never whole-page CSS-rotate.
  *  play9fix1 adaptive:
  *   - Landscape viewport (W>=H): JJ landscape stage letterboxed via translate+scale (jj1/jj1b).
  *   - Portrait viewport (H>W): upright full-viewport fill — NO tiny letterbox strip (play9fix1 FAIL).
@@ -77,6 +77,27 @@ function readInsetPx(inset, key) {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
+/**
+ * play9ship3b: Prefer Telegram viewportStableHeight (usable), never Math.max with
+ * innerHeight — that parked the DDZ hand/出牌 under TG bottom chrome so taps died.
+ * @param {{ innerHeight?: number, viewportStableHeight?: number, viewportHeight?: number, minPx?: number }} opts
+ */
+export function resolveTelegramViewportHeight({
+  innerHeight = 0,
+  viewportStableHeight = 0,
+  viewportHeight = 0,
+  minPx = MIN_TG_VH_PX,
+} = {}) {
+  const stable = Number(viewportStableHeight) || 0;
+  const live = Number(viewportHeight) || 0;
+  const inner = Number(innerHeight) || 0;
+  const floor = Math.max(1, Number(minPx) || MIN_TG_VH_PX);
+  if (stable >= floor) return Math.round(stable);
+  if (live >= floor) return Math.round(live);
+  if (inner >= floor) return Math.round(inner);
+  return floor;
+}
+
 export function syncViewportHeight() {
   const root = document.documentElement;
   const tg = window.Telegram?.WebApp;
@@ -92,14 +113,26 @@ export function syncViewportHeight() {
         readInsetPx(safe, "bottom"),
         readInsetPx(content, "bottom"),
       );
-      const bottom = Math.max(bottomInset, isPlayingTable() ? TG_BOT_KEYBOARD_CLEARANCE_PX : bottomInset);
-      root.style.setProperty("--safe-top", `${top}px`);
-      root.style.setProperty("--safe-bottom", `${bottom}px`);
-      root.style.setProperty("--tg-keyboard-clearance", `${TG_BOT_KEYBOARD_CLEARANCE_PX}px`);
       const stable = Number(tg.viewportStableHeight) || 0;
       const live = Number(tg.viewportHeight) || 0;
-      const candidate = Math.max(stable, live, h, MIN_TG_VH_PX);
-      if (candidate > 0) h = candidate;
+      // When stable height is trusted, only real insets — the old 168px clearance
+      // compensated for sizing the stage to full innerHeight (hand under chrome).
+      const trustStable = stable >= MIN_TG_VH_PX;
+      const bottom = trustStable
+        ? bottomInset
+        : Math.max(bottomInset, isPlayingTable() ? TG_BOT_KEYBOARD_CLEARANCE_PX : bottomInset);
+      root.style.setProperty("--safe-top", `${top}px`);
+      root.style.setProperty("--safe-bottom", `${bottom}px`);
+      root.style.setProperty("--tg-chrome-bottom", `${bottom}px`);
+      root.style.setProperty(
+        "--tg-keyboard-clearance",
+        `${trustStable ? bottomInset : TG_BOT_KEYBOARD_CLEARANCE_PX}px`,
+      );
+      h = resolveTelegramViewportHeight({
+        innerHeight: h,
+        viewportStableHeight: stable,
+        viewportHeight: live,
+      });
     } else if (vv && vv.height) {
       h = vv.height;
     }
@@ -180,8 +213,10 @@ function pinJjZoneGeometry(tv) {
     slot.style.setProperty("top", "auto", "important");
     slot.style.setProperty("width", "100%", "important");
     slot.style.setProperty("z-index", "20", "important");
-    // No safe-area pad — letterbox/upright stage already clears TG chrome
-    slot.style.setProperty("padding-bottom", "4px", "important");
+    // play9ship3b: stage sized to stable vh; keep a small real-inset pad (never 168)
+    const safePad = Number.parseFloat(document.documentElement.style.getPropertyValue("--safe-bottom")) || 0;
+    const pad = Math.max(4, Math.min(safePad, 40));
+    slot.style.setProperty("padding-bottom", `${pad}px`, "important");
   }
   const bar = tv.querySelector(".qq-bottom-bar");
   if (bar) {

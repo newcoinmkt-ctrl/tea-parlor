@@ -816,13 +816,13 @@ export function createMahjongTable({
       }
       keep.push(c);
     }
-    // play9ship3: 必须从手牌实际扣除 need 张，否则拒绝碰/杠
+    // play9ship3b: 必须从手牌实际扣除 need 张，否则拒绝碰/杠
     if (removed < need) {
       return { ok: false, reason: asGang ? 'no_gang' : 'no_peng' };
     }
     state.hands[seat] = sortMahjongHand(keep);
     const from = state.lastDiscard?.player;
-    // play9ship3: 碰/杠后从弃牌河移除被吃的那张，避免「手牌未扣 / 河中仍在」错觉
+    // play9ship3b: 碰/杠后从弃牌河移除被吃的那张，避免「手牌未扣 / 河中仍在」错觉
     if (state.discards.length) {
       const last = state.discards[state.discards.length - 1];
       if (last && last.player === from && sameTile(last.tile, tile)) {
@@ -882,7 +882,7 @@ export function createMahjongTable({
     const tile = hand.find((c) => c.id === tileId);
     if (!tile) return { ok: false, reason: 'missing' };
 
-    // play9ship3: 定缺未打完前只能打缺门（手牌校验）
+    // play9ship3b: 定缺未打完前只能打缺门（手牌校验）
     const missing = state.missingSuits[player];
     if (missing != null && missing >= 0 && missing <= 2) {
       const hasQue = hand.some((c) => c.suit === missing);

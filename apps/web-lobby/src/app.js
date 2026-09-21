@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ship3';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ship3';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ship3';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ship3';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape } from './net/table-orient.js?v=play9ship3';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ship3b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ship3b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ship3b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ship3b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9ship3b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -5185,7 +5185,9 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
 
   // play9match3: do NOT await full telegramLoginPromise (it also syncs wallet).
   // Token is set as soon as /auth returns — poll that so match clock starts ASAP.
-  const sessionToken = await waitForMatchSessionToken(2_500);
+  // play9ship3b: TG /auth can lag past 2.5s on cold start — give Mini App a bit more room
+  const tokenWaitMs = window.Telegram?.WebApp?.initData ? 4_000 : 2_500;
+  const sessionToken = await waitForMatchSessionToken(tokenWaitMs);
   if (ddzMatchAborted) throw new Error('match_cancelled');
   if (window.__teaParlorSessionUserId) pinusUid = String(window.__teaParlorSessionUserId);
   // Matching is online-only: without a gateway session, fail honestly (no local fallback).
@@ -5899,6 +5901,11 @@ function onPlay() {
 
   if (game.online) {
     const ids = cards.map((c) => c.id);
+    // play9ship3b: clear raise immediately; room snapshot reconciles hand counts
+    selected = new Set();
+    hintText = '';
+    try { paintHandSelection(); } catch (_) {}
+    syncPlayButtonFromSelection();
     pinusSync(() => getOnlineNet().ddzPlay(ids));
     return;
   }
@@ -7202,38 +7209,17 @@ if (document.readyState === 'loading') {
 }
 
 function applyTelegramSafeArea() {
-  const root = document.documentElement;
   const tg = window.Telegram && window.Telegram.WebApp;
-  const vv = window.visualViewport;
-  const MIN_TG_VH = 240;
-  const TG_BOT_KEYBOARD_CLEARANCE_PX = 168;
-  let h = window.innerHeight || document.documentElement?.clientHeight || 0;
   try {
     if (tg) {
       // play9fix2: rate-limit expand via expandTelegramTable — raw expand on every
       // viewportChanged freezes 麻将 enter on TG Mini App (play9fix1 partial fix).
       try { expandTelegramTable(); } catch (_) {}
       try { tg.MainButton?.hide?.(); } catch (_) {}
-      const safe = tg.safeAreaInset || {};
-      const content = tg.contentSafeAreaInset || {};
-      const top = Math.max(Number(safe.top) || 0, Number(content.top) || 0);
-      const bottomInset = Math.max(Number(safe.bottom) || 0, Number(content.bottom) || 0);
-      const shell = document.querySelector('.lobby-shell');
-      const playing = shell?.classList.contains('table-active') || shell?.classList.contains('multi-active');
-      const bottom = Math.max(bottomInset, playing ? TG_BOT_KEYBOARD_CLEARANCE_PX : bottomInset);
-      root.style.setProperty('--safe-top', top + 'px');
-      root.style.setProperty('--safe-bottom', bottom + 'px');
-      root.style.setProperty('--tg-chrome-bottom', (playing ? TG_BOT_KEYBOARD_CLEARANCE_PX : 0) + 'px');
-      root.style.setProperty('--tg-keyboard-clearance', TG_BOT_KEYBOARD_CLEARANCE_PX + 'px');
-      const stable = Number(tg.viewportStableHeight) || 0;
-      const unstable = Number(tg.viewportHeight) || 0;
-      h = Math.max(h, stable, unstable, MIN_TG_VH);
-    } else if (vv && vv.height) {
-      h = Math.max(h, vv.height);
     }
   } catch (_) {}
-  // Never set --tg-vh to 0 (bid→play TG viewport flicker → blank white Mini App).
-  root.style.setProperty('--tg-vh', Math.max(MIN_TG_VH, Math.round(h || MIN_TG_VH)) + 'px');
+  // play9ship3b: single source of truth — prefer viewportStableHeight (never Math.max w/ innerHeight)
+  try { syncViewportHeight(); } catch (_) {}
 }
 applyTelegramSafeArea();
 try { window.Telegram?.WebApp?.onEvent?.('viewportChanged', applyTelegramSafeArea); } catch (_) {}
