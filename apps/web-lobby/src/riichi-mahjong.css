@@ -768,7 +768,7 @@ html.table-stage-jj #multiGameView.riichi-active .mj-jj-topbar,
 }
 
 
-/* play9mj3: 立直宣言态 / 结算宝牌·里宝牌 / 座位立直 */
+/* play9fin1a: 立直宣言态 / 结算宝牌·里宝牌 / 座位立直 */
 #multiGameView.riichi-active .rk-ops button.is-riichi-armed {
   background: linear-gradient(180deg, #ffe082, #ffb300);
   color: #3b2200;

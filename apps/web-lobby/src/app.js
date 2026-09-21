@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9mj3';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9mj3';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9mj3';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9mj3';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9mj3';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin1a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin1a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin1a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin1a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin1a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -2763,7 +2763,7 @@ function bindUi() {
   nodes.settleBackBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     hideDdzResultModal();
-    showLobby();
+    showLobby({ forfeit: true });
   });
   nodes.againBtn?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -2778,7 +2778,7 @@ function bindUi() {
   nodes.ddzLobby?.addEventListener('click', (e) => {
     e.preventDefault();
     hideDdzResultModal();
-    showLobby();
+    showLobby({ forfeit: true });
   });
   nodes.ddzModal?.querySelectorAll('[data-ddz-result-dismiss]').forEach((n) => {
     n.addEventListener('click', (e) => {
@@ -4809,6 +4809,30 @@ function hideDdzMatch() {
   }
 }
 
+
+/** play9fin1a: wall-clock DDZ turn countdown (does not freeze when tab hidden) */
+let ddzTurnEndsAt = 0;
+let ddzTurnClockTimer = null;
+function stopDdzTurnClock() {
+  if (ddzTurnClockTimer) {
+    clearInterval(ddzTurnClockTimer);
+    ddzTurnClockTimer = null;
+  }
+  ddzTurnEndsAt = 0;
+}
+function armDdzTurnClock(seconds = 20) {
+  stopDdzTurnClock();
+  ddzTurnEndsAt = Date.now() + Math.max(1, Number(seconds) || 20) * 1000;
+  const tick = () => {
+    if (!nodes.turnTimer) return;
+    const left = Math.max(0, Math.ceil((ddzTurnEndsAt - Date.now()) / 1000));
+    nodes.turnTimer.textContent = String(left);
+    if (left <= 0) stopDdzTurnClock();
+  };
+  tick();
+  ddzTurnClockTimer = setInterval(tick, 250);
+}
+
 function cancelDdzMatch() {
   ddzMatchAborted = true;
   hideDdzMatch();
@@ -5245,6 +5269,11 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
     game.onlineBackend = onlineBackend;
     game.variant = variant;
     game.variantLabel = v.label;
+  }
+  // play9fin1a: resumed via reconnectionToken → same table, not a fresh deal
+  if (!extra.fresh && !keepOverlay && session?.room && session.room.phase && session.room.phase !== 'match') {
+    hintText = '已重连回桌';
+    if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
   }
   selected = new Set();
   trustee = false;
@@ -5692,15 +5721,35 @@ function restoreLobbyChrome() {
   syncP0Tabbar();
 }
 
-function showLobby() {
+/**
+ * play9fin1a: soft park mid-hand (reconnect token kept) vs hard leave on settle/forfeit.
+ * @param {{ forfeit?: boolean }} [opts]
+ */
+function showLobby(opts = {}) {
   hideDdzResultModal();
-  try { colyseusClient.leaveColyseus?.(); } catch (_) {}
+  const forfeit = !!opts.forfeit;
+  const midOnline = Boolean(
+    game?.online
+    && onlineBackend === 'colyseus'
+    && game.phase
+    && game.phase !== 'settle'
+    && game.phase !== 'match'
+  );
+  try {
+    if (midOnline && !forfeit && typeof colyseusClient.parkColyseus === 'function') {
+      colyseusClient.parkColyseus();
+      if (nodes.claimStatus) nodes.claimStatus.textContent = '已暂离牌桌 · 重进可回桌';
+    } else {
+      colyseusClient.leaveColyseus?.();
+    }
+  } catch (_) {}
   try { pinusClient.disconnectPinus?.(); } catch (_) {}
   onlineBackend = null;
   game = null;
   selected = new Set();
   trustee = false;
   hintText = '';
+  stopDdzTurnClock();
   restoreLobbyChrome();
   renderAccount();
   setLobbyView('home');
@@ -6653,7 +6702,14 @@ function _renderGameBody() {
   if (nodes.trusteeButton) nodes.trusteeButton.textContent = trustee ? '取消托管' : '托管';
   if (nodes.turnTimer) {
     const showClock = myPlay || myBid || myDouble;
-    nodes.turnTimer.textContent = showClock ? '20' : '';
+    if (showClock) {
+      if (!ddzTurnEndsAt || ddzTurnEndsAt < Date.now()) armDdzTurnClock(20);
+      const left = Math.max(0, Math.ceil((ddzTurnEndsAt - Date.now()) / 1000));
+      nodes.turnTimer.textContent = String(left || 20);
+    } else {
+      stopDdzTurnClock();
+      nodes.turnTimer.textContent = '';
+    }
     nodes.turnTimer.classList.toggle('is-active', showClock);
     setHidden(nodes.turnTimer, !showClock);
   }

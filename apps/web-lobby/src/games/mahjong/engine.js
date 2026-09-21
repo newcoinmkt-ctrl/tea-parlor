@@ -738,7 +738,7 @@ export function createMahjongTable({
         if (!dingque && n >= 3) {
           claims.push({ type: 'gang', seat: i, canHu: false, canPeng: true, canGang: true, canChi: false });
         }
-        // play9mj3: 吃 — 仅序数牌 + 上家
+        // play9fin1a: 吃 — 仅序数牌 + 上家
         if (!dingque && i === chiSeat && tile.suit <= 2) {
           const chiOpts = findChiOptions(state.hands[i], tile);
           if (chiOpts.length) {

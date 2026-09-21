@@ -3,6 +3,12 @@
  * 房间快照与 Pinus publicState 同构，可直接 applyPinusRoom
  */
 
+import {
+  saveDdzReconnect,
+  peekDdzReconnect,
+  clearDdzReconnect,
+} from './table-session.js';
+
 function defaultColyseusUrl() { if (typeof window !== 'undefined' && window.TEA_PARLOR_COLYSEUS_URL) { return String(window.TEA_PARLOR_COLYSEUS_URL); } return 'ws://127.0.0.1:2567'; }
 
 let client = null;
@@ -45,15 +51,47 @@ export async function connectColyseus(endpoint = defaultColyseusUrl()) {
   return client;
 }
 
+/**
+ * Hard leave (consented) — forfeit / explicit quit. Clears reconnect token.
+ */
 export async function leaveColyseus() {
   try {
-    if (room) await room.leave(true);
+    if (room) {
+      try { room.send('quit', {}); } catch (_) {}
+      await room.leave(true);
+    }
   } catch (_) {}
   room = null;
   lastRoomState = null;
   client = null;
-  try { sessionStorage.removeItem('tea-parlor-ddz-reconnect'); } catch (_) {}
+  clearDdzReconnect();
 }
+
+/**
+ * Soft park (play9fin1a) — non-consented leave so allowReconnection keeps the seat.
+ * Keeps reconnectionToken; server countdown / AI continue (no freeze).
+ */
+export async function parkColyseus() {
+  const prev = peekDdzReconnect();
+  const tok = room?.reconnectionToken || prev?.token || null;
+  const uid = prev?.uid || null;
+  const phase = lastRoomState?.phase || prev?.phase || null;
+  const roomId = room?.roomId || prev?.roomId || null;
+  try {
+    if (room) await room.leave(false);
+  } catch (_) {}
+  room = null;
+  // keep client for subsequent reconnect()
+  if (tok && uid) {
+    saveDdzReconnect({ uid, token: tok, roomId, phase, parked: true });
+  }
+}
+
+export function hasParkedDdz(uid) {
+  return Boolean(peekDdzReconnect(uid)?.token);
+}
+
+export { peekDdzReconnect, clearDdzReconnect, saveDdzReconnect };
 
 /**
  * 加入/创建斗地主人机房
@@ -78,16 +116,12 @@ export async function startColyseusDdzSession({
   if (token) options.token = token;
 
   if (fresh) {
-    try { sessionStorage.removeItem('tea-parlor-ddz-reconnect'); } catch (_) {}
+    clearDdzReconnect();
   }
 
   const storedTok = fresh ? null : (() => {
-    try {
-      const raw = sessionStorage.getItem('tea-parlor-ddz-reconnect');
-      const parsed = raw ? JSON.parse(raw) : null;
-      if (parsed?.uid === options.uid && parsed?.token) return parsed.token;
-    } catch (_) {}
-    return null;
+    const parsed = peekDdzReconnect(options.uid);
+    return parsed?.token || null;
   })();
   let joined = null;
   if (storedTok) {
@@ -101,12 +135,12 @@ export async function startColyseusDdzSession({
     joined = await client.joinOrCreate('doudizhu', options);
   }
   room = joined;
-  try {
-    sessionStorage.setItem('tea-parlor-ddz-reconnect', JSON.stringify({
-      uid: options.uid,
-      token: room.reconnectionToken || null,
-    }));
-  } catch (_) {}
+  saveDdzReconnect({
+    uid: options.uid,
+    token: room.reconnectionToken || null,
+    roomId: room.roomId || null,
+    phase: lastRoomState?.phase || 'match',
+  });
 
   room.onMessage('room', (msg) => {
     if (msg?.room) emitRoom(msg.room);

@@ -13,6 +13,13 @@ import { decideMahjongDiscard } from './ai.js';
 import { resultPlayerHtml, getResultSeatSrc } from '../../shared/result-avatar.js';
 import { brandTileBadgeHtml } from '../../shared/branding.js';
 
+import {
+  saveMjSession,
+  peekMjSession,
+  clearMjSession,
+  remainSeconds,
+} from '../../net/table-session.js';
+
 let _instance = null;
 
 export function createMahjongUI(options = {}) {
@@ -36,6 +43,8 @@ export function createMahjongUI(options = {}) {
   /** play9mj1: turn countdown (JJ compass center) */
   let turnSeconds = 15;
   let turnTimer = null;
+  /** play9fin1a: absolute deadline so countdown does not freeze when tab hidden */
+  let turnEndsAt = 0;
   /** play9ship3b: 倒计时到期 / 切后台 → 软代打，避免牌桌冻结（完整托管可后补） */
   let softTrustee = false;
   let disconnectBound = false;
@@ -161,7 +170,54 @@ export function createMahjongUI(options = {}) {
     try { window.dispatchEvent(new Event('resize')); } catch (_) { /* ignore */ }
   }
 
+
+  function persistSoftSession() {
+    if (!table) return;
+    const snap = table.snapshot();
+    if (!snap || snap.phase === 'settle' || snap.phase === 'idle') {
+      clearMjSession('classic');
+      return;
+    }
+    try {
+      const stake = opts.getStake();
+      saveMjSession('classic', {
+        mode: stake.mode || snap.mode || 'xuezhan',
+        label: roomLabel,
+        state: JSON.parse(JSON.stringify(table.state)),
+        turnEndsAt,
+        softTrustee,
+      });
+    } catch (e) {
+      console.warn('[mj] persistSoftSession', e);
+    }
+  }
+
+  function tryRestoreSession(stake) {
+    const saved = peekMjSession('classic', stake.mode || 'xuezhan');
+    if (!saved?.state) return false;
+    table = createMahjongTable({
+      mode: stake.mode || saved.mode || 'xuezhan',
+      stake: stake.stake || 100,
+      names: saved.state.names || ['茶馆', '茶友A', '茶友B', '茶友C'],
+    });
+    try {
+      const st = saved.state;
+      for (const k of Object.keys(st)) {
+        table.state[k] = st[k];
+      }
+    } catch (e) {
+      console.warn('[mj] hydrate failed', e);
+      clearMjSession('classic');
+      return false;
+    }
+    softTrustee = !!saved.softTrustee;
+    turnEndsAt = Number(saved.turnEndsAt) || 0;
+    if (el.status) el.status.textContent = '已重连回桌';
+    return true;
+  }
+
   function hide() {
+    persistSoftSession();
     openSeq += 1;
     opening = false;
     stopAi();
@@ -549,10 +605,13 @@ export function createMahjongUI(options = {}) {
     });
   }
 
-  function startTurnTimer(snap) {
+    function startTurnTimer(snap) {
     stopTurnTimer();
     if (!snap || snap.phase === 'settle' || opening) return;
-    turnSeconds = softTrustee ? 3 : 15;
+    const budget = softTrustee ? 3 : 15;
+    // play9fin1a: wall-clock deadline — tab hide must not freeze remaining time
+    turnEndsAt = Date.now() + budget * 1000;
+    turnSeconds = budget;
     const cd = document.getElementById('mjCountdown');
     if (cd) {
       cd.textContent = String(turnSeconds).padStart(2, '0');
@@ -560,18 +619,17 @@ export function createMahjongUI(options = {}) {
       cd.removeAttribute('hidden');
     }
     turnTimer = setInterval(() => {
-      turnSeconds = Math.max(0, turnSeconds - 1);
+      turnSeconds = remainSeconds(turnEndsAt, 0);
       if (cd) cd.textContent = String(turnSeconds).padStart(2, '0');
       if (turnSeconds <= 0) {
         stopTurnTimer();
-        // 仅在需要真人行动时代打；AI 回合由 scheduleAi 推进
         const s = table?.snapshot();
         if (!s || s.phase === 'settle') return;
         if (s.current === 0 || s.phase === 'call' || s.phase === 'exchange' || s.phase === 'dingque') {
           autoTimeoutAct('timeout');
         }
       }
-    }, 1000);
+    }, 250);
   }
 
   function hideHuSettle() {
@@ -619,6 +677,18 @@ export function createMahjongUI(options = {}) {
 
     const names = ['茶馆', '茶友A', '茶友B', '茶友C'];
     const seq = ++openSeq;
+    // play9fin1a: leave→re-enter resumes same table (not soft-trustee-only)
+    if (tryRestoreSession(stake)) {
+      const playerCount = table.snapshot().playerCount;
+      show(playerCount);
+      opening = false;
+      hideOpenLayer();
+      render();
+      scheduleAi();
+      startTurnTimer(table.snapshot());
+      return;
+    }
+    clearMjSession('classic');
     table = createMahjongTable({
       mode: stake.mode || 'xuezhan',
       stake: stake.stake || 100,
@@ -1379,6 +1449,7 @@ export function createMahjongUI(options = {}) {
     }
     if (!settleReported) {
       settleReported = true;
+      clearMjSession('classic');
       opts.onSettle({
         deltas,
         winner: snap.winner,

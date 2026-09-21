@@ -299,7 +299,7 @@ export function evaluateYaku({
     }
   }
 
-  // play9mj3: 立直/一发/门清自摸 — 保证番结算非空
+  // play9fin1a: 立直/一发/门清自摸 — 保证番结算非空
   if (riichi && closed) yaku.push({ name: '立直', han: 1 });
   if (ippatsu && riichi && closed) yaku.push({ name: '一发', han: 1 });
   if (isTsumo && closed) yaku.push({ name: '门前清自摸和', han: 1 });
@@ -604,7 +604,7 @@ export function createRiichiTable({
       uraCount,
       ippatsu: state.ippatsu[seat],
     });
-    // play9mj3: 结算必须非空役列表（立直和至少含立直）
+    // play9fin1a: 结算必须非空役列表（立直和至少含立直）
     if (!ev.yaku.length && state.riichi[seat]) {
       ev.yaku.push({ name: '立直', han: 1 });
       if (kind === 'tsumo') ev.yaku.push({ name: '门前清自摸和', han: 1 });
