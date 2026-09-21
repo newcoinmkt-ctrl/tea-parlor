@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin1c';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin1c';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin1c';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin1c';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin1c';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin2a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin2a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin2a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin2a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin2a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,

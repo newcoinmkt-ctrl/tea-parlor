@@ -1252,22 +1252,10 @@ html[data-card-back="cardback_chain_badge"] .mini-card.face-down {
 }
 
 /* 桌面/牌面大胶囊广告位：隐藏（广告只留在牌面水印） */
+/* play9fin2a: skin / card-face chips visible as decorative logos (ops/placeholder).
+   Never steal taps — pointer-events none. Hall/tx chip bars stay compact. */
 .tx-ad-bar,
-.mg-ad-bar,
-.tx-ad-chip,
-.table-skin-ad,
-.card-face-ad,
-.card-face-ad-hand,
-[data-ad-slot$="-table-skin"],
-[data-ad-slot$="-card-face"],
-[data-ad-slot$="-card-face-hand"],
-[data-ad-slot="multi-table-skin"],
-[data-ad-slot="multi-card-face"],
-[data-ad-slot="texas-table-skin"],
-[data-ad-slot="texas-card-face"],
-[data-ad-slot="doudizhu-table-skin"],
-[data-ad-slot="doudizhu-card-face"],
-[data-ad-slot="doudizhu-card-face-hand"] {
+.mg-ad-bar {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -1278,6 +1266,24 @@ html[data-card-back="cardback_chain_badge"] .mini-card.face-down {
   padding: 0 !important;
   overflow: hidden !important;
   opacity: 0 !important;
+}
+
+.table-skin-ad,
+.card-face-ad,
+.card-face-ad-hand,
+.tx-ad-chip,
+[data-ad-slot$="-table-skin"],
+[data-ad-slot$="-card-face"],
+[data-ad-slot$="-card-face-hand"],
+[data-ad-slot="multi-table-skin"],
+[data-ad-slot="multi-card-face"],
+[data-ad-slot="texas-table-skin"],
+[data-ad-slot="texas-card-face"],
+[data-ad-slot="doudizhu-table-skin"],
+[data-ad-slot="doudizhu-card-face"],
+[data-ad-slot="doudizhu-card-face-hand"] {
+  pointer-events: none !important;
+  cursor: default !important;
 }
 
 /* 德州内隐藏旧绝对定位广告，避免压到座位 */
@@ -26507,4 +26513,74 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
 .p0-match-card button {
   min-height: 42px; margin-top: 12px; padding: 0 18px; border: 0; border-radius: 12px;
   background: rgba(255,255,255,.1); color: #f7f2e6; cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   play9fin2a — ad logo slots visible in play, never block clicks
+   surfaces: skin · card face · table felt · clothes
+   ═══════════════════════════════════════════════════════════════ */
+.lobby-shell.table-active .table-skin-ad:not([hidden]),
+.lobby-shell.table-active .card-face-ad:not([hidden]),
+.lobby-shell.table-active .card-face-ad-hand:not([hidden]),
+.lobby-shell.table-active .table-center-ad:not([hidden]),
+.lobby-shell.texas-active .table-skin-ad:not([hidden]),
+.lobby-shell.texas-active .card-face-ad:not([hidden]),
+.lobby-shell.texas-active .table-center-ad:not([hidden]),
+.lobby-shell.texas-active .tx-ad-chip:not([hidden]),
+.lobby-shell.multi-active .table-skin-ad:not([hidden]),
+.lobby-shell.multi-active .card-face-ad:not([hidden]),
+.lobby-shell.multi-active .table-center-ad:not([hidden]),
+.lobby-shell.multi-active .tx-ad-chip:not([hidden]),
+.lobby-shell.multi-active .mg-table-center-ad:not([hidden]) {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 0.88 !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  z-index: 12 !important;
+}
+
+.lobby-shell.table-active .table-center-ad:not([hidden]),
+.lobby-shell.texas-active .table-center-ad:not([hidden]),
+.lobby-shell.multi-active .table-center-ad:not([hidden]),
+.lobby-shell.multi-active .mg-table-center-ad:not([hidden]) {
+  opacity: 0.42 !important;
+  z-index: 1 !important;
+}
+
+.lobby-shell .brand-logo-img,
+.lobby-shell [data-brand-logo] {
+  display: block;
+  max-width: 36px;
+  max-height: 36px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none !important;
+  margin: 0 auto 2px;
+}
+
+.lobby-shell .table-center-ad .brand-logo-img,
+.lobby-shell .mg-table-center-ad .brand-logo-img {
+  max-width: 48px;
+  max-height: 48px;
+  opacity: 0.7;
+}
+
+.lobby-shell .costume-chip.brand-slot:not([hidden]),
+.lobby-shell [data-ad-slot*="costume"]:not([hidden]) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 0.9 !important;
+  pointer-events: none !important;
+}
+
+.lobby-shell .playing-card .pc-face-ad,
+.lobby-shell .playing-card .brand-watermark,
+.lobby-shell .mj-brand-ad,
+.lobby-shell .char-chest-logos,
+.lobby-shell .char-logo {
+  pointer-events: none !important;
 }

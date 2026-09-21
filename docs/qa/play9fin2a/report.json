@@ -1,0 +1,13 @@
+{
+  "slice": "play9fin2a",
+  "cache": "play9fin2a",
+  "ok": true,
+  "checks": {
+    "skin_slot": "doudizhu-table-skin enabled + visible",
+    "card_face_slot": "doudizhu-card-face + per-card watermark",
+    "felt_slot": "doudizhu-table-center (felt) enabled",
+    "clothes_slot": "costume chips + char-chest-logos",
+    "no_click_block": "pointer-events:none on ad surfaces",
+    "tg_vh": "preserved (untouched)"
+  }
+}
