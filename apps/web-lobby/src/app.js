@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin4b';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin4b';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin4b';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin4b';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin4b';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin4c';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin4c';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin4c';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin4c';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin4c';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -2922,7 +2922,7 @@ function bindUi() {
       if (!action) return;
       e.preventDefault();
       e.stopPropagation();
-      if (action === 'home' || action === 'profile' || action === 'records' || action === 'recharge' || action === 'wardrobe' || action === 'chain' || action === 'activity' || action === 'open-doudizhu-rooms' || action === 'friend-room' || action === 'quick-doudizhu' || action === 'quick-doudizhu-classic' || action === 'local-doudizhu' || action === 'open-games' || action === 'rules') {
+      if (action === 'home' || action === 'profile' || action === 'records' || action === 'recharge' || action === 'wardrobe' || action === 'chain' || action === 'activity' || action === 'social' || action === 'open-doudizhu-rooms' || action === 'friend-room' || action === 'quick-doudizhu' || action === 'quick-doudizhu-classic' || action === 'local-doudizhu' || action === 'open-games' || action === 'rules') {
         restoreLobbyChrome();
       }
       const focus = lobbyAct.getAttribute('data-recharge-focus') || undefined;
@@ -3145,8 +3145,13 @@ function handleLobbyAction(action, opts = {}) {
     setLobbyView('records');
     renderRecordsPage();
   }
+  else if (action === 'social') {
+    // play9fin4c: light social — room code / recent same-table; no full IM
+    setLobbyView('social');
+    renderSocialPage();
+  }
   else if (action === 'activity') {
-    // play9fin4b: ops/activity — daily supply chips only, no Stars/chain top-up
+    // play9fin4c: ops/activity — daily supply chips only, no Stars/chain top-up
     setLobbyView('activity');
     renderActivityPage();
   }
@@ -3378,6 +3383,7 @@ function setLobbyView(view = 'home', gameType = null) {
   nodes.shell?.classList.toggle('lobby-view-records', view === 'records');
   nodes.shell?.classList.toggle('lobby-view-chain', view === 'chain');
   nodes.shell?.classList.toggle('lobby-view-activity', view === 'activity');
+  nodes.shell?.classList.toggle('lobby-view-social', view === 'social');
 
   $$('[data-lobby-view]').forEach((section) => {
     const sectionView = section.getAttribute('data-lobby-view');
@@ -3455,6 +3461,7 @@ function setLobbyView(view = 'home', gameType = null) {
   if (view === 'records') renderRecordsPage();
   if (view === 'chain') chainCenterController.renderChainCenter();
   if (view === 'activity') renderActivityPage();
+  if (view === 'social') renderSocialPage();
 }
 
 
@@ -4532,7 +4539,87 @@ function applyServerShadowBalance(summary) {
 }
 
 
-/** play9fin4b: activity center — chips-only daily supply; no Stars/chain top-up */
+/** play9fin4c: activity center — chips-only daily supply; no Stars/chain top-up */
+
+/** play9fin4c: recent same-table list (local only; no full IM) */
+const RECENT_TABLE_KEY = 'tea-parlor-recent-tables';
+const RECENT_TABLE_MAX = 8;
+
+function loadRecentTables() {
+  try {
+    const raw = localStorage.getItem(RECENT_TABLE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveRecentTables(list) {
+  try {
+    localStorage.setItem(RECENT_TABLE_KEY, JSON.stringify(list.slice(0, RECENT_TABLE_MAX)));
+  } catch (_) { /* ignore quota */ }
+}
+
+function rememberRecentTable({ roomKey, game = 'doudizhu', label } = {}) {
+  const key = String(roomKey || '').trim();
+  if (!key) return;
+  const now = Date.now();
+  const next = loadRecentTables().filter((x) => x.roomKey !== key);
+  next.unshift({
+    roomKey: key,
+    game,
+    label: label || `同桌·${key.slice(0, 12)}`,
+    at: now,
+  });
+  saveRecentTables(next);
+}
+
+function renderSocialPage() {
+  const listEl = document.getElementById('socialRecentList');
+  const status = document.getElementById('socialStatus');
+  if (status) status.textContent = '可生成邀请链接或输入房间号加入 · 不含好友动态 / 完整 IM';
+  if (!listEl) return;
+  const items = loadRecentTables();
+  if (!items.length) {
+    listEl.innerHTML = '<li class="social-recent-empty">暂无最近同桌 · 完成一局后出现在此</li>';
+    return;
+  }
+  listEl.innerHTML = items.map((it) => {
+    const when = new Date(it.at || Date.now()).toLocaleString('zh-CN', { hour12: false });
+    return `<li class="social-recent-item">
+      <button type="button" class="social-recent-open" data-social-room="${String(it.roomKey).replace(/"/g, '')}" data-social-game="${String(it.game || 'doudizhu')}">
+        <strong>${String(it.label || it.roomKey).replace(/</g, '')}</strong>
+        <small>${when} · 房间号 ${String(it.roomKey).replace(/</g, '')}</small>
+      </button>
+    </li>`;
+  }).join('');
+}
+
+function bindSocialUi() {
+  if (bindSocialUi._done) return;
+  bindSocialUi._done = true;
+  document.getElementById('socialJoinRoomBtn')?.addEventListener('click', () => {
+    const code = String(document.getElementById('socialRoomCodeInput')?.value || '').trim();
+    const status = document.getElementById('socialStatus');
+    if (!code || code.length < 4) {
+      if (status) status.textContent = '请输入有效房间号（至少 4 位）';
+      return;
+    }
+    rememberRecentTable({ roomKey: code, game: 'doudizhu', label: `房间·${code.slice(0, 12)}` });
+    enterFriendDualTable(code.startsWith('dual_') ? code : `dual_ddz_${code}`);
+    if (status) status.textContent = `正在加入同桌 ${code}…`;
+  });
+  document.getElementById('socialRecentList')?.addEventListener('click', (e) => {
+    const btn = e.target?.closest?.('[data-social-room]');
+    if (!btn) return;
+    const code = btn.getAttribute('data-social-room');
+    if (!code) return;
+    rememberRecentTable({ roomKey: code, game: btn.getAttribute('data-social-game') || 'doudizhu' });
+    enterFriendDualTable(code.startsWith('dual_') ? code : `dual_ddz_${code}`);
+  });
+}
+
 function syncActivityClaimStatus() {
   const el = document.getElementById('activityClaimStatus');
   const btn = document.getElementById('activityClaimBtn');
@@ -4900,6 +4987,7 @@ function ensureDualRoomKey(game = 'ddz') {
   } catch (_) {}
   const key = (colyseusClient.makeDualRoomKey?.(game)) || `dual_${game}_${Date.now().toString(36)}`;
   try { sessionStorage.setItem('tea-parlor-dual-room', key); } catch (_) {}
+  rememberRecentTable({ roomKey: key, game: 'doudizhu', label: `好友房·${String(key).slice(0, 12)}` });
   return key;
 }
 
@@ -4931,6 +5019,9 @@ function openFriendRoom(id) {
 
 /** Enter friend/dual DDZ table online (2nd human joins same roomKey). */
 function enterFriendDualTable(roomKey) {
+  const _rk = roomKey || document.getElementById('ddzFriendId')?.textContent || '';
+  if (_rk) rememberRecentTable({ roomKey: _rk, game: 'doudizhu', label: `好友房·${String(_rk).slice(0, 12)}` });
+
   const key = roomKey || document.getElementById('ddzFriendId')?.textContent || ensureDualRoomKey('ddz');
   try { sessionStorage.setItem('tea-parlor-dual-room', key); } catch (_) {}
   closeFriendRoom();

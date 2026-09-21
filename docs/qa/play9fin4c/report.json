@@ -1,0 +1,16 @@
+{
+  "slice": "play9fin4c",
+  "cache": "play9fin4c",
+  "ok": true,
+  "checks": {
+    "light_social_entry": true,
+    "friend_room_visible": true,
+    "recent_same_table": true,
+    "no_full_im": true,
+    "five_tabs": true,
+    "ddz_mj_nn": true,
+    "trustee_ads_tg_vh": true,
+    "fin4a_activity": true,
+    "fin4b_rarer_yaku": true
+  }
+}

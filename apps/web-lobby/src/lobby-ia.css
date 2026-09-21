@@ -383,7 +383,7 @@ html.table-stage-land {
 }
 
 
-/* ─── play9fin4b: activity / daily supply entry ─── */
+/* ─── play9fin4c: activity / daily supply entry ─── */
 .activity-entry-band {
   margin: 10px 12px 4px;
 }
@@ -530,3 +530,101 @@ html.table-stage-land {
 .activity-page [data-chain-topup] {
   display: none !important;
 }
+
+
+/* ─── play9fin4c: light social entry / recent same-table ─── */
+.social-entry-band { margin: 8px 12px 4px; }
+.social-entry-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 170, 255, 0.28);
+  background: linear-gradient(105deg, rgba(20, 36, 64, 0.92), rgba(28, 48, 40, 0.88));
+  color: #e8f0ff;
+  text-align: left;
+  cursor: pointer;
+}
+.social-entry-ico { font-size: 22px; }
+.social-entry-copy { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.social-entry-copy strong { font-size: 14px; font-weight: 800; }
+.social-entry-copy small { font-size: 11px; color: rgba(200, 220, 255, 0.75); }
+.social-entry-go {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #6aa8ff, #3a6fd0);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+.social-page { padding: 12px 14px 96px; max-width: 720px; margin: 0 auto; }
+.social-legal {
+  margin: 8px 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 40, 0.72);
+  border: 1px solid rgba(140, 170, 210, 0.25);
+  color: rgba(220, 230, 245, 0.88);
+  font-size: 12px;
+}
+.social-card {
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(22, 34, 56, 0.95), rgba(24, 40, 36, 0.92));
+  border: 1px solid rgba(120, 160, 220, 0.22);
+}
+.social-card-head { display: grid; gap: 4px; margin-bottom: 12px; }
+.social-card-head strong { font-size: 16px; color: #eef4ff; }
+.social-card-head small { font-size: 11px; color: rgba(190, 210, 240, 0.75); }
+.social-room-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+.social-join-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 140px;
+  font-size: 11px;
+  color: rgba(200, 220, 255, 0.8);
+}
+.social-join-label input {
+  min-height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 170, 210, 0.35);
+  background: rgba(8, 14, 24, 0.7);
+  color: #fff;
+  padding: 0 10px;
+}
+.social-status { margin-top: 10px; font-size: 12px; color: rgba(220, 230, 245, 0.85); }
+.social-recent-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.social-recent-empty {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px dashed rgba(140, 170, 210, 0.3);
+  color: rgba(180, 200, 230, 0.7);
+  font-size: 12px;
+  text-align: center;
+}
+.social-recent-item { margin: 0; }
+.social-recent-open {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(120, 160, 220, 0.25);
+  background: rgba(12, 22, 40, 0.75);
+  color: #eef4ff;
+  cursor: pointer;
+}
+.social-recent-open strong { font-size: 14px; }
+.social-recent-open small { font-size: 11px; color: rgba(180, 200, 230, 0.75); }
+.lobby-shell.lobby-view-social .friend-room-button { display: inline-flex !important; }
