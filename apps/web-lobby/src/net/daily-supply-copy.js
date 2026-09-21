@@ -1,6 +1,6 @@
 /**
  * Pure copy helpers for 每日补给 UI (server-authoritative, shadow / non-cash).
- * play9fin5b: clearer TG-session missing prompt + retry hint (no silent fail).
+ * play9fin5c: clearer TG-session missing prompt + retry hint (no silent fail).
  */
 export const DAILY_SUPPLY_LIMIT = 4;
 export const DAILY_SUPPLY_AMOUNT = 4000;

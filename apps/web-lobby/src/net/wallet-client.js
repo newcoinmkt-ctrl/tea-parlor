@@ -104,7 +104,7 @@ async function readJsonResponse(response) {
   return body;
 }
 
-/** play9fin5b — server-backed recent same-table (requires session) */
+/** play9fin5c — server-backed recent same-table (requires session) */
 export async function fetchRecentTables(token, options = {}) {
   return walletRequest('/social/recent-tables', token, { method: 'GET' }, options);
 }

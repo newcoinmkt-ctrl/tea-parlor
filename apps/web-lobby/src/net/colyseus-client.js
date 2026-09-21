@@ -9,6 +9,20 @@ import {
   clearDdzReconnect,
 } from './table-session.js';
 
+
+/** play9fin5c: distinguishable room-API error codes for logs */
+export function logRoomApiError(code, detail, extra = {}) {
+  const msg = detail?.message || detail?.msg || (typeof detail === 'string' ? detail : '');
+  const payload = {
+    code: String(code || 'room_api_error'),
+    message: String(msg || code || 'room_api_error'),
+    ...extra,
+  };
+  console.warn(`[room-api:${payload.code}]`, payload.message, payload);
+  return payload;
+}
+
+
 function defaultColyseusUrl() { if (typeof window !== 'undefined' && window.TEA_PARLOR_COLYSEUS_URL) { return String(window.TEA_PARLOR_COLYSEUS_URL); } return 'ws://127.0.0.1:2567'; }
 
 let client = null;
@@ -60,7 +74,9 @@ export async function leaveColyseus() {
       try { room.send('quit', {}); } catch (_) {}
       await room.leave(true);
     }
-  } catch (_) {}
+  } catch (err) {
+    logRoomApiError('room_leave_failed', err);
+  }
   room = null;
   lastRoomState = null;
   client = null;
@@ -130,12 +146,18 @@ export async function startColyseusDdzSession({
   if (storedTok) {
     try {
       joined = await client.reconnect(storedTok);
-    } catch (_) {
+    } catch (err) {
+      logRoomApiError('ddz_reconnect_failed', err, { roomKey: options.roomKey || options.roomId });
       joined = null;
     }
   }
   if (!joined) {
-    joined = await client.joinOrCreate('doudizhu', options);
+    try {
+      joined = await client.joinOrCreate('doudizhu', options);
+    } catch (err) {
+      logRoomApiError('ddz_join_or_create_failed', err, { roomKey: options.roomKey || options.roomId });
+      throw err;
+    }
   }
   room = joined;
   {
@@ -155,14 +177,17 @@ export async function startColyseusDdzSession({
   room.onMessage('error', (msg) => {
     const err = new Error(msg?.msg || 'colyseus error');
     err.data = msg;
-    console.warn('[colyseus]', err.message);
+    logRoomApiError('ddz_room_message_error', err, { codeHint: msg?.code || msg?.reason });
   });
   room.onMessage('hint', () => {});
   room.onMessage('joined', () => {});
 
   // First snapshot may be phase=match — that is success, not a timeout.
   const first = await new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('colyseus room state timeout')), 12000);
+    const t = setTimeout(() => {
+      logRoomApiError('ddz_room_state_timeout', 'colyseus room state timeout', { roomId: room?.roomId });
+      reject(new Error('colyseus room state timeout'));
+    }, 12000);
     const off = onRoomUpdate((st) => {
       clearTimeout(t);
       off();
@@ -291,10 +316,18 @@ export async function startColyseusMjSession({
 
   let joined = null;
   if (storedTok) {
-    try { joined = await client.reconnect(storedTok); } catch (_) { joined = null; }
+    try { joined = await client.reconnect(storedTok); } catch (err) {
+      logRoomApiError('mj_reconnect_failed', err, { roomKey: roomId });
+      joined = null;
+    }
   }
   if (!joined) {
-    joined = await client.joinOrCreate('mahjong', options);
+    try {
+      joined = await client.joinOrCreate('mahjong', options);
+    } catch (err) {
+      logRoomApiError('mj_join_or_create_failed', err, { roomKey: roomId });
+      throw err;
+    }
   }
   room = joined;
   try {
@@ -309,12 +342,15 @@ export async function startColyseusMjSession({
     if (msg?.room) emitRoom(msg.room);
   });
   room.onMessage('error', (msg) => {
-    console.warn('[colyseus:mj]', msg?.msg || msg);
+    logRoomApiError('mj_room_message_error', msg?.msg || msg, { codeHint: msg?.code || msg?.reason });
   });
   room.onMessage('joined', () => {});
 
   const first = await new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('colyseus mj room state timeout')), 12000);
+    const timer = setTimeout(() => {
+      logRoomApiError('mj_room_state_timeout', 'colyseus mj room state timeout', { roomId: room?.roomId });
+      reject(new Error('colyseus mj room state timeout'));
+    }, 12000);
     const off = onRoomUpdate((st) => {
       clearTimeout(timer);
       off();

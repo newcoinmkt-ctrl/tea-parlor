@@ -1,0 +1,12 @@
+{
+  "slice": "play9fin5c",
+  "cache": "play9fin5c",
+  "ok": true,
+  "checks": {
+    "version_cache_visible": true,
+    "room_api_errors_distinguishable": true,
+    "full_regression": true,
+    "no_stars_chain_rotate_withdraw": true,
+    "fin5a_fin5b_preserved": true
+  }
+}

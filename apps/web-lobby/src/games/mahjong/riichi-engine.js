@@ -252,13 +252,13 @@ function isSimple(t) {
 }
 
 
-/** play9fin5b: clone count map */
+/** play9fin5c: clone count map */
 function cloneCounts(counts) {
   return new Map(counts);
 }
 
 /**
- * play9fin5b: enumerate standard decompositions (pair + melds) — less lumping.
+ * play9fin5c: enumerate standard decompositions (pair + melds) — less lumping.
  * Caps results to avoid combinatorial blow-up on highly ambiguous hands.
  * @returns {{ pairKey:number, melds:{type:'chi'|'pon', keys:number[], suit?:number}[] }[]}
  */
@@ -426,7 +426,7 @@ function scoreRarerYakuForDecomp({ decomp, openMelds, closed, counts, full, meld
 }
 
 /**
- * play9fin5b: rarer yaku — try all decompositions, pick richest (most han / most yaku).
+ * play9fin5c: rarer yaku — try all decompositions, pick richest (most han / most yaku).
  * Settle lists each judgeable yaku separately (no single-lump fallback).
  */
 function detectRarerYaku({ counts, closed, sevenPairs, melds, full }) {
@@ -563,7 +563,7 @@ export function evaluateYaku({
     }
   }
 
-  // play9fin5b: rarer yaku via thickened decomp (each yaku listed separately)
+  // play9fin5c: rarer yaku via thickened decomp (each yaku listed separately)
   {
     const rarer = detectRarerYaku({ counts, closed, sevenPairs, melds, full });
     for (const y of rarer) {
@@ -585,7 +585,7 @@ export function evaluateYaku({
   }
 
   // play9fin1c: never return empty yaku on a winning hand — fallback 门前清自摸/荣和
-  // play9fin5b: never lump into generic 役牌 — list a concrete settle yaku
+  // play9fin5c: never lump into generic 役牌 — list a concrete settle yaku
   if (yaku.length === 0) {
     if (closed && isTsumo) yaku.push({ name: '门前清自摸和', han: 1 });
     else if (closed) yaku.push({ name: '平和', han: 1 });
