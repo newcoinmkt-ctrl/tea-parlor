@@ -83,7 +83,10 @@ export async function parkColyseus() {
   room = null;
   // keep client for subsequent reconnect()
   if (tok && uid) {
-    saveDdzReconnect({ uid, token: tok, roomId, phase, parked: true });
+    saveDdzReconnect({
+      uid, token: tok, roomId, phase, parked: true,
+      fullTrustee: !!(typeof window !== 'undefined' && window.__ddzFullTrustee),
+    });
   }
 }
 
@@ -135,12 +138,16 @@ export async function startColyseusDdzSession({
     joined = await client.joinOrCreate('doudizhu', options);
   }
   room = joined;
-  saveDdzReconnect({
-    uid: options.uid,
-    token: room.reconnectionToken || null,
-    roomId: room.roomId || null,
-    phase: lastRoomState?.phase || 'match',
-  });
+  {
+    const prev = peekDdzReconnect(options.uid);
+    saveDdzReconnect({
+      uid: options.uid,
+      token: room.reconnectionToken || null,
+      roomId: room.roomId || null,
+      phase: lastRoomState?.phase || 'match',
+      fullTrustee: !!(prev?.fullTrustee || (typeof window !== 'undefined' && window.__ddzFullTrustee)),
+    });
+  }
 
   room.onMessage('room', (msg) => {
     if (msg?.room) emitRoom(msg.room);

@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin2a';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin2a';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin2a';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin2a';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin2a';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin2b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin2b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin2b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin2b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin2b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -5324,7 +5324,21 @@ async function startRoomOnline(room, currency, variant = 'classic', backend = 'c
     if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
   }
   selected = new Set();
-  trustee = false;
+  // play9fin2b: restore full trustee across reconnect when flagged
+  {
+    let restored = !!window.__ddzFullTrustee;
+    try {
+      const prev = colyseusClient.peekDdzReconnect?.(window.__teaUid || pinusUid || undefined);
+      if (prev && prev.fullTrustee) restored = true;
+    } catch (_) { /* ignore */ }
+    trustee = !!restored;
+    if (trustee) {
+      hintText = hintText && hintText.includes('重连')
+        ? '已重连回桌 · 完整托管中'
+        : '完整托管中';
+      if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
+    }
+  }
   syncMatchOverlay(session.room);
   if (game?.phase === 'match') {
     hintText = '匹配中…';
@@ -6102,8 +6116,25 @@ function toggleCardSelect(cardId) {
 }
 
 function onToggleTrustee() {
+  // play9fin2b: multi mahjong/riichi full trustee via multiUI
+  const shell = document.querySelector('.lobby-shell');
+  if (shell?.classList.contains('multi-active') && multiUI?.toggleFullTrustee) {
+    const on = multiUI.toggleFullTrustee();
+    hintText = on ? '已托管（完整代打中）' : '已取消托管';
+    if (nodes.trusteeButton) nodes.trusteeButton.textContent = on ? '取消托管' : '托管';
+    if (nodes.tableStatus) nodes.tableStatus.textContent = hintText;
+    return;
+  }
   trustee = !trustee;
   hintText = trustee ? '已托管（系统代打）' : '已取消托管';
+  // play9fin2b: persist DDZ full trustee across soft park / reconnect
+  window.__ddzFullTrustee = trustee;
+  try {
+    const prev = colyseusClient.peekDdzReconnect?.(window.__teaUid || undefined);
+    if (prev?.token) {
+      colyseusClient.saveDdzReconnect({ ...prev, fullTrustee: trustee });
+    }
+  } catch (_) { /* ignore */ }
   renderGame();
   if (trustee) scheduleAi();
 }

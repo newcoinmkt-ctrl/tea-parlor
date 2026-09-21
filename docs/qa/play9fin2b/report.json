@@ -1,0 +1,12 @@
+{
+  "slice": "play9fin2b",
+  "cache": "play9fin2b",
+  "ok": true,
+  "checks": {
+    "ddz_full_trustee": "toggle + reconnect restore",
+    "mj_full_trustee": "mgTrusteeBtn + auto human turns",
+    "riichi_full_trustee": "same API",
+    "soft_vs_full": "soft remains timeout/disconnect; full supersedes",
+    "tg_vh": "preserved"
+  }
+}
