@@ -10,12 +10,12 @@ import test from 'node:test';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-test('cache play9fin4a', () => {
+test('cache play9fin4b', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const app = readFileSync(join(root, 'src/app.js'), 'utf8');
-  assert.match(html, /app\.js\?v=play9fin4a/);
-  assert.match(html, /riichi-mahjong\.css\?v=play9fin4a/);
-  assert.match(app, /\?v=play9fin4a/);
+  assert.match(html, /app\.js\?v=play9fin4b/);
+  assert.match(html, /riichi-mahjong\.css\?v=play9fin4b/);
+  assert.match(app, /\?v=play9fin4b/);
   assert.doesNotMatch(html, /app\.js\?v=play9mj3/);
 });
 

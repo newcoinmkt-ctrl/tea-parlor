@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin4a';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin4a';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin4a';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin4a';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin4a';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin4b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin4b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin4b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin4b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin4b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -3146,7 +3146,7 @@ function handleLobbyAction(action, opts = {}) {
     renderRecordsPage();
   }
   else if (action === 'activity') {
-    // play9fin4a: ops/activity — daily supply chips only, no Stars/chain top-up
+    // play9fin4b: ops/activity — daily supply chips only, no Stars/chain top-up
     setLobbyView('activity');
     renderActivityPage();
   }
@@ -4532,7 +4532,7 @@ function applyServerShadowBalance(summary) {
 }
 
 
-/** play9fin4a: activity center — chips-only daily supply; no Stars/chain top-up */
+/** play9fin4b: activity center — chips-only daily supply; no Stars/chain top-up */
 function syncActivityClaimStatus() {
   const el = document.getElementById('activityClaimStatus');
   const btn = document.getElementById('activityClaimBtn');

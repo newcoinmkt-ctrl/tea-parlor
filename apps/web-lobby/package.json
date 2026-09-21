@@ -9,8 +9,9 @@
     "dev": "node server.js",
     "check:visual": "node tests/visual-check.mjs",
     "test": "node --test tests/*.test.js",
-    "test:fin3c": "node --test tests/play9fin4a-regression.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js tests/play9fin1a-reconnect.test.js",
-    "test:fin4a": "node --test tests/play9fin4a-activity.test.js tests/play9fin2c-lobby-tabs.test.js"
+    "test:fin3c": "node --test tests/play9fin4b-regression.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js tests/play9fin1a-reconnect.test.js",
+    "test:fin4a": "node --test tests/play9fin4b-activity.test.js tests/play9fin2c-lobby-tabs.test.js",
+    "test:fin4b": "node --test tests/play9fin4b-rarer-yaku.test.js tests/play9fin1c-yaku-fu.test.js"
   },
   "dependencies": {
     "@tea-parlor/common": "file:../../packages/common"

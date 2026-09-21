@@ -1,0 +1,15 @@
+{
+  "slice": "play9fin4b",
+  "cache": "play9fin4b",
+  "ok": true,
+  "checks": {
+    "chinitsu": true,
+    "sanshoku": true,
+    "ittsu": true,
+    "toitoi": true,
+    "chiitoitsu": true,
+    "chanta": true,
+    "honitsu": true,
+    "non_empty_settle": true
+  }
+}
