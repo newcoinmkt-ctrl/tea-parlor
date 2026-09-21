@@ -381,3 +381,152 @@ html.table-stage-jj,
 html.table-stage-land {
   /* play9fin2c regression: no whole-page CSS rotate */
 }
+
+
+/* ─── play9fin4a: activity / daily supply entry ─── */
+.activity-entry-band {
+  margin: 10px 12px 4px;
+}
+.activity-entry-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 210, 100, 0.28);
+  border-radius: 14px;
+  background: linear-gradient(105deg, rgba(48, 32, 12, 0.92), rgba(28, 44, 28, 0.88));
+  color: #fff6d8;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+.activity-entry-ico { font-size: 22px; line-height: 1; }
+.activity-entry-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.activity-entry-copy strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+.activity-entry-copy small {
+  font-size: 11px;
+  color: rgba(255, 230, 180, 0.78);
+}
+.activity-entry-go {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f0c15a, #c8891e);
+  color: #2a1800;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.lobby-shell.lobby-view-activity .activity-page,
+.activity-page:not([hidden]) {
+  display: block;
+}
+.activity-page {
+  padding: 12px 14px 96px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.activity-legal {
+  margin: 8px 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 40, 0.72);
+  border: 1px solid rgba(140, 170, 210, 0.25);
+  color: rgba(220, 230, 245, 0.88);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.activity-card {
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(42, 30, 14, 0.95), rgba(24, 36, 28, 0.92));
+  border: 1px solid rgba(255, 210, 100, 0.22);
+}
+.activity-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.activity-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(240, 193, 90, 0.2);
+  color: #f0c15a;
+  font-size: 11px;
+  font-weight: 800;
+}
+.activity-card-head strong { font-size: 16px; color: #fff6d8; }
+.activity-card-head small { font-size: 11px; color: rgba(255, 230, 180, 0.7); }
+.activity-daily-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.activity-reward-label {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255, 230, 180, 0.7);
+}
+.activity-reward-amt {
+  display: block;
+  margin: 2px 0;
+  font-size: 18px;
+  color: #ffe08a;
+}
+.activity-reward-note {
+  display: block;
+  font-size: 11px;
+  color: rgba(200, 220, 200, 0.75);
+}
+.activity-status {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: rgba(230, 235, 220, 0.85);
+}
+.activity-list {
+  display: grid;
+  gap: 10px;
+}
+.activity-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(18, 28, 40, 0.78);
+  border: 1px solid rgba(120, 150, 190, 0.22);
+  display: grid;
+  gap: 4px;
+}
+.activity-item strong { color: #fff8e8; font-size: 14px; }
+.activity-item span { color: rgba(220, 230, 240, 0.82); font-size: 12px; }
+.activity-chip-only {
+  font-style: normal;
+  font-size: 11px;
+  color: #c8e0a8;
+}
+.activity-item-disabled {
+  opacity: 0.55;
+  border-style: dashed;
+}
+.activity-item-disabled .activity-chip-only { color: #e0a8a8; }
+
+/* No Stars / chain top-up controls on activity page */
+.activity-page [data-stars-pay],
+.activity-page .stars-pay,
+.activity-page .chain-topup,
+.activity-page [data-chain-topup] {
+  display: none !important;
+}
