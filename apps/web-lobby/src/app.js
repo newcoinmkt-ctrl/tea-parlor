@@ -41,12 +41,13 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin5b';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin5b';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin5b';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin5b';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin5b';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin5c';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin5c';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin5c';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin5c';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin5c';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
+import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
   loadPlayMode,
   savePlayMode,
@@ -4504,6 +4505,16 @@ function updateHintFromSelection() {
 }
 
 // ─── 账户 ───────────────────────────────────────────
+function paintLobbyVersionStamp() {
+  const el = document.getElementById('lobbyVersionStamp');
+  if (!el) return;
+  const version = String(window.TEA_PARLOR_VERSION || CACHE_STAMP);
+  const cache = String(window.TEA_PARLOR_CACHE || CACHE_STAMP);
+  el.textContent = formatLobbyVersionLabel({ version, cache });
+  el.dataset.version = version;
+  el.dataset.cache = cache;
+}
+
 function getLobbySessionToken() {
   return String(window.__teaParlorSessionToken || '').trim();
 }
@@ -4544,7 +4555,7 @@ function applyServerShadowBalance(summary) {
 
 /** play9fin4c: activity center — chips-only daily supply; no Stars/chain top-up */
 
-/** play9fin5b: recent same-table — server-backed when session available; localStorage cache/fallback */
+/** play9fin5c: recent same-table — server-backed when session available; localStorage cache/fallback */
 const RECENT_TABLE_KEY = 'tea-parlor-recent-tables';
 const RECENT_TABLE_MAX = 8;
 let _recentTablesCache = null;
@@ -4610,7 +4621,7 @@ function rememberRecentTable({ roomKey, game = 'doudizhu', label } = {}) {
   const next = loadRecentTables().filter((x) => x.roomKey !== key);
   next.unshift(entry);
   saveRecentTables(next);
-  // play9fin5b: push to server when TG session available (survives refresh / device switch)
+  // play9fin5c: push to server when TG session available (survives refresh / device switch)
   const token = getLobbySessionToken();
   if (token) {
     postRecentTableApi(token, entry).then((body) => {
@@ -4729,7 +4740,7 @@ function syncActivityClaimStatus() {
     const current = String(el.textContent || '');
     const keep = /已领取|领取失败|领取中|今日补给次数已用完/.test(current);
     if (!hasSession) {
-      // play9fin5b: never silent — always show clear TG prompt when session missing
+      // play9fin5c: never silent — always show clear TG prompt when session missing
       el.textContent = /重试登录|仍未就绪/.test(current) ? current : DAILY_SUPPLY_TG_PROMPT;
     } else if (!keep) {
       el.textContent = statusText;
@@ -4758,7 +4769,7 @@ function renderActivityPage() {
   }
 }
 
-/** play9fin5b: retry TG session login when claim blocked — clear prompt, no silent fail */
+/** play9fin5c: retry TG session login when claim blocked — clear prompt, no silent fail */
 function bindActivitySessionRetry() {
   if (bindActivitySessionRetry._done) return;
   bindActivitySessionRetry._done = true;
@@ -4851,7 +4862,7 @@ async function onClaim() {
   refreshClaims();
   const token = getLobbySessionToken();
   if (!token) {
-    // play9fin5b: clear prompt + surface retry (never silent fail)
+    // play9fin5c: clear prompt + surface retry (never silent fail)
     const msg = DAILY_SUPPLY_TG_PROMPT;
     if (nodes.claimStatus) nodes.claimStatus.textContent = msg;
     const actSt = document.getElementById('activityClaimStatus');
@@ -4905,6 +4916,7 @@ async function onClaim() {
 }
 
 function renderAccount() {
+  paintLobbyVersionStamp();
   refreshClaims();
   if (nodes.ingotBalance) nodes.ingotBalance.textContent = format(appState.ingots);
   const homeIngot = document.getElementById('homeIngotBalance');

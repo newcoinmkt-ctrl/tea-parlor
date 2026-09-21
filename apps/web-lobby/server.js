@@ -2,6 +2,7 @@ import { createReadStream, existsSync } from 'node:fs';
 import { extname, isAbsolute, join, normalize, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createServer } from 'node:http';
+import { CACHE_STAMP, BUILD_VERSION, buildStampPayload } from './src/net/build-stamp.js';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const monorepoRoot = resolve(root, '../..');
@@ -31,12 +32,16 @@ export function buildRuntimeConfigScript(env = process.env) {
       adsConfigLiteral = 'null';
     }
   }
+  const version = env.TEA_PARLOR_VERSION || BUILD_VERSION;
+  const cache = env.TEA_PARLOR_CACHE || CACHE_STAMP;
   return [
     'window.TEA_PARLOR_COLYSEUS_URL = ' + JSON.stringify(colyseus) + ';',
     'window.TEA_PARLOR_OPS_URL = ' + JSON.stringify(ops) + ';',
     'window.TEA_PARLOR_API_GATEWAY_URL = ' + JSON.stringify(gateway) + ';',
     'window.TEA_PARLOR_ADS_URL = ' + JSON.stringify(adsUrl) + ';',
     'window.TEA_PARLOR_ADS_CONFIG = ' + adsConfigLiteral + ';',
+    'window.TEA_PARLOR_VERSION = ' + JSON.stringify(version) + ';',
+    'window.TEA_PARLOR_CACHE = ' + JSON.stringify(cache) + ';',
   ].join('\n') + '\n';
 }
 
@@ -110,7 +115,10 @@ export function createWebLobbyServer() {
         'cache-control': 'no-store',
         'access-control-allow-origin': '*',
       });
-      res.end(JSON.stringify({ ok: true, service: 'web-lobby' }));
+      res.end(JSON.stringify(buildStampPayload({
+        version: process.env.TEA_PARLOR_VERSION || BUILD_VERSION,
+        cache: process.env.TEA_PARLOR_CACHE || CACHE_STAMP,
+      })));
       return;
     }
     if (pathname === '/runtime-config.js') {
