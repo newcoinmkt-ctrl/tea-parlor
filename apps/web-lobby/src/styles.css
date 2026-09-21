@@ -22945,7 +22945,8 @@ body[data-theme] .lobby-shell.lobby-view-home:not(.table-active):not(.texas-acti
   display: grid !important;
   width: auto;
   transform: none;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* play9fin2c: five tabs — was repeat(4) which clipped 说明/我 */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 2px;
   padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
   border-top: 1px solid rgba(255, 224, 146, 0.18);

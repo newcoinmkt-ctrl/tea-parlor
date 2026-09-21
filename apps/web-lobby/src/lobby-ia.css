@@ -290,3 +290,94 @@
 .lobby-shell.p0-tg:not(.table-active):not(.texas-active):not(.multi-active) .home-kicker {
   display: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   play9fin2c — lobby five-tab portrait polish
+   大厅/战绩/补给/说明/我 — no overlap/clip, tappable; table stays landscape
+   NO whole-page CSS rotate.
+   ═══════════════════════════════════════════════════════════════ */
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  z-index: 80 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 56px;
+  padding: 6px 4px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box !important;
+}
+
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar .home-tab {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  max-width: none !important;
+  padding: 4px 2px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar .home-tab strong {
+  display: block !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(10px, 2.8vw, 12px) !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+}
+
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar .home-tab-ico,
+.lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar .home-tab svg {
+  display: block !important;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  overflow: visible !important;
+}
+
+/* Content clearance above fixed five-tab bar (all lobby views) */
+.lobby-shell.lobby-view-home:not(.table-active):not(.texas-active):not(.multi-active) .home-app,
+.lobby-shell.lobby-view-home:not(.table-active):not(.texas-active):not(.multi-active) .p0-home-chrome,
+.lobby-shell.lobby-view-profile:not(.table-active):not(.texas-active):not(.multi-active),
+.lobby-shell.lobby-view-records:not(.table-active):not(.texas-active):not(.multi-active),
+.lobby-shell.lobby-view-recharge:not(.table-active):not(.texas-active):not(.multi-active),
+.lobby-shell.lobby-view-wardrobe:not(.table-active):not(.texas-active):not(.multi-active),
+.lobby-shell.lobby-view-chain:not(.table-active):not(.texas-active):not(.multi-active),
+.lobby-shell.lobby-view-games:not(.table-active):not(.texas-active):not(.multi-active) {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box !important;
+}
+
+/* Portrait narrow: keep 5 equal columns, never collapse to 4 */
+@media (max-width: 430px) {
+  .lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+  }
+  .lobby-shell:not(.table-active):not(.texas-active):not(.multi-active) .home-tabbar .home-tab strong {
+    font-size: 10px !important;
+  }
+}
+
+/* Table landscape: tabbar stays hidden (existing rules); never rotate page */
+html.table-landscape,
+html.table-stage-jj,
+html.table-stage-land {
+  /* play9fin2c regression: no whole-page CSS rotate */
+}

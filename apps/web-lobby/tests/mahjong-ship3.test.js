@@ -10,13 +10,13 @@ import { createMahjongTable } from '../src/games/mahjong/engine.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-test('cache play9fin2b', () => {
+test('cache play9fin2c', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const app = readFileSync(join(root, 'src/app.js'), 'utf8');
-  assert.match(html, /app\.js\?v=play9fin2b/);
-  assert.match(html, /jj-mahjong\.css\?v=play9fin2b/);
+  assert.match(html, /app\.js\?v=play9fin2c/);
+  assert.match(html, /jj-mahjong\.css\?v=play9fin2c/);
   assert.match(html, /id="mgMelds"/);
-  assert.match(app, /\?v=play9fin2b/);
+  assert.match(app, /\?v=play9fin2c/);
 });
 
 test('碰 deducts 2 tiles from hand + removes claim from river', () => {
