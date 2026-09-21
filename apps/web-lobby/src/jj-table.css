@@ -88,16 +88,31 @@ html.table-stage-jj #tableView .qq-logo-mark small {
   display: none !important;
 }
 
-/* Hide ads on JJ stage for clean reference zones */
-html.table-stage-jj #tableView .table-skin-ad,
-html.table-stage-jj #tableView .card-face-ad,
-html.table-stage-jj #tableView .table-center-ad,
-html.table-stage-jj #tableView .table-rail-ad,
-html.table-stage-jj #tableView .costume-chip,
+/* play9fin2a: keep bean/legacy seats/room-line hidden; show ad logo slots (non-interactive) */
 html.table-stage-jj #tableView .qq-bean-line,
 html.table-stage-jj #tableView .player-seat,
 html.table-stage-jj #tableView .qq-room-line {
   display: none !important;
+}
+html.table-stage-jj #tableView .table-skin-ad:not([hidden]),
+html.table-stage-jj #tableView .card-face-ad:not([hidden]),
+html.table-stage-jj #tableView .table-center-ad:not([hidden]),
+html.table-stage-jj #tableView .table-rail-ad:not([hidden]),
+html.table-stage-jj #tableView .costume-chip:not([hidden]) {
+  display: grid !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  opacity: 0.85;
+}
+html.table-stage-jj #tableView .table-center-ad:not([hidden]) {
+  display: grid !important;
+  opacity: 0.4;
+}
+html.table-stage-jj #tableView .costume-chip:not([hidden]) {
+  display: inline-flex !important;
+}
+html.table-stage-jj #tableView .table-rail-ad:not([hidden]) {
+  opacity: 0.55;
 }
 
 /* ── Top-center: hole cards + card counter ── */

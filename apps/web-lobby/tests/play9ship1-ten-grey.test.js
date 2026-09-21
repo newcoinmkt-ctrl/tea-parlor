@@ -16,13 +16,13 @@ const appSrc = readFileSync(path.join(root, '../src/app.js'), 'utf8');
 const orientSrc = readFileSync(path.join(root, '../src/net/table-orient.js'), 'utf8');
 const viewSrc = readFileSync(path.join(root, '../src/features/table/doudizhu-table-view.js'), 'utf8');
 
-test('play9fin1c cache bust on CSS + app.js', () => {
-  assert.match(html, /app\.js\?v=play9fin1c/);
-  assert.match(html, /jj-table\.css\?v=play9fin1c/);
-  assert.match(html, /table-play\.css\?v=play9fin1c/);
-  assert.match(html, /hand-fit\.css\?v=play9fin1c/);
+test('play9fin2a cache bust on CSS + app.js', () => {
+  assert.match(html, /app\.js\?v=play9fin2a/);
+  assert.match(html, /jj-table\.css\?v=play9fin2a/);
+  assert.match(html, /table-play\.css\?v=play9fin2a/);
+  assert.match(html, /hand-fit\.css\?v=play9fin2a/);
   assert.doesNotMatch(html, /\?v=play9fix1/);
-  assert.match(appSrc, /\?v=play9fin1c/);
+  assert.match(appSrc, /\?v=play9fin2a/);
 });
 
 test('RANK_LABEL[10] stays "10" and cardFaceHtml marks pc-rank--ten', () => {

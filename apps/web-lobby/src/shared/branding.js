@@ -72,20 +72,40 @@ export const GAME_BRAND_SLOTS = Object.freeze([
  * 默认投放列表（全部 BTC）
  * @returns {Array<{slotId:string,label:string,advertiserName:string,copy:string,landingUrl:string,enabled:boolean,surface:string,theme:string}>}
  */
-/** 桌心、桌沿、牌背、服饰胸口可见；大厅横幅仍关（无对应 DOM） */
+/**
+ * play9fin2a — four play surfaces host ad logos (config/placeholder OK):
+ *   skin (table-skin) · card face · table felt (table-center) · clothes (costume)
+ * Hall banners stay off (no DOM). Real ad network can override via adsUrl later.
+ */
 function isPlacementEnabled(slot) {
   const id = slot.slotId || '';
+  if (/lobby-/.test(id)) return false;
   if (slot.surface === 'costume') return true;
-  if (/table-center|table-rail|card-back/.test(id)) return true;
-  if (/-table-skin$|-card-face$|-card-face-hand$|lobby-/.test(id)) return false;
-  if (/^(multi|texas|doudizhu)-(table-skin|card-face)/.test(id)) return false;
+  if (/table-center|table-rail|table-skin|card-back|card-face/.test(id)) return true;
   return true;
+}
+
+/** Builtin placeholder logo for slots until ops/network fills logoUrl */
+export const PLACEHOLDER_AD_LOGO = './public/assets/logos/btc.svg';
+
+/** Surfaces that must stay non-interactive in play (never steal hand/button taps) */
+export const AD_LOGO_SURFACES = Object.freeze(['skin', 'card', 'felt', 'clothes']);
+
+export function surfaceKind(slotId = '', surface = '') {
+  const id = String(slotId);
+  if (/table-skin/.test(id) || surface === 'table' && /skin/.test(id)) return 'skin';
+  if (/table-center/.test(id)) return 'felt';
+  if (/card-face|card-back/.test(id) || surface === 'card') return 'card';
+  if (/costume/.test(id) || surface === 'costume') return 'clothes';
+  if (surface === 'table') return 'felt';
+  return surface || 'table';
 }
 
 export function defaultBrandPlacements(brand = ACTIVE_BRAND) {
   return GAME_BRAND_SLOTS.map((s) => ({
     slotId: s.slotId,
     surface: s.surface,
+    surfaceKind: surfaceKind(s.slotId, s.surface),
     game: s.game,
     label: surfaceLabel(s.surface),
     advertiserName: brand.name,
@@ -94,6 +114,7 @@ export function defaultBrandPlacements(brand = ACTIVE_BRAND) {
     enabled: isPlacementEnabled(s),
     theme: brand.theme,
     short: brand.short,
+    logoUrl: PLACEHOLDER_AD_LOGO,
   }));
 }
 
@@ -156,7 +177,11 @@ export function applyBrandPlacements(placements = defaultBrandPlacements()) {
     node.classList.add('brand-slot', `brand-${p.theme || 'btc'}`, `brand-surface-${p.surface || 'table'}`);
     node.dataset.brand = p.theme || 'btc';
     node.dataset.surface = p.surface || 'table';
+    node.dataset.adSurfaceKind = p.surfaceKind || surfaceKind(slotId, p.surface);
     if (p.slotType) node.dataset.slotType = p.slotType;
+    // Decorative in-play: keep href for ops preview but CSS forces pointer-events:none
+    node.setAttribute('tabindex', '-1');
+    node.setAttribute('aria-hidden', 'true');
 
     if (node.tagName === 'A' && p.landingUrl) {
       node.href = p.landingUrl;
