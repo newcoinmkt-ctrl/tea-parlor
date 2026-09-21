@@ -15,10 +15,10 @@ const jj = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 const branding = readFileSync(join(root, 'src/shared/branding.js'), 'utf8');
 const charLogos = readFileSync(join(root, 'src/shared/char-logos.js'), 'utf8');
 
-test('cache play9fin4a', () => {
-  assert.match(html, /app\.js\?v=play9fin4a/);
-  assert.match(html, /styles\.css\?v=play9fin4a/);
-  assert.match(html, /jj-table\.css\?v=play9fin4a/);
+test('cache play9fin4b', () => {
+  assert.match(html, /app\.js\?v=play9fin4b/);
+  assert.match(html, /styles\.css\?v=play9fin4b/);
+  assert.match(html, /jj-table\.css\?v=play9fin4b/);
 });
 
 test('DOM hosts four ad surfaces: skin, card face, felt, clothes', () => {

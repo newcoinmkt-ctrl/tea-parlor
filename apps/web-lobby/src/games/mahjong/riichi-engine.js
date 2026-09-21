@@ -251,6 +251,203 @@ function isSimple(t) {
   return t && t.suit <= 2 && t.rank >= 2 && t.rank <= 8;
 }
 
+
+/** play9fin4b: clone count map */
+function cloneCounts(counts) {
+  return new Map(counts);
+}
+
+/**
+ * play9fin4b: find one standard decomposition (pair + melds).
+ * @returns {{ pairKey:number, melds:{type:'chi'|'pon', keys:number[], suit?:number}[] }|null}
+ */
+function findMeldDecomposition(counts, needMelds) {
+  const keys = [...counts.keys()].sort((a, b) => a - b);
+  for (const pairKey of keys) {
+    if ((counts.get(pairKey) || 0) < 2) continue;
+    const m = cloneCounts(counts);
+    m.set(pairKey, m.get(pairKey) - 2);
+    if (m.get(pairKey) === 0) m.delete(pairKey);
+    const melds = [];
+    if (decomposeMelds(m, needMelds, melds)) {
+      return { pairKey, melds };
+    }
+  }
+  return null;
+}
+
+function decomposeMelds(counts, n, out) {
+  if (n === 0) {
+    for (const v of counts.values()) if (v > 0) return false;
+    return true;
+  }
+  let first = -1;
+  for (const [k, c] of counts) {
+    if (c > 0) { first = k; break; }
+  }
+  if (first < 0) return false;
+
+  const cnt = counts.get(first) || 0;
+  // pon
+  if (cnt >= 3) {
+    counts.set(first, cnt - 3);
+    out.push({ type: 'pon', keys: [first, first, first], suit: Math.floor(first / 10) });
+    if (decomposeMelds(counts, n - 1, out)) return true;
+    out.pop();
+    counts.set(first, cnt);
+  }
+  // chi
+  const suit = Math.floor(first / 10);
+  const rank = first % 10;
+  if (suit <= 2 && rank >= 1 && rank <= 7) {
+    const a = first;
+    const b = suit * 10 + (rank + 1);
+    const c = suit * 10 + (rank + 2);
+    if ((counts.get(a) || 0) >= 1 && (counts.get(b) || 0) >= 1 && (counts.get(c) || 0) >= 1) {
+      counts.set(a, (counts.get(a) || 0) - 1);
+      counts.set(b, (counts.get(b) || 0) - 1);
+      counts.set(c, (counts.get(c) || 0) - 1);
+      out.push({ type: 'chi', keys: [a, b, c], suit });
+      if (decomposeMelds(counts, n - 1, out)) return true;
+      out.pop();
+      counts.set(a, (counts.get(a) || 0) + 1);
+      counts.set(b, (counts.get(b) || 0) + 1);
+      counts.set(c, (counts.get(c) || 0) + 1);
+    }
+  }
+  return false;
+}
+
+function isTerminalOrHonorKey(k) {
+  const suit = Math.floor(k / 10);
+  const rank = k % 10;
+  return suit >= 3 || rank === 1 || rank === 9;
+}
+
+/** play9fin4b rarer yaku from decomposition + tile counts */
+function detectRarerYaku({ counts, closed, sevenPairs, melds, full }) {
+  const extra = [];
+  if (sevenPairs) return extra; // 七对子 already added; skip standard-shape rarer set
+
+  const needMelds = 4 - (melds?.length || 0);
+  // Include open melds as fixed pons/chis when present
+  const openMelds = (melds || []).map((m) => {
+    if (m.tiles?.length === 3) {
+      const keys = m.tiles.map(tileKey);
+      const sorted = [...keys].sort((a, b) => a - b);
+      const isChi = sorted[0] !== sorted[2] && Math.floor(sorted[0] / 10) === Math.floor(sorted[2] / 10);
+      return { type: isChi ? 'chi' : 'pon', keys: sorted, suit: Math.floor(sorted[0] / 10) };
+    }
+    if (m.type === 'chi' || m.kind === 'chi') {
+      return { type: 'chi', keys: [], suit: m.suit };
+    }
+    return { type: 'pon', keys: m.suit != null ? [m.suit * 10 + (m.rank || 0)] : [], suit: m.suit };
+  });
+
+  let decomp = null;
+  if (needMelds > 0) {
+    decomp = findMeldDecomposition(counts, needMelds);
+  } else {
+    decomp = { pairKey: [...counts.keys()][0], melds: [] };
+  }
+  if (!decomp && openMelds.length === 0) return extra;
+
+  const allMelds = [...(decomp?.melds || []), ...openMelds];
+  const pairKey = decomp?.pairKey;
+
+  // 对对和 — all pons
+  if (allMelds.length === 4 && allMelds.every((m) => m.type === 'pon')) {
+    extra.push({ name: '对对和', han: closed ? 2 : 2 });
+  }
+
+  // 清一色 / 混一色
+  const suitSet = new Set();
+  let hasHonor = false;
+  for (const t of full) {
+    if (t.suit >= 3) hasHonor = true;
+    else suitSet.add(t.suit);
+  }
+  for (const m of melds || []) {
+    const tiles = m.tiles || [];
+    if (tiles.length) {
+      for (const t of tiles) {
+        if (t.suit >= 3) hasHonor = true;
+        else suitSet.add(t.suit);
+      }
+    } else if (m.suit != null) {
+      if (m.suit >= 3) hasHonor = true;
+      else suitSet.add(m.suit);
+    }
+  }
+  if (suitSet.size === 1 && !hasHonor) {
+    extra.push({ name: '清一色', han: closed ? 6 : 5 });
+  } else if (suitSet.size === 1 && hasHonor) {
+    extra.push({ name: '混一色', han: closed ? 3 : 2 });
+  }
+
+  // 三色同顺 — same rank sequence in m/p/s
+  const chiByStart = new Map(); // startRank -> set of suits
+  for (const m of allMelds) {
+    if (m.type !== 'chi' || !m.keys?.length) continue;
+    const ranks = m.keys.map((k) => k % 10).sort((a, b) => a - b);
+    if (ranks[0] + 1 === ranks[1] && ranks[1] + 1 === ranks[2]) {
+      const start = ranks[0];
+      if (!chiByStart.has(start)) chiByStart.set(start, new Set());
+      chiByStart.get(start).add(m.suit);
+    }
+  }
+  for (const suits of chiByStart.values()) {
+    if (suits.has(0) && suits.has(1) && suits.has(2)) {
+      extra.push({ name: '三色同顺', han: closed ? 2 : 1 });
+      break;
+    }
+  }
+
+  // 一气通贯 — 123+456+789 same suit
+  for (let suit = 0; suit <= 2; suit++) {
+    const starts = new Set();
+    for (const m of allMelds) {
+      if (m.type !== 'chi' || m.suit !== suit || !m.keys?.length) continue;
+      const ranks = m.keys.map((k) => k % 10).sort((a, b) => a - b);
+      if (ranks[0] + 1 === ranks[1] && ranks[1] + 1 === ranks[2]) starts.add(ranks[0]);
+    }
+    if (starts.has(1) && starts.has(4) && starts.has(7)) {
+      extra.push({ name: '一气通贯', han: closed ? 2 : 1 });
+      break;
+    }
+  }
+
+  // 混全带幺九 — every meld and pair contains terminal/honor
+  if (pairKey != null && allMelds.length === 4) {
+    const pairOk = isTerminalOrHonorKey(pairKey);
+    const meldsOk = allMelds.every((m) => {
+      if (m.keys?.length) return m.keys.some(isTerminalOrHonorKey);
+      // open meld without keys: check suit/rank if present
+      if (m.suit >= 3) return true;
+      return false;
+    });
+    const hasHonorOrTerminal = [...counts.keys()].some(isTerminalOrHonorKey) || pairOk;
+    // chanta requires terminals/honors but NOT all-terminals (that would be junchan) — simplified: allow if pairOk && meldsOk && has at least one honor OR mixed
+    if (pairOk && meldsOk && hasHonorOrTerminal) {
+      // exclude if ALL tiles are terminals/honors without a simple (still award chanta for tea parlor)
+      const hasSimple = [...counts.keys()].some((k) => {
+        const suit = Math.floor(k / 10);
+        const rank = k % 10;
+        return suit <= 2 && rank >= 2 && rank <= 8;
+      });
+      // 纯全带幺九 if no honors and all terminal; 混全 if has honor or simple mixed into terminal melds
+      if (!hasSimple) {
+        // 纯全带幺九 (junchan) — closed 3 / open 2; treat as chanta upgrade
+        extra.push({ name: '纯全带幺九', han: closed ? 3 : 2 });
+      } else {
+        extra.push({ name: '混全带幺九', han: closed ? 2 : 1 });
+      }
+    }
+  }
+
+  return extra;
+}
+
 /**
  * 简化役种判定（门前为主）
  * @returns {{ yaku: {name:string,han:number}[], han: number, fu: number, sevenPairs?: boolean }}
@@ -335,6 +532,14 @@ export function evaluateYaku({
     if (!hasTerminalHonorTriplet && !yaku.some((y) => y.name === '平和')) {
       // 仅当尚无其它非宝牌役时也允许与立直并存
       yaku.push({ name: '平和', han: 1 });
+    }
+  }
+
+  // play9fin4b: rarer yaku (三色同顺/一气通贯/混全带幺九/对对和/清一色/混一色)
+  {
+    const rarer = detectRarerYaku({ counts, closed, sevenPairs, melds, full });
+    for (const y of rarer) {
+      if (!yaku.some((e) => e.name === y.name)) yaku.push(y);
     }
   }
 
