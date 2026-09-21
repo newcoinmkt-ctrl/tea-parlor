@@ -220,6 +220,27 @@ export function countDoraInHand(tiles, doraTiles) {
   return n;
 }
 
+/** 日麻吃候选（序数牌） */
+export function findRiichiChiOptions(hand, tile) {
+  if (!tile || tile.suit > 2) return [];
+  const suit = tile.suit;
+  const r = Number(tile.rank);
+  const patterns = [[r - 2, r - 1], [r - 1, r + 1], [r + 1, r + 2]];
+  const out = [];
+  for (const [a, b] of patterns) {
+    if (a < 1 || a > 9 || b < 1 || b > 9) continue;
+    const ta = hand.find((t) => t.suit === suit && t.rank === a);
+    if (!ta) continue;
+    const tb = hand.find((t) => t.suit === suit && t.rank === b && t.id !== ta.id);
+    if (!tb) continue;
+    const key = [a, r, b].sort((x, y) => x - y).join('-');
+    if (out.some((o) => o.key === key)) continue;
+    out.push({ key, tiles: [ta, tb], ranks: [a, r, b].sort((x, y) => x - y) });
+  }
+  return out;
+}
+
+
 function isTerminalOrHonor(t) {
   if (!t) return false;
   if (t.suit >= 3) return true;
@@ -243,6 +264,7 @@ export function evaluateYaku({
   seatWind = 1,
   roundWind = 1,
   doraCount = 0,
+  uraCount = 0,
   ippatsu = false,
 }) {
   const closed = melds.length === 0;
@@ -277,12 +299,17 @@ export function evaluateYaku({
     }
   }
 
+  // play9mj3: 立直/一发/门清自摸 — 保证番结算非空
   if (riichi && closed) yaku.push({ name: '立直', han: 1 });
-  if (ippatsu && riichi) yaku.push({ name: '一发', han: 1 });
+  if (ippatsu && riichi && closed) yaku.push({ name: '一发', han: 1 });
   if (isTsumo && closed) yaku.push({ name: '门前清自摸和', han: 1 });
 
   // 断幺九
-  if (full.every(isSimple) && melds.every((m) => (m.tiles || []).every(isSimple))) {
+  if (full.every(isSimple) && (melds.length === 0 || melds.every((m) => {
+    const tiles = m.tiles || [];
+    if (tiles.length) return tiles.every(isSimple);
+    return m.suit != null && m.suit <= 2 && m.rank >= 2 && m.rank <= 8;
+  }))) {
     yaku.push({ name: '断幺九', han: 1 });
   }
 
@@ -298,16 +325,28 @@ export function evaluateYaku({
     if ((counts.get(y.key) || 0) >= 3) yaku.push({ name: y.name, han: 1 });
   }
 
-  if (doraCount > 0) yaku.push({ name: '宝牌', han: doraCount });
-
-  // 至少要有非宝牌役才能和（日麻规则）；简化：若仅宝牌则补「平和」占位当门清听牌自摸/立直已有
-  const nonDora = yaku.filter((y) => y.name !== '宝牌' && y.name !== '里宝牌');
-  if (nonDora.length === 0 && doraCount > 0 && closed) {
-    // 不能仅宝牌和 — 返回空
-    return { yaku: [], han: 0, fu: 0 };
+  // 简化平和：门清全顺子+两面听近似 — 无字牌刻/杠且非七对时给平和
+  if (closed && !sevenPairs && full.every((t) => t.suit <= 2)) {
+    const hasTerminalHonorTriplet = [...counts.entries()].some(([k, c]) => {
+      const suit = Math.floor(k / 10);
+      const rank = k % 10;
+      return c >= 3 && (suit >= 3 || rank === 1 || rank === 9);
+    });
+    if (!hasTerminalHonorTriplet && !yaku.some((y) => y.name === '平和')) {
+      // 仅当尚无其它非宝牌役时也允许与立直并存
+      yaku.push({ name: '平和', han: 1 });
+    }
   }
-  if (yaku.length === 0) {
-    // 开放简化：门清和牌至少给平和
+
+  if (doraCount > 0) yaku.push({ name: '宝牌', han: doraCount });
+  if (uraCount > 0) yaku.push({ name: '里宝牌', han: uraCount });
+
+  // 至少要有非宝牌役才能和；若仅宝牌则拒和；门清无役则补平和
+  const nonDora = yaku.filter((y) => y.name !== '宝牌' && y.name !== '里宝牌');
+  if (nonDora.length === 0) {
+    if (doraCount + uraCount > 0 && closed) {
+      return { yaku: [], han: 0, fu: 0 };
+    }
     if (closed) yaku.push({ name: '平和', han: 1 });
     else return { yaku: [], han: 0, fu: 0 };
   }
@@ -386,8 +425,11 @@ export function createRiichiTable({
     uraDoraIndicators: [],
     scores: [START_POINTS, START_POINTS, START_POINTS, START_POINTS],
     riichi: [false, false, false, false],
+    riichiDiscardIndex: [-1, -1, -1, -1],
     riichiSticks: 0,
     ippatsu: [false, false, false, false],
+    _pendingRiichi: false,
+    callOptions: null,
     current: 0,
     phase: 'idle', // idle | discard | call | settle
     drawn: null,
@@ -443,8 +485,12 @@ export function createRiichiTable({
       winKind: state.winKind,
       settle: state.settle,
       canTsumo: state.canTsumo && state.current === 0,
-      canRiichi: state.canRiichi && state.current === 0,
+      canRiichi: (state.canRiichi || state._pendingRiichi) && state.current === 0 && !state.riichi[0],
+      pendingRiichi: !!state._pendingRiichi && state.current === 0,
       canRon: state.canRon && state.claimSeat === 0,
+      callOptions: state.phase === 'call' ? state.callOptions : null,
+      ippatsu: state.ippatsu.slice(),
+      riichiDiscardIndex: state.riichiDiscardIndex.slice(),
       seatWinds: [0, 1, 2, 3].map(seatWind),
       status: [0, 1, 2, 3].map(() => 'active'),
       missingSuits: [null, null, null, null],
@@ -554,16 +600,18 @@ export function createRiichiTable({
       isTsumo: kind === 'tsumo',
       seatWind: seatWind(seat),
       roundWind: state.roundWind,
-      doraCount: doraCount + uraCount,
+      doraCount,
+      uraCount,
       ippatsu: state.ippatsu[seat],
     });
-    if (uraCount > 0) {
-      // split 宝牌 / 里宝牌 display
-      const yaku = ev.yaku.filter((y) => y.name !== '宝牌');
-      if (doraCount > 0) yaku.push({ name: '宝牌', han: doraCount });
-      yaku.push({ name: '里宝牌', han: uraCount });
-      ev.yaku = yaku;
-      ev.han = yaku.reduce((s, y) => s + y.han, 0);
+    // play9mj3: 结算必须非空役列表（立直和至少含立直）
+    if (!ev.yaku.length && state.riichi[seat]) {
+      ev.yaku.push({ name: '立直', han: 1 });
+      if (kind === 'tsumo') ev.yaku.push({ name: '门前清自摸和', han: 1 });
+      if (doraCount > 0) ev.yaku.push({ name: '宝牌', han: doraCount });
+      if (uraCount > 0) ev.yaku.push({ name: '里宝牌', han: uraCount });
+      ev.han = ev.yaku.reduce((s, y) => s + y.han, 0);
+      ev.fu = 30;
     }
     const isDealer = seat === state.dealer;
     const pts = computePoints({
@@ -625,7 +673,10 @@ export function createRiichiTable({
     state.melds = [[], [], [], []];
     state.rivers = [[], [], [], []];
     state.riichi = [false, false, false, false];
+    state.riichiDiscardIndex = [-1, -1, -1, -1];
     state.ippatsu = [false, false, false, false];
+    state._pendingRiichi = false;
+    state.callOptions = null;
     state.winner = -1;
     state.winKind = null;
     state.settle = null;
@@ -661,6 +712,7 @@ export function createRiichiTable({
     const idx = hand.findIndex((t) => t.id === tileId);
     if (idx < 0) return { ok: false, reason: 'missing' };
 
+    let justDeclared = false;
     if (riichiDeclare || (state._pendingRiichi && seat === state.current)) {
       if (!state.canRiichi && !state._pendingRiichi) return { ok: false, reason: 'no_riichi' };
       const left = hand.slice(0, idx).concat(hand.slice(idx + 1));
@@ -670,6 +722,7 @@ export function createRiichiTable({
       state.scores[seat] -= 1000;
       state.riichiSticks += 1;
       state._pendingRiichi = false;
+      justDeclared = true;
     } else if (state.riichi[seat]) {
       // 立直后只能模切
       const drawn = state.drawn;
@@ -678,20 +731,24 @@ export function createRiichiTable({
 
     const [tile] = hand.splice(idx, 1);
     state.rivers[seat].push(tile);
+    if (justDeclared) state.riichiDiscardIndex[seat] = state.rivers[seat].length - 1;
     state.lastDiscard = tile;
     state.drawn = null;
     state.canTsumo = false;
     state.canRiichi = false;
+    state.callOptions = null;
     // 他人打出打断一发
     for (let i = 0; i < 4; i++) {
       if (i !== seat) state.ippatsu[i] = false;
     }
 
-    // 检查荣和
+    // 检查荣和 / 吃碰杠
     state.canRon = false;
     state.claimSeat = -1;
-    for (let i = 0; i < 4; i++) {
+    state.callOptions = null;
+    for (let i = 1; i < 4; i++) {
       if (i === seat) continue;
+      if (state.riichi[i]) continue; // 立直后不鸣牌
       if (canWinHand([...state.hands[i], tile], state.melds[i].length)) {
         const doraCount = countDoraInHand([...state.hands[i], tile], liveDoraTiles());
         const ev = evaluateYaku({
@@ -706,16 +763,54 @@ export function createRiichiTable({
           ippatsu: state.ippatsu[i],
         });
         if (ev.han > 0) {
-          // 本地人机：玩家可荣；AI 自动荣
-          if (i === 0) {
-            state.canRon = true;
-            state.claimSeat = 0;
-            state.phase = 'call';
-            return { ok: true, snap: snapshot(), awaitRon: true };
-          }
           applyWin({ seat: i, kind: 'ron', fromSeat: seat, winTile: tile });
           return { ok: true, snap: snapshot() };
         }
+      }
+      // AI 简化：有碰就碰（非立直）
+      const n = state.hands[i].filter((t) => sameTile(t, tile)).length;
+      if (n >= 2 && !state.riichi[i] && Math.random() > 0.55) {
+        doRiichiPeng(i, tile, n >= 3 && Math.random() > 0.7);
+        return { ok: true, snap: snapshot() };
+      }
+    }
+
+    // 玩家 call：荣 / 吃 / 碰 / 杠
+    if (seat !== 0) {
+      const opts = { canRon: false, canChi: false, canPeng: false, canGang: false, chiOptions: [] };
+      if (canWinHand([...state.hands[0], tile], state.melds[0].length)) {
+        const doraCount = countDoraInHand([...state.hands[0], tile], liveDoraTiles());
+        const ev = evaluateYaku({
+          hand: state.hands[0],
+          winTile: tile,
+          melds: state.melds[0],
+          riichi: state.riichi[0],
+          isTsumo: false,
+          seatWind: seatWind(0),
+          roundWind: state.roundWind,
+          doraCount,
+          ippatsu: state.ippatsu[0],
+        });
+        if (ev.han > 0) {
+          opts.canRon = true;
+          state.canRon = true;
+          state.claimSeat = 0;
+        }
+      }
+      if (!state.riichi[0]) {
+        const n = state.hands[0].filter((t) => sameTile(t, tile)).length;
+        opts.canPeng = n >= 2;
+        opts.canGang = n >= 3;
+        if (((seat + 1) % 4) === 0) {
+          const chiOpts = findRiichiChiOptions(state.hands[0], tile);
+          opts.canChi = chiOpts.length > 0;
+          opts.chiOptions = chiOpts;
+        }
+      }
+      if (opts.canRon || opts.canChi || opts.canPeng || opts.canGang) {
+        state.callOptions = opts;
+        state.phase = 'call';
+        return { ok: true, snap: snapshot(), awaitCall: true };
       }
     }
 
@@ -724,10 +819,107 @@ export function createRiichiTable({
     return { ok: true, snap: snapshot() };
   }
 
+  function doRiichiPeng(seat, tile, asGang = false) {
+    const need = asGang ? 3 : 2;
+    const hand = state.hands[seat];
+    const keep = [];
+    let removed = 0;
+    for (const c of hand) {
+      if (removed < need && sameTile(c, tile)) { removed += 1; continue; }
+      keep.push(c);
+    }
+    if (removed < need) return { ok: false, reason: asGang ? 'no_gang' : 'no_peng' };
+    state.hands[seat] = sortRiichiHand(keep);
+    // remove from river
+    const riv = state.rivers[state.current];
+    if (riv?.length && sameTile(riv[riv.length - 1], tile)) riv.pop();
+    state.melds[seat].push({
+      type: asGang ? 'gang' : 'peng',
+      tile,
+      suit: tile.suit,
+      rank: tile.rank,
+      open: true,
+      from: state.current,
+    });
+    state.ippatsu = [false, false, false, false];
+    state.lastDiscard = null;
+    state.callOptions = null;
+    state.canRon = false;
+    state.current = seat;
+    if (asGang) {
+      drawFor(seat);
+    } else {
+      state.phase = 'discard';
+      state.drawn = null;
+      refreshFlags(seat);
+    }
+    return { ok: true, deducted: need };
+  }
+
+  function doRiichiChi(seat, tile) {
+    const opts = findRiichiChiOptions(state.hands[seat], tile);
+    const opt = opts[0];
+    if (!opt) return { ok: false, reason: 'no_chi' };
+    const takeIds = new Set(opt.tiles.map((t) => t.id));
+    const before = state.hands[seat].length;
+    state.hands[seat] = sortRiichiHand(state.hands[seat].filter((t) => !takeIds.has(t.id)));
+    if (state.hands[seat].length !== before - 2) return { ok: false, reason: 'chi_deduct' };
+    const riv = state.rivers[state.current];
+    if (riv?.length && sameTile(riv[riv.length - 1], tile)) riv.pop();
+    state.melds[seat].push({
+      type: 'chi',
+      tile,
+      suit: tile.suit,
+      rank: tile.rank,
+      ranks: opt.ranks,
+      tiles: [...opt.tiles, tile],
+      open: true,
+      from: state.current,
+    });
+    state.ippatsu = [false, false, false, false];
+    state.lastDiscard = null;
+    state.callOptions = null;
+    state.canRon = false;
+    state.current = seat;
+    state.phase = 'discard';
+    state.drawn = null;
+    refreshFlags(seat);
+    return { ok: true, deducted: 2 };
+  }
+
   function declareRiichi() {
-    if (!state.canRiichi || state.current !== 0) return { ok: false };
+    if (state.current !== 0 || state.phase !== 'discard') return { ok: false, reason: 'phase' };
+    if (state.riichi[0]) return { ok: false, reason: 'already' };
+    if (!state.canRiichi && !state._pendingRiichi) return { ok: false, reason: 'no_riichi' };
     state._pendingRiichi = true;
-    return { ok: true, snap: snapshot() };
+    return { ok: true, snap: snapshot(), pending: true };
+  }
+
+  function humanCall(action) {
+    if (state.phase !== 'call' || !state.lastDiscard) return { ok: false, reason: 'no_call' };
+    const tile = state.lastDiscard;
+    const from = state.current;
+    if (action === 'ron' || action === 'hu') {
+      return ron();
+    }
+    if (action === 'chi') {
+      if (((from + 1) % 4) !== 0) return { ok: false, reason: 'not_kami' };
+      const r = doRiichiChi(0, tile);
+      if (!r.ok) return r;
+      return { ok: true, snap: snapshot(), chi: true };
+    }
+    if (action === 'peng' || action === 'gang') {
+      const r = doRiichiPeng(0, tile, action === 'gang');
+      if (!r.ok) return r;
+      return { ok: true, snap: snapshot(), peng: true };
+    }
+    // pass
+    state.canRon = false;
+    state.claimSeat = -1;
+    state.callOptions = null;
+    const next = (from + 1) % 4;
+    drawFor(next);
+    return { ok: true, snap: snapshot(), pass: true };
   }
 
   function tsumo() {
@@ -744,12 +936,7 @@ export function createRiichiTable({
   }
 
   function skipRon() {
-    if (state.phase !== 'call') return { ok: false };
-    state.canRon = false;
-    state.claimSeat = -1;
-    const next = (state.current + 1) % 4;
-    drawFor(next);
-    return { ok: true, snap: snapshot() };
+    return humanCall('pass');
   }
 
   function tsumoAi(seat) {
@@ -828,11 +1015,13 @@ export function createRiichiTable({
     tsumo,
     ron,
     skipRon,
+    humanCall,
     aiDiscard,
     tsumoAi,
     snapshot,
     debugHand,
     refreshFlags: () => refreshFlags(state.current),
+    state,
   };
 }
 

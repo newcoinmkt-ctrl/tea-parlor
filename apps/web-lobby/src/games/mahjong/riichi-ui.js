@@ -43,6 +43,8 @@ export function createRiichiUI(options = {}) {
   let turnSeconds = 34;
   let turnTimer = null;
   let openSeq = 0;
+  let softTrustee = false;
+  let disconnectBound = false;
 
   const root = document.getElementById('multiGameView');
   if (!root) throw new Error('multiGameView missing');
@@ -90,6 +92,9 @@ export function createRiichiUI(options = {}) {
         <button type="button" id="rkBtnRiichi">立直</button>
         <button type="button" id="rkBtnTsumo" class="is-primary">自摸</button>
         <button type="button" id="rkBtnRon" class="is-primary">荣和</button>
+        <button type="button" id="rkBtnChi">吃</button>
+        <button type="button" id="rkBtnPeng">碰</button>
+        <button type="button" id="rkBtnGang">杠</button>
         <button type="button" id="rkBtnSkip">跳过</button>`;
       root.querySelector('.mg-table')?.appendChild(ops);
     }
@@ -124,15 +129,83 @@ export function createRiichiUI(options = {}) {
     }
   }
 
+  function pickTimeoutDiscardId(snap) {
+    const hand = snap.hands?.[0] || [];
+    if (!hand.length) return null;
+    if (snap.riichi?.[0] && snap.drawn?.id) return snap.drawn.id;
+    if (selected && hand.some((c) => c.id === selected)) return selected;
+    return hand[hand.length - 1]?.id || hand[0]?.id || null;
+  }
+
+  function autoTimeoutAct(reason = 'timeout') {
+    if (!table) return;
+    const snap = table.snapshot();
+    if (!snap || snap.phase === 'settle') return;
+    softTrustee = true;
+    if (el.status) {
+      el.status.textContent = reason === 'disconnect'
+        ? '连接中断 · 已软代打（完整托管后补）'
+        : '倒计时到 · 系统代打';
+    }
+    if (snap.phase === 'call') {
+      table.humanCall?.('pass') || table.skipRon?.();
+      pendingRiichi = false;
+      selected = null;
+      render();
+      return;
+    }
+    if (snap.phase === 'discard' && snap.current === 0) {
+      if (snap.canTsumo) {
+        table.tsumo();
+        selected = null;
+        pendingRiichi = false;
+        render();
+        return;
+      }
+      const id = pickTimeoutDiscardId(snap);
+      if (!id) return;
+      const r = table.discard(id, { riichiDeclare: pendingRiichi });
+      pendingRiichi = false;
+      selected = null;
+      if (r?.ok) render();
+    }
+  }
+
+  function bindDisconnectGuard() {
+    if (disconnectBound) return;
+    disconnectBound = true;
+    document.addEventListener('visibilitychange', () => {
+      if (!table) return;
+      const snap = table.snapshot();
+      if (!snap || snap.phase === 'settle') return;
+      if (document.hidden) {
+        softTrustee = true;
+        if (snap.current === 0 || snap.phase === 'call') autoTimeoutAct('disconnect');
+        else scheduleAi();
+      }
+    });
+  }
+
   function startTurnTimer() {
     stopTurnTimer();
-    turnSeconds = 34;
+    if (!table) return;
+    const snap = table.snapshot();
+    if (!snap || snap.phase === 'settle') return;
+    turnSeconds = softTrustee ? 3 : 15;
     const cd = document.getElementById('mjCountdown');
-    if (cd) cd.textContent = String(turnSeconds);
+    if (cd) {
+      cd.textContent = String(turnSeconds).padStart(2, '0');
+      cd.hidden = false;
+      cd.removeAttribute('hidden');
+    }
     turnTimer = setInterval(() => {
       turnSeconds = Math.max(0, turnSeconds - 1);
-      if (cd) cd.textContent = String(turnSeconds);
-      if (turnSeconds <= 0) stopTurnTimer();
+      if (cd) cd.textContent = String(turnSeconds).padStart(2, '0');
+      if (turnSeconds <= 0) {
+        stopTurnTimer();
+        const s = table?.snapshot();
+        if (s && (s.current === 0 || s.phase === 'call')) autoTimeoutAct('timeout');
+      }
     }, 1000);
   }
 
@@ -289,8 +362,10 @@ export function createRiichiUI(options = {}) {
       const riv = snap.rivers?.[s] || [];
       const riichi = !!snap.riichi?.[s];
       // Mark first discard as riichi-declaration tile when seat is in riichi (Pocket sideways)
+      const ridx = snap.riichiDiscardIndex?.[s];
       const tiles = riv.map((t, idx) => {
-        const cls = riichi && idx === 0 ? 'rk-tile-mini is-riichi-discard' : 'rk-tile-mini';
+        const isDecl = riichi && ((ridx != null && ridx >= 0) ? idx === ridx : idx === 0);
+        const cls = isDecl ? 'rk-tile-mini is-riichi-discard' : 'rk-tile-mini';
         return tileImg(t, cls);
       }).join('');
       return `<div class="rk-kawa-seat" data-seat="${s}">${tiles}</div>`;
@@ -319,28 +394,53 @@ export function createRiichiUI(options = {}) {
     const btnRiichi = document.getElementById('rkBtnRiichi');
     const btnTsumo = document.getElementById('rkBtnTsumo');
     const btnRon = document.getElementById('rkBtnRon');
+    const btnChi = document.getElementById('rkBtnChi');
+    const btnPeng = document.getElementById('rkBtnPeng');
+    const btnGang = document.getElementById('rkBtnGang');
     const btnSkip = document.getElementById('rkBtnSkip');
     const dialHu = document.getElementById('rkDialHu');
     const dialCut = document.getElementById('rkDialCut');
+    const dialCall = document.getElementById('rkDialCall');
+    const pending = pendingRiichi || !!snap.pendingRiichi;
+    const co = snap.callOptions || {};
     if (btnRiichi) {
-      btnRiichi.disabled = !snap.canRiichi && !pendingRiichi;
-      btnRiichi.classList.toggle('is-primary', pendingRiichi);
-      btnRiichi.textContent = pendingRiichi ? '立直中…' : '立直';
+      const can = (snap.canRiichi || pending) && snap.phase === 'discard' && snap.current === 0 && !snap.riichi?.[0];
+      btnRiichi.disabled = !can;
+      btnRiichi.classList.toggle('is-primary', pending);
+      btnRiichi.classList.toggle('is-riichi-armed', pending);
+      btnRiichi.textContent = pending ? '立直中…' : '立直';
+      btnRiichi.setAttribute('aria-pressed', pending ? 'true' : 'false');
     }
     if (btnTsumo) {
       btnTsumo.disabled = !snap.canTsumo;
       btnTsumo.hidden = snap.phase === 'call';
     }
     if (btnRon) {
-      btnRon.disabled = !snap.canRon;
+      btnRon.disabled = !(snap.canRon || co.canRon);
       btnRon.hidden = snap.phase !== 'call';
+    }
+    if (btnChi) {
+      btnChi.disabled = !co.canChi;
+      btnChi.hidden = snap.phase !== 'call';
+    }
+    if (btnPeng) {
+      btnPeng.disabled = !co.canPeng;
+      btnPeng.hidden = snap.phase !== 'call';
+    }
+    if (btnGang) {
+      btnGang.disabled = !co.canGang;
+      btnGang.hidden = snap.phase !== 'call';
     }
     if (btnSkip) {
       btnSkip.hidden = snap.phase !== 'call';
       btnSkip.disabled = snap.phase !== 'call';
     }
-    if (dialHu) dialHu.disabled = !(snap.canTsumo || snap.canRon);
+    if (dialHu) dialHu.disabled = !(snap.canTsumo || snap.canRon || co.canRon);
     if (dialCut) dialCut.disabled = snap.phase !== 'discard' || snap.current !== 0;
+    if (dialCall) {
+      const canCall = snap.phase === 'call' && (co.canChi || co.canPeng || co.canGang);
+      dialCall.disabled = !canCall;
+    }
     if (el.actions) {
       el.actions.hidden = true;
       el.actions.innerHTML = '';
@@ -362,18 +462,25 @@ export function createRiichiUI(options = {}) {
         <p style="text-align:center">牌山耗尽</p>
         <div class="rk-settle-actions"><button type="button" id="rkSettleOk">确认</button></div>`;
     } else {
-      const yaku = s.yaku || [];
+      let yaku = Array.isArray(s.yaku) ? s.yaku.slice() : [];
+      if (!yaku.length) {
+        yaku = [{ name: s.title || '和了', han: Math.max(1, Number(s.han) || 1) }];
+      }
       const mid = Math.ceil(yaku.length / 2) || 0;
       const left = yaku.slice(0, mid);
       const right = yaku.slice(mid);
-      const yakuHtml = (arr) => arr.map((y) => `<div class="rk-yaku-tag"><span>${y.name}</span><b>${y.han} 番</b></div>`).join('');
+      const yakuHtml = (arr) => arr.map((y) => `<div class="rk-yaku-tag"><span>${y.name}</span><b>${y.han} 番</b></div>`).join('') || '<div class="rk-yaku-tag"><span>和了</span><b>1 番</b></div>';
+      const doraRow = (s.doraIndicators || []).map((t) => tileImg(t)).join('');
+      const uraRow = (s.uraDoraIndicators || []).map((t) => tileImg(t)).join('');
       panel.innerHTML = `
         <div class="rk-settle-top">
           <div class="rk-settle-points">${Math.abs(s.total)} 点</div>
           <div class="rk-settle-stamp">${s.title || (s.kind === 'tsumo' ? '自摸' : '荣和')}</div>
         </div>
-        <div class="rk-settle-han"><strong>${s.han} 番</strong><span>${s.fu || 30} 符</span></div>
+        <div class="rk-settle-han"><strong>${s.han || yaku.reduce((a, y) => a + y.han, 0)} 番</strong><span>${s.fu || 30} 符</span></div>
         <div class="rk-yaku-cols"><div>${yakuHtml(left)}</div><div>${yakuHtml(right)}</div></div>
+        <div class="rk-settle-dora"><span>宝牌</span>${doraRow || '—'}</div>
+        ${uraRow ? `<div class="rk-settle-dora rk-settle-ura"><span>里宝牌</span>${uraRow}</div>` : ''}
         <div class="rk-settle-hand">
           ${(s.hand || []).map((t) => tileImg(t)).join('')}
           <span class="rk-win-sep"></span>
@@ -417,8 +524,16 @@ export function createRiichiUI(options = {}) {
 
     if (el.status) {
       if (snap.phase === 'settle') el.status.textContent = snap.winKind === 'draw' ? '流局' : (snap.settle?.title || '和了');
-      else if (snap.phase === 'call') el.status.textContent = '可荣和 · 点荣和或跳过';
-      else if (snap.current === 0) el.status.textContent = pendingRiichi ? '立直宣言 · 选择打出的牌' : '点选手牌打出 · 可立直/自摸';
+      else if (snap.phase === 'call') {
+        const co = snap.callOptions || {};
+        const bits = [];
+        if (snap.canRon || co.canRon) bits.push('荣和');
+        if (co.canChi) bits.push('吃');
+        if (co.canPeng) bits.push('碰');
+        if (co.canGang) bits.push('杠');
+        el.status.textContent = bits.length ? `可${bits.join('/')} · 点选或跳过` : '可应答 · 跳过';
+      }
+      else if (snap.current === 0) el.status.textContent = (pendingRiichi || snap.pendingRiichi) ? '立直宣言 · 选择打出的牌' : (snap.riichi?.[0] ? '立直中 · 模切' : '点选手牌打出 · 可立直/自摸');
       else el.status.textContent = `${snap.names[snap.current]} 行牌中`;
     }
     if (el.sub) {
@@ -428,8 +543,10 @@ export function createRiichiUI(options = {}) {
       const meta = root.querySelector(`#mgMeta${i}`);
       if (meta) {
         const stick = snap.riichi?.[i] ? ' <span class="rk-riichi-stick" title="立直"></span>' : '';
-        meta.innerHTML = `<strong>${snap.names[i]}${i === 0 ? '（我）' : ''}</strong>${stick}`;
+        const ip = snap.ippatsu?.[i] && snap.riichi?.[i] ? ' <em class="rk-ippatsu">一发</em>' : '';
+        meta.innerHTML = `<strong>${snap.names[i]}${i === 0 ? '（我）' : ''}</strong>${stick}${ip}`;
       }
+      root.querySelector(`[data-mg-seat="${i}"]`)?.classList.toggle('is-riichi', !!snap.riichi?.[i]);
       const count = root.querySelector(`#mgCount${i}`);
       if (count) {
         count.textContent = `${snap.handCounts?.[i] ?? '—'}张`;
@@ -502,6 +619,7 @@ export function createRiichiUI(options = {}) {
         const r = table.declareRiichi();
         if (r?.ok) {
           pendingRiichi = true;
+          if (el.status) el.status.textContent = '立直宣言 · 选择打出的牌';
           render();
         }
         return;
@@ -519,8 +637,23 @@ export function createRiichiUI(options = {}) {
         render();
         return;
       }
-      if (t.id === 'rkBtnSkip' || t.closest('#rkBtnSkip')) {
-        table?.skipRon();
+      if (t.id === 'rkBtnChi' || t.closest('#rkBtnChi')) {
+        table?.humanCall?.('chi');
+        render();
+        return;
+      }
+      if (t.id === 'rkBtnPeng' || t.closest('#rkBtnPeng')) {
+        table?.humanCall?.('peng');
+        render();
+        return;
+      }
+      if (t.id === 'rkBtnGang' || t.closest('#rkBtnGang')) {
+        table?.humanCall?.('gang');
+        render();
+        return;
+      }
+      if (t.id === 'rkBtnSkip' || t.closest('#rkBtnSkip') || t.id === 'rkDialCall') {
+        table?.humanCall?.('pass') || table?.skipRon?.();
         render();
         return;
       }
@@ -535,6 +668,8 @@ export function createRiichiUI(options = {}) {
     settleReported = false;
     selected = null;
     pendingRiichi = false;
+    softTrustee = false;
+    bindDisconnectGuard();
     stopAi();
     const settle = document.getElementById('rkSettle');
     if (settle) {

@@ -1,0 +1,102 @@
+{
+  "cache": "play9mj3",
+  "url": "http://127.0.0.1:5294/index.html?v=play9mj3",
+  "viewport_landscape": [
+    896,
+    414
+  ],
+  "viewport_portrait": [
+    414,
+    896
+  ],
+  "ed_repro": {
+    "path": "麻将日麻立直+番结算; 推倒胡吃碰杠; 倒计时软代打; DDZ出牌; 牛牛抢庄→下注→搓牌→亮牌",
+    "cache": "?v=play9mj3",
+    "fail_on": "empty yaku settle; chi no deduct; freeze on hide; Math.max tg-vh; Stars/TON"
+  },
+  "root_gaps_filled": [
+    "日麻: 立直可点+宣言态; 一发/宝牌/里宝牌番结算非空; 结算面板役列表+点",
+    "日麻: 吃碰杠鸣牌(合法才亮) + 手牌扣除",
+    "日麻: 倒计时可见 + visibility soft代打(延 ship3)",
+    "推倒胡: 吃 + 碰杠合法按钮 + 手牌扣除"
+  ],
+  "shots": {
+    "lobby-896-home.png": {
+      "bytes": 80186,
+      "sha1": "1fdfc0adce49"
+    },
+    "ddz-896-touch-selected.png": {
+      "bytes": 112161,
+      "sha1": "827e13289808"
+    },
+    "ddz-896-after-play.png": {
+      "bytes": 102706,
+      "sha1": "2311b1c2813b"
+    },
+    "mj-riichi-896-table.png": {
+      "bytes": 223008,
+      "sha1": "996a238536c8"
+    },
+    "mj-riichi-896-settle.png": {
+      "bytes": 199496,
+      "sha1": "bce8e72cfa14"
+    },
+    "mj-riichi-896-declare.png": {
+      "bytes": 223529,
+      "sha1": "4e114440d72f"
+    },
+    "mj-tdh-896-table.png": {
+      "bytes": 202427,
+      "sha1": "effaeac64a23"
+    },
+    "nn-896-enter.png": {
+      "bytes": 99435,
+      "sha1": "c4446f37d637"
+    },
+    "nn-896-flow.png": {
+      "bytes": 131316,
+      "sha1": "24784667de93"
+    },
+    "ddz-414-hand.png": {
+      "bytes": 184602,
+      "sha1": "7defecb5150e"
+    }
+  },
+  "checks": {
+    "cache_live": {
+      "cache": true,
+      "attr": "./src/app.js?v=play9mj3",
+      "search": "?v=play9mj3",
+      "vh": "414px"
+    },
+    "riichi_hand": 13,
+    "riichi_chrome": {
+      "riichiDisabled": true,
+      "riichiText": "立直",
+      "countdown": "15",
+      "countdownHidden": false,
+      "ops": true,
+      "dora": true,
+      "variant": "riichi"
+    },
+    "riichi_settle": {
+      "visible": true,
+      "hasYaku": true,
+      "hasPoints": true
+    },
+    "tdh_countdown": {
+      "text": "15",
+      "hidden": false
+    },
+    "nn_active": false
+  },
+  "pass": {
+    "ddz_select_play": true,
+    "tdh_enter_countdown": true,
+    "nn_enter": true,
+    "ddz_414": true,
+    "riichi_table_settle": true
+  },
+  "ok": true,
+  "page_errors": []
+}
