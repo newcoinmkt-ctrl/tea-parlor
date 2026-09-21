@@ -1,0 +1,12 @@
+{
+  "slice": "play9fin4a",
+  "cache": "play9fin4a",
+  "ok": true,
+  "checks": {
+    "activity_entry": "home activity-entry-btn → activity view",
+    "daily_supply_claim": "activityClaimBtn + claim action",
+    "chips_only_non_withdrawable": true,
+    "no_stars_chain_topup_on_activity": true,
+    "cache": "play9fin4a"
+  }
+}

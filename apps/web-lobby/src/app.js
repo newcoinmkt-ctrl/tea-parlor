@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin3c';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin3c';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin3c';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin3c';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin3c';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin4a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin4a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin4a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin4a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin4a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import {
   loadPlayMode,
@@ -2754,6 +2754,7 @@ function bindUi() {
   // 直接绑定牌桌操作（固定节点）
   nodes.claimButton?.addEventListener('click', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     onClaim();
   });
   nodes.backBtn?.addEventListener('click', (e) => {
@@ -2921,7 +2922,7 @@ function bindUi() {
       if (!action) return;
       e.preventDefault();
       e.stopPropagation();
-      if (action === 'home' || action === 'profile' || action === 'records' || action === 'recharge' || action === 'wardrobe' || action === 'chain' || action === 'open-doudizhu-rooms' || action === 'friend-room' || action === 'quick-doudizhu' || action === 'quick-doudizhu-classic' || action === 'local-doudizhu' || action === 'open-games' || action === 'rules') {
+      if (action === 'home' || action === 'profile' || action === 'records' || action === 'recharge' || action === 'wardrobe' || action === 'chain' || action === 'activity' || action === 'open-doudizhu-rooms' || action === 'friend-room' || action === 'quick-doudizhu' || action === 'quick-doudizhu-classic' || action === 'local-doudizhu' || action === 'open-games' || action === 'rules') {
         restoreLobbyChrome();
       }
       const focus = lobbyAct.getAttribute('data-recharge-focus') || undefined;
@@ -3143,6 +3144,11 @@ function handleLobbyAction(action, opts = {}) {
   else if (action === 'records') {
     setLobbyView('records');
     renderRecordsPage();
+  }
+  else if (action === 'activity') {
+    // play9fin4a: ops/activity — daily supply chips only, no Stars/chain top-up
+    setLobbyView('activity');
+    renderActivityPage();
   }
   else if (action === 'recharge') {
     setLobbyView('recharge');
@@ -3371,6 +3377,7 @@ function setLobbyView(view = 'home', gameType = null) {
   nodes.shell?.classList.toggle('lobby-view-recharge', view === 'recharge');
   nodes.shell?.classList.toggle('lobby-view-records', view === 'records');
   nodes.shell?.classList.toggle('lobby-view-chain', view === 'chain');
+  nodes.shell?.classList.toggle('lobby-view-activity', view === 'activity');
 
   $$('[data-lobby-view]').forEach((section) => {
     const sectionView = section.getAttribute('data-lobby-view');
@@ -3447,7 +3454,9 @@ function setLobbyView(view = 'home', gameType = null) {
   if (view === 'recharge') renderRechargePage();
   if (view === 'records') renderRecordsPage();
   if (view === 'chain') chainCenterController.renderChainCenter();
+  if (view === 'activity') renderActivityPage();
 }
+
 
 // ─── 个人中心 / 补给 / 战绩 ─────────────────────────
 function bindProfileUi() {
@@ -4522,6 +4531,43 @@ function applyServerShadowBalance(summary) {
   }
 }
 
+
+/** play9fin4a: activity center — chips-only daily supply; no Stars/chain top-up */
+function syncActivityClaimStatus() {
+  const el = document.getElementById('activityClaimStatus');
+  const btn = document.getElementById('activityClaimBtn');
+  if (!el && !btn) return;
+  const left = Math.max(0, DAILY_CLAIM_LIMIT - (Number(appState.claims?.count) || 0));
+  const hasSession = Boolean(getLobbySessionToken());
+  const text = formatDailySupplyStatus({
+    remaining: left,
+    limit: DAILY_CLAIM_LIMIT,
+    amount: DAILY_CLAIM_AMOUNT,
+    hasSession,
+  });
+  if (el) {
+    const current = String(el.textContent || '');
+    const keep = /已领取|领取失败|领取中|请从 Telegram|今日补给次数已用完/.test(current);
+    if (!keep || !hasSession) el.textContent = hasSession ? text : DAILY_SUPPLY_TG_PROMPT;
+  }
+  if (btn) {
+    btn.disabled = !hasSession || left <= 0;
+    btn.textContent = claimButtonLabel({
+      remaining: left,
+      amount: DAILY_CLAIM_AMOUNT,
+      hasSession,
+    });
+  }
+}
+
+function renderActivityPage() {
+  syncActivityClaimStatus();
+  const legal = document.getElementById('activityLegal');
+  if (legal) {
+    legal.textContent = '奖励仅为影子金币（内部娱乐筹码）· 不可提现 · 不支持 Stars / 链上充值';
+  }
+}
+
 function applyDailySupplyStatus(status) {
   if (!status || typeof status !== 'object') return;
   const date = status.date || todayKey();
@@ -4579,6 +4625,8 @@ async function onClaim() {
       remaining: result.remaining,
     });
     if (nodes.claimStatus) nodes.claimStatus.textContent = okMsg;
+    const actSt = document.getElementById('activityClaimStatus');
+    if (actSt) actSt.textContent = okMsg;
     showLobbyToast(okMsg);
   } catch (err) {
     const reason = err?.body?.reason || err?.message || '';
@@ -4589,6 +4637,8 @@ async function onClaim() {
         ? DAILY_SUPPLY_TG_PROMPT
         : formatDailySupplyExhaustedReason(reason));
     if (nodes.claimStatus) nodes.claimStatus.textContent = msg;
+    const actStErr = document.getElementById('activityClaimStatus');
+    if (actStErr) actStErr.textContent = msg;
     showLobbyToast(msg);
     if (err?.body) {
       applyDailySupplyStatus(err.body);
@@ -4649,6 +4699,7 @@ function renderAccount() {
       }
     }
   }
+  syncActivityClaimStatus();
   const wins = appState.records.filter((r) => r.result === '胜' || Number(r.score) > 0).length;
   const losses = appState.records.filter((r) => r.result === '负' || Number(r.score) < 0).length;
   const homeSum = document.getElementById('homeRecordSummary');

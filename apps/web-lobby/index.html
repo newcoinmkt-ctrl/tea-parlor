@@ -9,18 +9,18 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin3c" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin3c" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin4a" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin4a" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -126,7 +126,7 @@
                 <strong>麻将</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="niuniu">
-                <img src="./public/assets/home/icon-niuniu.png?v=play9fin3c" alt="" />
+                <img src="./public/assets/home/icon-niuniu.png?v=play9fin4a" alt="" />
                 <strong>牛牛</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="texas">
@@ -151,6 +151,18 @@
               </button>
             </section>
             <p class="home-chain-hint">USDT 专用 · 与金币场分开</p>
+
+            <!-- play9fin4a: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
+            <section class="activity-entry-band" aria-label="活动入口">
+              <button type="button" class="activity-entry-btn" data-lobby-action="activity" id="homeActivityEntry">
+                <span class="activity-entry-ico" aria-hidden="true">🎁</span>
+                <span class="activity-entry-copy">
+                  <strong>活动中心</strong>
+                  <small>每日补给 · 影子金币 · 不可提现</small>
+                </span>
+                <span class="activity-entry-go">进入</span>
+              </button>
+            </section>
 
             </div>
 
@@ -214,13 +226,13 @@
               </button>
             </section>
 
-            <section class="claim-band home-claim" aria-label="每日补给">
+            <section class="claim-band home-claim" aria-label="每日补给" data-lobby-action="activity" role="button" tabindex="0">
               <div>
                 <p>每日补给</p>
                 <strong>每天 4 次 · 每次 4,000 影子金币 · 不可提现</strong>
                 <span id="claimStatus">请从 Telegram 打开茶馆领取每日补给</span>
               </div>
-              <button id="claimIngotButton" class="gold-button" type="button" disabled>请从 Telegram 打开</button>
+              <button id="claimIngotButton" class="gold-button" type="button" data-lobby-action="claim" disabled>请从 Telegram 打开</button>
             </section>
             <section class="status-band home-status" aria-label="今日状态">
               <div class="status-item">
@@ -1247,6 +1259,54 @@
             </div>
           </section>
 
+
+          <!-- play9fin4a: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
+          <section class="panel-page activity-page" data-lobby-view="activity" aria-label="活动中心" hidden>
+            <div class="view-head">
+              <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
+              <div>
+                <p>运营活动</p>
+                <h1>活动中心</h1>
+              </div>
+            </div>
+            <p class="activity-legal" id="activityLegal">奖励仅为影子金币（内部娱乐筹码）· 不可提现 · 不支持 Stars / 链上充值</p>
+
+            <div class="activity-card card-panel" id="activityDailyCard">
+              <header class="activity-card-head">
+                <span class="activity-badge">每日</span>
+                <strong>每日补给</strong>
+                <small>每天 4 次 × 4,000 · 需 Telegram 会话</small>
+              </header>
+              <div class="activity-daily-row">
+                <div>
+                  <p class="activity-reward-label">奖励</p>
+                  <strong class="activity-reward-amt">4,000 影子金币</strong>
+                  <span class="activity-reward-note">不可提现 · 不可兑外部资产</span>
+                </div>
+                <button type="button" class="gold-button" data-lobby-action="claim" id="activityClaimBtn">领取每日补给</button>
+              </div>
+              <p class="activity-status" id="activityClaimStatus" aria-live="polite">请从 Telegram 打开茶馆领取每日补给</p>
+            </div>
+
+            <div class="activity-list" aria-label="今日活动">
+              <article class="activity-item card-panel">
+                <strong>人机畅玩礼包</strong>
+                <span>完成 1 局人机 · +500 影子金币</span>
+                <em class="activity-chip-only">筹码奖励 · 不可提现</em>
+              </article>
+              <article class="activity-item card-panel">
+                <strong>对局补给</strong>
+                <span>今日对局累计 3 局 · +1,000 影子金币</span>
+                <em class="activity-chip-only">筹码奖励 · 不可提现</em>
+              </article>
+              <article class="activity-item card-panel activity-item-disabled" aria-disabled="true">
+                <strong>链上充值 / Stars</strong>
+                <span>本活动页不提供 Stars 或链上充值入口</span>
+                <em class="activity-chip-only">已禁用</em>
+              </article>
+            </div>
+          </section>
+
           <!-- 战绩 -->
           <section class="panel-page records-page" data-lobby-view="records" aria-label="战绩" hidden>
             <div class="view-head">
@@ -1897,6 +1957,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9fin3c"></script>
+    <script type="module" src="./src/app.js?v=play9fin4a"></script>
   </body>
 </html>
