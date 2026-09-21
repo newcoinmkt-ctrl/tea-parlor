@@ -39,6 +39,8 @@ export function saveDdzReconnect(blob) {
     roomId: blob.roomId || null,
     roomKey: blob.roomKey || null,
     phase: blob.phase || null,
+    // play9fin2b: full trustee survives disconnect reconnect
+    fullTrustee: !!blob.fullTrustee,
     savedAt: Date.now(),
   });
 }
@@ -68,6 +70,7 @@ export function saveMjSession(kind, payload) {
     state: payload.state,
     turnEndsAt: payload.turnEndsAt || null,
     softTrustee: !!payload.softTrustee,
+    fullTrustee: !!payload.fullTrustee,
     savedAt: Date.now(),
   });
 }

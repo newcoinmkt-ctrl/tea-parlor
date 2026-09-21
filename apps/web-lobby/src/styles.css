@@ -26584,3 +26584,25 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
 .lobby-shell .char-logo {
   pointer-events: none !important;
 }
+
+/* play9fin2b — mahjong full trustee button */
+#multiGameView .mg-trustee,
+#mgTrusteeBtn {
+  flex: 0 0 auto;
+  min-width: 64px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 220, 120, 0.35);
+  background: rgba(20, 40, 80, 0.45);
+  color: #ffe9a8;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 50;
+  pointer-events: auto !important;
+}
+#mgTrusteeBtn.is-on {
+  background: linear-gradient(180deg, #e8a020, #c06010);
+  color: #fff8e8;
+  border-color: rgba(255, 240, 180, 0.6);
+}

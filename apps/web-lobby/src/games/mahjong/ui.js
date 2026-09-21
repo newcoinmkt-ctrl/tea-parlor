@@ -45,8 +45,10 @@ export function createMahjongUI(options = {}) {
   let turnTimer = null;
   /** play9fin1a: absolute deadline so countdown does not freeze when tab hidden */
   let turnEndsAt = 0;
-  /** play9ship3b: 倒计时到期 / 切后台 → 软代打，避免牌桌冻结（完整托管可后补） */
+  /** play9ship3b: 倒计时到期 / 切后台 → 软代打，避免牌桌冻结 */
   let softTrustee = false;
+  /** play9fin2b: 完整托管 — 玩家点「托管」后持续系统代打，直到取消或回大厅 */
+  let fullTrustee = false;
   let disconnectBound = false;
   const BASE_SCORE = 1800;
   /** 开局掷骰/发牌动画进行中 */
@@ -186,6 +188,7 @@ export function createMahjongUI(options = {}) {
         state: JSON.parse(JSON.stringify(table.state)),
         turnEndsAt,
         softTrustee,
+        fullTrustee,
       });
     } catch (e) {
       console.warn('[mj] persistSoftSession', e);
@@ -211,8 +214,11 @@ export function createMahjongUI(options = {}) {
       return false;
     }
     softTrustee = !!saved.softTrustee;
+    fullTrustee = !!saved.fullTrustee;
     turnEndsAt = Number(saved.turnEndsAt) || 0;
-    if (el.status) el.status.textContent = '已重连回桌';
+    if (el.status) {
+      el.status.textContent = fullTrustee ? '已重连回桌 · 完整托管中' : '已重连回桌';
+    }
     return true;
   }
 
@@ -530,11 +536,17 @@ export function createMahjongUI(options = {}) {
     if (!table || opening) return;
     const snap = table.snapshot();
     if (!snap || snap.phase === 'settle') return;
-    softTrustee = true;
+    if (!fullTrustee) softTrustee = true;
     if (el.status) {
-      el.status.textContent = reason === 'disconnect'
-        ? '连接中断 · 已软代打（完整托管后补）'
-        : '倒计时到 · 系统代打';
+      if (fullTrustee) {
+        el.status.textContent = reason === 'disconnect'
+          ? '连接中断 · 完整托管代打中'
+          : '完整托管 · 系统代打';
+      } else {
+        el.status.textContent = reason === 'disconnect'
+          ? '连接中断 · 已软代打'
+          : '倒计时到 · 系统代打';
+      }
     }
     if (snap.phase === 'call') {
       table.humanCall('pass');
@@ -608,7 +620,7 @@ export function createMahjongUI(options = {}) {
     function startTurnTimer(snap) {
     stopTurnTimer();
     if (!snap || snap.phase === 'settle' || opening) return;
-    const budget = softTrustee ? 3 : 15;
+    const budget = (fullTrustee || softTrustee) ? 3 : 15;
     // play9fin1a: wall-clock deadline — tab hide must not freeze remaining time
     turnEndsAt = Date.now() + budget * 1000;
     turnSeconds = budget;
@@ -662,6 +674,7 @@ export function createMahjongUI(options = {}) {
     roomLabel = stake.label || modeName(stake.mode || 'xuezhan');
     settleReported = false;
     softTrustee = false;
+    fullTrustee = false; // restore path sets again after tryRestoreSession
     selected = null;
     moveCount = 0;
     stopAi();
@@ -683,6 +696,8 @@ export function createMahjongUI(options = {}) {
       show(playerCount);
       opening = false;
       hideOpenLayer();
+      bindTrusteeBtn();
+      syncTrusteeChrome();
       render();
       scheduleAi();
       startTurnTimer(table.snapshot());
@@ -696,6 +711,8 @@ export function createMahjongUI(options = {}) {
     });
     const playerCount = table.snapshot().playerCount;
     show(playerCount);
+    bindTrusteeBtn();
+    syncTrusteeChrome();
 
     // 清空手牌区，先走开局仪式
     if (el.hand) el.hand.innerHTML = '';
@@ -922,6 +939,17 @@ export function createMahjongUI(options = {}) {
     if (snap.phase === 'settle') {
       showSettle(snap);
       return;
+    }
+    // play9fin2b: 完整托管 — 真人回合也系统代打（含 call/exchange/dingque）
+    if (fullTrustee) {
+      const humanTurn = snap.current === 0
+        || snap.phase === 'call'
+        || snap.phase === 'exchange'
+        || snap.phase === 'dingque';
+      if (humanTurn) {
+        aiTimer = setTimeout(() => autoTimeoutAct('full'), 280);
+        return;
+      }
     }
     // 换三张 / 定缺：等真人操作
     if (snap.phase === 'exchange' || snap.phase === 'dingque') return;
@@ -1460,6 +1488,50 @@ export function createMahjongUI(options = {}) {
     }
   }
 
-  _instance = { start, hide, show, setOptions };
+  /** play9fin2b — 完整托管 toggle（取消或回大厅结束） */
+  function toggleFullTrustee(force) {
+    if (typeof force === 'boolean') fullTrustee = force;
+    else fullTrustee = !fullTrustee;
+    if (fullTrustee) {
+      softTrustee = false; // full supersedes soft park
+      if (el.status) el.status.textContent = '已托管（完整代打中）';
+      persistSoftSession();
+      scheduleAi();
+    } else {
+      if (el.status) el.status.textContent = '已取消托管';
+      persistSoftSession();
+    }
+    syncTrusteeChrome();
+    return fullTrustee;
+  }
+
+  function isFullTrustee() { return !!fullTrustee; }
+
+  function syncTrusteeChrome() {
+    const btn = document.getElementById('mgTrusteeBtn');
+    if (btn) btn.textContent = fullTrustee ? '取消托管' : '托管';
+    if (btn) btn.classList.toggle('is-on', fullTrustee);
+    const ddzBtn = document.getElementById('trusteeButton');
+    // only mirror label when multi table is the active game surface
+    if (ddzBtn && document.querySelector('.lobby-shell.multi-active')) {
+      ddzBtn.textContent = fullTrustee ? '取消托管' : '托管';
+    }
+  }
+
+  function bindTrusteeBtn() {
+    const btn = document.getElementById('mgTrusteeBtn');
+    if (!btn || btn.dataset.boundTrustee) return;
+    btn.dataset.boundTrustee = '1';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFullTrustee();
+    });
+  }
+
+  _instance = {
+    start, hide, show, setOptions,
+    toggleFullTrustee, isFullTrustee, syncTrusteeChrome, bindTrusteeBtn,
+  };
   return _instance;
 }

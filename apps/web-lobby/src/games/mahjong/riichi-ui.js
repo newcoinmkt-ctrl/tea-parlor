@@ -52,6 +52,8 @@ export function createRiichiUI(options = {}) {
   let turnEndsAt = 0;
   let openSeq = 0;
   let softTrustee = false;
+  /** play9fin2b: 完整托管 */
+  let fullTrustee = false;
   let disconnectBound = false;
 
   const root = document.getElementById('multiGameView');
@@ -149,11 +151,17 @@ export function createRiichiUI(options = {}) {
     if (!table) return;
     const snap = table.snapshot();
     if (!snap || snap.phase === 'settle') return;
-    softTrustee = true;
+    if (!fullTrustee) softTrustee = true;
     if (el.status) {
-      el.status.textContent = reason === 'disconnect'
-        ? '连接中断 · 已软代打（完整托管后补）'
-        : '倒计时到 · 系统代打';
+      if (fullTrustee) {
+        el.status.textContent = reason === 'disconnect'
+          ? '连接中断 · 完整托管代打中'
+          : '完整托管 · 系统代打';
+      } else {
+        el.status.textContent = reason === 'disconnect'
+          ? '连接中断 · 已软代打'
+          : '倒计时到 · 系统代打';
+      }
     }
     if (snap.phase === 'call') {
       table.humanCall?.('pass') || table.skipRon?.();
@@ -199,7 +207,7 @@ export function createRiichiUI(options = {}) {
     if (!table) return;
     const snap = table.snapshot();
     if (!snap || snap.phase === 'settle') return;
-    const budget = softTrustee ? 3 : 15;
+    const budget = (fullTrustee || softTrustee) ? 3 : 15;
     turnEndsAt = Date.now() + budget * 1000;
     turnSeconds = budget;
     const cd = document.getElementById('mjCountdown');
@@ -220,6 +228,8 @@ export function createRiichiUI(options = {}) {
 
   function show() {
     ensureChrome();
+    bindTrusteeBtn();
+    syncTrusteeChrome();
     root.hidden = false;
     root.removeAttribute('hidden');
     root.dataset.game = 'mahjong';
@@ -269,6 +279,7 @@ export function createRiichiUI(options = {}) {
         state: JSON.parse(JSON.stringify(table.state)),
         turnEndsAt,
         softTrustee,
+        fullTrustee,
       });
     } catch (e) {
       console.warn('[riichi] persistSoftSession', e);
@@ -292,6 +303,7 @@ export function createRiichiUI(options = {}) {
       return false;
     }
     softTrustee = !!saved.softTrustee;
+    fullTrustee = !!saved.fullTrustee;
     turnEndsAt = Number(saved.turnEndsAt) || 0;
     if (el.status) el.status.textContent = '已重连回桌';
     return true;
@@ -631,6 +643,11 @@ export function createRiichiUI(options = {}) {
     if (!table) return;
     const snap = table.snapshot();
     if (snap.phase === 'settle') return;
+    // play9fin2b: 完整托管 — 真人回合也代打
+    if (fullTrustee && (snap.current === 0 || snap.phase === 'call')) {
+      aiTimer = setTimeout(() => autoTimeoutAct('full'), 280);
+      return;
+    }
     if (snap.phase === 'call') return; // wait player
     if (snap.current === 0) return;
     aiTimer = setTimeout(() => {
@@ -731,6 +748,7 @@ export function createRiichiUI(options = {}) {
     selected = null;
     pendingRiichi = false;
     softTrustee = false;
+    fullTrustee = false;
     bindDisconnectGuard();
     stopAi();
     const settle = document.getElementById('rkSettle');
@@ -766,7 +784,42 @@ export function createRiichiUI(options = {}) {
     }, 200);
   }
 
+
+  function toggleFullTrustee(force) {
+    if (typeof force === 'boolean') fullTrustee = force;
+    else fullTrustee = !fullTrustee;
+    if (fullTrustee) {
+      softTrustee = false;
+      if (el.status) el.status.textContent = '已托管（完整代打中）';
+      persistSoftSession();
+      scheduleAi();
+    } else {
+      if (el.status) el.status.textContent = '已取消托管';
+      persistSoftSession();
+    }
+    syncTrusteeChrome();
+    return fullTrustee;
+  }
+  function isFullTrustee() { return !!fullTrustee; }
+  function syncTrusteeChrome() {
+    const btn = document.getElementById('mgTrusteeBtn');
+    if (btn) {
+      btn.textContent = fullTrustee ? '取消托管' : '托管';
+      btn.classList.toggle('is-on', fullTrustee);
+    }
+  }
+  function bindTrusteeBtn() {
+    const btn = document.getElementById('mgTrusteeBtn');
+    if (!btn || btn.dataset.boundTrustee) return;
+    btn.dataset.boundTrustee = '1';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFullTrustee();
+    });
+  }
+
   bind();
-  _instance = { start, hide, setOptions, get root() { return root; } };
+  _instance = { start, hide, setOptions, toggleFullTrustee, isFullTrustee, syncTrusteeChrome, bindTrusteeBtn, get root() { return root; } };
   return _instance;
 }
