@@ -28,3 +28,13 @@ test('dev still defaults ops and gateway to localhost', () => {
   assert.match(js, /TEA_PARLOR_OPS_URL = "http:\/\/127.0.0.1:5190"/);
   assert.match(js, /TEA_PARLOR_API_GATEWAY_URL = "http:\/\/127.0.0.1:3000"/);
 });
+
+test('runtime config includes ads URL/config slots', () => {
+  const js = buildRuntimeConfigScript({
+    NODE_ENV: 'production',
+    COLYSEUS_URL: 'wss://c.example',
+  });
+  assert.match(js, /TEA_PARLOR_ADS_URL = ""/);
+  assert.match(js, /TEA_PARLOR_ADS_CONFIG = null/);
+});
+

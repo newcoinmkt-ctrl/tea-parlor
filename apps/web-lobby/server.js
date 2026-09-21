@@ -20,10 +20,23 @@ export function buildRuntimeConfigScript(env = process.env) {
   const colyseus = env.COLYSEUS_URL || 'ws://127.0.0.1:2567';
   const ops = trimPublicUrl(env.OPS_PUBLIC_URL) || (isProd ? '' : 'http://127.0.0.1:5190');
   const gateway = trimPublicUrl(env.API_GATEWAY_PUBLIC_URL) || (isProd ? '' : 'http://127.0.0.1:3000');
+  // play9fin3b: ads config — URL and/or inline JSON from env
+  const adsUrl = trimPublicUrl(env.ADS_PUBLIC_URL || env.TEA_ADS_URL) || '';
+  let adsConfigLiteral = 'null';
+  const rawCfg = env.ADS_CONFIG_JSON || env.TEA_ADS_CONFIG_JSON || '';
+  if (rawCfg) {
+    try {
+      adsConfigLiteral = JSON.stringify(JSON.parse(rawCfg));
+    } catch (_) {
+      adsConfigLiteral = 'null';
+    }
+  }
   return [
     'window.TEA_PARLOR_COLYSEUS_URL = ' + JSON.stringify(colyseus) + ';',
     'window.TEA_PARLOR_OPS_URL = ' + JSON.stringify(ops) + ';',
     'window.TEA_PARLOR_API_GATEWAY_URL = ' + JSON.stringify(gateway) + ';',
+    'window.TEA_PARLOR_ADS_URL = ' + JSON.stringify(adsUrl) + ';',
+    'window.TEA_PARLOR_ADS_CONFIG = ' + adsConfigLiteral + ';',
   ].join('\n') + '\n';
 }
 

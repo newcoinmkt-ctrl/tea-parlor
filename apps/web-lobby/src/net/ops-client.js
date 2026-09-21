@@ -37,9 +37,33 @@ export function resolveOpsBase() {
   return DEFAULT_OPS_URL;
 }
 
+/**
+ * play9fin3b — resolve ads config URL.
+ * Priority: explicit ?adsUrl → TEA_PARLOR_ADS_URL → static manifest → ops (dev).
+ * Returns '' when no remote URL (caller uses inline config / static / placeholder).
+ */
 export function resolveAdsUrl(explicit) {
-  if (explicit && /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//i.test(explicit)) return explicit;
-  return `${resolveOpsBase()}/public/ad-placements`;
+  if (explicit) {
+    const e = String(explicit).trim();
+    if (/^https?:\/\//i.test(e) || e.startsWith('./') || e.startsWith('/')) return e;
+  }
+  try {
+    const runtime = typeof window !== 'undefined' ? String(window.TEA_PARLOR_ADS_URL || '').trim() : '';
+    if (runtime && (/^https?:\/\//i.test(runtime) || runtime.startsWith('./') || runtime.startsWith('/'))) {
+      return runtime;
+    }
+  } catch (_) { /* ignore */ }
+  // Static bundled manifest (always available; swappable via deploy)
+  return './public/ads/manifest.json';
+}
+
+/** play9fin3b — inline env JSON config if present */
+export function resolveInlineAdsConfig() {
+  try {
+    const cfg = typeof window !== 'undefined' ? window.TEA_PARLOR_ADS_CONFIG : null;
+    if (cfg && typeof cfg === 'object') return cfg;
+  } catch (_) { /* ignore */ }
+  return null;
 }
 
 export async function fetchOpsCatalog() {

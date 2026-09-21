@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "source": "static-manifest",
+  "brand": {
+    "id": "btc",
+    "name": "BTC",
+    "short": "₿",
+    "copy": "Bitcoin",
+    "landingUrl": "https://bitcoin.org",
+    "theme": "btc",
+    "logoUrl": "./public/assets/logos/btc.svg"
+  },
+  "placements": [
+    {
+      "slotId": "doudizhu-table-skin",
+      "surface": "table",
+      "surfaceKind": "skin",
+      "advertiserName": "BTC",
+      "copy": "桌布合作",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "doudizhu-table-center",
+      "surface": "table",
+      "surfaceKind": "felt",
+      "advertiserName": "BTC",
+      "copy": "桌毡",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "doudizhu-card-face",
+      "surface": "card",
+      "surfaceKind": "card",
+      "advertiserName": "BTC",
+      "copy": "牌面",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "doudizhu-card-face-hand",
+      "surface": "card",
+      "surfaceKind": "card",
+      "advertiserName": "BTC",
+      "copy": "手牌",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "doudizhu-costume-seat-0",
+      "surface": "costume",
+      "surfaceKind": "clothes",
+      "advertiserName": "BTC",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "doudizhu-costume-seat-1",
+      "surface": "costume",
+      "surfaceKind": "clothes",
+      "advertiserName": "BTC",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "doudizhu-costume-seat-2",
+      "surface": "costume",
+      "surfaceKind": "clothes",
+      "advertiserName": "BTC",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "multi-table-skin",
+      "surface": "table",
+      "surfaceKind": "skin",
+      "advertiserName": "BTC",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "multi-table-center",
+      "surface": "table",
+      "surfaceKind": "felt",
+      "advertiserName": "BTC",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    },
+    {
+      "slotId": "multi-card-face",
+      "surface": "card",
+      "surfaceKind": "card",
+      "advertiserName": "BTC",
+      "landingUrl": "https://bitcoin.org",
+      "enabled": true,
+      "logoUrl": "./public/assets/logos/btc.svg"
+    }
+  ]
+}

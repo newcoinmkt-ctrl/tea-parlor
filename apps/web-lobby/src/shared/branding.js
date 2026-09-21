@@ -74,6 +74,8 @@ export const GAME_BRAND_SLOTS = Object.freeze([
  */
 /**
  * play9fin2a — four play surfaces host ad logos (config/placeholder OK):
+ * play9fin3b — config source: ?adsUrl / TEA_PARLOR_ADS_URL / TEA_PARLOR_ADS_CONFIG /
+ *   static ./public/ads/manifest.json → PLACEHOLDER_AD_LOGO; pointer-events none
  *   skin (table-skin) · card face · table felt (table-center) · clothes (costume)
  * Hall banners stay off (no DOM). Real ad network can override via adsUrl later.
  */
@@ -201,13 +203,19 @@ export function applyBrandPlacements(placements = defaultBrandPlacements()) {
     if (emEl) emEl.textContent = p.advertiserName || p.short || 'BTC';
 
     let logoEl = node.querySelector('[data-brand-logo]');
-    const logoUrl = p.logoUrl || p.logo?.url || '';
+    const logoUrl = p.logoUrl || p.logo?.url || PLACEHOLDER_AD_LOGO;
     if (logoUrl) {
       if (!logoEl) {
         logoEl = document.createElement('img');
         logoEl.setAttribute('data-brand-logo', '');
         logoEl.className = 'brand-logo-img';
         logoEl.alt = '';
+        // play9fin3b: graceful placeholder fallback if remote/image fails
+        logoEl.addEventListener('error', () => {
+          if (logoEl.dataset.fallbackApplied) return;
+          logoEl.dataset.fallbackApplied = '1';
+          logoEl.src = PLACEHOLDER_AD_LOGO;
+        });
         node.prepend(logoEl);
       }
       logoEl.src = logoUrl;
@@ -263,34 +271,87 @@ export function mergeBrandPlacements(fallback, remote) {
   return [...map.values()];
 }
 
-export async function loadAndApplyBrandPlacements(adsUrl) {
+/**
+ * Normalize a placement row from JSON / env / ops into brand fields.
+ * play9fin3b: swappable image+link; empty logo → PLACEHOLDER_AD_LOGO
+ */
+export function normalizeAdPlacement(p = {}, brand = ACTIVE_BRAND) {
+  const logoUrl = p.logoUrl || resolveAdLogoUrl(p) || p.logo?.url || brand.logoUrl || PLACEHOLDER_AD_LOGO;
+  return {
+    slotId: p.slotId,
+    label: p.campaignTitle || p.label || surfaceLabel(p.surface),
+    advertiserName: p.advertiserName || brand.name,
+    copy: p.copy || brand.copy || '',
+    landingUrl: p.landingUrl || brand.landingUrl || '',
+    enabled: p.enabled !== false,
+    surface: p.surface,
+    surfaceKind: p.surfaceKind || surfaceKind(p.slotId, p.surface),
+    slotType: p.slotType,
+    theme: p.theme || p.assetTheme || brand.theme,
+    short: p.short || brand.short,
+    logoUrl: logoUrl || PLACEHOLDER_AD_LOGO,
+    categoryId: p.categoryId || '',
+  };
+}
+
+/**
+ * play9fin3b — load ads from URL and/or inline config; always graceful fallback.
+ * @param {string} [adsUrl]
+ * @param {{ inlineConfig?: object|null }} [opts]
+ */
+export async function loadAndApplyBrandPlacements(adsUrl, opts = {}) {
   const fallback = defaultBrandPlacements();
-  if (!adsUrl) {
-    applyBrandPlacements(fallback);
-    return fallback;
+  const inline = opts?.inlineConfig;
+  const preferUrl = !!opts?.preferUrl;
+
+  const applyPayload = (payload) => {
+    if (!payload || typeof payload !== 'object') return null;
+    const brand = payload.brand ? { ...ACTIVE_BRAND, ...payload.brand } : ACTIVE_BRAND;
+    const remote = Array.isArray(payload.placements) ? payload.placements : [];
+    if (!remote.length && !payload.brand) return null;
+    const mapped = remote.map((p) => normalizeAdPlacement(p, brand));
+    // If only brand override, recolor defaults
+    if (!mapped.length && payload.brand) {
+      return defaultBrandPlacements(brand).map((row) => ({
+        ...row,
+        logoUrl: brand.logoUrl || row.logoUrl || PLACEHOLDER_AD_LOGO,
+        landingUrl: brand.landingUrl || row.landingUrl,
+      }));
+    }
+    return mergeBrandPlacements(fallback, mapped);
+  };
+
+  // preferUrl (?adsUrl): fetch first; else try inline env JSON, then URL/static
+  const tryInline = () => {
+    if (!inline) return null;
+    try { return applyPayload(inline); } catch (_) { return null; }
+  };
+
+  if (!preferUrl) {
+    const fromInline = tryInline();
+    if (fromInline) {
+      applyBrandPlacements(fromInline);
+      return fromInline;
+    }
   }
+
+  if (!adsUrl) {
+    const fromInline = tryInline();
+    applyBrandPlacements(fromInline || fallback);
+    return fromInline || fallback;
+  }
+
   try {
     const res = await fetch(adsUrl, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`ads_${res.status}`);
     const payload = await res.json();
-    const remote = Array.isArray(payload.placements) ? payload.placements : [];
-    const merged = mergeBrandPlacements(fallback, remote.map((p) => ({
-      slotId: p.slotId,
-      label: p.campaignTitle || p.label,
-      advertiserName: p.advertiserName,
-      copy: p.copy,
-      landingUrl: p.landingUrl,
-      enabled: p.enabled,
-      surface: p.surface,
-      slotType: p.slotType,
-      theme: p.theme || p.assetTheme,
-      short: p.short,
-      logoUrl: resolveAdLogoUrl(p),
-      categoryId: p.categoryId || '',
-    })));
+    const merged = applyPayload(payload) || fallback;
     applyBrandPlacements(merged);
     return merged;
   } catch {
-    applyBrandPlacements(fallback);
-    return fallback;
+    const fromInline = tryInline();
+    // play9fin3b: graceful placeholder fallback
+    applyBrandPlacements(fromInline || fallback);
+    return fromInline || fallback;
   }
 }
