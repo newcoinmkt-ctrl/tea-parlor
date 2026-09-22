@@ -1,5 +1,5 @@
 /**
- * play9ui2b — Telegram Mini App invite / startapp deep link helpers
+ * play9ui2c — Telegram Mini App invite / startapp deep link helpers
  * Pure functions for generate + parse; dual-session room join.
  */
 

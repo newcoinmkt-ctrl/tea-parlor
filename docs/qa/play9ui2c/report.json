@@ -1,0 +1,15 @@
+{
+  "cache": "play9ui2c",
+  "slice": "ui2c",
+  "checks": {
+    "four_seat_diamond": true,
+    "level_and_meter_hud": true,
+    "bomb_stacks_sizha": true,
+    "restore_sort_toolbar": true,
+    "suit_filters": true,
+    "letterbox_no_rotate": true,
+    "no_new_rules_engine": true
+  },
+  "refs": ["03-guandan-table.png"],
+  "prior_slices": ["ui2a", "ui2b"]
+}

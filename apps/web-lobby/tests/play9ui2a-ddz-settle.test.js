@@ -1,5 +1,5 @@
 /**
- * play9ui2b — DDZ cruise settle thicken
+ * play9ui2c — DDZ cruise settle thicken
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,11 +15,11 @@ const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const css = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9ui2b', () => {
-  assert.equal(CACHE_STAMP, 'play9ui2b');
-  assert.equal(BUILD_VERSION, 'play9ui2b');
-  assert.match(html, /app\.js\?v=play9ui2b/);
-  assert.match(html, /jj-table\.css\?v=play9ui2b/);
+test('cache play9ui2c', () => {
+  assert.equal(CACHE_STAMP, 'play9ui2c');
+  assert.equal(BUILD_VERSION, 'play9ui2c');
+  assert.match(html, /app\.js\?v=play9ui2c/);
+  assert.match(html, /jj-table\.css\?v=play9ui2c/);
 });
 
 test('3D ± score + 总分 + circular 胜 stamp', () => {
@@ -53,7 +53,7 @@ test('day/night atmosphere CSS vars (no huge bg hard-dep)', () => {
   assert.match(html, /jj-atm-night/);
   assert.match(html, /data-jj-atm/);
   assert.match(app, /jj-atm-day/);
-  assert.match(html, /data-jj-settle="play9ui2b"/);
+  assert.match(html, /data-jj-settle="play9ui2c"/);
 });
 
 test('再来一局 + 回大厅 preserved', () => {
@@ -78,7 +78,7 @@ test('no Stars/TON/USDT/withdraw in settle chrome', () => {
   assert.doesNotMatch(chunk, /\bStars\b|\bTON\b|\bUSDT\b|提现|withdraw/i);
 });
 
-test('docs/qa play9ui2b present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2b/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2b/report.json')), true);
+test('docs/qa play9ui2c present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2c/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2c/report.json')), true);
 });

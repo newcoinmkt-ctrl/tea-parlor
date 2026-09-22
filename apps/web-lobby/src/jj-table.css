@@ -1386,7 +1386,7 @@ html.table-stage-jj #tableView #playButton.is-recommended[aria-disabled="true"] 
   transform: none !important;
 }
 
-/* ── play9ui2b: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
+/* ── play9ui2c: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
 html.table-stage-jj #tableView #bidControls.jj-bid-bar:not([hidden]),
 html.table-stage-jj #tableView #bidControls:not([hidden]) {
   gap: 12px !important;
@@ -1479,7 +1479,7 @@ html.table-stage-jj #tableView.table-stage-land-target {
   /* transform is inline translate+scale only */
 }
 
-/* ── play9ui2b: settle triangle polish (ref 02) ── */
+/* ── play9ui2c: settle triangle polish (ref 02) ── */
 html.table-stage-jj #tableView.is-settle .jj-settle-hud:not([hidden]) {
   z-index: 120 !important;
 }
@@ -1544,7 +1544,7 @@ html.table-stage-jj #tableView.is-settle #settleBackButton {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * play9ui2b — DDZ cruise settle thicken (refs 01 / 04)
+ * play9ui2c — DDZ cruise settle thicken (refs 01 / 04)
  * Floating 3D ±scores, circular 胜 stamp, 总分, top pill, day/night CSS vars.
  * No whole-page rotate; letterbox landscape only.
  * ═══════════════════════════════════════════════════════════════════════════ */
@@ -1751,7 +1751,7 @@ html.table-stage-jj #tableView.is-settle #settleControls:not([hidden]) {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * play9ui2b — DDZ play controls align (refs 05 / 06)
+ * play9ui2c — DDZ play controls align (refs 05 / 06)
  * 不出 | alarm-clock | 提示 | 出牌 inline; gold pass/hint, green play.
  * Top hole cards + 记牌器; remain badges; speech bubbles; fan hand.
  * ═══════════════════════════════════════════════════════════════════════════ */

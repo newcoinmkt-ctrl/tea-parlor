@@ -26700,7 +26700,7 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
 #ddzResultModal .tx-result-you .neg { color: #ff8a7a; font-size: 22px; }
 
 
-/* play9ui2b — social invite deep link preview */
+/* play9ui2c — social invite deep link preview */
 .social-invite-preview {
   margin-top: 10px;
   padding: 10px 12px;
@@ -26718,3 +26718,119 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
   font-size: 11px;
 }
 .social-invite-preview[hidden] { display: none !important; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * play9ui2c — Guandan 4-seat yard table shell (ref 03)
+ * Diamond seats bottom/left/top/right; 级牌+记牌器; vertical 「四炸」 stacks;
+ * 恢复+一键理牌; suit filters; letterbox landscape (no page rotate).
+ * UI-only — reuses existing match/play pipeline; no new rules engine.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+html.table-stage-gd.table-stage-land #multiGameView.gd-yard.table-stage-land-target,
+html.table-stage-gd #multiGameView.gd-active.gd-4p.gd-yard {
+  /* letterbox target already handled by table-orient; lock feel */
+}
+
+/* Diamond seats: left / top / right / bottom */
+html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="1"],
+.multi-game-view.gd-active.gd-4p.gd-yard[data-play9ui2c] [data-mg-seat="1"],
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="1"] {
+  left: 3% !important;
+  top: 34% !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="2"],
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="2"] {
+  left: 50% !important;
+  top: 4% !important;
+  transform: translateX(-50%) !important;
+  right: auto !important;
+}
+html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="3"],
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="3"] {
+  right: 3% !important;
+  top: 34% !important;
+  left: auto !important;
+}
+html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="0"],
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="0"] {
+  left: 2% !important;
+  bottom: 20% !important;
+  top: auto !important;
+}
+
+/* Avatar + blue chip/score bar + remain count (ref) */
+.multi-game-view.gd-active.gd-4p.gd-yard .gd-gold,
+.gd-yard .gd-gold {
+  min-width: 76px !important;
+  padding: 4px 10px !important;
+  border-radius: 4px !important;
+  background: linear-gradient(180deg, #4f9af0, #2a6fc8) !important;
+  box-shadow: 0 2px 6px rgba(20, 60, 120, 0.35) !important;
+  font-size: 15px !important;
+}
+.multi-game-view.gd-active.gd-4p.gd-yard .mg-count,
+.gd-yard .mg-count {
+  background: linear-gradient(180deg, #5aa8f5, #2f78d0) !important;
+  border-radius: 6px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  font-size: 15px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Vertical bomb stacks — thicker 「四炸」 tag */
+.gd-yard .gd-col.is-bomb .gd-bomb-tag,
+.gd-yard .gd-bomb-tag {
+  left: 50% !important;
+  bottom: -2px !important;
+  transform: translateX(-50%) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  background: linear-gradient(180deg, #f0b030, #c87810) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+.gd-yard .gd-col.is-bomb .gd-card {
+  box-shadow: 0 3px 8px rgba(180, 100, 0, 0.28) !important;
+}
+
+/* 级牌 HUD top-left; 记牌器 top-right */
+.gd-yard .gd-level-chip {
+  top: 10px !important;
+  left: 52px !important;
+  background: linear-gradient(180deg, #fff, #e8f0ff) !important;
+  color: #1a3a6a !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 3px 10px rgba(20, 60, 120, 0.35) !important;
+}
+.gd-yard .gd-level-chip small { color: #3a5a8a !important; font-weight: 800 !important; }
+.gd-yard .gd-level-chip b { color: #c02828 !important; font-size: 22px !important; }
+.gd-yard .gd-remain-meter {
+  top: 10px !important;
+  right: 14px !important;
+  background: rgba(24, 48, 32, 0.62) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Toolbar: suit filters + 恢复 + 一键理牌 */
+.gd-yard .gd-tool-restore { background: linear-gradient(180deg, #ffe9a0, #f0b830) !important; }
+.gd-yard .gd-tool-sort { background: linear-gradient(180deg, #7ad0ff, #2f86d8) !important; }
+
+/* Center play clear */
+.gd-yard .mg-center {
+  z-index: 7 !important;
+  min-width: 120px !important;
+  min-height: 64px !important;
+}
+
+/* Guard: never whole-page rotate for Guandan */
+html.table-stage-gd #multiGameView {
+  /* transform set by table-orient translate+scale only */
+}
