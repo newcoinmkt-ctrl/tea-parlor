@@ -1,9 +1,9 @@
 /**
- * play9ui2a — DDZ cruise settle thicken
+ * play9ui2b — DDZ play controls align
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9ui2a';
-export const BUILD_VERSION = 'play9ui2a';
+export const CACHE_STAMP = 'play9ui2b';
+export const BUILD_VERSION = 'play9ui2b';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

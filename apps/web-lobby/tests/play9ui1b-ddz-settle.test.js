@@ -1,5 +1,5 @@
 /**
- * play9ui2a — DDZ JJ settle triangle + 再来一局/回大厅
+ * play9ui2b — DDZ JJ settle triangle + 再来一局/回大厅
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -14,10 +14,10 @@ const html = readFileSync(join(root, 'index.html'), 'utf8');
 const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const css = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 
-test('cache play9ui2a', () => {
-  assert.equal(CACHE_STAMP, 'play9ui2a');
-  assert.equal(BUILD_VERSION, 'play9ui2a');
-  assert.match(html, /app\.js\?v=play9ui2a/);
+test('cache play9ui2b', () => {
+  assert.equal(CACHE_STAMP, 'play9ui2b');
+  assert.equal(BUILD_VERSION, 'play9ui2b');
+  assert.match(html, /app\.js\?v=play9ui2b/);
 });
 
 test('JJ settle HUD triangle seats + score/total/stamp', () => {
@@ -41,7 +41,7 @@ test('再来一局 + 回大厅 preserved on settle', () => {
   assert.match(css, /#settleControls/);
 });
 
-test('docs/qa play9ui2a present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2a/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2a/report.json')), true);
+test('docs/qa play9ui2b present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2b/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2b/report.json')), true);
 });

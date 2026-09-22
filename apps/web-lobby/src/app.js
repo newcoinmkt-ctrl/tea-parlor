@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ui2a';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ui2a';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ui2a';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ui2a';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9ui2a';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ui2b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ui2b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ui2b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ui2b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9ui2b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -5345,7 +5345,7 @@ function ensureDualRoomKey(game = 'ddz') {
 function friendInviteUrl(roomId) {
   const tg = window.Telegram?.WebApp;
   const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
-  // play9ui2a: startapp=t_<roomKey> deep link
+  // play9ui2b: startapp=t_<roomKey> deep link
   return buildTgInviteUrl(roomId, bot);
 }
 
@@ -5404,7 +5404,7 @@ function bindFriendDualEnter() {
     e.preventDefault();
     enterFriendDualTable();
   });
-  // play9ui2a: TG invite deep link — start_param / tgWebAppStartParam / startapp
+  // play9ui2b: TG invite deep link — start_param / tgWebAppStartParam / startapp
   tryConsumeTgInviteDeepLink();
 }
 
@@ -6855,7 +6855,7 @@ function renderJjSettleHud() {
   if (top) {
     const xp = document.getElementById('jjSettleXp');
     const mx = document.getElementById('jjSettleMult');
-    // play9ui2a: keep pill icons; structure-only xp when no career meter
+    // play9ui2b: keep pill icons; structure-only xp when no career meter
     if (xp) {
       xp.innerHTML = '<i class="jj-pill-ico jj-pill-progress" aria-hidden="true"></i>235/360';
     }
@@ -7355,7 +7355,7 @@ function _renderGameBody() {
       setHidden(nodes.bidTimer, !(showClock && myBid));
     }
   }
-  // play9ui2a: 「自动出牌中」 banner when trustee (UI only; no 赖子)
+  // play9ui2b: 「自动出牌中」 banner when trustee (UI only; no 赖子)
   if (nodes.ddzAutoplayHint) {
     const showAuto = Boolean(trustee) && game && (game.phase === 'play' || game.phase === 'double');
     setHidden(nodes.ddzAutoplayHint, !showAuto);
