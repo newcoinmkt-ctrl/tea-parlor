@@ -1,6 +1,6 @@
 /**
  * 掼蛋 UI — 绿毡桌 · 重叠手牌 · 桌面结算
- * play9gd1c — Colyseus online play + level HUD + ui2c play / ui2d settle skins
+ * play9gd1d — Colyseus online play + level HUD + ui2c play / ui2d settle skins
  */
 import { createGuanDanTable, cardText, Phase, isWild } from './engine.js';
 import { fitAllHands } from '../../net/hand-layout.js';
@@ -192,7 +192,7 @@ export function createGuanDanUI(options = {}) {
     root.removeAttribute('hidden');
     root.dataset.game = 'guandan';
     root.classList.remove('zjh-active', 'mj-2p', 'mj-4p');
-    root.classList.add('gd-active', 'gd-4p', 'gd-yard', 'play9ui2d');
+    root.classList.add('gd-active', 'gd-4p', 'gd-yard', 'play9ui2c', 'play9ui2d');
     document.documentElement.classList.add('table-stage-gd');
     document.body?.classList.add('table-stage-gd');
     document.querySelector('.lobby-shell')?.classList.add('table-active', 'multi-active');
@@ -226,7 +226,7 @@ export function createGuanDanUI(options = {}) {
     root.setAttribute('hidden', '');
     document.documentElement.classList.remove('table-stage-gd');
     document.body?.classList.remove('table-stage-gd');
-    root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'play9ui2d', 'mj-4p', 'mj-2p', 'zjh-active');
+    root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'play9ui2c', 'play9ui2d', 'mj-4p', 'mj-2p', 'zjh-active');
     delete root.dataset.game;
     root.style.zIndex = '';
     root.style.pointerEvents = 'none';

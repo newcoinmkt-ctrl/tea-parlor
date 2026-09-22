@@ -16,9 +16,9 @@ const rk = readFileSync(join(root, 'src/games/mahjong/riichi-ui.js'), 'utf8');
 const sess = readFileSync(join(root, 'src/net/table-session.js'), 'utf8');
 const coly = readFileSync(join(root, 'src/net/colyseus-client.js'), 'utf8');
 
-test('cache play9gd1c', () => {
-  assert.match(html, /app\.js\?v=play9gd1c/);
-  assert.match(app, /\?v=play9gd1c/);
+test('cache play9gd1d', () => {
+  assert.match(html, /app\.js\?v=play9gd1d/);
+  assert.match(app, /\?v=play9gd1d/);
 });
 
 test('multi HUD has 托管 button', () => {
