@@ -1,5 +1,6 @@
 /**
  * 掼蛋 UI — 绿毡桌 · 重叠手牌 · 桌面结算
+ * play9gd1a — Colyseus online + ui2c play / ui2d settle skins
  */
 import { createGuanDanTable, cardText, Phase, isWild } from './engine.js';
 import { fitAllHands } from '../../net/hand-layout.js';
@@ -31,6 +32,8 @@ export function createGuanDanUI(options = {}) {
   let suitFilter = null;
   let arrangeMode = 'auto';
   let rawOrder = [];
+  let online = false;
+  let serverSnap = null;
 
   const root = document.getElementById('multiGameView');
   if (!root) throw new Error('multiGameView missing');
@@ -83,6 +86,11 @@ export function createGuanDanUI(options = {}) {
     if (next.onSettle) opts.onSettle = next.onSettle;
     if (next.onExit) opts.onExit = next.onExit;
     if (next.getStake) opts.getStake = next.getStake;
+    if (next.onPlay) opts.onPlay = next.onPlay;
+    if (next.onPass) opts.onPass = next.onPass;
+    if (next.onRematch) opts.onRematch = next.onRematch;
+    if (next.onTrustee) opts.onTrustee = next.onTrustee;
+    if (typeof next.online === 'boolean') online = next.online;
   }
 
   function ensureChrome() {
@@ -245,7 +253,77 @@ export function createGuanDanUI(options = {}) {
     }
   }
 
+  function getSnap() {
+    if (online && serverSnap) return serverSnap;
+    return table ? table.snapshot(0) : null;
+  }
+
+  /** Colyseus push — map publicState into UI snapshot shape */
+  function applyServerSnap(snap) {
+    if (!snap) return;
+    online = true;
+    // Normalize: ensure hands[0] is my visible hand
+    const hands = snap.hands
+      || [snap.myHand || [], [], [], []].map((h, i) => (i === 0 ? h : (h || []).map((c) => (c.hidden != null ? c : { id: c.id || i, hidden: true }))));
+    serverSnap = {
+      phase: snap.phase === 'match' ? 'play' : snap.phase, // keep table chrome during match seats fill
+      matchPhase: snap.phase === 'match',
+      currentRank: snap.currentRank ?? 2,
+      currentSeat: snap.currentSeat ?? 0,
+      leadSeat: snap.leadSeat ?? 0,
+      lastPlay: snap.lastPlay || null,
+      seatPlays: snap.seatPlays || [null, null, null, null],
+      remainMeter: snap.remainMeter || {},
+      finished: snap.finished || [],
+      hands,
+      handCounts: snap.handCounts || hands.map((h) => (Array.isArray(h) ? h.filter((c) => !c.hidden).length || h.length : 0)),
+      names: snap.names || ['茶馆', '茶友A', '茶友B', '茶友C'],
+      message: snap.phase === 'match' ? '' : (snap.message || snap.status || ''),
+      stake: snap.stake,
+      tribute: null,
+      returnable: [],
+      settlement: snap.settlement || null,
+      lastRecord: snap.lastRecord || null,
+      active: snap.active || [],
+      humanTurn: !!(snap.humanTurn || snap.isHumanTurn),
+      humanReturn: false,
+      myTrustee: !!snap.myTrustee,
+      myFullTrustee: !!snap.myFullTrustee,
+    };
+    if (snap.phase === 'match') {
+      serverSnap.phase = 'play';
+      serverSnap.humanTurn = false;
+      serverSnap.handCounts = (snap.seats || []).map((s) => (s && !s.empty ? 27 : 0));
+      if (!serverSnap.handCounts.some(Boolean)) serverSnap.handCounts = [0, 0, 0, 0];
+    }
+    if (!rawOrder.length && serverSnap.hands?.[0]) {
+      rawOrder = (serverSnap.hands[0] || []).filter((c) => !c.hidden).map((c) => c.id);
+    }
+    if (serverSnap.phase === Phase.SETTLE) showSettle(serverSnap);
+    else render();
+  }
+
+  function startOnline() {
+    const st = opts.getStake() || {};
+    roomLabel = st.label || '掼蛋';
+    online = true;
+    settleReported = false;
+    selected = new Set();
+    suitFilter = null;
+    arrangeMode = 'raw';
+    rawOrder = [];
+    table = null;
+    career = null;
+    show();
+    if (el.status) el.status.textContent = '';
+    if (serverSnap) render();
+  }
+
   function start() {
+    if (online || opts.online) {
+      startOnline();
+      return;
+    }
     const st = opts.getStake() || {};
     roomLabel = st.label || '掼蛋';
     settleReported = false;
@@ -270,6 +348,16 @@ export function createGuanDanUI(options = {}) {
   }
 
   function startNext() {
+    if (online) {
+      settleReported = false;
+      selected = new Set();
+      if (typeof opts.onRematch === 'function') {
+        Promise.resolve(opts.onRematch()).catch((e) => {
+          if (el.status) el.status.textContent = e?.message || '再来一局失败';
+        });
+      }
+      return;
+    }
     if (!table) {
       start();
       return;
@@ -301,6 +389,7 @@ export function createGuanDanUI(options = {}) {
 
   function scheduleAi() {
     stopAi();
+    if (online) return;
     if (!table) return;
     const snap = table.snapshot(0);
     if (snap.phase === Phase.SETTLE) {
@@ -367,7 +456,7 @@ export function createGuanDanUI(options = {}) {
 
   function cardFace(c, currentRank) {
     const t = cardText(c);
-    const wild = table && isWild(c, currentRank);
+    const wild = isWild(c, currentRank);
     const red = c.suit === 0 || c.suit === 2 || c.rank === 17;
     let rank = t;
     let suit = '';
@@ -460,8 +549,8 @@ export function createGuanDanUI(options = {}) {
   }
 
   function render() {
-    if (!table) return;
-    const snap = table.snapshot(0);
+    const snap = getSnap();
+    if (!snap) return;
     const settling = snap.phase === Phase.SETTLE;
     root.classList.toggle('gd-settling', settling);
     if (el.title) el.title.textContent = roomLabel;
@@ -548,6 +637,7 @@ export function createGuanDanUI(options = {}) {
           if (!canSel) return;
           const id = btn.getAttribute('data-card-id');
           if (snap.humanReturn) {
+            if (online || !table) return;
             const card = hand.find((c) => c.id === id);
             const r = table.humanReturnTribute(card);
             if (r.ok) {
@@ -572,6 +662,13 @@ export function createGuanDanUI(options = {}) {
           <button type="button" class="gd-act gd-act-play" data-gd="play">出</button>
         `;
         el.actions.querySelector('[data-gd="pass"]')?.addEventListener('click', () => {
+          if (online) {
+            selected = new Set();
+            Promise.resolve(opts.onPass?.()).catch((e) => {
+              if (el.status) el.status.textContent = e?.message || '不能过';
+            });
+            return;
+          }
           const r = table.act(0, null);
           if (!r.ok && el.status) el.status.textContent = r.reason === 'must_lead' ? '首出必须出' : '不能过';
           selected = new Set();
@@ -581,6 +678,21 @@ export function createGuanDanUI(options = {}) {
         el.actions.querySelector('[data-gd="play"]')?.addEventListener('click', () => {
           const hand = (snap.hands[0] || []).filter((c) => !c.hidden);
           const cards = hand.filter((c) => selected.has(c.id));
+          if (online) {
+            const ids = cards.map((c) => c.id);
+            selected = new Set();
+            Promise.resolve(opts.onPlay?.(ids)).catch((e) => {
+              const map = {
+                invalid_hand: '牌型不合法',
+                cannot_beat: '压不住上家',
+                not_in_hand: '选牌有误',
+                must_lead: '请先出',
+              };
+              const msg = e?.message || '';
+              if (el.status) el.status.textContent = map[msg] || msg || '不能出';
+            });
+            return;
+          }
           const r = table.act(0, cards);
           if (!r.ok) {
             const map = {
@@ -634,6 +746,6 @@ export function createGuanDanUI(options = {}) {
     if (pill) pill.hidden = true;
   }
 
-  _instance = { start, hide, show, render, setOptions, startNext };
+  _instance = { start, startOnline, hide, show, render, setOptions, startNext, applyServerSnap, getSnap };
   return _instance;
 }

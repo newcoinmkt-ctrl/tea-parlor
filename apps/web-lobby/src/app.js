@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ui2d';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ui2d';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ui2d';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ui2d';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9ui2d';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9gd1a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9gd1a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9gd1a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9gd1a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9gd1a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -2728,9 +2728,19 @@ async function startGuanDan(tableKey = 'novice', options = {}) {
     return;
   }
 
-  multiUI = createGuanDanUI({
+  // play9gd1: gold/ingot novice+ → Colyseus authoritative by default; crypto stays local (no chain this wave)
+  // Prefer Colyseus whenever SDK is loaded (live lobby always loads it), even if playMode was left on local.
+  const useColyseus = currency !== 'crypto'
+    && options.local !== true
+    && playMode !== 'pinus'
+    && colyseusClient.isColyseusAvailable();
+
+  const uiOpts = {
     getStake: () => ({ stake: t.stake, label: t.label, currency }),
+    online: useColyseus,
     onExit: () => {
+      try { colyseusClient.leaveColyseus?.(); } catch (_) {}
+      onlineBackend = null;
       leaveMultiTable();
       setLobbyView('rooms', currency === 'crypto' ? 'real' : 'guandan');
       if (nodes.claimStatus) nodes.claimStatus.textContent = '已离开掼蛋桌';
@@ -2756,15 +2766,59 @@ async function startGuanDan(tableKey = 'novice', options = {}) {
       saveState();
       renderAccount();
     },
-  });
+  };
+
+  if (useColyseus) {
+    uiOpts.onPlay = async (cardIds) => {
+      const res = await colyseusClient.gdPlay(cardIds);
+      if (res?.room) multiUI?.applyServerSnap?.(res.room);
+    };
+    uiOpts.onPass = async () => {
+      const res = await colyseusClient.gdPass();
+      if (res?.room) multiUI?.applyServerSnap?.(res.room);
+    };
+    uiOpts.onRematch = async () => {
+      const res = await colyseusClient.gdRematch();
+      if (res?.room) multiUI?.applyServerSnap?.(res.room);
+    };
+    uiOpts.onTrustee = async (on) => {
+      const res = await colyseusClient.gdSetTrustee(on);
+      if (res?.room) multiUI?.applyServerSnap?.(res.room);
+    };
+  }
+
+  multiUI = createGuanDanUI(uiOpts);
   try {
-    multiUI.start();
-    buryDdzLayer();
+    if (useColyseus) {
+      onlineBackend = 'colyseus';
+      multiUI.startOnline();
+      buryDdzLayer();
+      const uid = window.__teaUid || pinusUid || `h5_${Date.now()}`;
+      const name = appState?.profile?.name || nodes.playerName?.textContent || '茶馆';
+      const session = await colyseusClient.startColyseusGdSession({
+        uid,
+        name,
+        roomId: tableKey || 'novice',
+        currency,
+        token: window.__teaSessionToken || undefined,
+        fresh: true,
+      });
+      if (session?.room) multiUI.applyServerSnap(session.room);
+      colyseusClient.onRoomUpdate((st) => {
+        if (activeGame !== 'guandan' || onlineBackend !== 'colyseus') return;
+        multiUI?.applyServerSnap?.(st);
+      });
+    } else {
+      multiUI.start();
+      buryDdzLayer();
+    }
   } catch (e) {
     console.error('[TeaParlor] 掼蛋开局失败', e);
     if (nodes.claimStatus) nodes.claimStatus.textContent = `掼蛋开局失败：${e?.message || e}`;
+    try { colyseusClient.leaveColyseus?.(); } catch (_) {}
     forceCloseMultiView();
     activeGame = null;
+    onlineBackend = null;
   }
 }
 
@@ -5345,7 +5399,7 @@ function ensureDualRoomKey(game = 'ddz') {
 function friendInviteUrl(roomId) {
   const tg = window.Telegram?.WebApp;
   const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
-  // play9ui2d: startapp=t_<roomKey> deep link
+  // play9gd1a: startapp=t_<roomKey> deep link
   return buildTgInviteUrl(roomId, bot);
 }
 
@@ -5404,7 +5458,7 @@ function bindFriendDualEnter() {
     e.preventDefault();
     enterFriendDualTable();
   });
-  // play9ui2d: TG invite deep link — start_param / tgWebAppStartParam / startapp
+  // play9gd1a: TG invite deep link — start_param / tgWebAppStartParam / startapp
   tryConsumeTgInviteDeepLink();
 }
 
@@ -6855,7 +6909,7 @@ function renderJjSettleHud() {
   if (top) {
     const xp = document.getElementById('jjSettleXp');
     const mx = document.getElementById('jjSettleMult');
-    // play9ui2d: keep pill icons; structure-only xp when no career meter
+    // play9gd1a: keep pill icons; structure-only xp when no career meter
     if (xp) {
       xp.innerHTML = '<i class="jj-pill-ico jj-pill-progress" aria-hidden="true"></i>235/360';
     }
@@ -7355,7 +7409,7 @@ function _renderGameBody() {
       setHidden(nodes.bidTimer, !(showClock && myBid));
     }
   }
-  // play9ui2d: 「自动出牌中」 banner when trustee (UI only; no 赖子)
+  // play9gd1a: 「自动出牌中」 banner when trustee (UI only; no 赖子)
   if (nodes.ddzAutoplayHint) {
     const showAuto = Boolean(trustee) && game && (game.phase === 'play' || game.phase === 'double');
     setHidden(nodes.ddzAutoplayHint, !showAuto);

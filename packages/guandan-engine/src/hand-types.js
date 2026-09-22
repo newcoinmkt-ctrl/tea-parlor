@@ -250,6 +250,11 @@ export function identifyFixedRanks(ranks, cards, opts = {}) {
     return [R(HandType.JOKER_BOMB, 17, { pattern: [17, 17, 16, 16], bombSize: 4 })];
   }
 
+  // 纯王单张（小王/大王可作单出；双王不成对，仅天王炸）
+  if (jokers.length === n && n === 1) {
+    return [R(HandType.SINGLE, ranks[0], { pattern: ranks.slice() })];
+  }
+
   // 仅普通牌
   if (jokers.length && jokers.length !== n) {
     // 王不能进顺子/连对等，只能单独或天王炸
