@@ -54,6 +54,8 @@ export function createNiuniuUI(options = {}) {
   let busy = false;
   let aiTimer = null;
   let phaseTimer = null;
+  let phaseEndsAt = 0;
+  let phaseCountdownIv = null;
   let matchTimer = null;
   let floatTimer = null;
 
@@ -159,6 +161,8 @@ export function createNiuniuUI(options = {}) {
   function stopAll() {
     if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
     if (phaseTimer) { clearTimeout(phaseTimer); phaseTimer = null; }
+    if (phaseCountdownIv) { clearInterval(phaseCountdownIv); phaseCountdownIv = null; }
+    phaseEndsAt = 0;
     if (matchTimer) { clearTimeout(matchTimer); matchTimer = null; }
     if (floatTimer) { clearTimeout(floatTimer); floatTimer = null; }
   }
@@ -283,6 +287,8 @@ export function createNiuniuUI(options = {}) {
 
   function armPhaseTimer() {
     if (phaseTimer) { clearTimeout(phaseTimer); phaseTimer = null; }
+    if (phaseCountdownIv) { clearInterval(phaseCountdownIv); phaseCountdownIv = null; }
+    phaseEndsAt = 0;
     if (!table) return;
     const s = table.snapshot(0);
     const sec = s.timers || {};
@@ -301,7 +307,15 @@ export function createNiuniuUI(options = {}) {
       ms = (sec.cuopai || 10) * 1000;
       fn = () => { table.timeoutLiang(); afterAdvance(); };
     }
-    if (fn && ms) phaseTimer = setTimeout(fn, ms);
+    if (fn && ms) {
+      phaseEndsAt = Date.now() + ms;
+      if (phaseCountdownIv) clearInterval(phaseCountdownIv);
+      phaseCountdownIv = setInterval(() => { try { render(); } catch (_) {} }, 400);
+      phaseTimer = setTimeout(() => {
+        if (phaseCountdownIv) { clearInterval(phaseCountdownIv); phaseCountdownIv = null; }
+        fn();
+      }, ms);
+    }
   }
 
   function afterAdvance() {
@@ -483,12 +497,22 @@ export function createNiuniuUI(options = {}) {
         const img = SEAT_IMGS[sd.seat % SEAT_IMGS.length];
         const qiang = sd.hasQiang ? (sd.score1 === 0 ? '不抢' : `抢×${sd.score1}`) : '';
         const xia = sd.hasXia ? `注×${sd.score2}` : '';
+        const needsAct = (
+          (snap.phase === PHASE.qiangzhuang && !sd.hasQiang)
+          || (snap.phase === PHASE.xiazhu && sd.seat !== snap.button && !sd.hasXia)
+          || (snap.phase === PHASE.cuopai && !sd.hasLiang)
+        );
+        const leftSec = phaseEndsAt ? Math.max(0, Math.ceil((phaseEndsAt - Date.now()) / 1000)) : 0;
         return (
-          `<div class="nn-seat${sd.isBanker ? ' is-banker' : ''}${sd.hasLiang ? ' is-open' : ''}" data-nn-seat="${sd.seat}" style="${style}">`
+          `<div class="nn-seat${sd.isBanker ? ' is-banker' : ''}${sd.hasLiang ? ' is-open' : ''}${needsAct ? ' is-turn' : ''}" data-nn-seat="${sd.seat}" style="${style}">`
+          + `<div class="nn-seat-frame">`
           + `<img class="nn-ava" src="${img}" alt="${sd.name}" />`
           + `<div class="nn-seat-meta"><strong>${sd.name}</strong>`
-          + `<span>${qiang}${xia ? ' · ' + xia : ''} · ${sd.chips}</span></div>`
+          + `<span class="nn-chips">${sd.chips}</span></div>`
+          + `</div>`
+          + (needsAct && leftSec > 0 ? `<span class="nn-turn-clock" aria-label="倒计时">${leftSec}</span>` : '')
           + `<div class="nn-seat-cards">${renderCards(sd.holds, face)}</div>`
+          + (qiang || xia ? `<div class="nn-seat-act">${qiang}${xia ? (qiang ? ' · ' : '') + xia : ''}</div>` : '')
           + (sd.niu != null ? stampHtml(sd.niu, true) : '')
           + (sd.isBanker ? '<i class="nn-zhuang">庄</i>' : '')
           + `</div>`
@@ -508,12 +532,20 @@ export function createNiuniuUI(options = {}) {
       }
     }
     if (el.self) {
+      const meNeeds = (
+        (snap.phase === PHASE.qiangzhuang && !me.hasQiang)
+        || (snap.phase === PHASE.xiazhu && snap.button !== 0 && !me.hasXia)
+        || (snap.phase === PHASE.cuopai && !me.hasLiang)
+      );
+      const leftSec = phaseEndsAt ? Math.max(0, Math.ceil((phaseEndsAt - Date.now()) / 1000)) : 0;
       el.self.innerHTML =
-        `<div class="nn-self-meta${me.isBanker ? ' is-banker' : ''}">`
+        `<div class="nn-self-meta${me.isBanker ? ' is-banker' : ''}${meNeeds ? ' is-turn' : ''}">`
         + `<strong>我</strong>`
-        + `<span>筹 ${me.chips}${me.isBanker ? ' · 庄' : ''}`
+        + `<span class="nn-chips">${me.chips}</span>`
+        + `<span>${me.isBanker ? '庄' : ''}`
         + `${me.hasQiang ? ` · 抢×${me.score1}` : ''}`
         + `${me.hasXia ? ` · 注×${me.score2}` : ''}</span>`
+        + (meNeeds && leftSec > 0 ? `<span class="nn-turn-clock">${leftSec}</span>` : '')
         + `</div>`;
     }
 
@@ -589,6 +621,8 @@ export function createNiuniuUI(options = {}) {
 
   function showSettle(snap) {
     if (phaseTimer) { clearTimeout(phaseTimer); phaseTimer = null; }
+    if (phaseCountdownIv) { clearInterval(phaseCountdownIv); phaseCountdownIv = null; }
+    phaseEndsAt = 0;
     spawnFloats(snap);
     if (el.settleRow) {
       el.settleRow.hidden = false;
