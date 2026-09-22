@@ -1,5 +1,5 @@
 /**
- * play9fin7a — Telegram Mini App invite / startapp deep link helpers
+ * play9fin7b — Telegram Mini App invite / startapp deep link helpers
  * Pure functions for generate + parse; dual-session room join.
  * Unified invite payload: roomKey + gameId for DDZ / Guandan / MJ.
  */
@@ -127,4 +127,25 @@ export function validateInviteRoomKey(roomKey) {
   const dual = normalizeDualRoomKey(k, inferGameIdFromRoomKey(k) || 'ddz');
   if (!dual) return { ok: false, reason: 'invalid', message: '邀请码无效，请检查链接或房间号' };
   return { ok: true, roomKey: dual, gameId: inferGameIdFromRoomKey(dual) };
+}
+
+/** Map Colyseus / network join failures to readable Chinese (never blank). */
+export function formatInviteJoinError(err) {
+  const msg = String(err?.message || err || '').toLowerCase();
+  if (!msg || msg === 'undefined' || msg === 'null') {
+    return '邀请加入失败，请稍后重试或重新获取链接';
+  }
+  if (/full|max clients|seat|no.?seat|capacity|房间已满/.test(msg)) {
+    return '该桌已满，请换一桌或请房主再开一局';
+  }
+  if (/not found|expired|gone|closed|disposed|does not exist|404|410/.test(msg)) {
+    return '邀请已过期或房间已关闭，请重新获取链接';
+  }
+  if (/invalid|malformed|bad.?key|forbidden|401|403/.test(msg)) {
+    return '邀请码无效，请检查链接或房间号';
+  }
+  if (/timeout|timed out|network|fetch|websocket|econn|offline/.test(msg)) {
+    return '网络超时，请检查连接后重试';
+  }
+  return `邀请加入失败：${String(err?.message || err).slice(0, 80)}`;
 }

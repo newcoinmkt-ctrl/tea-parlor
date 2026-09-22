@@ -1,0 +1,6 @@
+{
+  "wave": "play9fin7b",
+  "cache": "play9fin7b",
+  "leaveOtherTable": "leave-then-join",
+  "errors": ["full", "expired", "invalid", "timeout"]
+}

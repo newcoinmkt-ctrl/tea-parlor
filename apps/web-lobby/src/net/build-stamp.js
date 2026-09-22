@@ -1,9 +1,9 @@
 /**
- * play9fin7a — unify invite export (DDZ + Guandan)
+ * play9fin7b — deep-link seat join (leave→join)
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9fin7a';
-export const BUILD_VERSION = 'play9fin7a';
+export const CACHE_STAMP = 'play9fin7b';
+export const BUILD_VERSION = 'play9fin7b';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

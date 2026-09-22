@@ -1,5 +1,5 @@
 /**
- * play9fin5a feature preserved under play9fin7a cache
+ * play9fin5a feature preserved under play9fin7b cache
  * recent same-table server-backed (not localStorage-only)
  */
 import test from 'node:test';
@@ -16,9 +16,9 @@ const wallet = readFileSync(join(root, 'src/net/wallet-client.js'), 'utf8');
 const gateway = readFileSync(join(repo, 'apps/api-gateway/src/server.js'), 'utf8');
 const store = readFileSync(join(repo, 'apps/api-gateway/src/recent-tables.js'), 'utf8');
 
-test('cache play9fin7a', () => {
-  assert.match(html, /app\.js\?v=play9fin7a/);
-  assert.match(app, /\?v=play9fin7a/);
+test('cache play9fin7b', () => {
+  assert.match(html, /app\.js\?v=play9fin7b/);
+  assert.match(app, /\?v=play9fin7b/);
   assert.doesNotMatch(html, /app\.js\?v=play9fin5a/);
 });
 
