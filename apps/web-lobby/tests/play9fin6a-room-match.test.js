@@ -1,5 +1,5 @@
 /**
- * play9gd1b — room select / match thicken
+ * play9gd1c — room select / match thicken
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -21,10 +21,10 @@ const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const matchCopy = readFileSync(join(root, 'src/net/ddz-match-copy.js'), 'utf8');
 
-test('cache play9gd1b', () => {
-  assert.match(html, /app\.js\?v=play9gd1b/);
-  assert.equal(CACHE_STAMP, 'play9gd1b');
-  assert.equal(BUILD_VERSION, 'play9gd1b');
+test('cache play9gd1c', () => {
+  assert.match(html, /app\.js\?v=play9gd1c/);
+  assert.equal(CACHE_STAMP, 'play9gd1c');
+  assert.equal(BUILD_VERSION, 'play9gd1c');
   assert.doesNotMatch(html, /app\.js\?v=play9fin5c/);
 });
 
@@ -72,7 +72,7 @@ test('MATCH_MS still ≤3s AI fill', () => {
   assert.match(ddz, /MATCH_MS_DEFAULT\s*=\s*3_000/);
 });
 
-test('docs/qa play9gd1b present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1b/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1b/report.json')), true);
+test('docs/qa play9gd1c present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/report.json')), true);
 });
