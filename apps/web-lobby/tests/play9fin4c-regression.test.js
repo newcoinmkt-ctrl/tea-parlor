@@ -1,5 +1,5 @@
 /**
- * play9ui2a — light social + full regression
+ * play9ui2b — light social + full regression
  * Room code / invite OR recent same-table openable; NO full IM
  * DDZ/MJ/NN + server trustee + ads config + five tabs; no whole-page rotate
  */
@@ -18,9 +18,9 @@ const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const lia = readFileSync(join(root, 'src/lobby-ia.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9ui2a', () => {
-  assert.match(html, /app\.js\?v=play9ui2a/);
-  assert.match(app, /\?v=play9ui2a/);
+test('cache play9ui2b', () => {
+  assert.match(html, /app\.js\?v=play9ui2b/);
+  assert.match(app, /\?v=play9ui2b/);
   assert.doesNotMatch(html, /app\.js\?v=play9fin4b/);
 });
 
@@ -91,7 +91,7 @@ test('dual-session smoke still green when available', () => {
   assert.equal(r.status, 0, r.stdout + r.stderr);
 });
 
-test('docs/qa play9ui2a present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2a/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2a/report.json')), true);
+test('docs/qa play9ui2b present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2b/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui2b/report.json')), true);
 });

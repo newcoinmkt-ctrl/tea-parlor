@@ -1,0 +1,14 @@
+{
+  "cache": "play9ui2b",
+  "slice": "ui2b",
+  "checks": {
+    "play_bar_inline_clock": true,
+    "hole_cards_deck_meter": true,
+    "remain_badges": true,
+    "speech_bubbles": true,
+    "hand_fan_select": true,
+    "no_rotate": true
+  },
+  "refs": ["05-ddz-play-controls.png", "06-ddz-play-mid.png"],
+  "prior_slices": ["ui2a"]
+}
