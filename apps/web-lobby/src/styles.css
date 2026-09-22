@@ -26700,7 +26700,7 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
 #ddzResultModal .tx-result-you .neg { color: #ff8a7a; font-size: 22px; }
 
 
-/* play9ui2c — social invite deep link preview */
+/* play9ui2d — social invite deep link preview */
 .social-invite-preview {
   margin-top: 10px;
   padding: 10px 12px;
@@ -26721,7 +26721,7 @@ body[data-theme] .lobby-shell:not(.table-active) .topbar,
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * play9ui2c — Guandan 4-seat yard table shell (ref 03)
+ * play9ui2d — Guandan 4-seat yard table shell (ref 03)
  * Diamond seats bottom/left/top/right; 级牌+记牌器; vertical 「四炸」 stacks;
  * 恢复+一键理牌; suit filters; letterbox landscape (no page rotate).
  * UI-only — reuses existing match/play pipeline; no new rules engine.
@@ -26734,28 +26734,28 @@ html.table-stage-gd #multiGameView.gd-active.gd-4p.gd-yard {
 
 /* Diamond seats: left / top / right / bottom */
 html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="1"],
-.multi-game-view.gd-active.gd-4p.gd-yard[data-play9ui2c] [data-mg-seat="1"],
-.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="1"] {
+.multi-game-view.gd-active.gd-4p.gd-yard[data-play9ui2d] [data-mg-seat="1"],
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2d [data-mg-seat="1"] {
   left: 3% !important;
   top: 34% !important;
   right: auto !important;
   bottom: auto !important;
 }
 html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="2"],
-.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="2"] {
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2d [data-mg-seat="2"] {
   left: 50% !important;
   top: 4% !important;
   transform: translateX(-50%) !important;
   right: auto !important;
 }
 html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="3"],
-.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="3"] {
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2d [data-mg-seat="3"] {
   right: 3% !important;
   top: 34% !important;
   left: auto !important;
 }
 html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="0"],
-.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2c [data-mg-seat="0"] {
+.multi-game-view.gd-active.gd-4p.gd-yard.play9ui2d [data-mg-seat="0"] {
   left: 2% !important;
   bottom: 20% !important;
   top: auto !important;
@@ -26833,4 +26833,126 @@ html.table-stage-gd #multiGameView.gd-yard [data-mg-seat="0"],
 /* Guard: never whole-page rotate for Guandan */
 html.table-stage-gd #multiGameView {
   /* transform set by table-orient translate+scale only */
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * play9ui2d — Guandan 4-seat settle + full wave regression (ref 02)
+ * 头游/二游/三游/末游 tags, floating 3D ± scores, 再来一局 (+ 回大厅),
+ * 连胜/活跃 placeholders; guards for ui2a/b + ui1c/d/e.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.gd-yard.gd-settling .gd-score-3d,
+.gd-yard .gd-delta.gd-score-3d {
+  display: block !important;
+  font-size: 36px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em !important;
+  transform: perspective(220px) rotateX(8deg) !important;
+  margin-top: 4px !important;
+}
+.gd-yard .gd-delta.gd-score-3d.pos {
+  color: #ffd24a !important;
+  background: linear-gradient(180deg, #fff6c2, #ffd24a 45%, #c88810) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter:
+    drop-shadow(0 1px 0 #c88810)
+    drop-shadow(0 2px 0 #7a5508)
+    drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45)) !important;
+}
+.gd-yard .gd-delta.gd-score-3d.neg {
+  color: #f2f2f2 !important;
+  background: linear-gradient(180deg, #ffffff, #d8dce6 50%, #8a93a5) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter:
+    drop-shadow(0 1px 0 #6a7388)
+    drop-shadow(0 2px 0 #4a5264)
+    drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* Place tags 头游/二游/三游/末游 */
+.gd-yard.gd-settling .gd-place,
+.gd-yard .gd-place {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 3px 10px 3px 22px !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  position: relative !important;
+  margin-top: 4px !important;
+}
+.gd-yard .gd-place::before {
+  content: "🐥" !important;
+  position: absolute !important;
+  left: 2px !important;
+  top: -4px !important;
+  font-size: 15px !important;
+}
+.gd-yard .gd-place.p0 { background: linear-gradient(180deg, #ff7a4a, #e04020) !important; }
+.gd-yard .gd-place.p1 { background: linear-gradient(180deg, #ffb03a, #e08010) !important; }
+.gd-yard .gd-place.p2 { background: linear-gradient(180deg, #5aa8f0, #2f78d0) !important; }
+.gd-yard .gd-place.p3 { background: linear-gradient(180deg, #8a90a8, #5a6078) !important; }
+
+/* 再来一局 prominent */
+.gd-yard.gd-settling .gd-again-pill:not([hidden]),
+.gd-yard .gd-again-pill:not([hidden]) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 200px !important;
+  min-height: 48px !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+.gd-yard.gd-settling #mgSettleRow:not([hidden]),
+.gd-yard.gd-settling .mg-settle:not([hidden]) {
+  display: flex !important;
+  gap: 12px !important;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+
+/* 连胜 / 活跃 placeholders (weak OK) */
+.gd-yard .gd-streak-chip,
+.gd-yard .gd-active-chip {
+  position: absolute !important;
+  z-index: 28 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  min-width: 44px !important;
+  padding: 4px 8px !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28) !important;
+}
+.gd-yard .gd-streak-chip {
+  top: 10px !important;
+  left: 110px !important;
+  background: linear-gradient(180deg, #4a8ae8, #2a5eb0) !important;
+}
+.gd-yard .gd-active-chip {
+  top: 10px !important;
+  left: 164px !important;
+  background: linear-gradient(180deg, #f0c040, #d49010) !important;
+  color: #3a2800 !important;
+}
+.gd-yard .gd-streak-chip small,
+.gd-yard .gd-active-chip small { font-size: 10px !important; opacity: 0.9 !important; }
+.gd-yard .gd-streak-chip b,
+.gd-yard .gd-active-chip b { font-size: 14px !important; line-height: 1 !important; }
+.gd-yard.gd-settling .gd-streak-chip,
+.gd-yard.gd-settling .gd-active-chip {
+  display: flex !important;
 }

@@ -795,7 +795,7 @@ html.table-stage-mj #mjCountdown.mj-countdown {
   opacity: 1 !important;
 }
 
-/* ── play9ui2c: JJ 推倒胡 table polish (ref 04) ── */
+/* ── play9ui2d: JJ 推倒胡 table polish (ref 04) ── */
 html.table-stage-mj #multiGameView .mj-felt {
   background:
     linear-gradient(145deg, #4a2a78 0%, #2a1850 40%, #1a0e38 100%) !important;
@@ -861,7 +861,7 @@ html.table-stage-mj #multiGameView.table-stage-land-target {
   /* translate+scale only via table-orient.js */
 }
 
-/* ── play9ui2c: JJ hu settle never blank; hall/rematch visible ── */
+/* ── play9ui2d: JJ hu settle never blank; hall/rematch visible ── */
 html.table-stage-mj #multiGameView.is-hu-settle .mj-hu-settle:not([hidden]) {
   display: block !important;
   z-index: 120 !important;

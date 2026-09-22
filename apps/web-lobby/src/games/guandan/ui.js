@@ -144,6 +144,20 @@ export function createGuanDanUI(options = {}) {
         render();
       });
     }
+    if (!root.querySelector('.gd-streak-chip')) {
+      const streak = document.createElement('div');
+      streak.className = 'gd-streak-chip';
+      streak.innerHTML = '<small>连胜</small><b data-gd-streak>0</b>';
+      streak.setAttribute('aria-label', '连胜');
+      root.appendChild(streak);
+    }
+    if (!root.querySelector('.gd-active-chip')) {
+      const act = document.createElement('div');
+      act.className = 'gd-active-chip';
+      act.innerHTML = '<small>活跃</small><b data-gd-active>1/3</b>';
+      act.setAttribute('aria-label', '活跃');
+      root.appendChild(act);
+    }
     if (!root.querySelector('.gd-again-pill')) {
       const pill = document.createElement('button');
       pill.type = 'button';
@@ -170,7 +184,7 @@ export function createGuanDanUI(options = {}) {
     root.removeAttribute('hidden');
     root.dataset.game = 'guandan';
     root.classList.remove('zjh-active', 'mj-2p', 'mj-4p');
-    root.classList.add('gd-active', 'gd-4p', 'gd-yard', 'play9ui2c');
+    root.classList.add('gd-active', 'gd-4p', 'gd-yard', 'play9ui2d');
     document.documentElement.classList.add('table-stage-gd');
     document.body?.classList.add('table-stage-gd');
     document.querySelector('.lobby-shell')?.classList.add('table-active', 'multi-active');
@@ -204,7 +218,7 @@ export function createGuanDanUI(options = {}) {
     root.setAttribute('hidden', '');
     document.documentElement.classList.remove('table-stage-gd');
     document.body?.classList.remove('table-stage-gd');
-    root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'play9ui2c', 'mj-4p', 'mj-2p', 'zjh-active');
+    root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'play9ui2d', 'mj-4p', 'mj-2p', 'zjh-active');
     delete root.dataset.game;
     root.style.zIndex = '';
     root.style.pointerEvents = 'none';
@@ -478,8 +492,8 @@ export function createGuanDanUI(options = {}) {
         const d = snap.lastRecord?.deltas?.[i];
         s.meta.innerHTML =
           `<span class="gd-gold">${gold}</span>`
-          + (settling && d != null ? `<em class="gd-delta ${d >= 0 ? 'pos' : 'neg'}">${d > 0 ? '+' : ''}${d}</em>` : '')
-          + (settling && place >= 0 ? `<span class="gd-place p${place}">${places[place]}</span>` : '');
+          + (settling && d != null ? `<em class="gd-delta gd-score-3d ${d >= 0 ? 'pos' : 'neg'}" data-gd-score>${d > 0 ? '+' : ''}${d}</em>` : '')
+          + (settling && place >= 0 ? `<span class="gd-place p${place}" data-gd-place="${place}">${places[place]}</span>` : '');
       }
       if (s.count) {
         s.count.textContent = `${snap.handCounts[i] ?? 0}`;
@@ -588,7 +602,7 @@ export function createGuanDanUI(options = {}) {
         el.actions.innerHTML = '';
       }
     }
-    if (el.settleRow) el.settleRow.hidden = true;
+    if (el.settleRow) el.settleRow.hidden = !settling;
     if (el.modal) el.modal.hidden = true;
     try {
       requestAnimationFrame(() => {
