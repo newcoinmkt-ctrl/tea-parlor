@@ -9,6 +9,7 @@ import {
   inferGameIdFromRoomKey,
   validateInviteRoomKey,
   shortGameId,
+  formatInviteJoinError,
 } from '../src/net/tg-invite.js';
 
 test('buildTgInviteUrl startapp', () => {
@@ -65,4 +66,9 @@ test('parse guandan startapp', () => {
   const p = parseTgInviteStartParam({ startapp: 't_dual_gd_room99' });
   assert.equal(p.roomKey, 'dual_gd_room99');
   assert.equal(p.gameId, 'gd');
+});
+
+test('formatInviteJoinError readable', () => {
+  assert.match(formatInviteJoinError(new Error('FULL')), /已满/);
+  assert.match(formatInviteJoinError(new Error('expired')), /过期|关闭/);
 });
