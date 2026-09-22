@@ -1,5 +1,5 @@
 /**
- * play9gd1a — Mahjong JJ table layout guards
+ * play9gd1b — Mahjong JJ table layout guards
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -14,11 +14,11 @@ const html = readFileSync(join(root, 'index.html'), 'utf8');
 const css = readFileSync(join(root, 'src/jj-mahjong.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9gd1a', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1a');
-  assert.equal(BUILD_VERSION, 'play9gd1a');
-  assert.match(html, /app\.js\?v=play9gd1a/);
-  assert.match(html, /jj-mahjong\.css\?v=play9gd1a/);
+test('cache play9gd1b', () => {
+  assert.equal(CACHE_STAMP, 'play9gd1b');
+  assert.equal(BUILD_VERSION, 'play9gd1b');
+  assert.match(html, /app\.js\?v=play9gd1b/);
+  assert.match(html, /jj-mahjong\.css\?v=play9gd1b/);
 });
 
 test('compass 东南西北 + countdown + four walls', () => {
@@ -45,10 +45,10 @@ test('letterbox no rotate; tg-vh preserved', () => {
   assert.doesNotMatch(css, /#multiGameView[^{]*\{[^}]*rotate\(90deg\)/);
   assert.match(orient, /viewportStableHeight/);
   assert.doesNotMatch(orient, /Math\.max\([^)]*innerHeight[^)]*viewportStableHeight/);
-  assert.match(css, /play9gd1a|table-stage-land-target/);
+  assert.match(css, /play9gd1b|table-stage-land-target/);
 });
 
-test('docs/qa play9gd1a present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1a/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1a/report.json')), true);
+test('docs/qa play9gd1b present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1b/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1b/report.json')), true);
 });
