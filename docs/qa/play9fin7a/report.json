@@ -1,0 +1,9 @@
+{
+  "wave": "play9fin7a",
+  "cache": "play9fin7a",
+  "invite": {
+    "ddz": ["ddzTableInvite", "ddzResultInvite", "ddzRoomInvite"],
+    "guandan": ["mgTableInvite", "mgSettleInvite", "mgResultInvite", "gdRoomInvite"],
+    "url": "https://t.me/teaparlorbot/app?startapp=t_<roomKey>"
+  }
+}

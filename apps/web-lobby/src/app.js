@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9gd1d';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9gd1d';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9gd1d';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9gd1d';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9gd1d';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin7a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin7a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin7a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin7a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin7a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -93,6 +93,11 @@ import {
   parseTgInviteStartParam,
   collectTgInviteSources,
   normalizeDualRoomKey,
+  buildInvitePayload,
+  inviteShareText,
+  shortGameId,
+  inferGameIdFromRoomKey,
+  validateInviteRoomKey,
 } from './net/tg-invite.js';
 import {
   createChainCenterController,
@@ -2795,13 +2800,22 @@ async function startGuanDan(tableKey = 'novice', options = {}) {
       buryDdzLayer();
       const uid = window.__teaUid || pinusUid || `h5_${Date.now()}`;
       const name = appState?.profile?.name || nodes.playerName?.textContent || '茶馆';
+      const dualKey = options.dualRoomKey
+        ? (normalizeDualRoomKey(options.dualRoomKey, 'gd') || options.dualRoomKey)
+        : '';
+      if (dualKey) {
+        try {
+          sessionStorage.setItem('tea-parlor-dual-room-gd', dualKey);
+          sessionStorage.setItem('tea-parlor-dual-room', dualKey);
+        } catch (_) {}
+      }
       const session = await colyseusClient.startColyseusGdSession({
         uid,
         name,
-        roomId: tableKey || 'novice',
+        roomId: dualKey || tableKey || 'novice',
         currency,
         token: window.__teaSessionToken || undefined,
-        fresh: true,
+        fresh: !dualKey,
       });
       if (session?.room) multiUI.applyServerSnap(session.room);
       colyseusClient.onRoomUpdate((st) => {
@@ -5384,23 +5398,100 @@ function cancelDdzMatch() {
 }
 
 
-/** play9fin1c: dual-session shared room key (two TG / two clients same table) */
+/** play9fin7a: dual-session shared room key (per-game; two TG / two clients same table) */
 function ensureDualRoomKey(game = 'ddz') {
+  const g = shortGameId(game);
+  const storageKey = `tea-parlor-dual-room-${g}`;
   try {
-    const k = sessionStorage.getItem('tea-parlor-dual-room');
-    if (k) return k;
+    const k = sessionStorage.getItem(storageKey) || sessionStorage.getItem('tea-parlor-dual-room');
+    if (k && inferGameIdFromRoomKey(k) === g) return k;
+    if (k && k.startsWith(`dual_${g}_`)) return k;
   } catch (_) {}
-  const key = (colyseusClient.makeDualRoomKey?.(game)) || `dual_${game}_${Date.now().toString(36)}`;
-  try { sessionStorage.setItem('tea-parlor-dual-room', key); } catch (_) {}
-  rememberRecentTable({ roomKey: key, game: 'doudizhu', label: `好友房·${String(key).slice(0, 12)}` });
+  const key = (colyseusClient.makeDualRoomKey?.(g)) || `dual_${g}_${Date.now().toString(36)}`;
+  try {
+    sessionStorage.setItem(storageKey, key);
+    sessionStorage.setItem('tea-parlor-dual-room', key);
+  } catch (_) {}
+  const lobbyGame = g === 'gd' ? 'guandan' : (g === 'mj' ? 'mahjong' : 'doudizhu');
+  rememberRecentTable({ roomKey: key, game: lobbyGame, label: `好友房·${String(key).slice(0, 12)}` });
   return key;
 }
 
 function friendInviteUrl(roomId) {
   const tg = window.Telegram?.WebApp;
   const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
-  // play9gd1d: startapp=t_<roomKey> deep link
+  // play9fin7a: startapp=t_<roomKey> deep link
   return buildTgInviteUrl(roomId, bot);
+}
+
+/**
+ * play9fin7a — unified「邀请好友」exit (in-play / settle / room-select).
+ * Payload: roomKey + gameId; TG prefers startapp share; non-TG copies link/roomKey.
+ */
+function emitInviteFriend(gameId = 'ddz', roomKeyOpt = '') {
+  const g = shortGameId(gameId || (activeGame === 'guandan' ? 'gd' : 'ddz'));
+  let roomKey = String(roomKeyOpt || '').trim();
+  if (!roomKey) {
+    try { roomKey = sessionStorage.getItem(`tea-parlor-dual-room-${g}`) || ''; } catch (_) {}
+  }
+  if (!roomKey) {
+    try {
+      const legacy = sessionStorage.getItem('tea-parlor-dual-room') || '';
+      if (legacy && inferGameIdFromRoomKey(legacy) === g) roomKey = legacy;
+    } catch (_) {}
+  }
+  if (!roomKey) roomKey = ensureDualRoomKey(g);
+  const tg = window.Telegram?.WebApp;
+  const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
+  const payload = buildInvitePayload({ roomKey, gameId: g, botUsername: bot });
+  try {
+    sessionStorage.setItem(`tea-parlor-dual-room-${g}`, payload.roomKey);
+    sessionStorage.setItem('tea-parlor-dual-room', payload.roomKey);
+  } catch (_) {}
+  const share = `https://t.me/share/url?url=${encodeURIComponent(payload.url)}&text=${encodeURIComponent(inviteShareText(g))}`;
+  let mode = 'copy';
+  try {
+    if (tg?.openTelegramLink) {
+      tg.openTelegramLink(share);
+      mode = 'tg-share';
+    } else if (tg?.openLink) {
+      tg.openLink(payload.url);
+      mode = 'tg-link';
+    } else if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(payload.copyText).catch(() => {});
+      mode = 'clipboard';
+    }
+  } catch (err) {
+    console.warn('[invite] emit', err);
+  }
+  const status = `邀请好友 · ${payload.gameId} · ${payload.roomKey.slice(0, 18)} · ${mode}`;
+  if (nodes.claimStatus) nodes.claimStatus.textContent = status;
+  const gdHint = document.getElementById('gdInviteHint');
+  if (gdHint && g === 'gd') gdHint.textContent = status;
+  const socialStatus = document.getElementById('socialStatus');
+  if (socialStatus) socialStatus.textContent = status;
+  // Surface copyable URL on friend preview when present
+  const urlEl = document.getElementById('ddzFriendUrl') || document.getElementById('socialInviteUrl');
+  if (urlEl) urlEl.textContent = payload.url.replace(/^https:\/\//, '');
+  const preview = document.getElementById('ddzFriendPreview') || document.getElementById('socialInvitePreview');
+  if (preview) preview.hidden = false;
+  return payload;
+}
+
+function bindUnifiedInviteExits() {
+  if (bindUnifiedInviteExits._done) return;
+  bindUnifiedInviteExits._done = true;
+  const handler = (ev) => {
+    const btn = ev.target && ev.target.closest && ev.target.closest('[data-invite-game], #ddzTableInvite, #ddzResultInvite, #ddzRoomInvite, #gdRoomInvite, #mgTableInvite, #mgSettleInvite, #mgResultInvite');
+    if (!btn) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const g = btn.getAttribute('data-invite-game')
+      || (btn.id && btn.id.startsWith('mg') ? 'gd' : null)
+      || (btn.id && btn.id.startsWith('gd') ? 'gd' : 'ddz');
+    emitInviteFriend(g);
+  };
+  document.addEventListener('click', handler, true);
 }
 
 function openFriendRoom(id) {
@@ -5458,7 +5549,7 @@ function bindFriendDualEnter() {
     e.preventDefault();
     enterFriendDualTable();
   });
-  // play9gd1d: TG invite deep link — start_param / tgWebAppStartParam / startapp
+  // play9fin7a: TG invite deep link — start_param / tgWebAppStartParam / startapp
   tryConsumeTgInviteDeepLink();
 }
 
@@ -5468,14 +5559,46 @@ function tryConsumeTgInviteDeepLink() {
     if (tryConsumeTgInviteDeepLink._done) return;
     const parsed = parseTgInviteStartParam(collectTgInviteSources());
     if (!parsed?.roomKey) return;
+    const check = validateInviteRoomKey(parsed.roomKey);
+    if (!check.ok) {
+      tryConsumeTgInviteDeepLink._done = true;
+      if (nodes.claimStatus) nodes.claimStatus.textContent = check.message || '邀请无效';
+      return;
+    }
     tryConsumeTgInviteDeepLink._done = true;
-    const key = parsed.roomKey;
-    try { sessionStorage.setItem('tea-parlor-dual-room', key); } catch (_) {}
+    const key = check.roomKey;
+    const g = check.gameId || parsed.gameId || 'ddz';
+    try {
+      sessionStorage.setItem('tea-parlor-dual-room', key);
+      sessionStorage.setItem(`tea-parlor-dual-room-${g}`, key);
+    } catch (_) {}
     if (nodes.claimStatus) nodes.claimStatus.textContent = `邀请深链 · 正在加入 ${key.slice(0, 16)}…`;
-    setTimeout(() => enterFriendDualTable(key), 400);
+    setTimeout(() => {
+      if (g === 'gd') enterFriendDualGuandan(key);
+      else enterFriendDualTable(key);
+    }, 400);
   } catch (err) {
     console.warn('[invite] deep link', err);
+    if (nodes.claimStatus) nodes.claimStatus.textContent = `邀请加入失败：${err?.message || err}`;
   }
+}
+
+/** play9fin7a/b: Guandan dual invite join via roomKey */
+function enterFriendDualGuandan(roomKey) {
+  const key = normalizeDualRoomKey(roomKey, 'gd') || roomKey;
+  if (!key) {
+    if (nodes.claimStatus) nodes.claimStatus.textContent = '掼蛋邀请码无效';
+    return;
+  }
+  rememberRecentTable({ roomKey: key, game: 'guandan', label: `好友房·${String(key).slice(0, 12)}` });
+  try {
+    sessionStorage.setItem('tea-parlor-dual-room-gd', key);
+    sessionStorage.setItem('tea-parlor-dual-room', key);
+  } catch (_) {}
+  startGuanDan('novice', { dualRoomKey: key }).catch((err) => {
+    console.warn('[dual] enterFriendDualGuandan', err);
+    if (nodes.claimStatus) nodes.claimStatus.textContent = `掼蛋同桌失败：${err?.message || err}`;
+  });
 }
 
 function shareFriendRoom() {
@@ -5493,6 +5616,7 @@ function shareFriendRoom() {
 
 function bindP0Lobby() {
   bindFriendDualEnter();
+  bindUnifiedInviteExits();
   const tabbar = document.querySelector('.home-tabbar');
   if (tabbar && !tabbar.dataset.play9ToastGuard) {
     tabbar.dataset.play9ToastGuard = '1';
@@ -6909,7 +7033,7 @@ function renderJjSettleHud() {
   if (top) {
     const xp = document.getElementById('jjSettleXp');
     const mx = document.getElementById('jjSettleMult');
-    // play9gd1d: keep pill icons; structure-only xp when no career meter
+    // play9fin7a: keep pill icons; structure-only xp when no career meter
     if (xp) {
       xp.innerHTML = '<i class="jj-pill-ico jj-pill-progress" aria-hidden="true"></i>235/360';
     }
@@ -7409,7 +7533,7 @@ function _renderGameBody() {
       setHidden(nodes.bidTimer, !(showClock && myBid));
     }
   }
-  // play9gd1d: 「自动出牌中」 banner when trustee (UI only; no 赖子)
+  // play9fin7a: 「自动出牌中」 banner when trustee (UI only; no 赖子)
   if (nodes.ddzAutoplayHint) {
     const showAuto = Boolean(trustee) && game && (game.phase === 'play' || game.phase === 'double');
     setHidden(nodes.ddzAutoplayHint, !showAuto);

@@ -17,9 +17,9 @@ const room = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/rooms/Doudizh
 const mj = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/mjLogic.js'), 'utf8');
 const mjRoom = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/rooms/MahjongRoom.js'), 'utf8');
 
-test('cache play9gd1d', () => {
-  assert.match(html, /app\.js\?v=play9gd1d/);
-  assert.match(app, /\?v=play9gd1d/);
+test('cache play9fin7a', () => {
+  assert.match(html, /app\.js\?v=play9fin7a/);
+  assert.match(app, /\?v=play9fin7a/);
 });
 
 test('server setFullTrustee + reconnect preserves fullTrustee', () => {

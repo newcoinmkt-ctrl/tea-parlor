@@ -1,6 +1,6 @@
 /**
  * 掼蛋 UI — 绿毡桌 · 重叠手牌 · 桌面结算
- * play9gd1d — Colyseus online play + level HUD + ui2c play / ui2d settle skins
+ * play9fin7a — Colyseus online play + level HUD + ui2c play / ui2d settle skins
  */
 import { createGuanDanTable, cardText, Phase, isWild } from './engine.js';
 import { fitAllHands } from '../../net/hand-layout.js';

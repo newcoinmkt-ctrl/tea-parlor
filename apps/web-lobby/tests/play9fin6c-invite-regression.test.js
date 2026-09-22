@@ -1,5 +1,5 @@
 /**
- * play9gd1d — TG invite deep link + full regression
+ * play9fin7a — TG invite deep link + full regression
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -22,10 +22,10 @@ const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 const lia = readFileSync(join(root, 'src/lobby-ia.css'), 'utf8');
 
-test('cache play9gd1d', () => {
-  assert.match(html, /app\.js\?v=play9gd1d/);
-  assert.equal(CACHE_STAMP, 'play9gd1d');
-  assert.equal(BUILD_VERSION, 'play9gd1d');
+test('cache play9fin7a', () => {
+  assert.match(html, /app\.js\?v=play9fin7a/);
+  assert.equal(CACHE_STAMP, 'play9fin7a');
+  assert.equal(BUILD_VERSION, 'play9fin7a');
   assert.doesNotMatch(html, /app\.js\?v=play9fin6b/);
 });
 
@@ -91,7 +91,7 @@ test('dual-session smoke still green', () => {
   assert.match(r.stdout || '', /PASS/);
 });
 
-test('docs/qa play9gd1d present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/report.json')), true);
+test('docs/qa play9fin7a present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7a/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7a/report.json')), true);
 });
