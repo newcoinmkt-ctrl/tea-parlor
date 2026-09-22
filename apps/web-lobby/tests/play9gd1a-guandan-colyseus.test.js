@@ -1,5 +1,5 @@
 /**
- * play9gd1b — Guandan Colyseus lobby entry + cache
+ * play9gd1c — Guandan Colyseus lobby entry + cache
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,10 +17,10 @@ const ui = readFileSync(join(root, 'src/games/guandan/ui.js'), 'utf8');
 const colyIndex = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/index.js'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9gd1b', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1b');
-  assert.equal(BUILD_VERSION, 'play9gd1b');
-  assert.match(html, /app\.js\?v=play9gd1b/);
+test('cache play9gd1c', () => {
+  assert.equal(CACHE_STAMP, 'play9gd1c');
+  assert.equal(BUILD_VERSION, 'play9gd1c');
+  assert.match(html, /app\.js\?v=play9gd1c/);
 });
 
 test('lobby startGuanDan wires Colyseus for gold', () => {
@@ -30,14 +30,14 @@ test('lobby startGuanDan wires Colyseus for gold', () => {
   assert.match(client, /startColyseusGdSession/);
   assert.match(ui, /applyServerSnap/);
   assert.match(ui, /startOnline/);
-  assert.match(ui, /play9gd1b/);
+  assert.match(ui, /play9gd1c/);
 });
 
 test('colyseus registers guandan room', () => {
   assert.match(colyIndex, /GuandanRoom/);
   assert.match(colyIndex, /define\('guandan'/);
   assert.match(colyIndex, /['"]guandan['"]/);
-  assert.match(colyIndex, /play9gd1b/);
+  assert.match(colyIndex, /play9gd1c/);
 });
 
 test('ui2c/ui2d skins preserved; no page rotate; ship3b tg-vh', () => {
@@ -56,9 +56,9 @@ test('no crypto/withdraw for gd1 wave path', () => {
   assert.doesNotMatch(app, /startGuanDan[\s\S]{0,200}withdraw/);
 });
 
-test('docs/qa play9gd1b present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1b/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1b/report.json')), true);
+test('docs/qa play9gd1c present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/report.json')), true);
   assert.equal(existsSync(join(repo, 'packages/guandan-engine')), true);
   assert.equal(existsSync(join(repo, 'apps/web-lobby/src/games/guandan2')), false);
 });

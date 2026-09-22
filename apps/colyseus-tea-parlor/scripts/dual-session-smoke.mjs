@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * play9gd1b — dual-session same-table smoke (DDZ + Mahjong)
+ * play9gd1c — dual-session same-table smoke (DDZ + Mahjong)
  * Two logical clients join same roomKey, play several steps, assert settle.
  *
  * Usage:
