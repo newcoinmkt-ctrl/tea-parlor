@@ -28,8 +28,8 @@ app.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'tea-parlor-colyseus',
-    version: process.env.TEA_PARLOR_VERSION || 'play9ui2b',
-    cache: process.env.TEA_PARLOR_CACHE || 'play9ui2b',
+    version: process.env.TEA_PARLOR_VERSION || 'play9ui2c',
+    cache: process.env.TEA_PARLOR_CACHE || 'play9ui2c',
     games: ['doudizhu', 'mahjong', 'niuniu'], // niuniu listed for dual-deploy; no NnRoom in v1 (local vs-AI)
     port: PORT,
     matchMs: MATCH_MS,

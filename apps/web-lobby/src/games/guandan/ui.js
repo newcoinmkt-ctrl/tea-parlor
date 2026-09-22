@@ -170,7 +170,9 @@ export function createGuanDanUI(options = {}) {
     root.removeAttribute('hidden');
     root.dataset.game = 'guandan';
     root.classList.remove('zjh-active', 'mj-2p', 'mj-4p');
-    root.classList.add('gd-active', 'gd-4p', 'gd-yard');
+    root.classList.add('gd-active', 'gd-4p', 'gd-yard', 'play9ui2c');
+    document.documentElement.classList.add('table-stage-gd');
+    document.body?.classList.add('table-stage-gd');
     document.querySelector('.lobby-shell')?.classList.add('table-active', 'multi-active');
     root.style.pointerEvents = 'auto';
     root.style.display = 'flex';
@@ -200,7 +202,9 @@ export function createGuanDanUI(options = {}) {
     if (el.hand) el.hand.innerHTML = '';
     root.hidden = true;
     root.setAttribute('hidden', '');
-    root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'mj-4p', 'mj-2p', 'zjh-active');
+    document.documentElement.classList.remove('table-stage-gd');
+    document.body?.classList.remove('table-stage-gd');
+    root.classList.remove('gd-active', 'gd-4p', 'gd-yard', 'gd-settling', 'play9ui2c', 'mj-4p', 'mj-2p', 'zjh-active');
     delete root.dataset.game;
     root.style.zIndex = '';
     root.style.pointerEvents = 'none';
@@ -522,7 +526,7 @@ export function createGuanDanUI(options = {}) {
             currentRank: snap.currentRank,
             dim: dimCol || (suitFilter != null && c.suit !== suitFilter && c.rank < 16),
           })).join('')
-          + (bomb ? `<span class="gd-bomb-tag">${g.cards.length === 4 ? '四炸' : g.cards.length + '炸'}</span>` : '')
+          + (bomb ? `<span class="gd-bomb-tag">${g.cards.length === 4 ? '「四炸」' : '「' + g.cards.length + '炸」'}</span>` : '')
           + `</div>`;
       }).join('');
       el.hand.querySelectorAll('[data-card-id]').forEach((btn) => {
