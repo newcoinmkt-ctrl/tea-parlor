@@ -1,5 +1,5 @@
 /**
- * play9gd1a — rarer riichi yaku beyond fin1c/fin3 common set
+ * play9gd1b — rarer riichi yaku beyond fin1c/fin3 common set
  * sanshoku / ittsu / chanta / toitoi / chiitoitsu / chinitsu (+ honitsu)
  * Settle still non-empty with yaku list + fu/points
  */
@@ -35,9 +35,9 @@ function settle(tiles13, win, opts = {}) {
   return ev;
 }
 
-test('cache play9gd1a', () => {
-  assert.match(html, /app\.js\?v=play9gd1a/);
-  assert.match(eng, /play9gd1a|detectRarerYaku/);
+test('cache play9gd1b', () => {
+  assert.match(html, /app\.js\?v=play9gd1b/);
+  assert.match(eng, /play9gd1b|detectRarerYaku/);
 });
 
 test('chinitsu 清一色 judgeable + non-empty settle', () => {
@@ -103,5 +103,5 @@ test('engine wires detectRarerYaku; docs present', () => {
   assert.match(eng, /一气通贯/);
   assert.match(eng, /对对和/);
   assert.match(eng, /清一色/);
-  assert.equal(existsSync(join(root, '../../docs/qa/play9gd1a/README.md')), true);
+  assert.equal(existsSync(join(root, '../../docs/qa/play9gd1b/README.md')), true);
 });

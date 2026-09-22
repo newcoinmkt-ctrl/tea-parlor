@@ -1,5 +1,5 @@
 /**
- * play9gd1a — MJ JJ settle + FULL wave regression
+ * play9gd1b — MJ JJ settle + FULL wave regression
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -18,10 +18,10 @@ const jj = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 const nnCss = readFileSync(join(root, 'src/niuniu.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9gd1a', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1a');
-  assert.equal(BUILD_VERSION, 'play9gd1a');
-  assert.match(html, /app\.js\?v=play9gd1a/);
+test('cache play9gd1b', () => {
+  assert.equal(CACHE_STAMP, 'play9gd1b');
+  assert.equal(BUILD_VERSION, 'play9gd1b');
+  assert.match(html, /app\.js\?v=play9gd1b/);
 });
 
 test('MJ settle: four banners + 胡 stamp + 再来/回大厅; never blank', () => {
@@ -33,9 +33,9 @@ test('MJ settle: four banners + 胡 stamp + 再来/回大厅; never blank', () =
   assert.match(html, /class="mj-hu-stamp"[^>]*>胡</);
   assert.match(html, /id="mgAgainBtn"[^>]*>再来一局</);
   assert.match(html, /id="mgLobbyBtn"[^>]*>回大厅</);
-  assert.match(mjUi, /play9gd1a: never blank settle|never blank settle/);
+  assert.match(mjUi, /play9gd1b: never blank settle|never blank settle/);
   assert.match(mjUi, /showHuSettle/);
-  assert.match(mjCss, /play9gd1a|#mgSettleRow/);
+  assert.match(mjCss, /play9gd1b|#mgSettleRow/);
 });
 
 test('wave regression: ui1a bid/autoplay + ui1b settle + ui1c NN felt + ui1d MJ', () => {
@@ -66,8 +66,8 @@ test('fin features: trustee ads activity five-ish lobby views', () => {
   assert.match(html, /id="ddzResultAgain"[^>]*>再来一局</);
 });
 
-test('docs/qa play9gd1a + prior slices present', () => {
-  for (const s of ['play9ui1a', 'play9ui1b', 'play9ui1c', 'play9ui1d', 'play9gd1a']) {
+test('docs/qa play9gd1b + prior slices present', () => {
+  for (const s of ['play9ui1a', 'play9ui1b', 'play9ui1c', 'play9ui1d', 'play9gd1b']) {
     assert.equal(existsSync(join(repo, `docs/qa/${s}/README.md`)), true, s);
   }
 });
