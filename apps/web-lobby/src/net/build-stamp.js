@@ -1,9 +1,9 @@
 /**
- * play9ui1b — DDZ JJ settle triangle (+/- score, 胜 stamp, 再来一局/回大厅)
+ * play9ui1c — green felt multi-seat NN + full regression
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9ui1b';
-export const BUILD_VERSION = 'play9ui1b';
+export const CACHE_STAMP = 'play9ui1c';
+export const BUILD_VERSION = 'play9ui1c';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

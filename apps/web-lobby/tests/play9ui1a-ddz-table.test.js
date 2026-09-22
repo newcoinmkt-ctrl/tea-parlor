@@ -1,5 +1,5 @@
 /**
- * play9ui1b — DDZ JJ table: bid bar + autoplay hint + layout guards
+ * play9ui1c — DDZ JJ table: bid bar + autoplay hint + layout guards
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,11 +15,11 @@ const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const css = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9ui1b', () => {
-  assert.equal(CACHE_STAMP, 'play9ui1b');
-  assert.equal(BUILD_VERSION, 'play9ui1b');
-  assert.match(html, /app\.js\?v=play9ui1b/);
-  assert.match(html, /jj-table\.css\?v=play9ui1b/);
+test('cache play9ui1c', () => {
+  assert.equal(CACHE_STAMP, 'play9ui1c');
+  assert.equal(BUILD_VERSION, 'play9ui1c');
+  assert.match(html, /app\.js\?v=play9ui1c/);
+  assert.match(html, /jj-table\.css\?v=play9ui1c/);
 });
 
 test('bid bar: 不叫 + countdown + 1/2/3', () => {
@@ -58,7 +58,7 @@ test('no Stars/TON/USDT/withdraw in DDZ table chrome', () => {
   assert.doesNotMatch(tableChunk, /\bStars\b|\bTON\b|\bUSDT\b|提现|withdraw/i);
 });
 
-test('docs/qa play9ui1b present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1b/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1b/report.json')), true);
+test('docs/qa play9ui1c present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1c/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1c/report.json')), true);
 });

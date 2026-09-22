@@ -1,0 +1,14 @@
+{
+  "cache": "play9ui1c",
+  "slice": "ui1c",
+  "checks": {
+    "nn_green_felt_wood_rim": true,
+    "nn_6_seats": true,
+    "active_countdown": true,
+    "action_bar_nn": true,
+    "no_rotate": true,
+    "no_stars_chain_withdraw": true,
+    "ddz_mj_nn_tabs": true
+  },
+  "refs": ["03-green-felt-multiseat.jpeg"]
+}
