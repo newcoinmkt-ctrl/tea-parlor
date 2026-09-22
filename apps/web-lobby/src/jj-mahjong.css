@@ -795,7 +795,7 @@ html.table-stage-mj #mjCountdown.mj-countdown {
   opacity: 1 !important;
 }
 
-/* ── play9ui1d: JJ 推倒胡 table polish (ref 04) ── */
+/* ── play9ui1e: JJ 推倒胡 table polish (ref 04) ── */
 html.table-stage-mj #multiGameView .mj-felt {
   background:
     linear-gradient(145deg, #4a2a78 0%, #2a1850 40%, #1a0e38 100%) !important;
@@ -859,4 +859,36 @@ html.table-stage-mj #multiGameView .mg-ava-frame {
 /* Never rotate multiGameView */
 html.table-stage-mj #multiGameView.table-stage-land-target {
   /* translate+scale only via table-orient.js */
+}
+
+/* ── play9ui1e: JJ hu settle never blank; hall/rematch visible ── */
+html.table-stage-mj #multiGameView.is-hu-settle .mj-hu-settle:not([hidden]) {
+  display: block !important;
+  z-index: 120 !important;
+}
+html.table-stage-mj #multiGameView.is-hu-settle .mj-hu-banner {
+  font-size: 26px !important;
+  min-width: 100px !important;
+  opacity: 1 !important;
+}
+html.table-stage-mj #multiGameView.is-hu-settle .mj-hu-stamp {
+  display: grid !important;
+  font-size: 44px !important;
+  z-index: 130 !important;
+}
+html.table-stage-mj #multiGameView.is-hu-settle #mgSettleRow:not([hidden]),
+html.table-stage-mj #multiGameView.is-hu-settle .mg-settle:not([hidden]) {
+  display: flex !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 140 !important;
+  gap: 12px !important;
+  justify-content: center !important;
+}
+html.table-stage-mj #multiGameView.is-hu-settle #mgAgainBtn,
+html.table-stage-mj #multiGameView.is-hu-settle #mgLobbyBtn {
+  min-width: 110px !important;
+  min-height: 44px !important;
+  font-weight: 800 !important;
+  pointer-events: auto !important;
 }

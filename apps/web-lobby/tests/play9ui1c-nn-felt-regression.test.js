@@ -1,5 +1,5 @@
 /**
- * play9ui1d — NN green felt + full regression guards
+ * play9ui1e — NN green felt + full regression guards
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -18,15 +18,15 @@ const jj = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 const mjCss = readFileSync(join(root, 'src/jj-mahjong.css'), 'utf8');
 
-test('cache play9ui1d', () => {
-  assert.equal(CACHE_STAMP, 'play9ui1d');
-  assert.equal(BUILD_VERSION, 'play9ui1d');
-  assert.match(html, /app\.js\?v=play9ui1d/);
-  assert.match(html, /niuniu\.css\?v=play9ui1d/);
+test('cache play9ui1e', () => {
+  assert.equal(CACHE_STAMP, 'play9ui1e');
+  assert.equal(BUILD_VERSION, 'play9ui1e');
+  assert.match(html, /app\.js\?v=play9ui1e/);
+  assert.match(html, /niuniu\.css\?v=play9ui1e/);
 });
 
 test('NN oval green felt + wood rim + 6 seats', () => {
-  assert.match(nnCss, /play9ui1d|green felt/);
+  assert.match(nnCss, /play9ui1e|green felt/);
   assert.match(nnCss, /nn-felt|#nnFelt/);
   assert.match(nnCss, /8b5a2b|wood|#8b5a2b/);
   assert.match(nnUi, /6-seat|seatPos/);
@@ -68,7 +68,7 @@ test('Texas entry exists but no invented 9-seat NN', () => {
   assert.doesNotMatch(nnUi, /9-seat|nine.?seat/i);
 });
 
-test('docs/qa play9ui1d present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1d/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1d/report.json')), true);
+test('docs/qa play9ui1e present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1e/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1e/report.json')), true);
 });

@@ -1,9 +1,9 @@
 /**
- * play9ui1d — Mahjong JJ table (compass + walls + big hand letterbox)
+ * play9ui1e — Mahjong JJ settle + full regression
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9ui1d';
-export const BUILD_VERSION = 'play9ui1d';
+export const CACHE_STAMP = 'play9ui1e';
+export const BUILD_VERSION = 'play9ui1e';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

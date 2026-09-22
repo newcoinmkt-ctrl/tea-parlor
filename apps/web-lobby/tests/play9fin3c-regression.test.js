@@ -1,5 +1,5 @@
 /**
- * play9ui1d — dual-session smoke docs + full regression guards
+ * play9ui1e — dual-session smoke docs + full regression guards
  * DDZ / MJ / NN + five tabs; no Stars / chain / rotate / withdraw
  */
 import test from 'node:test';
@@ -17,15 +17,15 @@ const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const lia = readFileSync(join(root, 'src/lobby-ia.css'), 'utf8');
 const colyPkg = JSON.parse(readFileSync(join(repo, 'apps/colyseus-tea-parlor/package.json'), 'utf8'));
 
-test('cache play9ui1d', () => {
-  assert.match(html, /app\.js\?v=play9ui1d/);
-  assert.match(app, /\?v=play9ui1d/);
+test('cache play9ui1e', () => {
+  assert.match(html, /app\.js\?v=play9ui1e/);
+  assert.match(app, /\?v=play9ui1e/);
 });
 
 test('dual-session smoke script exists and is wired', () => {
   const smoke = join(repo, 'apps/colyseus-tea-parlor/scripts/dual-session-smoke.mjs');
   assert.equal(existsSync(smoke), true);
-  assert.match(readFileSync(smoke, 'utf8'), /play9ui1d/);
+  assert.match(readFileSync(smoke, 'utf8'), /play9ui1e/);
   assert.match(readFileSync(smoke, 'utf8'), /clientA|mjA/);
   assert.equal(colyPkg.scripts?.['smoke:dual'], 'node scripts/dual-session-smoke.mjs');
 });

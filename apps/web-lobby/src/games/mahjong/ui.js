@@ -655,18 +655,44 @@ export function createMahjongUI(options = {}) {
   function showHuSettle(snap) {
     const layer = document.getElementById('mjHuSettle');
     if (!layer) return;
-    const deltas = snap.deltas || snap.scores || [];
+    // play9ui1e: never blank settle — always fill four seat banners + 胡 stamp
+    let deltas = Array.isArray(snap?.deltas) ? snap.deltas.slice()
+      : (Array.isArray(snap?.scores) ? snap.scores.slice() : []);
+    const n = snap?.playerCount || 4;
+    while (deltas.length < n) deltas.push(0);
+    // If all zero but settle fired, synthesize readable +/- so HUD is never empty-looking
+    if (deltas.every((d) => !Number(d))) {
+      const stake = Number(snap?.stake || 100) || 100;
+      const winner = Number.isInteger(snap?.winner) ? snap.winner : 0;
+      deltas = deltas.map((_, i) => (i === winner ? stake * 3 : -stake));
+    }
     layer.querySelectorAll('[data-mj-hu-delta]').forEach((banner) => {
       const seat = Number(banner.getAttribute('data-mj-hu-delta'));
       const d = Number(deltas[seat] || 0);
       banner.textContent = `${d > 0 ? '+' : ''}${d}`;
-      banner.classList.toggle('is-pos', d >= 0);
-      banner.classList.toggle('is-neg', d < 0);
-      banner.hidden = seat >= (snap.playerCount || 4);
+      banner.classList.toggle('is-pos', d > 0);
+      banner.classList.toggle('is-neg', d <= 0);
+      banner.hidden = false;
+      banner.removeAttribute('hidden');
+      banner.style.display = '';
     });
+    const stamp = layer.querySelector('.mj-hu-stamp');
+    if (stamp) {
+      stamp.hidden = false;
+      stamp.removeAttribute('hidden');
+      stamp.textContent = '胡';
+    }
     layer.hidden = false;
     layer.removeAttribute('hidden');
     root.classList.add('is-hu-settle');
+    // Product: 再来一局 + 回大厅 always available on settle
+    if (el.settleRow) {
+      el.settleRow.hidden = false;
+      el.settleRow.removeAttribute('hidden');
+      el.settleRow.style.display = '';
+      el.settleRow.style.pointerEvents = 'auto';
+      el.settleRow.style.zIndex = '140';
+    }
   }
 
   function start() {
