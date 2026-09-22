@@ -1,0 +1,13 @@
+{
+  "cache": "play9ui1b",
+  "slice": "ui1b",
+  "checks": {
+    "triangle_seats": true,
+    "score_plus_minus": true,
+    "total_score": true,
+    "win_lose_stamp": true,
+    "again_lobby_buttons": true,
+    "no_rotate": true
+  },
+  "refs": ["02-ddz-settle-jj.jpeg"]
+}

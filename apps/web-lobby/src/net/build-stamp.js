@@ -1,9 +1,9 @@
 /**
- * play9ui1a — DDZ JJ table layout (bid bar + autoplay hint + letterbox)
+ * play9ui1b — DDZ JJ settle triangle (+/- score, 胜 stamp, 再来一局/回大厅)
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9ui1a';
-export const BUILD_VERSION = 'play9ui1a';
+export const CACHE_STAMP = 'play9ui1b';
+export const BUILD_VERSION = 'play9ui1b';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

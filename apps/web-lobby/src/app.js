@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ui1a';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ui1a';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ui1a';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ui1a';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9ui1a';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ui1b';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ui1b';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ui1b';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ui1b';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9ui1b';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -5345,7 +5345,7 @@ function ensureDualRoomKey(game = 'ddz') {
 function friendInviteUrl(roomId) {
   const tg = window.Telegram?.WebApp;
   const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
-  // play9ui1a: startapp=t_<roomKey> deep link
+  // play9ui1b: startapp=t_<roomKey> deep link
   return buildTgInviteUrl(roomId, bot);
 }
 
@@ -5404,7 +5404,7 @@ function bindFriendDualEnter() {
     e.preventDefault();
     enterFriendDualTable();
   });
-  // play9ui1a: TG invite deep link — start_param / tgWebAppStartParam / startapp
+  // play9ui1b: TG invite deep link — start_param / tgWebAppStartParam / startapp
   tryConsumeTgInviteDeepLink();
 }
 
@@ -6812,11 +6812,13 @@ function settle(winner) {
 }
 
 
-function jjMiniCardHtml(c, { winStamp = false } = {}) {
+function jjMiniCardHtml(c, { winStamp = false, loseStamp = false } = {}) {
   if (!c) return '';
   const t = cardText(c);
   const red = isRed(c) ? ' red-card red' : '';
-  const stamp = winStamp ? '<span class="jj-win-stamp" aria-label="胜">胜</span>' : '';
+  const stamp = winStamp
+    ? '<span class="jj-win-stamp" aria-label="胜">胜</span>'
+    : (loseStamp ? '<span class="jj-lose-stamp" aria-label="负">负</span>' : '');
   const rankTxt = t.replace(/[♠♥♣♦]/g, '');
   const tenCls = (c.rank === 10 || rankTxt === '10') ? ' pc-rank--ten' : '';
   return `<span class="jj-mini-card table-card${red}${(c.rank === 10 || rankTxt === '10') ? ' is-ten' : ''}">`
@@ -6884,12 +6886,15 @@ function renderJjSettleHud() {
       }
     } else if (cards.length && winSide) {
       stampIdx = cards.length - 1;
+    } else if (cards.length && !winSide) {
+      stampIdx = cards.length - 1; // 负 stamp on last remaining
     }
     const rows = chunkRows(cards, 8);
     const handHtml = rows.map((row, ri) => (
       `<div class="jj-settle-hand-row">${row.map((c, ci) => {
         const globalIdx = ri * 8 + ci;
-        return jjMiniCardHtml(c, { winStamp: globalIdx === stampIdx });
+        const on = globalIdx === stampIdx;
+        return jjMiniCardHtml(c, { winStamp: on && winSide, loseStamp: on && !winSide });
       }).join('')}</div>`
     )).join('');
     const scoreCls = d > 0 ? 'pos' : 'neg';
@@ -7336,7 +7341,7 @@ function _renderGameBody() {
       setHidden(nodes.bidTimer, !(showClock && myBid));
     }
   }
-  // play9ui1a: 「自动出牌中」 banner when trustee (UI only; no 赖子)
+  // play9ui1b: 「自动出牌中」 banner when trustee (UI only; no 赖子)
   if (nodes.ddzAutoplayHint) {
     const showAuto = Boolean(trustee) && game && (game.phase === 'play' || game.phase === 'double');
     setHidden(nodes.ddzAutoplayHint, !showAuto);
