@@ -1,9 +1,9 @@
 /**
- * play9fin7b — deep-link seat join (leave→join)
+ * play9fin7c — dual session + reconnect
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9fin7b';
-export const BUILD_VERSION = 'play9fin7b';
+export const CACHE_STAMP = 'play9fin7c';
+export const BUILD_VERSION = 'play9fin7c';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * play9fin7b — dual-session same-table smoke (DDZ + Mahjong)
+ * play9fin7c — dual-session same-table smoke (DDZ + Mahjong)
  * Two logical clients join same roomKey, play several steps, assert settle.
  *
  * Usage:
@@ -11,6 +11,7 @@
  */
 import { DdzTable } from '../src/ddzLogic.js';
 import { MjTable } from '../src/mjLogic.js';
+import { GdTable } from '../src/gdLogic.js';
 
 const LIVE = process.env.LIVE_COLYSEUS_URL || '';
 const results = [];
@@ -119,11 +120,77 @@ async function smokeLiveHint() {
   }
 }
 
+
+async function smokeGdInProcess() {
+  const roomKey = `dual_smoke_gd_${Date.now().toString(36)}`;
+  const t = new GdTable({
+    roomKey,
+    currency: 'ingot',
+    match: true,
+    autoDeal: false,
+    aiThinkMs: 0,
+  });
+  await t.ensureReady();
+  t.occupy('gdA', '掼A');
+  t.occupy('gdB', '掼B');
+  ok('gd two clients same room', t.humanCount === 2, `humans=${t.humanCount} key=${roomKey}`);
+  // dual waits for more humans or timeout; force complete
+  await t.completeMatch?.() || t.driveAi?.();
+  ok('gd dual table alive', t.humanCount >= 2, `phase=${t.phase}`);
+}
+
+async function smokeDdzReconnectSeat() {
+  const roomKey = `dual_recon_ddz_${Date.now().toString(36)}`;
+  const t = new DdzTable({
+    roomKey,
+    currency: 'ingot',
+    match: true,
+    autoDeal: false,
+    aiThinkMs: 0,
+  });
+  await t.ensureReady();
+  t.occupy('reconA', '甲');
+  t.occupy('reconB', '乙');
+  await t.completeMatch();
+  const seatBefore = t.seatOf('reconA');
+  ok('ddz recon seat before', seatBefore >= 0, `seat=${seatBefore}`);
+  t.disconnect('reconA');
+  ok('ddz soft disconnect', t.seats[seatBefore]?.kind === 'human', 'seat retained under trustee');
+  t.reconnect('reconA', '甲回');
+  const seatAfter = t.seatOf('reconA');
+  ok('ddz reconnect same seat', seatAfter === seatBefore, `before=${seatBefore} after=${seatAfter}`);
+  ok('ddz same roomKey', t.roomKey === roomKey, t.roomKey);
+}
+
+async function smokeGdReconnectSeat() {
+  const roomKey = `dual_recon_gd_${Date.now().toString(36)}`;
+  const t = new GdTable({
+    roomKey,
+    currency: 'ingot',
+    match: true,
+    autoDeal: false,
+    aiThinkMs: 0,
+  });
+  await t.ensureReady();
+  t.occupy('gA', 'A');
+  t.occupy('gB', 'B');
+  const seatBefore = t.seatOf('gA');
+  ok('gd recon seat before', seatBefore >= 0, `seat=${seatBefore}`);
+  if (typeof t.disconnect === 'function') t.disconnect('gA');
+  t.reconnect('gA', 'A回');
+  const seatAfter = t.seatOf('gA');
+  ok('gd reconnect same seat', seatAfter === seatBefore, `before=${seatBefore} after=${seatAfter}`);
+  ok('gd same roomKey after recon', t.roomKey === roomKey, t.roomKey);
+}
+
 await smokeDdzInProcess();
 await smokeMjInProcess();
+await smokeGdInProcess();
+await smokeDdzReconnectSeat();
+await smokeGdReconnectSeat();
 await smokeLiveHint();
 
 const failed = results.filter((r) => !r.pass);
-console.log('\n=== play9fin3c dual-session smoke ===');
+console.log('\n=== play9fin7c dual-session smoke ===');
 console.log(JSON.stringify({ ok: failed.length === 0, total: results.length, failed: failed.length, results }, null, 2));
 process.exit(failed.length ? 1 : 0);

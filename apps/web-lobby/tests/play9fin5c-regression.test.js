@@ -1,5 +1,5 @@
 /**
- * play9fin7b — version visible / room-api errors distinguishable + full regression
+ * play9fin7c — version visible / room-api errors distinguishable + full regression
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -21,11 +21,11 @@ const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const lia = readFileSync(join(root, 'src/lobby-ia.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9fin7b', () => {
-  assert.match(html, /app\.js\?v=play9fin7b/);
-  assert.match(app, /\?v=play9fin7b/);
-  assert.equal(CACHE_STAMP, 'play9fin7b');
-  assert.equal(BUILD_VERSION, 'play9fin7b');
+test('cache play9fin7c', () => {
+  assert.match(html, /app\.js\?v=play9fin7c/);
+  assert.match(app, /\?v=play9fin7c/);
+  assert.equal(CACHE_STAMP, 'play9fin7c');
+  assert.equal(BUILD_VERSION, 'play9fin7c');
   assert.doesNotMatch(html, /app\.js\?v=play9fin5b/);
 });
 
@@ -38,13 +38,13 @@ test('lobby + health show version/cache stamp', () => {
   assert.match(serverSrc, /TEA_PARLOR_VERSION|TEA_PARLOR_CACHE/);
   const health = buildStampPayload();
   assert.equal(health.ok, true);
-  assert.equal(health.cache, 'play9fin7b');
-  assert.equal(health.version, 'play9fin7b');
-  assert.match(formatLobbyVersionLabel(), /play9fin7b/);
+  assert.equal(health.cache, 'play9fin7c');
+  assert.equal(health.version, 'play9fin7c');
+  assert.match(formatLobbyVersionLabel(), /play9fin7c/);
   const cfg = buildRuntimeConfigScript({ NODE_ENV: 'production' });
   assert.match(cfg, /TEA_PARLOR_VERSION/);
   assert.match(cfg, /TEA_PARLOR_CACHE/);
-  assert.match(colySrv, /version:.*play9fin7b|TEA_PARLOR_VERSION/);
+  assert.match(colySrv, /version:.*play9fin7c|TEA_PARLOR_VERSION/);
 });
 
 test('key room API errors distinguishable in logs', () => {
@@ -100,7 +100,7 @@ test('dual-session smoke still green when available', () => {
   assert.equal(r.status, 0, r.stderr || r.stdout);
 });
 
-test('docs/qa play9fin7b present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7b/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7b/report.json')), true);
+test('docs/qa play9fin7c present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7c/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7c/report.json')), true);
 });

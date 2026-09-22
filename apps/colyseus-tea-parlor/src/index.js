@@ -29,8 +29,8 @@ app.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'tea-parlor-colyseus',
-    version: process.env.TEA_PARLOR_VERSION || 'play9fin7b',
-    cache: process.env.TEA_PARLOR_CACHE || 'play9fin7b',
+    version: process.env.TEA_PARLOR_VERSION || 'play9fin7c',
+    cache: process.env.TEA_PARLOR_CACHE || 'play9fin7c',
     games: ['doudizhu', 'mahjong', 'niuniu', 'guandan'], // niuniu listed for dual-deploy; no NnRoom in v1 (local vs-AI); guandan = GuandanRoom
     port: PORT,
     matchMs: MATCH_MS,

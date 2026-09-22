@@ -40,9 +40,9 @@ function settle(tiles13, win, opts = {}) {
   return ev;
 }
 
-test('cache play9fin7b', () => {
-  assert.match(html, /app\.js\?v=play9fin7b/);
-  assert.match(app, /\?v=play9fin7b/);
+test('cache play9fin7c', () => {
+  assert.match(html, /app\.js\?v=play9fin7c/);
+  assert.match(app, /\?v=play9fin7c/);
   assert.doesNotMatch(html, /app\.js\?v=play9fin5a/);
 });
 
@@ -65,7 +65,7 @@ test('yaku decompose thickened — findAllMeldDecompositions + best-of', () => {
   assert.match(eng, /findAllMeldDecompositions/);
   assert.match(eng, /scoreRarerYakuForDecomp/);
   assert.match(eng, /collectMeldDecompositions/);
-  assert.match(eng, /play9fin7b|findAllMeldDecompositions/);
+  assert.match(eng, /play9fin7c|findAllMeldDecompositions/);
 });
 
 test('settle lists each judgeable yaku separately (chinitsu + tanyao not lumped)', () => {

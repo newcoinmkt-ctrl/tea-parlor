@@ -1,5 +1,5 @@
 /**
- * play9fin7b — deep-link seat join
+ * play9fin7c — deep-link seat join
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -19,11 +19,11 @@ const html = readFileSync(join(root, 'index.html'), 'utf8');
 const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const coly = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/index.js'), 'utf8');
 
-test('cache play9fin7b', () => {
-  assert.equal(CACHE_STAMP, 'play9fin7b');
-  assert.equal(BUILD_VERSION, 'play9fin7b');
-  assert.match(html, /app\.js\?v=play9fin7b/);
-  assert.match(coly, /play9fin7b/);
+test('cache play9fin7c', () => {
+  assert.equal(CACHE_STAMP, 'play9fin7c');
+  assert.equal(BUILD_VERSION, 'play9fin7c');
+  assert.match(html, /app\.js\?v=play9fin7c/);
+  assert.match(coly, /play9fin7c/);
 });
 
 test('validate + readable join errors', () => {
@@ -52,9 +52,9 @@ test('parse cold/hot startapp → roomKey', () => {
   assert.equal(b.gameId, 'gd');
 });
 
-test('docs/qa play9fin7b', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7b/README.md')), true);
-  assert.match(readFileSync(join(repo, 'docs/qa/play9fin7b/README.md'), 'utf8'), /leave.?then.?join|离开.*加入/i);
+test('docs/qa play9fin7c', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7c/README.md')), true);
+  assert.match(readFileSync(join(repo, 'docs/qa/play9fin7c/README.md'), 'utf8'), /leave.?then.?join|离开.*加入/i);
 });
 
 test('guandan still in health games list marker', () => {

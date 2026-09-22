@@ -1,0 +1,7 @@
+{
+  "wave": "play9fin7c",
+  "cache": "play9fin7c",
+  "dual": ["ddz", "guandan"],
+  "reconnect": "roomKey-matched token",
+  "smoke": "dual-session-smoke.mjs"
+}
