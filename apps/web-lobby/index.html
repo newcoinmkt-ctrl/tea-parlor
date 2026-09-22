@@ -9,18 +9,18 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin6c" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin6c" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/niuniu.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9ui1a" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9ui1a" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -94,7 +94,7 @@
         <div class="stage-content">
           <section class="home-app" data-lobby-view="home" aria-label="茶馆主房间">
             <p class="home-kicker">茶馆主房间</p>
-            <p class="lobby-version-stamp" id="lobbyVersionStamp" aria-label="版本缓存戳">茶馆 play9fin6c · cache play9fin6c</p>
+            <p class="lobby-version-stamp" id="lobbyVersionStamp" aria-label="版本缓存戳">茶馆 play9ui1a · cache play9ui1a</p>
             <strong id="homePlayerName" hidden>茶馆</strong>
 
             <div class="p0-home-chrome">
@@ -127,7 +127,7 @@
                 <strong>麻将</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="niuniu">
-                <img src="./public/assets/home/icon-niuniu.png?v=play9fin6c" alt="" />
+                <img src="./public/assets/home/icon-niuniu.png?v=play9ui1a" alt="" />
                 <strong>牛牛</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="texas">
@@ -153,7 +153,7 @@
             </section>
             <p class="home-chain-hint">USDT 专用 · 与金币场分开</p>
 
-            <!-- play9fin6c: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
+            <!-- play9ui1a: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
             <section class="activity-entry-band" aria-label="活动入口">
               <button type="button" class="activity-entry-btn" data-lobby-action="activity" id="homeActivityEntry">
                 <span class="activity-entry-ico" aria-hidden="true">🎁</span>
@@ -165,7 +165,7 @@
               </button>
             </section>
 
-            <!-- play9fin6c: light social — room code / invite OR recent same-table -->
+            <!-- play9ui1a: light social — room code / invite OR recent same-table -->
             <section class="social-entry-band" aria-label="轻社交入口">
               <button type="button" class="social-entry-btn" data-lobby-action="social" id="homeSocialEntry">
                 <span class="social-entry-ico" aria-hidden="true">👥</span>
@@ -1275,7 +1275,7 @@
           </section>
 
 
-          <!-- play9fin6c: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
+          <!-- play9ui1a: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
           <section class="panel-page activity-page" data-lobby-view="activity" aria-label="活动中心" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1327,7 +1327,7 @@
 
           <!-- 战绩 -->
           
-          <!-- play9fin6c: light social — room code invite + recent same-table; NO full IM -->
+          <!-- play9ui1a: light social — room code invite + recent same-table; NO full IM -->
           <section class="panel-page social-page" data-lobby-view="social" aria-label="约局同桌" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1570,12 +1570,14 @@
           <!-- 自己：出牌区 + 操作钮 + 手牌（JJ：按钮在手牌正上方） -->
           <div class="self-slot">
             <div id="playZone0" class="play-zone play-zone-self" aria-label="我的出牌"></div>
+            <div id="ddzAutoplayHint" class="jj-autoplay-hint" hidden aria-live="polite">自动出牌中</div>
             <div class="qq-center-actions action-panel">
-              <div id="bidControls" class="action-row qq-action-row" hidden>
-                <button data-bid="0" type="button" class="qq-btn qq-btn-blue">不叫</button>
-                <button data-bid="1" type="button" class="qq-btn qq-btn-gold">1 分</button>
-                <button data-bid="2" type="button" class="qq-btn qq-btn-gold">2 分</button>
-                <button data-bid="3" type="button" class="qq-btn qq-btn-gold">3 分</button>
+              <div id="bidControls" class="action-row qq-action-row jj-bid-bar" hidden aria-label="叫分">
+                <button data-bid="0" type="button" class="qq-btn qq-btn-pass jj-bid-pass">不叫</button>
+                <span class="jj-bid-clock" id="bidTimer" aria-live="polite" aria-label="叫分倒计时" hidden>20</span>
+                <button data-bid="1" type="button" class="qq-btn qq-btn-gold jj-bid-num">1</button>
+                <button data-bid="2" type="button" class="qq-btn qq-btn-gold jj-bid-num">2</button>
+                <button data-bid="3" type="button" class="qq-btn qq-btn-gold jj-bid-num">3</button>
               </div>
               <div id="doubleControls" class="action-row qq-action-row" hidden>
                 <button data-double="1" type="button" class="qq-btn qq-btn-blue">不加倍</button>
@@ -2030,6 +2032,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9fin6c"></script>
+    <script type="module" src="./src/app.js?v=play9ui1a"></script>
   </body>
 </html>

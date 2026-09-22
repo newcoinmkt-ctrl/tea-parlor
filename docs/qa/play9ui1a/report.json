@@ -1,0 +1,15 @@
+{
+  "cache": "play9ui1a",
+  "slice": "ui1a",
+  "viewport_landscape": [896, 414],
+  "viewport_portrait": [414, 896],
+  "checks": {
+    "bid_bar": "不叫 + bidTimer + 1/2/3",
+    "autoplay_hint": "自动出牌中 when trustee",
+    "meter": "王/2/A/K/Q/J/炸",
+    "no_rotate": true,
+    "tg_vh": "ship3b prefer viewportStableHeight",
+    "no_laizi_gameplay": true
+  },
+  "refs": ["01-ddz-table-jj.jpeg", "06-ddz-night-cruise.png", "07-ddz-day-cruise.png", "08-ddz-bid.png", "09-ddz-autoplay.png"]
+}

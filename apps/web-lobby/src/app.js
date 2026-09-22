@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin6c';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin6c';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin6c';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin6c';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin6c';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9ui1a';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9ui1a';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9ui1a';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9ui1a';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9ui1a';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -612,6 +612,8 @@ const nodes = {
   bottomCards: $('#bottomCards'),
   handArea: $('#handArea'),
   bidControls: $('#bidControls'),
+  bidTimer: $('#bidTimer'),
+  ddzAutoplayHint: $('#ddzAutoplayHint'),
   doubleControls: $('#doubleControls'),
   superDoubleBtn: $('#superDoubleBtn'),
   playControls: $('#playControls'),
@@ -5303,13 +5305,17 @@ function stopDdzTurnClock() {
   }
   ddzTurnEndsAt = 0;
 }
+function paintDdzTurnClocks(left) {
+  const txt = String(left);
+  if (nodes.turnTimer) nodes.turnTimer.textContent = txt;
+  if (nodes.bidTimer) nodes.bidTimer.textContent = txt;
+}
 function armDdzTurnClock(seconds = 20) {
   stopDdzTurnClock();
   ddzTurnEndsAt = Date.now() + Math.max(1, Number(seconds) || 20) * 1000;
   const tick = () => {
-    if (!nodes.turnTimer) return;
     const left = Math.max(0, Math.ceil((ddzTurnEndsAt - Date.now()) / 1000));
-    nodes.turnTimer.textContent = String(left);
+    paintDdzTurnClocks(left);
     if (left <= 0) stopDdzTurnClock();
   };
   tick();
@@ -5339,7 +5345,7 @@ function ensureDualRoomKey(game = 'ddz') {
 function friendInviteUrl(roomId) {
   const tg = window.Telegram?.WebApp;
   const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
-  // play9fin6c: startapp=t_<roomKey> deep link
+  // play9ui1a: startapp=t_<roomKey> deep link
   return buildTgInviteUrl(roomId, bot);
 }
 
@@ -5398,7 +5404,7 @@ function bindFriendDualEnter() {
     e.preventDefault();
     enterFriendDualTable();
   });
-  // play9fin6c: TG invite deep link — start_param / tgWebAppStartParam / startapp
+  // play9ui1a: TG invite deep link — start_param / tgWebAppStartParam / startapp
   tryConsumeTgInviteDeepLink();
 }
 
@@ -7310,19 +7316,34 @@ function _renderGameBody() {
   }
   if (nodes.hintButton) nodes.hintButton.disabled = !myPlay;
   if (nodes.trusteeButton) nodes.trusteeButton.textContent = trustee ? '取消托管' : '托管';
-  if (nodes.turnTimer) {
+  if (nodes.turnTimer || nodes.bidTimer) {
     const showClock = myPlay || myBid || myDouble;
     if (showClock) {
       if (!ddzTurnEndsAt || ddzTurnEndsAt < Date.now()) armDdzTurnClock(20);
       const left = Math.max(0, Math.ceil((ddzTurnEndsAt - Date.now()) / 1000));
-      nodes.turnTimer.textContent = String(left || 20);
+      paintDdzTurnClocks(left || 20);
     } else {
       stopDdzTurnClock();
-      nodes.turnTimer.textContent = '';
+      paintDdzTurnClocks('');
     }
-    nodes.turnTimer.classList.toggle('is-active', showClock);
-    setHidden(nodes.turnTimer, !showClock);
+    if (nodes.turnTimer) {
+      nodes.turnTimer.classList.toggle('is-active', showClock && myPlay);
+      // play clock lives in playControls; hide during bid (bidTimer owns countdown)
+      setHidden(nodes.turnTimer, !(showClock && myPlay));
+    }
+    if (nodes.bidTimer) {
+      nodes.bidTimer.classList.toggle('is-active', showClock && myBid);
+      setHidden(nodes.bidTimer, !(showClock && myBid));
+    }
   }
+  // play9ui1a: 「自动出牌中」 banner when trustee (UI only; no 赖子)
+  if (nodes.ddzAutoplayHint) {
+    const showAuto = Boolean(trustee) && game && (game.phase === 'play' || game.phase === 'double');
+    setHidden(nodes.ddzAutoplayHint, !showAuto);
+    nodes.ddzAutoplayHint.classList.toggle('is-on', showAuto);
+    if (showAuto) nodes.ddzAutoplayHint.textContent = '自动出牌中';
+  }
+  nodes.tableView?.classList.toggle('is-trustee', Boolean(trustee));
   // 确保当前可见操作区可点
   if (nodes.playControls && !nodes.playControls.hidden) {
     nodes.playControls.style.setProperty('pointer-events', 'auto', 'important');
