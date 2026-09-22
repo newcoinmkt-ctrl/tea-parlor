@@ -1,5 +1,5 @@
 /**
- * play9ui1e — lobby activity / daily supply entry
+ * play9ui2a — lobby activity / daily supply entry
  * Enterable + viewable; chips only; non-withdrawable; NO Stars/chain top-up
  */
 import test from 'node:test';
@@ -14,10 +14,10 @@ const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const lia = readFileSync(join(root, 'src/lobby-ia.css'), 'utf8');
 const copy = readFileSync(join(root, 'src/net/daily-supply-copy.js'), 'utf8');
 
-test('cache play9ui1e', () => {
-  assert.match(html, /app\.js\?v=play9ui1e/);
-  assert.match(html, /lobby-ia\.css\?v=play9ui1e/);
-  assert.match(app, /\?v=play9ui1e/);
+test('cache play9ui2a', () => {
+  assert.match(html, /app\.js\?v=play9ui2a/);
+  assert.match(html, /lobby-ia\.css\?v=play9ui2a/);
+  assert.match(app, /\?v=play9ui2a/);
   assert.doesNotMatch(html, /app\.js\?v=play9fin3c/);
 });
 
@@ -51,12 +51,12 @@ test('rewards are chips only — non-withdrawable; no Stars/chain top-up on acti
   assert.doesNotMatch(activityBlock, /data-chain-topup|id="chainTopup"|class="chain-topup"/);
   assert.match(activityBlock, /已禁用/);
   assert.match(copy, /不可提现/);
-  assert.match(lia, /play9ui1e/);
+  assert.match(lia, /play9ui2a/);
   assert.match(lia, /activity-entry-btn/);
   assert.match(lia, /activity-page/);
 });
 
-test('docs/qa play9ui1e present', () => {
-  assert.equal(existsSync(join(root, '../../docs/qa/play9ui1e/README.md')), true);
-  assert.equal(existsSync(join(root, '../../docs/qa/play9ui1e/report.json')), true);
+test('docs/qa play9ui2a present', () => {
+  assert.equal(existsSync(join(root, '../../docs/qa/play9ui2a/README.md')), true);
+  assert.equal(existsSync(join(root, '../../docs/qa/play9ui2a/report.json')), true);
 });
