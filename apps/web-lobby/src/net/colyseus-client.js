@@ -395,3 +395,126 @@ export function makeDualRoomKey(game = 'ddz') {
   const suffix = Math.random().toString(36).slice(2, 8);
   return `dual_${game}_${suffix}`;
 }
+
+/**
+ * play9gd1 — join/create Guandan 4-seat Colyseus room
+ */
+export async function startColyseusGdSession({
+  endpoint = defaultColyseusUrl(),
+  uid,
+  name,
+  roomId = 'novice',
+  currency = 'ingot',
+  token,
+  fresh = true,
+} = {}) {
+  await connectColyseus(endpoint);
+  const options = {
+    uid: uid || `h5_${Date.now()}`,
+    name: name || '茶馆',
+    roomKey: roomId,
+    currency,
+  };
+  if (token) options.token = token;
+
+  if (fresh) {
+    try { sessionStorage.removeItem('tea-parlor-gd-reconnect'); } catch (_) {}
+  }
+  const storedTok = fresh ? null : (() => {
+    try {
+      const raw = sessionStorage.getItem('tea-parlor-gd-reconnect');
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed?.uid === options.uid && parsed?.token) return parsed.token;
+    } catch (_) {}
+    return null;
+  })();
+
+  let joined = null;
+  if (storedTok) {
+    try { joined = await client.reconnect(storedTok); } catch (err) {
+      logRoomApiError('gd_reconnect_failed', err, { roomKey: roomId });
+      joined = null;
+    }
+  }
+  if (!joined) {
+    try {
+      joined = await client.joinOrCreate('guandan', options);
+    } catch (err) {
+      logRoomApiError('gd_join_or_create_failed', err, { roomKey: roomId });
+      throw err;
+    }
+  }
+  room = joined;
+  try {
+    sessionStorage.setItem('tea-parlor-gd-reconnect', JSON.stringify({
+      uid: options.uid,
+      token: room.reconnectionToken || null,
+      roomKey: roomId,
+      fullTrustee: !!(typeof window !== 'undefined' && window.__gdFullTrustee),
+    }));
+  } catch (_) {}
+
+  room.onMessage('room', (msg) => {
+    if (msg?.room) emitRoom(msg.room);
+  });
+  room.onMessage('error', (msg) => {
+    logRoomApiError('gd_room_message_error', msg?.msg || msg, { codeHint: msg?.code || msg?.reason });
+  });
+  room.onMessage('joined', () => {});
+
+  const first = await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      logRoomApiError('gd_room_state_timeout', 'colyseus gd room state timeout', { roomId: room?.roomId });
+      reject(new Error('colyseus gd room state timeout'));
+    }, 12000);
+    const off = onRoomUpdate((st) => {
+      clearTimeout(timer);
+      off();
+      resolve(st);
+    });
+    try { room.send('state', {}); } catch (_) {}
+  });
+
+  return {
+    room: first,
+    uid: options.uid,
+    sessionId: room.sessionId,
+    backend: 'colyseus',
+    game: 'guandan',
+  };
+}
+
+export async function gdPlay(cardIds) {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('play', { cardIds });
+  return { room: await p };
+}
+
+export async function gdPass() {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('pass', {});
+  return { room: await p };
+}
+
+export async function gdRematch() {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('rematch', {});
+  return { room: await p };
+}
+
+export async function gdSetTrustee(on = true) {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('trustee', { on: !!on });
+  return { room: await p };
+}
+
+export async function gdState() {
+  const r = ensureRoom();
+  const p = waitRoomUpdate();
+  r.send('state', {});
+  return { room: await p };
+}

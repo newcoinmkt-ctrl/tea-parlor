@@ -1,9 +1,9 @@
 /**
- * play9ui2d — Guandan settle + full regression
+ * play9gd1a — Guandan Colyseus room + lobby entry
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9ui2d';
-export const BUILD_VERSION = 'play9ui2d';
+export const CACHE_STAMP = 'play9gd1a';
+export const BUILD_VERSION = 'play9gd1a';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {
