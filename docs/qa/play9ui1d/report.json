@@ -1,0 +1,12 @@
+{
+  "cache": "play9ui1d",
+  "slice": "ui1d",
+  "checks": {
+    "compass_winds_timer": true,
+    "four_walls": true,
+    "big_bottom_hand": true,
+    "tuidaohu_and_riichi_entries": true,
+    "letterbox_no_rotate": true
+  },
+  "refs": ["04-mj-table-jj.png"]
+}
