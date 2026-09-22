@@ -1386,7 +1386,7 @@ html.table-stage-jj #tableView #playButton.is-recommended[aria-disabled="true"] 
   transform: none !important;
 }
 
-/* ── play9ui1c: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
+/* ── play9ui1d: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
 html.table-stage-jj #tableView #bidControls.jj-bid-bar:not([hidden]),
 html.table-stage-jj #tableView #bidControls:not([hidden]) {
   gap: 12px !important;
@@ -1479,7 +1479,7 @@ html.table-stage-jj #tableView.table-stage-land-target {
   /* transform is inline translate+scale only */
 }
 
-/* ── play9ui1c: settle triangle polish (ref 02) ── */
+/* ── play9ui1d: settle triangle polish (ref 02) ── */
 html.table-stage-jj #tableView.is-settle .jj-settle-hud:not([hidden]) {
   z-index: 120 !important;
 }

@@ -18,10 +18,11 @@
     "test:fin5c": "node --test tests/play9fin5c-regression.test.js tests/play9fin5b-activity-yaku.test.js tests/play9fin5a-recent-tables.test.js tests/play9fin4c-regression.test.js tests/play9fin4a-activity.test.js tests/play9fin4b-rarer-yaku.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js",
     "test:fin6a": "node --test tests/play9fin6a-room-match.test.js tests/ddz-match-copy.test.js tests/play9fin5c-regression.test.js tests/play9fin5b-activity-yaku.test.js tests/play9fin5a-recent-tables.test.js tests/play9fin4c-regression.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/play9fin3b-ad-config.test.js tests/niuniu-lobby.test.js",
     "test:fin6b": "node --test tests/play9fin6b-settle.test.js tests/play9fin6a-room-match.test.js tests/play9fin5c-regression.test.js tests/play9fin5a-recent-tables.test.js tests/play9fin4c-regression.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/niuniu-lobby.test.js",
-    "test:fin6c": "node --test tests/play9ui1c-invite-regression.test.js tests/tg-invite.test.js tests/play9fin6b-settle.test.js tests/play9fin6a-room-match.test.js tests/play9fin5c-regression.test.js tests/play9fin5a-recent-tables.test.js tests/play9fin4c-regression.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/niuniu-lobby.test.js",
-    "test:ui1a": "node --test tests/play9ui1c-ddz-table.test.js tests/play9fin6c-invite-regression.test.js tests/play9fin6b-settle.test.js tests/ddz-table-acts.test.js tests/play9fin2b-full-trustee.test.js",
-    "test:ui1b": "node --test tests/play9ui1c-ddz-settle.test.js tests/play9fin6b-settle.test.js tests/play9ui1a-ddz-table.test.js",
-    "test:ui1c": "node --test tests/play9ui1c-nn-felt-regression.test.js tests/play9ui1b-ddz-settle.test.js tests/play9ui1a-ddz-table.test.js tests/niuniu-lobby.test.js tests/play9fin2c-lobby-tabs.test.js"
+    "test:fin6c": "node --test tests/play9ui1d-invite-regression.test.js tests/tg-invite.test.js tests/play9fin6b-settle.test.js tests/play9fin6a-room-match.test.js tests/play9fin5c-regression.test.js tests/play9fin5a-recent-tables.test.js tests/play9fin4c-regression.test.js tests/play9fin2c-lobby-tabs.test.js tests/play9fin3a-trustee-auth.test.js tests/niuniu-lobby.test.js",
+    "test:ui1a": "node --test tests/play9ui1d-ddz-table.test.js tests/play9fin6c-invite-regression.test.js tests/play9fin6b-settle.test.js tests/ddz-table-acts.test.js tests/play9fin2b-full-trustee.test.js",
+    "test:ui1b": "node --test tests/play9ui1d-ddz-settle.test.js tests/play9fin6b-settle.test.js tests/play9ui1a-ddz-table.test.js",
+    "test:ui1c": "node --test tests/play9ui1d-nn-felt-regression.test.js tests/play9ui1b-ddz-settle.test.js tests/play9ui1a-ddz-table.test.js tests/niuniu-lobby.test.js tests/play9fin2c-lobby-tabs.test.js",
+    "test:ui1d": "node --test tests/play9ui1d-mj-table.test.js tests/play9ui1c-nn-felt-regression.test.js"
   },
   "dependencies": {
     "@tea-parlor/common": "file:../../packages/common"
