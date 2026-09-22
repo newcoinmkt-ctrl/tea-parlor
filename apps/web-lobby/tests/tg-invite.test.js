@@ -5,6 +5,10 @@ import {
   parseTgInviteStartParam,
   normalizeDualRoomKey,
   collectTgInviteSources,
+  buildInvitePayload,
+  inferGameIdFromRoomKey,
+  validateInviteRoomKey,
+  shortGameId,
 } from '../src/net/tg-invite.js';
 
 test('buildTgInviteUrl startapp', () => {
@@ -20,12 +24,15 @@ test('parse sources prefer start_param', () => {
     tgWebAppStartParam: 't_dual_ddz_two',
   });
   assert.equal(p.roomKey, 'dual_ddz_one');
+  assert.equal(p.gameId, 'ddz');
 });
 
 test('normalizeDualRoomKey', () => {
   assert.equal(normalizeDualRoomKey('dual_ddz_x'), 'dual_ddz_x');
   assert.equal(normalizeDualRoomKey('abcd'), 'dual_ddz_abcd');
   assert.equal(normalizeDualRoomKey('t_dual_ddz_z'), 'dual_ddz_z');
+  assert.equal(normalizeDualRoomKey('wxyz', 'gd'), 'dual_gd_wxyz');
+  assert.equal(normalizeDualRoomKey('dual_gd_aa'), 'dual_gd_aa');
 });
 
 test('collectTgInviteSources from fake loc', () => {
@@ -35,4 +42,27 @@ test('collectTgInviteSources from fake loc', () => {
   );
   assert.equal(src.start_param, 't_dual_ddz_tg');
   assert.equal(src.tgWebAppStartParam, 't_other');
+});
+
+test('buildInvitePayload includes roomKey + gameId', () => {
+  const p = buildInvitePayload({ roomKey: 'dual_gd_table1', gameId: 'guandan' });
+  assert.equal(p.roomKey, 'dual_gd_table1');
+  assert.equal(p.gameId, 'gd');
+  assert.match(p.url, /startapp=t_dual_gd_table1/);
+  assert.match(p.copyText, /dual_gd_table1/);
+});
+
+test('infer + validate', () => {
+  assert.equal(inferGameIdFromRoomKey('dual_gd_xyz'), 'gd');
+  assert.equal(shortGameId('guandan'), 'gd');
+  const ok = validateInviteRoomKey('dual_ddz_ok12');
+  assert.equal(ok.ok, true);
+  const bad = validateInviteRoomKey('');
+  assert.equal(bad.ok, false);
+});
+
+test('parse guandan startapp', () => {
+  const p = parseTgInviteStartParam({ startapp: 't_dual_gd_room99' });
+  assert.equal(p.roomKey, 'dual_gd_room99');
+  assert.equal(p.gameId, 'gd');
 });

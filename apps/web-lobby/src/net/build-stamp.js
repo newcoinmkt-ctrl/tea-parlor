@@ -1,9 +1,9 @@
 /**
- * play9gd1d — Guandan skin wire + full wave regression
+ * play9fin7a — unify invite export (DDZ + Guandan)
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9gd1d';
-export const BUILD_VERSION = 'play9gd1d';
+export const CACHE_STAMP = 'play9fin7a';
+export const BUILD_VERSION = 'play9fin7a';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

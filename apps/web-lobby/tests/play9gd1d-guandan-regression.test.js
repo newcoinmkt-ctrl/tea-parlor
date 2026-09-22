@@ -1,5 +1,5 @@
 /**
- * play9gd1d — Guandan skins + full wave regression
+ * play9fin7a — Guandan skins + full wave regression
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -20,11 +20,11 @@ const jj = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 const nn = readFileSync(join(root, 'src/niuniu.css'), 'utf8');
 const mj = readFileSync(join(root, 'src/jj-mahjong.css'), 'utf8');
 
-test('cache play9gd1d', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1d');
-  assert.equal(BUILD_VERSION, 'play9gd1d');
-  assert.match(html, /app\.js\?v=play9gd1d/);
-  assert.match(coly, /play9gd1d/);
+test('cache play9fin7a', () => {
+  assert.equal(CACHE_STAMP, 'play9fin7a');
+  assert.equal(BUILD_VERSION, 'play9fin7a');
+  assert.match(html, /app\.js\?v=play9fin7a/);
+  assert.match(coly, /play9fin7a/);
   assert.match(coly, /['"]guandan['"]/);
 });
 
@@ -52,8 +52,8 @@ test('regression: DDZ/MJ/NN markers; no rotate; ship3b tg-vh; no withdraw', () =
   assert.doesNotMatch(app, /startGuanDan[\s\S]{0,400}withdraw/);
 });
 
-test('docs/qa play9gd1d + no second engine', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/README.md')), true);
+test('docs/qa play9fin7a + no second engine', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7a/README.md')), true);
   assert.equal(existsSync(join(repo, 'packages/guandan-engine')), true);
   assert.equal(existsSync(join(root, 'src/games/guandan2')), false);
 });

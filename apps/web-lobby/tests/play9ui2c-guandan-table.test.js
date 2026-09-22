@@ -1,5 +1,5 @@
 /**
- * play9gd1d — Guandan 4-seat yard table shell
+ * play9fin7a — Guandan 4-seat yard table shell
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,10 +15,10 @@ const ui = readFileSync(join(root, 'src/games/guandan/ui.js'), 'utf8');
 const css = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9gd1d', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1d');
-  assert.equal(BUILD_VERSION, 'play9gd1d');
-  assert.match(html, /app\.js\?v=play9gd1d/);
+test('cache play9fin7a', () => {
+  assert.equal(CACHE_STAMP, 'play9fin7a');
+  assert.equal(BUILD_VERSION, 'play9fin7a');
+  assert.match(html, /app\.js\?v=play9fin7a/);
 });
 
 test('existing Guandan module only — no new engine package', () => {
@@ -38,7 +38,7 @@ test('4-seat diamond + avatar/chip/remain chrome', () => {
   assert.match(ui, /gd-active/);
   assert.match(ui, /gd-4p/);
   assert.match(ui, /gd-yard/);
-  assert.match(ui, /play9gd1d/);
+  assert.match(ui, /play9fin7a/);
   assert.match(css, /data-mg-seat="1"/);
   assert.match(css, /data-mg-seat="2"/);
   assert.match(css, /data-mg-seat="3"/);
@@ -76,7 +76,7 @@ test('letterbox landscape; no page rotate; ship3b tg-vh', () => {
   assert.doesNotMatch(orient, /Math\.max\([^)]*innerHeight[^)]*viewportStableHeight/);
 });
 
-test('docs/qa play9gd1d present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/report.json')), true);
+test('docs/qa play9fin7a present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7a/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7a/report.json')), true);
 });

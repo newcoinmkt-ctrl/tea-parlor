@@ -9,18 +9,18 @@
     <meta name="theme-color" content="#1a5aab" />
     <meta name="format-detection" content="telephone=no" />
     <title>茶馆</title>
-    <link rel="stylesheet" href="./src/styles.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/hand-fit.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/table-landscape.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/table-play.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/jj-table.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/niuniu.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9gd1d" />
-    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9gd1d" />
+    <link rel="stylesheet" href="./src/styles.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/themes/tokens.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/themes/classic-green.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/hand-fit.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/table-landscape.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/table-play.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/jj-table.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/jj-mahjong.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/riichi-mahjong.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/niuniu.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/lobby-ia.css?v=play9fin7a" />
+    <link rel="stylesheet" href="./src/themes/tp-bridge.css?v=play9fin7a" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -94,7 +94,7 @@
         <div class="stage-content">
           <section class="home-app" data-lobby-view="home" aria-label="茶馆主房间">
             <p class="home-kicker">茶馆主房间</p>
-            <p class="lobby-version-stamp" id="lobbyVersionStamp" aria-label="版本缓存戳">茶馆 play9gd1d · cache play9gd1d</p>
+            <p class="lobby-version-stamp" id="lobbyVersionStamp" aria-label="版本缓存戳">茶馆 play9fin7a · cache play9fin7a</p>
             <strong id="homePlayerName" hidden>茶馆</strong>
 
             <div class="p0-home-chrome">
@@ -127,7 +127,7 @@
                 <strong>麻将</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="niuniu">
-                <img src="./public/assets/home/icon-niuniu.png?v=play9gd1d" alt="" />
+                <img src="./public/assets/home/icon-niuniu.png?v=play9fin7a" alt="" />
                 <strong>牛牛</strong>
               </button>
               <button class="home-icon-btn" type="button" data-side-game="texas">
@@ -153,7 +153,7 @@
             </section>
             <p class="home-chain-hint">USDT 专用 · 与金币场分开</p>
 
-            <!-- play9gd1d: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
+            <!-- play9fin7a: ops/activity entry — daily supply chips only, no Stars/chain top-up -->
             <section class="activity-entry-band" aria-label="活动入口">
               <button type="button" class="activity-entry-btn" data-lobby-action="activity" id="homeActivityEntry">
                 <span class="activity-entry-ico" aria-hidden="true">🎁</span>
@@ -165,7 +165,7 @@
               </button>
             </section>
 
-            <!-- play9gd1d: light social — room code / invite OR recent same-table -->
+            <!-- play9fin7a: light social — room code / invite OR recent same-table -->
             <section class="social-entry-band" aria-label="轻社交入口">
               <button type="button" class="social-entry-btn" data-lobby-action="social" id="homeSocialEntry">
                 <span class="social-entry-ico" aria-hidden="true">👥</span>
@@ -879,6 +879,7 @@
 
             <div class="start-strip p0-start-dock">
               <button class="friend-room-button" type="button" data-lobby-action="friend-room">好友房</button>
+              <button class="friend-room-button" type="button" id="ddzRoomInvite" data-invite-game="ddz">邀请好友</button>
               <button class="friend-room-button" type="button" id="ddzLocalPlay" data-lobby-action="local-doudizhu">人机畅玩</button>
               <button class="quick-start-button" type="button" id="ddzQuickStart" data-lobby-action="quick-doudizhu">快速开始</button>
               <small class="p0-dock-hint">快速开始=联网匹配 · 人机畅玩不经匹配</small>
@@ -1013,6 +1014,10 @@
                 <span class="room-meta">赛季积分 · 最低 20</span>
                 <span class="room-action">进入</span>
               </button>
+            </div>
+            <div class="p0-dock" style="margin-top:12px">
+              <button type="button" class="friend-room-button" id="gdRoomInvite" data-invite-game="gd">邀请好友</button>
+              <p class="p0-dock-hint" id="gdInviteHint">生成 startapp 深链 · 好友同桌掼蛋</p>
             </div>
           </section>
 
@@ -1275,7 +1280,7 @@
           </section>
 
 
-          <!-- play9gd1d: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
+          <!-- play9fin7a: 活动中心 — 每日补给 / 任务奖励（仅影子金币，不可提现；无 Stars/链上充值） -->
           <section class="panel-page activity-page" data-lobby-view="activity" aria-label="活动中心" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1327,7 +1332,7 @@
 
           <!-- 战绩 -->
           
-          <!-- play9gd1d: light social — room code invite + recent same-table; NO full IM -->
+          <!-- play9fin7a: light social — room code invite + recent same-table; NO full IM -->
           <section class="panel-page social-page" data-lobby-view="social" aria-label="约局同桌" hidden>
             <div class="view-head">
               <button class="view-back-button" type="button" data-lobby-action="home">返回大厅</button>
@@ -1478,6 +1483,7 @@
               <div class="qq-more-menu" id="hudMoreMenu" hidden role="menu">
                 <button type="button" class="qq-more-item" role="menuitem" data-lobby-action="claim" title="礼包">🎁 礼包</button>
                 <button type="button" class="qq-more-item" role="menuitem" id="trusteeButton" title="托管">托管</button>
+                <button type="button" class="qq-more-item" role="menuitem" id="ddzTableInvite" data-invite-game="ddz" title="邀请好友">邀请好友</button>
               </div>
             </div>
           </div>
@@ -1584,7 +1590,7 @@
                 <button data-double="2" type="button" class="qq-btn qq-btn-gold">加倍</button>
                 <button data-double="4" type="button" class="qq-btn qq-btn-gold" id="superDoubleBtn">超级加倍</button>
               </div>
-              <div id="playControls" class="action-row qq-action-row play-controls-inline jj-play-bar" hidden data-jj-play="play9gd1d" aria-label="出牌操作">
+              <div id="playControls" class="action-row qq-action-row play-controls-inline jj-play-bar" hidden data-jj-play="play9fin7a" aria-label="出牌操作">
                 <div class="qq-action-btns jj-play-btns">
                   <button id="passButton" type="button" class="qq-btn qq-btn-pass jj-btn-gold muted-button">不出</button>
                   <span class="jj-play-clock" id="turnTimer" aria-live="polite" aria-label="出牌倒计时" hidden>20</span>
@@ -1631,7 +1637,7 @@
 
 
         <!-- play9jj1b JJ settlement overlay (triangle seats) -->
-        <div id="jjSettleHud" class="jj-settle-hud" hidden aria-live="polite" data-jj-settle="play9gd1d">
+        <div id="jjSettleHud" class="jj-settle-hud" hidden aria-live="polite" data-jj-settle="play9fin7a">
           <div class="jj-settle-topbar" id="jjSettleTopbar" aria-label="进度与倍数">
             <span class="jj-settle-pill-item jj-settle-xp" id="jjSettleXp"><i class="jj-pill-ico jj-pill-progress" aria-hidden="true"></i>235/360</span>
             <span class="jj-settle-pill-item jj-settle-mult" id="jjSettleMult"><i class="jj-pill-ico jj-pill-mult" aria-hidden="true"></i>100x3</span>
@@ -1665,6 +1671,7 @@
             <div class="tx-result-you" id="ddzResultYou"></div>
             <div class="tx-result-actions">
               <button type="button" id="ddzResultAgain" class="qq-btn qq-btn-gold p0-next">再来一局</button>
+              <button type="button" id="ddzResultInvite" class="qq-btn qq-btn-blue" data-invite-game="ddz">邀请好友</button>
               <button type="button" id="ddzResultLobby" class="qq-btn qq-btn-blue">回大厅</button>
             </div>
             <div class="p0-settle-ad" id="ddzSettleAd">
@@ -1804,6 +1811,7 @@
         <header class="mg-hud table-top">
           <button id="mgBackBtn" class="icon-text-button mg-back" type="button">← 返回</button>
           <button id="mgTrusteeBtn" class="icon-text-button mg-trustee" type="button" title="完整托管">托管</button>
+          <button id="mgTableInvite" class="icon-text-button mg-invite" type="button" data-invite-game="gd" title="邀请好友">邀请好友</button>
           <div class="mg-hud-mid">
             <span id="mgTitle" class="mg-hud-title">玩法</span>
             <strong id="mgStatus" class="mg-hud-status">准备开局</strong>
@@ -1924,6 +1932,7 @@
           </div>
           <div id="mgSettleRow" class="action-row mg-settle" hidden>
             <button id="mgAgainBtn" type="button" class="qq-btn qq-btn-gold">再来一局</button>
+            <button id="mgSettleInvite" type="button" class="qq-btn qq-btn-blue" data-invite-game="gd">邀请好友</button>
             <button id="mgLobbyBtn" class="qq-btn qq-btn-blue muted-button" type="button">回大厅</button>
           </div>
         </footer>
@@ -1950,6 +1959,7 @@
             <div class="tx-result-you" id="mgResultYou"></div>
             <div class="tx-result-actions">
               <button type="button" id="mgResultAgain" class="qq-btn qq-btn-gold">再来一局</button>
+              <button type="button" id="mgResultInvite" class="qq-btn qq-btn-blue" data-invite-game="gd">邀请好友</button>
               <button type="button" id="mgResultLobby" class="qq-btn qq-btn-blue">回大厅</button>
             </div>
           </div>
@@ -2032,6 +2042,6 @@
     <script src="./public/pinus/pinusclient.js"></script>
     <script src="./public/colyseus/colyseus.js"></script>
     <script src="./runtime-config.js"></script>
-    <script type="module" src="./src/app.js?v=play9gd1d"></script>
+    <script type="module" src="./src/app.js?v=play9fin7a"></script>
   </body>
 </html>

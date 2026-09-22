@@ -1,5 +1,5 @@
 /**
- * play9gd1d — Guandan playable rules + level HUD
+ * play9fin7a — Guandan playable rules + level HUD
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,11 +15,11 @@ const ui = readFileSync(join(root, 'src/games/guandan/ui.js'), 'utf8');
 const gdLogic = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/gdLogic.js'), 'utf8');
 const coly = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/index.js'), 'utf8');
 
-test('cache play9gd1d', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1d');
-  assert.equal(BUILD_VERSION, 'play9gd1d');
-  assert.match(html, /app\.js\?v=play9gd1d/);
-  assert.match(coly, /play9gd1d/);
+test('cache play9fin7a', () => {
+  assert.equal(CACHE_STAMP, 'play9fin7a');
+  assert.equal(BUILD_VERSION, 'play9fin7a');
+  assert.match(html, /app\.js\?v=play9fin7a/);
+  assert.match(coly, /play9fin7a/);
 });
 
 test('server validates hand types via guandan-engine', () => {
@@ -35,7 +35,7 @@ test('级牌 HUD uses server currentRank', () => {
   assert.match(ui, /currentRank/);
   assert.match(ui, /data-gd-level/);
   assert.match(ui, /applyServerSnap/);
-  assert.match(ui, /play9gd1d/);
+  assert.match(ui, /play9fin7a/);
 });
 
 test('ui2c 四炸 / 理牌 display-only preserved', () => {
@@ -44,7 +44,7 @@ test('ui2c 四炸 / 理牌 display-only preserved', () => {
   assert.match(ui, /gd-yard/);
 });
 
-test('docs/qa play9gd1d present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/README.md')), true);
+test('docs/qa play9fin7a present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7a/README.md')), true);
   assert.equal(existsSync(join(repo, 'packages/guandan-engine')), true);
 });
