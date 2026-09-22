@@ -1,5 +1,5 @@
 /**
- * play9gd1c — Guandan settle + full wave regression
+ * play9gd1d — Guandan settle + full wave regression
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -19,10 +19,10 @@ const nn = readFileSync(join(root, 'src/niuniu.css'), 'utf8');
 const mj = readFileSync(join(root, 'src/jj-mahjong.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9gd1c', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1c');
-  assert.equal(BUILD_VERSION, 'play9gd1c');
-  assert.match(html, /app\.js\?v=play9gd1c/);
+test('cache play9gd1d', () => {
+  assert.equal(CACHE_STAMP, 'play9gd1d');
+  assert.equal(BUILD_VERSION, 'play9gd1d');
+  assert.match(html, /app\.js\?v=play9gd1d/);
 });
 
 test('Guandan settle: 头游..末游 + 3D scores + 再来一局', () => {
@@ -88,7 +88,7 @@ test('no chain / Stars / TON / USDT / withdraw; no page rotate; ship3b tg-vh', (
   assert.match(html, /brand-slot|data-ad-slot/);
 });
 
-test('docs/qa play9gd1c present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/report.json')), true);
+test('docs/qa play9gd1d present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/report.json')), true);
 });

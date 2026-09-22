@@ -1,5 +1,5 @@
 /**
- * play9gd1c — DDZ play controls align
+ * play9gd1d — DDZ play controls align
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,11 +15,11 @@ const app = readFileSync(join(root, 'src/app.js'), 'utf8');
 const css = readFileSync(join(root, 'src/jj-table.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9gd1c', () => {
-  assert.equal(CACHE_STAMP, 'play9gd1c');
-  assert.equal(BUILD_VERSION, 'play9gd1c');
-  assert.match(html, /app\.js\?v=play9gd1c/);
-  assert.match(html, /jj-table\.css\?v=play9gd1c/);
+test('cache play9gd1d', () => {
+  assert.equal(CACHE_STAMP, 'play9gd1d');
+  assert.equal(BUILD_VERSION, 'play9gd1d');
+  assert.match(html, /app\.js\?v=play9gd1d/);
+  assert.match(html, /jj-table\.css\?v=play9gd1d/);
 });
 
 test('play bar: 不出 | clock | 提示 | 出牌', () => {
@@ -67,7 +67,7 @@ test('no whole-page rotate; ship3b tg-vh', () => {
   assert.doesNotMatch(orient, /Math\.max\([^)]*viewportStableHeight[^)]*innerHeight/);
 });
 
-test('docs/qa play9gd1c present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1c/report.json')), true);
+test('docs/qa play9gd1d present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9gd1d/report.json')), true);
 });

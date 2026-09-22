@@ -1,9 +1,9 @@
 /**
- * play9gd1c — Guandan rank settle + rematch (?v=play9gd1c)
+ * play9gd1d — Guandan skin wire + full wave regression
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9gd1c';
-export const BUILD_VERSION = 'play9gd1c';
+export const CACHE_STAMP = 'play9gd1d';
+export const BUILD_VERSION = 'play9gd1d';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {
