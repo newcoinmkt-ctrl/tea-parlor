@@ -1386,7 +1386,7 @@ html.table-stage-jj #tableView #playButton.is-recommended[aria-disabled="true"] 
   transform: none !important;
 }
 
-/* ── play9ui1a: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
+/* ── play9ui1b: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
 html.table-stage-jj #tableView #bidControls.jj-bid-bar:not([hidden]),
 html.table-stage-jj #tableView #bidControls:not([hidden]) {
   gap: 12px !important;
@@ -1477,4 +1477,68 @@ html.table-stage-jj #tableView .qq-center-actions {
 /* Guard: no whole-page / tableView rotate in ui1a */
 html.table-stage-jj #tableView.table-stage-land-target {
   /* transform is inline translate+scale only */
+}
+
+/* ── play9ui1b: settle triangle polish (ref 02) ── */
+html.table-stage-jj #tableView.is-settle .jj-settle-hud:not([hidden]) {
+  z-index: 120 !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-score {
+  font-size: 36px !important;
+  font-weight: 900 !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-score.pos {
+  color: #ffd84a !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65), 0 0 12px rgba(255, 200, 40, 0.35) !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-score.neg {
+  color: #f2f2f2 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7) !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-total {
+  font-size: 14px !important;
+  color: #ffe14a !important;
+  margin-top: 4px !important;
+}
+.jj-lose-stamp {
+  position: absolute !important;
+  top: -4px !important;
+  right: -4px !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 3px !important;
+  background: #5a6470 !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  z-index: 2 !important;
+}
+/* Product: keep 再来一局 + 回大厅 even if ref omits them */
+html.table-stage-jj #tableView.is-settle #settleControls:not([hidden]) {
+  display: flex !important;
+  gap: 14px !important;
+  bottom: 18px !important;
+  z-index: 140 !important;
+  pointer-events: auto !important;
+}
+html.table-stage-jj #tableView.is-settle #settleControls .qq-btn {
+  min-width: 110px !important;
+  min-height: 44px !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  border-radius: 999px !important;
+  pointer-events: auto !important;
+}
+html.table-stage-jj #tableView.is-settle #againButton,
+html.table-stage-jj #tableView.is-settle #settleBackButton {
+  visibility: visible !important;
+  display: inline-flex !important;
+}
+/* Also keep modal buttons available if modal shown (non-JJ fallback) */
+#ddzResultAgain, #ddzResultLobby {
+  min-width: 100px;
 }
