@@ -1,5 +1,5 @@
 /**
- * play9fin7b — unify invite export (DDZ + Guandan)
+ * play9fin7c — unify invite export (DDZ + Guandan)
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -21,11 +21,11 @@ const invite = readFileSync(join(root, 'src/net/tg-invite.js'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 const coly = readFileSync(join(repo, 'apps/colyseus-tea-parlor/src/index.js'), 'utf8');
 
-test('cache play9fin7b', () => {
-  assert.equal(CACHE_STAMP, 'play9fin7b');
-  assert.equal(BUILD_VERSION, 'play9fin7b');
-  assert.match(html, /app\.js\?v=play9fin7b/);
-  assert.match(coly, /play9fin7b/);
+test('cache play9fin7c', () => {
+  assert.equal(CACHE_STAMP, 'play9fin7c');
+  assert.equal(BUILD_VERSION, 'play9fin7c');
+  assert.match(html, /app\.js\?v=play9fin7c/);
+  assert.match(coly, /play9fin7c/);
 });
 
 test('unified 邀请好友 exits: DDZ in-play + settle + room-select', () => {
@@ -69,6 +69,6 @@ test('constraints: letterbox / tg-vh / no withdraw / guandan health', () => {
   assert.match(html, /data-side-game="guandan"|data-game="guandan"/);
 });
 
-test('docs/qa play9fin7b', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7b/README.md')), true);
+test('docs/qa play9fin7c', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9fin7c/README.md')), true);
 });

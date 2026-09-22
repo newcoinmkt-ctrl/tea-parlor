@@ -41,11 +41,11 @@ import { createNiuniuUI } from './games/niuniu/ui.js';
 // 掼蛋改为按需加载，避免 /vendor 失败时整站白屏
 import * as pinusClient from './pinus/client.js';
 import * as colyseusClient from './net/colyseus-client.js';
-import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin7b';
-import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin7b';
-import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin7b';
-import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin7b';
-import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin7b';
+import { initHandFit, fitAllHands } from './net/hand-layout.js?v=play9fin7c';
+import { tableActsFromOnlineRoom } from './net/ddz-table-acts.js?v=play9fin7c';
+import { evaluatePlaySelection } from './net/ddz-play-validate.js?v=play9fin7c';
+import { shouldIgnoreMouseAfterTouch, isTapGesture } from './net/ddz-hand-touch.js?v=play9fin7c';
+import { initTableOrientation, expandTelegramTable, syncTableStageLandscape, syncViewportHeight } from './net/table-orient.js?v=play9fin7c';
 import { stripGuandanChrome, stripGuandanChromeFromDocument } from './net/strip-gd-chrome.js';
 import { CACHE_STAMP, formatLobbyVersionLabel } from './net/build-stamp.js';
 import {
@@ -5399,7 +5399,7 @@ function cancelDdzMatch() {
 }
 
 
-/** play9fin7b: dual-session shared room key (per-game; two TG / two clients same table) */
+/** play9fin7c: dual-session shared room key (per-game; two TG / two clients same table) */
 function ensureDualRoomKey(game = 'ddz') {
   const g = shortGameId(game);
   const storageKey = `tea-parlor-dual-room-${g}`;
@@ -5421,12 +5421,12 @@ function ensureDualRoomKey(game = 'ddz') {
 function friendInviteUrl(roomId) {
   const tg = window.Telegram?.WebApp;
   const bot = tg?.initDataUnsafe?.receiver?.username || 'teaparlorbot';
-  // play9fin7b: startapp=t_<roomKey> deep link
+  // play9fin7c: startapp=t_<roomKey> deep link
   return buildTgInviteUrl(roomId, bot);
 }
 
 /**
- * play9fin7b — unified「邀请好友」exit (in-play / settle / room-select).
+ * play9fin7c — unified「邀请好友」exit (in-play / settle / room-select).
  * Payload: roomKey + gameId; TG prefers startapp share; non-TG copies link/roomKey.
  */
 function emitInviteFriend(gameId = 'ddz', roomKeyOpt = '') {
@@ -5515,7 +5515,7 @@ function openFriendRoom(id) {
   }
 }
 
-/** play9fin7b: hard-leave current table before invite join (never blank). */
+/** play9fin7c: hard-leave current table before invite join (never blank). */
 async function leaveOtherTableForInvite(targetKey = '') {
   const target = String(targetKey || '').trim();
   const atTable = Boolean(
@@ -5596,7 +5596,7 @@ function bindFriendDualEnter() {
     e.preventDefault();
     enterFriendDualTable();
   });
-  // play9fin7b: cold + hot start deep link (re-join only if start_param changed)
+  // play9fin7c: cold + hot start deep link (re-join only if start_param changed)
   tryConsumeTgInviteDeepLink();
   if (!bindFriendDualEnter._hot) {
     bindFriendDualEnter._hot = true;
@@ -5639,7 +5639,7 @@ function tryConsumeTgInviteDeepLink(force = false) {
       sessionStorage.setItem(`tea-parlor-dual-room-${g}`, key);
     } catch (_) {}
     if (nodes.claimStatus) nodes.claimStatus.textContent = `邀请深链 · 正在加入 ${key.slice(0, 16)}…`;
-    // play9fin7b: enter* leaves other table then joins (documented: leave→join)
+    // play9fin7c: enter* leaves other table then joins (documented: leave→join)
     Promise.resolve()
       .then(() => (g === 'gd' ? enterFriendDualGuandan(key) : enterFriendDualTable(key)))
       .catch((err) => {
@@ -5657,7 +5657,7 @@ function tryConsumeTgInviteDeepLink(force = false) {
   }
 }
 
-/** play9fin7b: Guandan dual invite join via roomKey (leave-other-table first). */
+/** play9fin7c: Guandan dual invite join via roomKey (leave-other-table first). */
 async function enterFriendDualGuandan(roomKey) {
   const key = normalizeDualRoomKey(roomKey, 'gd') || roomKey;
   const check = validateInviteRoomKey(key);
@@ -7115,7 +7115,7 @@ function renderJjSettleHud() {
   if (top) {
     const xp = document.getElementById('jjSettleXp');
     const mx = document.getElementById('jjSettleMult');
-    // play9fin7b: keep pill icons; structure-only xp when no career meter
+    // play9fin7c: keep pill icons; structure-only xp when no career meter
     if (xp) {
       xp.innerHTML = '<i class="jj-pill-ico jj-pill-progress" aria-hidden="true"></i>235/360';
     }
@@ -7615,7 +7615,7 @@ function _renderGameBody() {
       setHidden(nodes.bidTimer, !(showClock && myBid));
     }
   }
-  // play9fin7b: 「自动出牌中」 banner when trustee (UI only; no 赖子)
+  // play9fin7c: 「自动出牌中」 banner when trustee (UI only; no 赖子)
   if (nodes.ddzAutoplayHint) {
     const showAuto = Boolean(trustee) && game && (game.phase === 'play' || game.phase === 'double');
     setHidden(nodes.ddzAutoplayHint, !showAuto);

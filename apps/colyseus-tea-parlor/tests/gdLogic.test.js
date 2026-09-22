@@ -1,5 +1,5 @@
 /**
- * play9fin7b — Guandan room match + AI fill + health marker
+ * play9fin7c — Guandan room match + AI fill + health marker
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,10 +16,10 @@ import { verifyGdJoin } from '../src/rooms/GuandanRoom.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const indexSrc = readFileSync(join(root, 'src/index.js'), 'utf8');
 
-test('health lists guandan + cache play9fin7b', () => {
+test('health lists guandan + cache play9fin7c', () => {
   assert.match(indexSrc, /guandan/);
   assert.match(indexSrc, /GuandanRoom/);
-  assert.match(indexSrc, /play9fin7b/);
+  assert.match(indexSrc, /play9fin7c/);
   assert.match(indexSrc, /games: \[[^\]]*['"]guandan['"]/);
 });
 

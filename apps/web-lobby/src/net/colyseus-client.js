@@ -138,9 +138,14 @@ export async function startColyseusDdzSession({
     clearDdzReconnect();
   }
 
+  // play9fin7c: only resume when stored roomKey matches target dual/public key
   const storedTok = fresh ? null : (() => {
     const parsed = peekDdzReconnect(options.uid);
-    return parsed?.token || null;
+    if (!parsed?.token) return null;
+    const want = String(options.roomKey || '');
+    const had = String(parsed.roomKey || '');
+    if (want && had && want !== had) return null;
+    return parsed.token;
   })();
   let joined = null;
   if (storedTok) {
@@ -166,6 +171,7 @@ export async function startColyseusDdzSession({
       uid: options.uid,
       token: room.reconnectionToken || null,
       roomId: room.roomId || null,
+      roomKey: options.roomKey || roomId || null,
       phase: lastRoomState?.phase || 'match',
       fullTrustee: !!(prev?.fullTrustee || (typeof window !== 'undefined' && window.__ddzFullTrustee)),
     });
@@ -420,11 +426,16 @@ export async function startColyseusGdSession({
   if (fresh) {
     try { sessionStorage.removeItem('tea-parlor-gd-reconnect'); } catch (_) {}
   }
+  // play9fin7c: only resume when stored gd roomKey matches invite/target key
   const storedTok = fresh ? null : (() => {
     try {
       const raw = sessionStorage.getItem('tea-parlor-gd-reconnect');
       const parsed = raw ? JSON.parse(raw) : null;
-      if (parsed?.uid === options.uid && parsed?.token) return parsed.token;
+      if (!(parsed?.uid === options.uid && parsed?.token)) return null;
+      const want = String(options.roomKey || '');
+      const had = String(parsed.roomKey || '');
+      if (want && had && want !== had) return null;
+      return parsed.token;
     } catch (_) {}
     return null;
   })();
