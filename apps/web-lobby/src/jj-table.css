@@ -1385,3 +1385,96 @@ html.table-stage-jj #tableView #playButton.is-recommended[aria-disabled="true"] 
   pointer-events: none !important;
   transform: none !important;
 }
+
+/* ── play9ui1a: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
+html.table-stage-jj #tableView #bidControls.jj-bid-bar:not([hidden]),
+html.table-stage-jj #tableView #bidControls:not([hidden]) {
+  gap: 12px !important;
+  padding: 4px 8px !important;
+}
+html.table-stage-jj #tableView #bidControls .jj-bid-pass,
+html.table-stage-jj #tableView #bidControls .qq-btn-pass[data-bid="0"] {
+  min-width: 88px !important;
+  min-height: 44px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, #ff6b6b 0%, #d62828 55%, #a01616 100%) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  font-size: 18px !important;
+  border: 2px solid rgba(255, 220, 180, 0.45) !important;
+  box-shadow: 0 4px 0 #7a0f0f, 0 6px 12px rgba(0, 0, 0, 0.35) !important;
+}
+html.table-stage-jj #tableView #bidControls .jj-bid-num,
+html.table-stage-jj #tableView #bidControls .qq-btn-gold[data-bid] {
+  min-width: 56px !important;
+  min-height: 44px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, #ffe9a0 0%, #f0c040 45%, #d4a017 100%) !important;
+  color: #5a2e00 !important;
+  font-weight: 900 !important;
+  font-size: 22px !important;
+  border: 2px solid rgba(255, 255, 220, 0.65) !important;
+  box-shadow: 0 4px 0 #9a6a08, 0 6px 12px rgba(0, 0, 0, 0.3) !important;
+}
+html.table-stage-jj #tableView #bidControls .jj-bid-clock,
+html.table-stage-jj #tableView #bidTimer {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 35% 30%, #fff6c8, #f5a623 55%, #c45e00 100%) !important;
+  color: #3a1a00 !important;
+  font-weight: 900 !important;
+  font-size: 16px !important;
+  border: 2px solid #ffe9a0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  line-height: 1 !important;
+}
+html.table-stage-jj #tableView #bidTimer[hidden] {
+  display: none !important;
+}
+
+/* Auto-play banner — center above hand / over play zone self */
+html.table-stage-jj #tableView .jj-autoplay-hint,
+html.table-stage-jj #tableView #ddzAutoplayHint {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 118px !important;
+  transform: translateX(-50%) !important;
+  z-index: 200 !important;
+  pointer-events: none !important;
+  padding: 6px 18px !important;
+  border-radius: 8px !important;
+  background: rgba(20, 28, 40, 0.55) !important;
+  color: #ffe14a !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55) !important;
+  white-space: nowrap !important;
+}
+html.table-stage-jj #tableView #ddzAutoplayHint[hidden] {
+  display: none !important;
+}
+html.table-stage-jj #tableView.is-trustee #ddzAutoplayHint:not([hidden]) {
+  display: block !important;
+}
+
+/* Layout priority: triangle seats + hole + meter + remain — don't cover hand */
+html.table-stage-jj #tableView .qq-center-actions {
+  margin-bottom: 6px !important;
+}
+html.table-stage-jj #tableView .self-slot .hand-wrap,
+html.table-stage-jj #tableView #handArea {
+  z-index: 90 !important;
+}
+html.table-stage-jj #tableView .qq-center-actions {
+  z-index: 230 !important;
+}
+/* Guard: no whole-page / tableView rotate in ui1a */
+html.table-stage-jj #tableView.table-stage-land-target {
+  /* transform is inline translate+scale only */
+}
