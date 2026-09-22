@@ -1,0 +1,13 @@
+{
+  "cache": "play9ui1e",
+  "slice": "ui1e",
+  "checks": {
+    "four_score_banners": true,
+    "hu_stamp": true,
+    "again_lobby": true,
+    "never_blank_settle": true,
+    "full_regression": true
+  },
+  "refs": ["05-mj-settle-jj.png"],
+  "prior_slices": ["ui1a", "ui1b", "ui1c", "ui1d"]
+}

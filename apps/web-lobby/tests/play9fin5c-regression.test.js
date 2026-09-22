@@ -1,5 +1,5 @@
 /**
- * play9ui1d — version visible / room-api errors distinguishable + full regression
+ * play9ui1e — version visible / room-api errors distinguishable + full regression
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -21,11 +21,11 @@ const styles = readFileSync(join(root, 'src/styles.css'), 'utf8');
 const lia = readFileSync(join(root, 'src/lobby-ia.css'), 'utf8');
 const orient = readFileSync(join(root, 'src/net/table-orient.js'), 'utf8');
 
-test('cache play9ui1d', () => {
-  assert.match(html, /app\.js\?v=play9ui1d/);
-  assert.match(app, /\?v=play9ui1d/);
-  assert.equal(CACHE_STAMP, 'play9ui1d');
-  assert.equal(BUILD_VERSION, 'play9ui1d');
+test('cache play9ui1e', () => {
+  assert.match(html, /app\.js\?v=play9ui1e/);
+  assert.match(app, /\?v=play9ui1e/);
+  assert.equal(CACHE_STAMP, 'play9ui1e');
+  assert.equal(BUILD_VERSION, 'play9ui1e');
   assert.doesNotMatch(html, /app\.js\?v=play9fin5b/);
 });
 
@@ -38,13 +38,13 @@ test('lobby + health show version/cache stamp', () => {
   assert.match(serverSrc, /TEA_PARLOR_VERSION|TEA_PARLOR_CACHE/);
   const health = buildStampPayload();
   assert.equal(health.ok, true);
-  assert.equal(health.cache, 'play9ui1d');
-  assert.equal(health.version, 'play9ui1d');
-  assert.match(formatLobbyVersionLabel(), /play9ui1d/);
+  assert.equal(health.cache, 'play9ui1e');
+  assert.equal(health.version, 'play9ui1e');
+  assert.match(formatLobbyVersionLabel(), /play9ui1e/);
   const cfg = buildRuntimeConfigScript({ NODE_ENV: 'production' });
   assert.match(cfg, /TEA_PARLOR_VERSION/);
   assert.match(cfg, /TEA_PARLOR_CACHE/);
-  assert.match(colySrv, /version:.*play9ui1d|TEA_PARLOR_VERSION/);
+  assert.match(colySrv, /version:.*play9ui1e|TEA_PARLOR_VERSION/);
 });
 
 test('key room API errors distinguishable in logs', () => {
@@ -100,7 +100,7 @@ test('dual-session smoke still green when available', () => {
   assert.equal(r.status, 0, r.stderr || r.stdout);
 });
 
-test('docs/qa play9ui1d present', () => {
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1d/README.md')), true);
-  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1d/report.json')), true);
+test('docs/qa play9ui1e present', () => {
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1e/README.md')), true);
+  assert.equal(existsSync(join(repo, 'docs/qa/play9ui1e/report.json')), true);
 });
