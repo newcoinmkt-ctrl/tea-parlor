@@ -1,0 +1,14 @@
+{
+  "cache": "play9ui2a",
+  "slice": "ui2a",
+  "checks": {
+    "score_3d": true,
+    "win_stamp_circle": true,
+    "total_line": true,
+    "top_pill": true,
+    "day_night_vars": true,
+    "again_lobby": true,
+    "no_rotate": true
+  },
+  "refs": ["01-ddz-settle-night.png", "04-ddz-settle-day.png"]
+}

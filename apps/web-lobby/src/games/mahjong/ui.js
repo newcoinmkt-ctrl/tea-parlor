@@ -655,7 +655,7 @@ export function createMahjongUI(options = {}) {
   function showHuSettle(snap) {
     const layer = document.getElementById('mjHuSettle');
     if (!layer) return;
-    // play9ui1e: never blank settle — always fill four seat banners + 胡 stamp
+    // play9ui2a: never blank settle — always fill four seat banners + 胡 stamp
     let deltas = Array.isArray(snap?.deltas) ? snap.deltas.slice()
       : (Array.isArray(snap?.scores) ? snap.scores.slice() : []);
     const n = snap?.playerCount || 4;

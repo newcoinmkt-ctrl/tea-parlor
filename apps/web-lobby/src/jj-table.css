@@ -1386,7 +1386,7 @@ html.table-stage-jj #tableView #playButton.is-recommended[aria-disabled="true"] 
   transform: none !important;
 }
 
-/* ── play9ui1e: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
+/* ── play9ui2a: JJ bid bar (不叫 / clock / 1 / 2 / 3) + 自动出牌中 ── */
 html.table-stage-jj #tableView #bidControls.jj-bid-bar:not([hidden]),
 html.table-stage-jj #tableView #bidControls:not([hidden]) {
   gap: 12px !important;
@@ -1479,7 +1479,7 @@ html.table-stage-jj #tableView.table-stage-land-target {
   /* transform is inline translate+scale only */
 }
 
-/* ── play9ui1e: settle triangle polish (ref 02) ── */
+/* ── play9ui2a: settle triangle polish (ref 02) ── */
 html.table-stage-jj #tableView.is-settle .jj-settle-hud:not([hidden]) {
   z-index: 120 !important;
 }
@@ -1541,4 +1541,210 @@ html.table-stage-jj #tableView.is-settle #settleBackButton {
 /* Also keep modal buttons available if modal shown (non-JJ fallback) */
 #ddzResultAgain, #ddzResultLobby {
   min-width: 100px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * play9ui2a — DDZ cruise settle thicken (refs 01 / 04)
+ * Floating 3D ±scores, circular 胜 stamp, 总分, top pill, day/night CSS vars.
+ * No whole-page rotate; letterbox landscape only.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --jj-atm-sky-top: #1a1040;
+  --jj-atm-sky-mid: #2a1a5a;
+  --jj-atm-sky-bot: #3d2a6e;
+  --jj-atm-deck: rgba(40, 48, 68, 0.55);
+  --jj-atm-glow: rgba(255, 210, 120, 0.18);
+  --jj-score-gold-1: #fff6c2;
+  --jj-score-gold-2: #ffd24a;
+  --jj-score-gold-3: #c88810;
+  --jj-score-silver-1: #ffffff;
+  --jj-score-silver-2: #d8dce6;
+  --jj-score-silver-3: #8a93a5;
+}
+
+#tableView.jj-atm-night,
+#tableView[data-jj-atm="night"] {
+  --jj-atm-sky-top: #120a2e;
+  --jj-atm-sky-mid: #1e1450;
+  --jj-atm-sky-bot: #352268;
+  --jj-atm-deck: rgba(28, 36, 56, 0.62);
+  --jj-atm-glow: rgba(255, 200, 90, 0.22);
+}
+
+#tableView.jj-atm-day,
+#tableView[data-jj-atm="day"] {
+  --jj-atm-sky-top: #6eb6ef;
+  --jj-atm-sky-mid: #9ed0f5;
+  --jj-atm-sky-bot: #c8e6fa;
+  --jj-atm-deck: rgba(210, 200, 175, 0.45);
+  --jj-atm-glow: rgba(255, 240, 180, 0.35);
+}
+
+/* Soft atmosphere wash over cruise stage (gradients, not huge bitmaps) */
+html.table-stage-jj #tableView.harbor-table::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(ellipse 55% 40% at 78% 28%, var(--jj-atm-glow), transparent 70%),
+    linear-gradient(180deg, var(--jj-atm-sky-top) 0%, var(--jj-atm-sky-mid) 42%, var(--jj-atm-sky-bot) 100%) !important;
+  opacity: 0.42 !important;
+  mix-blend-mode: soft-light !important;
+}
+html.table-stage-jj #tableView.harbor-table.is-settle::before {
+  opacity: 0.55 !important;
+}
+
+/* Top pill: progress + multiplier icons */
+html.table-stage-jj #tableView.is-settle .jj-settle-topbar {
+  gap: 16px !important;
+  padding: 6px 18px !important;
+  background: rgba(8, 14, 28, 0.78) !important;
+  border: 1px solid rgba(255, 220, 140, 0.28) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-pill-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-pill-ico {
+  display: inline-block !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 3px !important;
+  flex-shrink: 0 !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-pill-progress {
+  background:
+    linear-gradient(90deg, #6ec8ff 0 30%, transparent 30%),
+    linear-gradient(90deg, #6ec8ff 0 55%, transparent 55%),
+    linear-gradient(90deg, #6ec8ff 0 80%, transparent 80%),
+    #1a2940 !important;
+  box-shadow: inset 0 0 0 1px rgba(140, 200, 255, 0.5) !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-pill-mult {
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 30%, #ffe9a0, #e0a820 55%, #9a6a10) !important;
+  box-shadow: 0 0 0 1px rgba(255, 220, 120, 0.55) !important;
+}
+
+/* Floating 3D ± score text (gold win / silver-white loss) */
+html.table-stage-jj #tableView.is-settle .jj-settle-score {
+  font-size: 42px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1 !important;
+  position: relative !important;
+  z-index: 88 !important;
+  transform: perspective(240px) rotateX(8deg) !important;
+  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.35)) !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-score.pos {
+  color: var(--jj-score-gold-2) !important;
+  background: linear-gradient(180deg, var(--jj-score-gold-1) 0%, var(--jj-score-gold-2) 45%, var(--jj-score-gold-3) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter:
+    drop-shadow(0 1px 0 var(--jj-score-gold-3))
+    drop-shadow(0 2px 0 #7a5508)
+    drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 0 10px rgba(255, 200, 60, 0.35)) !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-score.neg {
+  color: var(--jj-score-silver-2) !important;
+  background: linear-gradient(180deg, var(--jj-score-silver-1) 0%, var(--jj-score-silver-2) 50%, var(--jj-score-silver-3) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter:
+    drop-shadow(0 1px 0 #6a7388)
+    drop-shadow(0 2px 0 #4a5264)
+    drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* 总分 under local player */
+html.table-stage-jj #tableView.is-settle .jj-settle-total {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #ffe14a !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65) !important;
+  margin-top: 6px !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Circular 胜 stamp on winning last card */
+html.table-stage-jj #tableView.is-settle .jj-win-stamp {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 30%, #ff6a6a, #d01010 70%, #8a0000) !important;
+  border: 2px solid #fff !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45) !important;
+  top: -6px !important;
+  right: -8px !important;
+  transform: rotate(12deg) !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-lose-stamp {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #5a6470 !important;
+  border: 1px solid #c8ced8 !important;
+}
+
+/* Local seat: center-bottom like ref; cards must not cover scores/avatars */
+html.table-stage-jj #jjSettleHud .jj-settle-seat.seat-bl {
+  left: 50% !important;
+  right: auto !important;
+  bottom: 14% !important;
+  transform: translateX(-50%) !important;
+  align-items: center !important;
+  max-width: 56% !important;
+  z-index: 86 !important;
+}
+html.table-stage-jj #jjSettleHud .jj-settle-seat.seat-bl .jj-settle-row {
+  justify-content: center !important;
+}
+html.table-stage-jj #jjSettleHud .jj-settle-seat.seat-bl .jj-settle-hand-row {
+  justify-content: center !important;
+}
+html.table-stage-jj #jjSettleHud .jj-settle-seat.seat-tl,
+html.table-stage-jj #jjSettleHud .jj-settle-seat.seat-tr {
+  z-index: 84 !important;
+  max-width: 42% !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-hand {
+  margin-top: 6px !important;
+  z-index: 82 !important;
+  position: relative !important;
+}
+html.table-stage-jj #tableView.is-settle .jj-settle-avatar {
+  z-index: 87 !important;
+  position: relative !important;
+}
+/* Side A-frame stands for opponent totals */
+html.table-stage-jj #tableView.is-settle .jj-settle-stand {
+  background: linear-gradient(180deg, #6a7488, #3a4250) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%) !important;
+  min-width: 48px !important;
+  font-size: 15px !important;
+}
+
+/* Rematch + hall stay clickable above hud */
+html.table-stage-jj #tableView.is-settle #settleControls:not([hidden]) {
+  z-index: 150 !important;
+  pointer-events: auto !important;
 }
