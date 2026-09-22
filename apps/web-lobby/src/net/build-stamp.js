@@ -1,9 +1,9 @@
 /**
- * play9ui2c — Guandan 4-seat yard shell
+ * play9ui2d — Guandan settle + full regression
  * Keep in sync with index.html ?v= and health payload.
  */
-export const CACHE_STAMP = 'play9ui2c';
-export const BUILD_VERSION = 'play9ui2c';
+export const CACHE_STAMP = 'play9ui2d';
+export const BUILD_VERSION = 'play9ui2d';
 export const BUILD_SERVICE = 'web-lobby';
 
 export function buildStampPayload(extra = {}) {

@@ -1,0 +1,18 @@
+{
+  "cache": "play9ui2d",
+  "slice": "ui2d",
+  "checks": {
+    "guandan_settle_places": true,
+    "score_3d": true,
+    "again_lobby": true,
+    "streak_active_placeholder": true,
+    "ddz_ui2a_b": true,
+    "mj_ui1d_e": true,
+    "nn_felt_ui1c": true,
+    "no_chain": true,
+    "no_rotate": true,
+    "tg_vh": true
+  },
+  "refs": ["02-guandan-settle.png"],
+  "prior_slices": ["ui2a", "ui2b", "ui2c"]
+}

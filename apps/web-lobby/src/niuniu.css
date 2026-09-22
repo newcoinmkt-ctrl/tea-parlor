@@ -433,7 +433,7 @@ html.table-stage-land #multiGameView.nn-active .nn-felt {
   inset: 6px 6px 120px !important;
 }
 
-/* ── play9ui2c: green felt oval + wood rim (ref 03 aesthetic for 6-seat NN) ── */
+/* ── play9ui2d: green felt oval + wood rim (ref 03 aesthetic for 6-seat NN) ── */
 #multiGameView.nn-active {
   background:
     repeating-linear-gradient(
