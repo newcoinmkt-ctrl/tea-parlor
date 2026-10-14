@@ -5817,6 +5817,12 @@ function dealDeckForVariant(variantId) {
 }
 
 /** 当前局解析/压制（自动适配癞子） */
+function onlineLastPlayParsed(cards, room) {
+  if (!cards?.length || cards.some((c) => c?.rank == null)) return null;
+  const wild = room?.variant === 'laizi' ? (room.wildRank ?? null) : null;
+  try { return parseHandMode(cards, wild) || null; } catch (_) { return null; }
+}
+
 function parsePlayCards(cards) {
   const wild = game?.variant === 'laizi' ? game.wildRank : null;
   return parseHandMode(cards, wild);
@@ -6216,8 +6222,10 @@ function applyPinusRoom(room, roomMeta, currency) {
       ? {
           player: room.lastPlay.player,
           cards: safeLastCards,
+          // Full parse (type + length + weight) so canBeat works online;
+          // a bare { type, cards } made every follow-up play look unbeatable.
           parsed: room.lastPlay.type
-            ? { type: room.lastPlay.type, cards: safeLastCards }
+            ? (onlineLastPlayParsed(safeLastCards, room) || { type: room.lastPlay.type, cards: safeLastCards })
             : null,
         }
       : null,

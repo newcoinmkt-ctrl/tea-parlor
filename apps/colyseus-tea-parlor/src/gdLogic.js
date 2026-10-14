@@ -3,6 +3,7 @@
  * 4 座：匹配 →（≤3s AI 补位）→ 出牌/过牌 → 名次结算
  * 复用 @tea-parlor/guandan-engine；本局跳过进贡（tribute cut）
  */
+import { earlyDealHumans } from './matchGate.js';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -320,7 +321,7 @@ export class GdTable {
   async completeMatch() {
     if (this.phase !== 'match') return this.phase;
     const remaining = this.remainingMatchMs();
-    const need = this.minHumansBeforeAi || 1;
+    const need = earlyDealHumans(this.minHumansBeforeAi, 4);
     const humans = this.humanCount;
     // Wait until timeout unless ≥need humans (AI fills rest) — mirror DDZ.
     if (remaining > 0 && humans < 4 && humans < need) {

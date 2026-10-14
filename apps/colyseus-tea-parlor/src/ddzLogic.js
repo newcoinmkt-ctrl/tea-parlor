@@ -3,6 +3,7 @@
  * 3 座：匹配 →（满 3 真人立刻 / 3s AI 补位）→ 叫分/出牌
  * 复用 packages/doudizhu-engine；AI/托管座走现有 AI helpers
  */
+import { earlyDealHumans } from './matchGate.js';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -307,7 +308,7 @@ export class DdzTable {
   async completeMatch() {
     if (this.phase !== 'match') return this.phase;
     const remaining = this.remainingMatchMs();
-    const need = this.minHumansBeforeAi || 1;
+    const need = earlyDealHumans(this.minHumansBeforeAi, 3);
     const humans = this.humanCount;
     // Wait for partner on friend/dual until timeout; once ≥need humans (or 3), may deal.
     if (remaining > 0 && humans < 3 && humans < need) {

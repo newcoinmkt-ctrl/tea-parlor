@@ -2,6 +2,7 @@
  * Colyseus Room · 斗地主 3 人匹配
  * 消息协议与 H5 publicState 同构
  */
+import { earlyDealHumans } from '../matchGate.js';
 import colyseus from 'colyseus';
 import { verifySessionToken } from '@tea-parlor/session-auth';
 import {
@@ -166,7 +167,7 @@ export class DoudizhuRoom extends Room {
       });
       this._armMatchTimer(remainMs);
       // play9fin1b: 3 humans OR friend/dual with ≥minHumansBeforeAi → deal (AI fills rest)
-      const need = this.table.minHumansBeforeAi || 1;
+      const need = earlyDealHumans(this.table.minHumansBeforeAi, 3);
       if (this.table.humanCount >= 3 || this.table.humanCount >= need) {
         await this._dealNow();
       }
@@ -285,7 +286,7 @@ export class DoudizhuRoom extends Room {
     if (this._dealt) return;
     if (this.table?.phase === 'match') {
       const remaining = this.table.remainingMatchMs();
-      const need = this.table.minHumansBeforeAi || 1;
+      const need = earlyDealHumans(this.table.minHumansBeforeAi, 3);
       const humans = this.table.humanCount;
       // play9fin1b: allow early deal when dual/friend has ≥need humans (AI fills rest)
       if (remaining > 0 && humans < 3 && humans < need) {
@@ -305,7 +306,7 @@ export class DoudizhuRoom extends Room {
     // completeMatch may no-op if still gated (defense in depth)
     if (this.table.phase === 'match') {
       const remaining = this.table.remainingMatchMs();
-      const need = this.table.minHumansBeforeAi || 1;
+      const need = earlyDealHumans(this.table.minHumansBeforeAi, 3);
       if (remaining > 0 && this.table.humanCount < 3 && this.table.humanCount < need) {
         console.log('[ddz] deal blocked remaining=', remaining);
         this._armMatchTimer(remaining);

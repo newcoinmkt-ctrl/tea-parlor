@@ -2,6 +2,7 @@
  * Colyseus Room · 掼蛋 4 人匹配 (play9gd1)
  * 消息协议与 H5 guandan snapshot 同构
  */
+import { earlyDealHumans } from '../matchGate.js';
 import colyseus from 'colyseus';
 import { verifySessionToken } from '@tea-parlor/session-auth';
 import {
@@ -149,7 +150,7 @@ export class GuandanRoom extends Room {
       this.table.resetMatchWindow();
       const remainMs = Math.max(0, this.table.matchEndsAt - Date.now());
       this._armMatchTimer(remainMs);
-      const need = this.table.minHumansBeforeAi || 1;
+      const need = earlyDealHumans(this.table.minHumansBeforeAi, 4);
       // Mirror DDZ: ≥need humans → deal now (AI fills rest); MATCH_MS arms silent fill path
       if (this.table.humanCount >= 4 || this.table.humanCount >= need) {
         await this._dealNow();
@@ -259,7 +260,7 @@ export class GuandanRoom extends Room {
     if (this._dealt) return;
     if (this.table?.phase === 'match') {
       const remaining = this.table.remainingMatchMs();
-      const need = this.table.minHumansBeforeAi || 1;
+      const need = earlyDealHumans(this.table.minHumansBeforeAi, 4);
       const humans = this.table.humanCount;
       if (remaining > 0 && humans < 4 && humans < need) {
         this._armMatchTimer(remaining);
@@ -270,7 +271,7 @@ export class GuandanRoom extends Room {
     await this.table.completeMatch();
     if (this.table.phase === 'match') {
       const remaining = this.table.remainingMatchMs();
-      const need = this.table.minHumansBeforeAi || 1;
+      const need = earlyDealHumans(this.table.minHumansBeforeAi, 4);
       if (remaining > 0 && this.table.humanCount < 4 && this.table.humanCount < need) {
         this._armMatchTimer(remaining);
         return;
